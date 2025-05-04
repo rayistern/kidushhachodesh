@@ -1,282 +1,204 @@
 :root {
-  --primary-bg: #0f1729;
-  --card-bg: #1a2236;
-  --card-border: #2e364e;
-  --text-primary: #e2e4e9;
-  --text-secondary: #a4adc0;
-  --accent-color: #4f69ff;
-  --highlight-color: #70e1c8;
-  --danger-color: #ff6b6b;
-  --success-color: #6bffb8;
+  --color-bg: #181c20;
+  --color-surface: #23272f;
+  --color-surface-2: #23272f;
+  --color-card: #23272f;
+  --color-border: #2d323a;
+  --color-accent: #4ea1f7;
+  --color-accent-hover: #6ec1ff;
+  --color-text: #f8fafc;
+  --color-text-secondary: #c9d6e3;
+  --color-shadow: 0 2px 16px 0 rgba(0,0,0,0.25);
 }
 
-body {
-  background-color: var(--primary-bg);
-  color: var(--text-primary);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+body, .app-container {
+  background: var(--color-bg);
+  color: var(--color-text);
+  min-height: 100vh;
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
   margin: 0;
   padding: 0;
-  line-height: 1.5;
 }
 
-.app-container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 1rem;
+.top-links-bar {
+  background: var(--color-surface-2) !important;
+  border-bottom: 1px solid var(--color-border) !important;
+  color: var(--color-text) !important;
+}
+.top-links-bar a {
+  color: #fff !important;
+  font-weight: 700;
+  text-shadow: 0 2px 8px #0057b8cc, 0 1px 2px #0008;
+  transition: 
+    color 0.2s,
+    background 0.2s,
+    text-shadow 0.2s;
+  border-radius: 6px;
+  padding: 0.2em 0.7em;
+  letter-spacing: 0.01em;
+  background: none;
+}
+.top-links-bar a:hover {
+  color: #6ec1ff !important;
+  background: rgba(78,161,247,0.18);
+  text-shadow: 0 2px 12px #4ea1f7cc, 0 1px 2px #0008;
+  text-decoration: none;
 }
 
 .app-header {
   text-align: center;
-  margin-bottom: 1.5rem;
-  position: relative;
+  margin: 2.5rem 0 1.5rem 0;
 }
-
-.app-header::after {
-  content: '';
-  position: absolute;
-  bottom: -12px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80px;
-  height: 3px;
-  background: linear-gradient(90deg, var(--accent-color), var(--highlight-color));
-  border-radius: 3px;
-}
-
 .app-header h1 {
-  font-size: 2.5rem;
-  margin: 0;
-  background: linear-gradient(135deg, var(--accent-color), var(--highlight-color));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-fill-color: transparent;
+  font-size: 2.2rem;
+  font-weight: 800;
+  margin: 0 0 0.3em 0;
+  letter-spacing: 0.04em;
+  color: var(--color-text);
+  text-shadow: 0 2px 8px #000a;
 }
-
 .app-header h2 {
   font-size: 1.1rem;
-  font-weight: 400;
-  color: var(--text-secondary);
-  margin-top: 0.4rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  margin: 0;
+  letter-spacing: 0.01em;
+  text-shadow: 0 1px 4px #000a;
 }
 
-/* New layout with side panel and main area */
 .main-layout {
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
+  align-items: center;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
 }
 
-/* Make top section with controls and visualization side by side */
 .top-section {
   display: flex;
-  gap: 0.8rem;
-  height: 620px;
+  width: 100%;
+  gap: 2.5rem;
+  align-items: flex-start;
 }
 
-/* Control panel as a scrollable sidebar */
 .control-panel {
-  width: 300px;
-  flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
-  overflow-y: auto;
-  max-height: 620px;
-  padding-right: 0.5rem;
-}
-
-/* Make visualization take remaining width */
-.visualization-area {
+  gap: 1.5rem;
+  min-width: 260px;
+  max-width: 320px;
   flex: 1;
-  height: 620px;
-  position: relative;
 }
 
-/* Control cards styling */
 .control-card {
-  background-color: var(--card-bg);
-  border-radius: 12px;
-  border: 1px solid var(--card-border);
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  flex-shrink: 0;
+  background: var(--color-card);
+  border-radius: 14px;
+  box-shadow: var(--color-shadow);
+  padding: 1.2rem 1.3rem 1.1rem 1.3rem;
+  border: 1px solid var(--color-border);
+  margin-bottom: 0.2rem;
+  transition: box-shadow 0.2s;
+}
+.control-card.full-width {
+  width: 100%;
+  margin-top: 2rem;
 }
 
-/* Visualization card styling */
+.visualization-area {
+  flex: 2;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
 .visualization-card {
-  height: 100%;
-  background-color: var(--card-bg);
-  border-radius: 12px;
-  border: 1px solid var(--card-border);
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background: var(--color-card);
+  border-radius: 16px;
+  box-shadow: var(--color-shadow);
+  padding: 1.5rem 1.5rem 1.2rem 1.5rem;
+  border: 1px solid var(--color-border);
+  min-height: 340px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Inner component styles */
-.date-control, .hebrew-date-input, .astronomical-calculations {
-  padding: 0.75rem;
-}
-
-/* Knowledge base section */
-.knowledge-section {
-  margin-top: 1rem;
-}
-
-.knowledge-section .card {
-  background-color: var(--card-bg);
-  border-radius: 12px;
-  border: 1px solid var(--card-border);
-  overflow: hidden;
-  padding: 0;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-}
-
-.card-title {
-  padding: 1rem;
-  margin: 0;
-  font-size: 1.1rem;
-  border-bottom: 1px solid var(--card-border);
-  background-color: rgba(0, 0, 0, 0.1);
-  color: var(--highlight-color);
+.bottom-section {
+  width: 100%;
+  margin-top: 2.5rem;
+  display: flex;
+  justify-content: center;
 }
 
 .app-footer {
-  margin-top: 3rem;
   text-align: center;
-  padding: 1.25rem;
-  color: var(--text-secondary);
-  font-size: 0.85rem;
-  border-top: 1px solid var(--card-border);
+  color: var(--color-text-secondary);
+  font-size: 0.98rem;
+  margin: 3.5rem 0 1.5rem 0;
+  padding: 1.2rem 0 0.5rem 0;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface-2);
+  border-radius: 0 0 12px 12px;
 }
 
-/* Responsive layout */
-@media (max-width: 992px) {
-  .top-section {
-    flex-direction: column;
-    height: auto;
-  }
-  
-  .control-panel {
-    width: 100%;
-    max-height: none;
-    flex-direction: row;
-    overflow-x: auto;
-    padding-right: 0;
-    padding-bottom: 0.5rem;
-  }
-  
-  .control-card {
-    width: 300px;
-    flex-shrink: 0;
-  }
-  
-  .visualization-area {
-    height: 500px;
-  }
-}
-
-@media (max-width: 767px) {
-  .app-container {
-    padding: 0.75rem;
-  }
-  
-  .app-header h1 {
-    font-size: 2rem;
-  }
-  
-  .control-panel {
-    grid-template-columns: 1fr;
-  }
-}
-
-.App {
-  font-family: Arial, Helvetica, sans-serif;
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-.App-header {
-  text-align: center;
-  margin-bottom: 30px;
-}
-
-.App-main {
+.video-embeds-row {
   display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.visualization-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.dashboard {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-
-.hebrew-date, .astronomical-data {
-  flex: 1;
-  min-width: 300px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  padding: 15px;
-  background-color: #f9f9f9;
-}
-
-.hebrew-date .note {
-  font-size: 0.8em;
-  font-style: italic;
-  color: #666;
-}
-
-h1, h2, h3 {
-  color: #333;
-}
-
-h1 {
-  font-size: 2.2em;
-}
-
-h2 {
-  font-size: 1.3em;
-  color: #555;
-}
-
-/* Reduce padding in control components */
-.date-control, .astronomical-calculations, .hebrew-date-input {
-  padding: 0.8rem;
-  height: auto;
-}
-
-/* Make sure astronomical calculations panel doesn't cause layout issues */
-.astronomical-calculations {
-  max-height: none;
-  overflow-y: visible;
-}
-
-/* Add this to your App.css */
-.bottom-section {
-  margin-top: 20px;
+  justify-content: center;
+  gap: 2.5rem;
+  margin: 2.5rem 0 1.5rem 0;
   width: 100%;
+}
+.video-embed-section-left,
+.video-embed-section-right {
+  background: var(--color-card);
+  border-radius: 12px;
+  box-shadow: var(--color-shadow);
+  padding: 1.1rem 1.2rem 1.2rem 1.2rem;
+  border: 1px solid var(--color-border);
+  max-width: 400px;
+  min-width: 260px;
+  flex: 1;
+}
+.video-embed-section-right {
+  max-width: 320px;
+  text-align: center;
+}
+.video-embed-section-left h3,
+.video-embed-section-right h3 {
+  font-size: 1rem;
+  color: var(--color-text);
+  margin-bottom: 0.7em;
+  font-weight: 600;
+  text-shadow: 0 1px 4px #000a;
+}
+
+.sidebar {
+  display: none; /* Hide sidebar for now, or style as needed */
+}
+
+@media (max-width: 900px) {
+  .main-layout, .top-section, .video-embeds-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.2rem;
+  }
+  .control-panel {
+    flex-direction: row;
+    gap: 1rem;
+    min-width: 0;
+    max-width: 100%;
+  }
+  .visualization-area {
+    margin-top: 1.2rem;
+  }
+  .video-embed-section-left,
+  .video-embed-section-right {
+    max-width: 100%;
+    min-width: 0;
+  }
 }
 
 .full-width {
   width: 100%;
 }
-
-.video-embeds-row {
-  align-items: flex-start;
-}
-.video-embed-section-left,
-.video-embed-section-right {
-  background: #fafbfc;
-  padding: 1rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px #0001;
-} 
