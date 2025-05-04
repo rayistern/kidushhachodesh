@@ -280,43 +280,7 @@ const CelestialVisualization = ({ date, onDateChange, onTooltipChange }) => {
       positions.moon.radius, 
       0, 2 * Math.PI
     );
-    ctx.fillStyle = '#E0E0E0';
-    ctx.fill();
-    
-    // Add indication of the lunar phase
-    const elongation = Math.abs((positions.moon.longitude - positions.sun.longitude + 180) % 360 - 180);
-    const phaseAngle = (elongation * Math.PI / 180) % (2 * Math.PI);
-    
-    // Draw phase shadow
-    ctx.beginPath();
-    ctx.arc(
-      positions.moon.x, 
-      positions.moon.y, 
-      positions.moon.radius, 
-      -Math.PI/2, Math.PI/2
-    );
-    
-    // Adjust arc direction based on phase
-    if (positions.moon.longitude > positions.sun.longitude) {
-      // Waxing phase (right side illuminated)
-      ctx.arc(
-        positions.moon.x, 
-        positions.moon.y, 
-        positions.moon.radius * Math.cos(phaseAngle/2), 
-        Math.PI/2, -Math.PI/2, true
-      );
-    } else {
-      // Waning phase (left side illuminated)
-      ctx.arc(
-        positions.moon.x, 
-        positions.moon.y, 
-        positions.moon.radius * Math.cos(phaseAngle/2), 
-        Math.PI/2, -Math.PI/2
-      );
-    }
-    
-    ctx.closePath();
-    ctx.fillStyle = 'rgba(30, 30, 50, 0.8)';
+    ctx.fillStyle = positions.moon.data.fill;
     ctx.fill();
     
     // Restore context
@@ -508,6 +472,14 @@ const CelestialVisualization = ({ date, onDateChange, onTooltipChange }) => {
     // Map the moon's coordinates to canvas coordinates
     const moonScale = 1.0 + 0.1 * (firstEpicycleX + secondEpicycleX); // Scale for distance variations
 
+    // Calculate moon illumination (0 = new moon, 1 = full moon)
+    const moonIllumination = (1 - Math.cos(elongation * Math.PI / 180)) / 2;
+    // Map illumination to brightness (30% to 100%)
+    const minBright = 30;
+    const maxBright = 100;
+    const brightness = minBright + moonIllumination * (maxBright - minBright);
+    const moonFill = `hsl(0, 0%, ${brightness}%)`;
+
     // Store moon components for visualization
     const positions = {
       // Earth at center
@@ -593,6 +565,7 @@ const CelestialVisualization = ({ date, onDateChange, onTooltipChange }) => {
           phase: moonPhase,
           visibility: isVisible ? "Potentially Visible" : "Not Visible",
           elongation: elongation.toFixed(2),
+          fill: moonFill,
           description: "The moon's position as calculated from the Rambam's model.",
           reference: "Hilchot Kiddush HaChodesh, Chapter 17"
         }
