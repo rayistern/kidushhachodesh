@@ -244,3 +244,18 @@ export const GALGALIM_INFO = {
 export const GALGAL_NOTEH_INCLINATION_DEG = 5;           // ≈ 5° north/south of the ecliptic
 //  3 ‘chalakim’ 11 ‘sec’ per day  ⇒  3/60 + 11/3600  deg
 export const NODE_REGRESSION_DEG_PER_DAY = -0.0529538;   // negative = retrograde 
+
+export const MAZALOT_LABELS = [
+  "Taleh",    // Aries
+  "Shor",     // Taurus
+  "Teomim",   // Gemini
+  "Sartan",   // Cancer
+  "Aryeh",    // Leo
+  "Betulah",  // Virgo
+  "Moznayim", // Libra
+  "Akrav",    // Scorpio
+  "Keshet",   // Sagittarius
+  "G'di",     // Capricorn
+  "D'li",     // Aquarius
+  "Dagim"     // Pisces
+]; 

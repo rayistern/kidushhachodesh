@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import './CelestialVisualization.css';
-import { CONSTANTS, GALGALIM_INFO, GALGAL_NOTEH_INCLINATION_DEG } from '../constants';
+import { CONSTANTS, GALGALIM_INFO, GALGAL_NOTEH_INCLINATION_DEG, MAZALOT_LABELS } from '../constants';
 import { getHebrewDate, getMoladInfo, getHebrewDateDisplay, getMoladDisplay } from '../utils/dateUtils';
 import { getAscendingNodeLongitude } from '../utils/astronomy';
 
@@ -85,7 +85,7 @@ const CelestialVisualization = ({ date, onDateChange, onTooltipChange }) => {
       
       const labelX = width / 2 + (zodiacRadius + 15) * Math.cos(angle);
       const labelY = height / 2 + (zodiacRadius + 15) * Math.sin(angle);
-      ctx.fillText(CONSTANTS.CONSTELLATIONS[i], labelX, labelY);
+      ctx.fillText(MAZALOT_LABELS[i], labelX, labelY);
     }
     
     // Draw sun's eccentric circle (deferent)
