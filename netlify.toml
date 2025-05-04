@@ -1,0 +1,16 @@
+[build]
+  # Netlify will run this to produce your static files
+  command = "npm run build"
+  # This is where CRA outputs the production bundle
+  publish = "build"
+
+# (Optional) If you ever want to run `netlify dev`, this tells it how
+[dev]
+  command = "npm start"
+  port    = 8888
+
+# Redirect all 404s to /index.html for SPA routing
+[[redirects]]
+  from = "/*"
+  to   = "/index.html"
+  status = 200 

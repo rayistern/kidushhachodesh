@@ -1,0 +1,179 @@
+.celestial-visualization {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 500px;
+  max-height: 600px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+}
+
+.celestial-visualization canvas {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.controls {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  gap: 0.4rem;
+  z-index: 10;
+  background-color: rgba(0, 0, 0, 0.3);
+  padding: 0.3rem;
+  border-radius: 6px;
+  backdrop-filter: blur(5px);
+}
+
+.controls button {
+  background-color: rgba(79, 105, 255, 0.15);
+  border: 1px solid rgba(79, 105, 255, 0.3);
+  color: var(--accent-color);
+  width: 30px;
+  height: 30px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.controls button:hover {
+  background-color: rgba(79, 105, 255, 0.25);
+  border-color: var(--accent-color);
+  transform: translateY(-2px);
+}
+
+.date-scroll-controls {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background-color: rgba(0, 0, 0, 0.4);
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  z-index: 10;
+  backdrop-filter: blur(5px);
+}
+
+.date-scroll-btn {
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--text-primary);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.date-scroll-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.scroll-info {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.tooltip {
+  position: absolute;
+  background-color: rgba(26, 34, 54, 0.95);
+  border: 1px solid var(--card-border);
+  border-radius: 6px;
+  padding: 0.8rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  max-width: 220px;
+  z-index: 100;
+  backdrop-filter: blur(5px);
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.tooltip h4 {
+  margin-top: 0;
+  margin-bottom: 0.6rem;
+  color: var(--highlight-color);
+  border-bottom: 1px solid rgba(112, 225, 200, 0.3);
+  padding-bottom: 0.4rem;
+  font-size: 0.95rem;
+}
+
+.tooltip p {
+  margin: 0.4rem 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.tooltip p:nth-child(2),
+.tooltip p:nth-child(3),
+.tooltip p:nth-child(4) {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.tooltip .reference {
+  font-style: italic;
+  font-size: 0.75rem;
+  color: var(--accent-color);
+  margin-top: 0.6rem;
+  padding-top: 0.4rem;
+  border-top: 1px solid rgba(79, 105, 255, 0.2);
+}
+
+.constellation-labels {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.constellation-label {
+  position: absolute;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+  white-space: nowrap;
+}
+
+.date-info-panel {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  z-index: 100;
+  max-width: 300px;
+}
+
+.date-info-panel h3 {
+  margin-top: 0;
+  margin-bottom: 5px;
+  font-size: 16px;
+}
+
+.date-info-panel p {
+  margin: 3px 0;
+  font-size: 14px;
+} 

@@ -1,0 +1,63 @@
+.hebrew-date-input {
+  background-color: #1a1a2e;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1.5rem;
+}
+
+.hebrew-date-input h3 {
+  margin-top: 0;
+  color: #e2e2e2;
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #2d2d42;
+  padding-bottom: 0.5rem;
+}
+
+.hebrew-date-form {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.form-group label {
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+  color: #b8b8d4;
+}
+
+.form-group input,
+.form-group select {
+  background-color: #272740;
+  border: 1px solid #3e3e5e;
+  color: white;
+  padding: 0.75rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #5d5dbc;
+  box-shadow: 0 0 0 2px rgba(93, 93, 188, 0.3);
+}
+
+.formatted-date {
+  background-color: #272740;
+  padding: 0.75rem;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  font-weight: 500;
+  text-align: center;
+  color: #e2e2e2;
+  direction: rtl;
+} 

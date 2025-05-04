@@ -1,0 +1,92 @@
+.astronomical-calculations {
+  width: 100%;
+}
+
+.astronomical-calculations h3 {
+  margin-top: 0;
+  color: var(--highlight-color);
+  border-bottom: 1px solid rgba(112, 225, 200, 0.3);
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+.calculations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-top: 15px;
+}
+
+.calculation-item {
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 15px;
+  border-radius: 6px;
+  border: 1px solid var(--card-border);
+}
+
+.calculation-item h4 {
+  margin-top: 0;
+  color: var(--highlight-color);
+  font-size: 1rem;
+  margin-bottom: 10px;
+}
+
+.calculation-item p {
+  margin: 5px 0;
+  font-size: 0.9rem;
+}
+
+.calculation-section {
+  margin-bottom: 1.5rem;
+}
+
+.calculation-section h4 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: var(--highlight-color);
+  font-size: 1.1rem;
+  border-bottom: 1px solid rgba(112, 225, 200, 0.2);
+  padding-bottom: 0.5rem;
+}
+
+.calculation-section table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.calculation-section table td {
+  padding: 0.75rem 0.5rem;
+  border-bottom: 1px solid rgba(46, 54, 78, 0.5);
+}
+
+.calculation-section table tr:last-child td {
+  border-bottom: none;
+}
+
+.calculation-section table td:first-child {
+  color: var(--text-secondary);
+  font-weight: 500;
+  width: 40%;
+}
+
+.calculation-section table td:last-child {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.new-moon-alert {
+  color: #ff8585;
+  font-weight: bold;
+  background-color: rgba(255, 107, 107, 0.15);
+  padding: 5px 10px;
+  border-radius: 4px;
+  margin-top: 10px;
+  border: 1px solid rgba(255, 107, 107, 0.3);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .calculations-grid {
+    grid-template-columns: 1fr;
+  }
+} 

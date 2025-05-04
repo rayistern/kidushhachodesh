@@ -1,0 +1,25 @@
+.mathematical-model {
+  width: 100%;
+  margin: 20px 0;
+  padding: 20px;
+  background-color: var(--card-bg);
+  border-radius: 12px;
+  border: 1px solid var(--card-border);
+  color: var(--text-primary);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.mathematical-model h3 {
+  margin-top: 0;
+  color: var(--highlight-color);
+  border-bottom: 1px solid rgba(112, 225, 200, 0.3);
+  padding-bottom: 10px;
+}
+
+.mathematical-model ul {
+  padding-left: 20px;
+}
+
+.mathematical-model li {
+  margin-bottom: 10px;
+} 
