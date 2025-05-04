@@ -272,6 +272,42 @@ const CelestialVisualization = ({ date, onDateChange, onTooltipChange }) => {
     ctx.stroke();
     ctx.setLineDash([]);
     
+    /* ------------------------------------------------------------------
+       Helper – draw a small radial "tick" that shows the galgal's
+       current orientation.  Five-pixel length by default.
+    ------------------------------------------------------------------ */
+    const drawGalgalTick = (
+      c, cx, cy, radius, angle,
+      length = 5,
+      color  = 'rgba(255,255,255,0.7)'
+    ) => {
+      const inner = radius - length;
+      c.beginPath();
+      c.moveTo(
+        cx + inner * Math.cos(angle),
+        cy + inner * Math.sin(angle)
+      );
+      c.lineTo(
+        cx + radius * Math.cos(angle),
+        cy + radius * Math.sin(angle)
+      );
+      c.strokeStyle = color;
+      c.lineWidth   = 1;
+      c.stroke();
+    };
+    
+    /* --------------------------------------------------------------
+       Draw orientation-ticks for each galgal to visualize rotation
+    -------------------------------------------------------------- */
+    // Draw one tick for each of the four galgalim
+    ['galgalSunDefer','galgalMoonDefer','galgalMoonFirstEpi','galgalMoonSecondEpi']
+      .forEach(key => {
+        const g = positions[key];
+        if (g) {
+          drawGalgalTick(ctx, g.centerX, g.centerY, g.radius, g.angle);
+        }
+      });
+    
     // Draw moon with phase representation
     ctx.beginPath();
     ctx.arc(
@@ -621,6 +657,35 @@ const CelestialVisualization = ({ date, onDateChange, onTooltipChange }) => {
           description: "The center point of the moon's second epicycle (inclination circle).",
           reference: "Hilchot Kiddush HaChodesh, Chapter 17"
         }
+      },
+      
+      /* ----------------------------------------------------------
+         Galgal objects with current 'angle' so the canvas
+         layer can draw ticks that rotate over time.
+      ---------------------------------------------------------- */
+      galgalSunDefer: {
+        centerX: centerX + eccentricX * sunRadius,
+        centerY: centerY + eccentricY * sunRadius,
+        radius: sunRadius,
+        angle: sunMeanRadians          // 0° direction on the deferent
+      },
+      galgalMoonDefer: {
+        centerX: centerX + moonEccentricX * moonRadius,
+        centerY: centerY + moonEccentricY * moonRadius,
+        radius: moonRadius * 0.8,
+        angle: moonMeanRadians
+      },
+      galgalMoonFirstEpi: {
+        centerX: centerX + moonEccentricX * moonRadius,
+        centerY: centerY + moonEccentricY * moonRadius,
+        radius: moonRadius * CONSTANTS.MOON.GALGALIM.FIRST_EPICYCLE.RADIUS_RATIO,
+        angle: firstEpicycleRadians
+      },
+      galgalMoonSecondEpi: {
+        centerX: centerX + moonEccentricX * moonRadius,
+        centerY: centerY + moonEccentricY * moonRadius,
+        radius: moonRadius * CONSTANTS.MOON.GALGALIM.SECOND_EPICYCLE.RADIUS_RATIO,
+        angle: secondEpicycleRadians
       }
     };
     
