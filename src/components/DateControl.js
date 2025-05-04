@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './DateControl.css';
 
-const DateControl = ({ date, onDateChange }) => {
+const DateControl = ({ date, onDateChange, hideCurrentDate }) => {
   const [year, setYear] = useState(date.getFullYear());
   const [month, setMonth] = useState(date.getMonth() + 1);
   const [day, setDay] = useState(date.getDate());
@@ -77,9 +77,11 @@ const DateControl = ({ date, onDateChange }) => {
         <button type="submit" className="submit-btn">Update Date</button>
       </form>
       
-      <div className="current-date">
-        <p>Current Date: {date.toLocaleDateString()}</p>
-      </div>
+      {!hideCurrentDate && (
+        <div className="current-date">
+          <p>Current Date: {date.toLocaleDateString()}</p>
+        </div>
+      )}
     </div>
   );
 };

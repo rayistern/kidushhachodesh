@@ -76,19 +76,12 @@ body, .app-container {
 }
 
 .top-section {
-  display: flex;
   width: 100%;
-  gap: 2.5rem;
-  align-items: flex-start;
+  margin-bottom: 0;
 }
 
 .control-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  min-width: 260px;
-  max-width: 320px;
-  flex: 1;
+  display: none;
 }
 
 .control-card {
@@ -125,8 +118,8 @@ body, .app-container {
 }
 
 .bottom-section {
+  margin-top: 1.5rem;
   width: 100%;
-  margin-top: 2.5rem;
   display: flex;
   justify-content: center;
 }
@@ -199,6 +192,93 @@ body, .app-container {
   }
 }
 
+.App {
+  font-family: Arial, Helvetica, sans-serif;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.App-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.App-main {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.visualization-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.dashboard {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.hebrew-date, .astronomical-data {
+  flex: 1;
+  min-width: 300px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 15px;
+  background-color: #f9f9f9;
+}
+
+.hebrew-date .note {
+  font-size: 0.8em;
+  font-style: italic;
+  color: #666;
+}
+
+/* Reduce padding in control components */
+.date-control, .astronomical-calculations, .hebrew-date-input {
+  padding: 0.8rem;
+  height: auto;
+}
+
+/* Make sure astronomical calculations panel doesn't cause layout issues */
+.astronomical-calculations {
+  max-height: none;
+  overflow-y: visible;
+}
+
+/* Add this to your App.css */
 .full-width {
   width: 100%;
 }
+
+.video-embeds-row {
+  align-items: flex-start;
+}
+.video-embed-section-left,
+.video-embed-section-right {
+  background: #fafbfc;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px #0001;
+}
+
+/* Add this new section for the mid-section layout */
+.mid-section {
+  width: 100%;
+  margin: 1.5rem 0 0 0;
+  display: flex;
+  justify-content: center;
+}
+
+.mid-section .control-card {
+  width: 100%; /* Make it full width instead of 400px */
+  max-width: 100%;
+}
+
+.visualization-area.full-width {
+  width: 100%;
+  max-width: 100%;
+} 

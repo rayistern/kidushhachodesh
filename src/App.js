@@ -124,15 +124,8 @@ function App() {
 
       <div className="main-layout">
         <div className="top-section">
-          {/* Side panel with controls */}
-          <div className="control-panel">
-            <div className="control-card">
-              <DateControl date={currentDate} onDateChange={handleDateChange} />
-            </div>
-          </div>
-          
-          {/* Main visualization area */}
-          <div className="visualization-area">
+          {/* Main visualization area - Now takes full width */}
+          <div className="visualization-area full-width">
             <div className="visualization-card">
               <CelestialVisualization 
                 date={currentDate} 
@@ -143,7 +136,18 @@ function App() {
           </div>
         </div>
         
-        {/* AstronomicalCalculations moved below the visualization */}
+        {/* Date control moved below visualization */}
+        <div className="mid-section">
+          <div className="control-card">
+            <DateControl 
+              date={currentDate} 
+              onDateChange={handleDateChange} 
+              hideCurrentDate={true} 
+            />
+          </div>
+        </div>
+        
+        {/* AstronomicalCalculations below */}
         <div className="bottom-section">
           <div className="control-card full-width">
             <AstronomicalCalculations date={currentDate} />
