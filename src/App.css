@@ -268,4 +268,15 @@ h2 {
 
 .full-width {
   width: 100%;
+}
+
+.video-embeds-row {
+  align-items: flex-start;
+}
+.video-embed-section-left,
+.video-embed-section-right {
+  background: #fafbfc;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px #0001;
 } 

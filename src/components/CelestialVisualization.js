@@ -101,7 +101,8 @@ const CelestialVisualization = ({ date, onDateChange, onTooltipChange }) => {
     ctx.stroke();
     
     // Draw sun's epicycle
-    const epicycleRadius = positions.sunDeferent.radius * CONSTANTS.SUN.EPICYCLE.RADIUS_RATIO;
+    const sunEpicycleRatio = CONSTANTS.SUN.GALGALIM?.EPICYCLE?.RADIUS_RATIO ?? 0;
+    const epicycleRadius = positions.sunDeferent.radius * sunEpicycleRatio;
     ctx.beginPath();
     ctx.arc(
       positions.sunEpicycleCenter.x,
@@ -273,39 +274,70 @@ const CelestialVisualization = ({ date, onDateChange, onTooltipChange }) => {
     ctx.setLineDash([]);
     
     /* ------------------------------------------------------------------
-       Helper – draw a small radial "tick" that shows the galgal's
-       current orientation.  Five-pixel length by default.
+       Helper – draw a more VISIBLE radial "tick" that shows the galgal's
+       current orientation.
     ------------------------------------------------------------------ */
     const drawGalgalTick = (
       c, cx, cy, radius, angle,
-      length = 5,
-      color  = 'rgba(255,255,255,0.7)'
+      length = 12,  // Increase from 5px to 12px
+      color = 'rgba(255, 255, 255, 0.9)' // More opaque
     ) => {
+      // Draw a more visible tick mark
       const inner = radius - length;
+      const outer = radius + length; // Also extend outward!
+      
       c.beginPath();
       c.moveTo(
         cx + inner * Math.cos(angle),
         cy + inner * Math.sin(angle)
       );
       c.lineTo(
-        cx + radius * Math.cos(angle),
-        cy + radius * Math.sin(angle)
+        cx + outer * Math.cos(angle),
+        cy + outer * Math.sin(angle)
       );
+      
       c.strokeStyle = color;
-      c.lineWidth   = 1;
+      c.lineWidth = 2.5; // Thicker line
       c.stroke();
+      
+      // Add a small circle at the outer end for better visibility
+      c.beginPath();
+      c.arc(
+        cx + outer * Math.cos(angle),
+        cy + outer * Math.sin(angle),
+        3, // Small circle radius
+        0, 2 * Math.PI
+      );
+      c.fillStyle = color;
+      c.fill();
     };
     
     /* --------------------------------------------------------------
        Draw orientation-ticks for each galgal to visualize rotation
+       Make them MUCH more visible!
     -------------------------------------------------------------- */
-    // Draw one tick for each of the four galgalim
-    ['galgalSunDefer','galgalMoonDefer','galgalMoonFirstEpi','galgalMoonSecondEpi']
-      .forEach(key => {
-        const g = positions[key];
-        if (g) {
-          drawGalgalTick(ctx, g.centerX, g.centerY, g.radius, g.angle);
+    Object.entries(positions)
+      // only galgal* entries with a positive radius
+      .filter(([key, g]) => key.startsWith('galgal') && g.radius > 0)
+      .forEach(([key, g]) => {
+        // Use different colors for each galgal type
+        let color = 'rgba(255, 255, 255, 0.9)';
+        
+        if (key.includes('Sun')) {
+          color = 'rgba(255, 230, 100, 0.9)'; // Yellow for sun
+        } else if (key.includes('Moon')) {
+          color = 'rgba(180, 200, 255, 0.9)'; // Blue for moon
         }
+        
+        drawGalgalTick(
+          ctx, 
+          g.centerX, 
+          g.centerY, 
+          g.radius, 
+          g.angle,
+          12, // Length
+          color
+        );
       });
     
     // Draw moon with phase representation
@@ -325,6 +357,7 @@ const CelestialVisualization = ({ date, onDateChange, onTooltipChange }) => {
   
   // Calculate positions based on date
   const calculatePositions = (currentDate, width, height) => {
+    const sunEpicycleRatio = CONSTANTS.SUN.GALGALIM?.EPICYCLE?.RADIUS_RATIO ?? 0;
     const baseDate = CONSTANTS.BASE_DATE;
     const daysFromBase = Math.floor((currentDate - baseDate) / (1000 * 60 * 60 * 24));
     
@@ -516,6 +549,32 @@ const CelestialVisualization = ({ date, onDateChange, onTooltipChange }) => {
     const brightness = minBright + moonIllumination * (maxBright - minBright);
     const moonFill = `hsl(0, 0%, ${brightness}%)`;
 
+    // Calculate the proper rotation angles for each galgal
+    // The angles should reflect each galgal's unique rotation speed
+    
+    // Sun deferent rotates at mean sun rate
+    const sunDeferentAngle = sunMeanRadians;
+    
+    // Sun epicycle rotates in the OPPOSITE direction at ~1 degree per day
+    // (This creates the apparent retrograde motion effect)
+    const sunEpicycleAngle = -daysFromBase * Math.PI / 180;
+    
+    // Moon deferent rotates at mean lunar rate
+    const moonDeferentAngle = moonMeanRadians;
+    
+    // First epicycle rotates once per anomalistic month (~27.55 days)
+    // This is about 13.06° per day
+    const moonFirstEpiAngle = firstEpicycleRadians;
+    
+    // Second epicycle rotates at a different rate, approximately
+    // once per draconic month (~27.21 days)
+    // This is about 13.23° per day
+    const moonSecondEpiAngle = secondEpicycleRadians;
+    
+    // Map the moon's coordinates to canvas coordinates
+    const moonTrueXPos = centerX + moonTrueX * moonRadius;
+    const moonTrueYPos = centerY + moonTrueY * moonRadius;
+
     // Store moon components for visualization
     const positions = {
       // Earth at center
@@ -589,8 +648,8 @@ const CelestialVisualization = ({ date, onDateChange, onTooltipChange }) => {
       
       // Moon's position
       moon: {
-        x: centerX + moonTrueX * moonRadius,
-        y: centerY + moonTrueY * moonRadius,
+        x: moonTrueXPos,
+        y: moonTrueYPos,
         radius: 8 * moonScale, // Variable size based on distance
         data: {
           title: "Moon",
@@ -660,32 +719,38 @@ const CelestialVisualization = ({ date, onDateChange, onTooltipChange }) => {
       },
       
       /* ----------------------------------------------------------
-         Galgal objects with current 'angle' so the canvas
-         layer can draw ticks that rotate over time.
+         Galgal objects with CORRECTED angles that accurately
+         show how each sphere rotates
       ---------------------------------------------------------- */
       galgalSunDefer: {
         centerX: centerX + eccentricX * sunRadius,
         centerY: centerY + eccentricY * sunRadius,
         radius: sunRadius,
-        angle: sunMeanRadians          // 0° direction on the deferent
+        angle: sunDeferentAngle
+      },
+      galgalSunEpicycle: {
+        centerX: centerX + eccentricX * sunRadius,
+        centerY: centerY + eccentricY * sunRadius,
+        radius: sunRadius * sunEpicycleRatio,
+        angle: sunEpicycleAngle   // OPPOSITE direction!
       },
       galgalMoonDefer: {
         centerX: centerX + moonEccentricX * moonRadius,
         centerY: centerY + moonEccentricY * moonRadius,
         radius: moonRadius * 0.8,
-        angle: moonMeanRadians
+        angle: moonDeferentAngle
       },
       galgalMoonFirstEpi: {
         centerX: centerX + moonEccentricX * moonRadius,
         centerY: centerY + moonEccentricY * moonRadius,
         radius: moonRadius * CONSTANTS.MOON.GALGALIM.FIRST_EPICYCLE.RADIUS_RATIO,
-        angle: firstEpicycleRadians
+        angle: moonFirstEpiAngle
       },
       galgalMoonSecondEpi: {
         centerX: centerX + moonEccentricX * moonRadius,
         centerY: centerY + moonEccentricY * moonRadius,
         radius: moonRadius * CONSTANTS.MOON.GALGALIM.SECOND_EPICYCLE.RADIUS_RATIO,
-        angle: secondEpicycleRadians
+        angle: moonSecondEpiAngle
       }
     };
     
