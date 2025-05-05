@@ -70,9 +70,16 @@ export function getAstronomicalData(date) {
         : (sunMeanLon - sunMaslulCorr + 360) % 360;
 
   /* ---------- MOON -------------- */
+  /* daily mean motion (deg + min + sec) */
+  const moonMeanMotionDeg =
+      CONSTANTS.MOON.MEAN_MOTION_PER_DAY.degrees +
+      CONSTANTS.MOON.MEAN_MOTION_PER_DAY.minutes / 60 +
+      CONSTANTS.MOON.MEAN_MOTION_PER_DAY.seconds / 3600;
+
+  /* Rambam epoch ⇒ conjunction ⇒ mean-Moon longitude = 0°  */
   const moonMeanLon =
-      (CONSTANTS.MOON.START_POSITION.degrees +
-       CONSTANTS.MOON.MEAN_MOTION_PER_DAY.degrees * daysFromBase) % 360;
+      (CONSTANTS.MOON.MEAN_LONGITUDE_AT_EPOCH +
+       moonMeanMotionDeg * daysFromBase) % 360;
 
   const moonMaslul =
       (CONSTANTS.MOON.MASLUL_START.degrees +

@@ -77,7 +77,7 @@ export const CONSTANTS = {
   
   SUN: {
     MEAN_MOTION_PER_DAY: { degrees: 0, minutes: 59, seconds: 8 },
-    START_POSITION: { degrees: 7, minutes: 3, seconds: 32 },
+    START_POSITION: { degrees: 0, minutes: 0, seconds: 0 },
     START_CONSTELLATION: 0, // Aries
     APOGEE_START: { degrees: 26, minutes: 45, seconds: 8 },
     APOGEE_CONSTELLATION: 2, // Gemini
@@ -97,7 +97,7 @@ export const CONSTANTS = {
   
   MOON: {
     MEAN_MOTION_PER_DAY: { degrees: 13, minutes: 10, seconds: 35 },
-    START_POSITION: { degrees: 1, minutes: 14, seconds: 43 },
+    START_POSITION: { degrees: 0, minutes: 0, seconds: 0 },
     START_CONSTELLATION: 1, // Taurus
     MASLUL_MEAN_MOTION: { degrees: 13, minutes: 3, seconds: 54 },
     MASLUL_START: { degrees: 84, minutes: 28, seconds: 42 },
@@ -108,20 +108,21 @@ export const CONSTANTS = {
       DEFERENT: {
         RADIUS_RATIO: 1.0, // Relative to base radius
         REVOLUTION_PERIOD: 27.32166, // Sidereal month in days
+        DEFERENT_INITIAL_ANGLE: 0,
       },
       
       // First epicycle (galgal katan)
       FIRST_EPICYCLE: {
         RADIUS_RATIO: 0.0575, // Ratio to deferent radius
         REVOLUTION_PERIOD: 13.6608, // Half a sidereal month
-        INITIAL_ANGLE: 180,
+        FIRST_EPICYCLE_INITIAL_ANGLE: 0,
       },
       
       // Second epicycle (galgal noteh - inclined circle)
       SECOND_EPICYCLE: {
         RADIUS_RATIO: 0.038, // Smaller than first epicycle
         REVOLUTION_PERIOD: 27.32166 / 2, // Cycles twice per month
-        INITIAL_ANGLE: 90, // Perpendicular to first epicycle initially
+        SECOND_EPICYCLE_INITIAL_ANGLE: 0,
       },
       
       // Eccentric (galgal yotze merkaz)
@@ -134,6 +135,10 @@ export const CONSTANTS = {
       INCLINATION: 5.145, // Degrees of orbital inclination
       LATITUDE_CYCLE: 27.21222, // Draconic month in days
     },
+    
+    // Rambam: Sun and Moon are in conjunction at the epoch.
+    // Put the Moon at 0° so day-zero is NEW moon, not FULL moon.
+    MEAN_LONGITUDE_AT_EPOCH: 0,     // deg
   },
   
   CONSTELLATIONS: [
