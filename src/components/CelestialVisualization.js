@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import './CelestialVisualization.css';
-import { CONSTANTS, GALGALIM_INFO, GALGAL_NOTEH_INCLINATION_DEG, MAZALOT_LABELS } from '../constants';
+import { CONSTANTS, GALGALIM_INFO, GALGAL_NOTEH_INCLINATION_DEG, MAZALOT_LABELS, MOON_PHASES } from '../constants';
 import { getHebrewDate, getMoladInfo, getHebrewDateDisplay, getMoladDisplay } from '../utils/dateUtils';
+import { getAstronomicalData } from '../utils/astronomyCalc';
 import { getAscendingNodeLongitude } from '../utils/astronomy';
 
 const CelestialVisualization = ({ date, onDateChange, onTooltipChange }) => {
@@ -83,10 +84,63 @@ const CelestialVisualization = ({ date, onDateChange, onTooltipChange }) => {
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       
-      const labelX = width / 2 + (zodiacRadius + 15) * Math.cos(angle);
-      const labelY = height / 2 + (zodiacRadius + 15) * Math.sin(angle);
+      // Move labels further out from the zodiac circle to avoid overlapping with degree markers
+      const labelX = width / 2 + (zodiacRadius + 30) * Math.cos(angle); // Increased from +15 to +30
+      const labelY = height / 2 + (zodiacRadius + 30) * Math.sin(angle); // Increased from +15 to +30
       ctx.fillText(MAZALOT_LABELS[i], labelX, labelY);
     }
+    
+    // Draw degree tick marks on zodiac circle for more precise readings
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+    ctx.lineWidth = 1;
+    
+    // Draw major ticks every 30 degrees (at constellation boundaries)
+    for (let i = 0; i < 12; i++) {
+      const angle = (i * 30) * Math.PI / 180;
+      const outerX = width / 2 + (zodiacRadius + 5) * Math.cos(angle);
+      const outerY = height / 2 + (zodiacRadius + 5) * Math.sin(angle);
+      const innerX = width / 2 + (zodiacRadius - 5) * Math.cos(angle);
+      const innerY = height / 2 + (zodiacRadius - 5) * Math.sin(angle);
+      
+      ctx.beginPath();
+      ctx.moveTo(innerX, innerY);
+      ctx.lineTo(outerX, outerY);
+      ctx.stroke();
+      
+      // Add a semi-transparent background for degree labels
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+      ctx.beginPath();
+      ctx.arc(width / 2 + (zodiacRadius - 20) * Math.cos(angle), height / 2 + (zodiacRadius - 20) * Math.sin(angle), 12, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Then draw the text on top
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.font = 'bold 10px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      const labelX = width / 2 + (zodiacRadius - 20) * Math.cos(angle);
+      const labelY = height / 2 + (zodiacRadius - 20) * Math.sin(angle);
+      ctx.fillText(`${i * 30}°`, labelX, labelY);
+    }
+    
+    // Draw minor ticks every 10 degrees
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+    for (let i = 0; i < 36; i++) {
+      if (i % 3 !== 0) { // Skip major ticks we already drew
+        const angle = (i * 10) * Math.PI / 180;
+        const outerX = width / 2 + (zodiacRadius + 3) * Math.cos(angle);
+        const outerY = height / 2 + (zodiacRadius + 3) * Math.sin(angle);
+        const innerX = width / 2 + (zodiacRadius - 3) * Math.cos(angle);
+        const innerY = height / 2 + (zodiacRadius - 3) * Math.sin(angle);
+        
+        ctx.beginPath();
+        ctx.moveTo(innerX, innerY);
+        ctx.lineTo(outerX, outerY);
+        ctx.stroke();
+      }
+    }
+    ctx.restore();
     
     // Draw sun's eccentric circle (deferent)
     ctx.beginPath();
@@ -437,109 +491,31 @@ const CelestialVisualization = ({ date, onDateChange, onTooltipChange }) => {
     const epicycleX = epicycleRadius * Math.cos(epicycleRadians);
     const epicycleY = epicycleRadius * Math.sin(epicycleRadians);
     
-    // Combine all components for true position
-    const sunTrueX = deferentX + epicycleX;
-    const sunTrueY = deferentY + epicycleY;
-    
-    // Calculate final longitude from coordinates
-    const finalSunLongitude = (Math.atan2(sunTrueY, sunTrueX) * 180 / Math.PI + 360) % 360;
-    
-    // Calculate which constellation the sun is in
-    const sunConstellation = Math.floor(finalSunLongitude / 30);
-    
-    // Moon calculations
-    // Convert moon's mean motion to decimal degrees
-    const moonMeanMotionDegrees = CONSTANTS.MOON.MEAN_MOTION_PER_DAY.degrees + 
-                                 CONSTANTS.MOON.MEAN_MOTION_PER_DAY.minutes / 60 + 
-                                 CONSTANTS.MOON.MEAN_MOTION_PER_DAY.seconds / 3600;
-    
-    // Calculate moon's complex position with four galgalim model
-    // 1. Calculate basic mean position
-    const moonMeanLongitude = (CONSTANTS.MOON.START_POSITION.degrees + 
-                            CONSTANTS.MOON.START_POSITION.minutes / 60 + 
-                            CONSTANTS.MOON.START_POSITION.seconds / 3600 + 
-                            (moonMeanMotionDegrees * daysFromBase)) % 360;
+    /* ---------- unified sun & moon data ---------- */
+    const { sun: sunData, moon: moonData } = getAstronomicalData(currentDate);
 
-    // 2. Calculate moon's maslul (argument)
-    const moonMaslulMotion = CONSTANTS.MOON.MASLUL_MEAN_MOTION.degrees + 
-                           CONSTANTS.MOON.MASLUL_MEAN_MOTION.minutes / 60 + 
-                           CONSTANTS.MOON.MASLUL_MEAN_MOTION.seconds / 3600;
+    // parse numbers out of the astronomy util
+    const sunTrueLongitude  = parseFloat(sunData.trueLongitude);
+    let   moonTrueLongitude = parseFloat(moonData.correctedLongitude);
+    const moonLatitude      = parseFloat(moonData.latitude);
+    const elongation        = parseFloat(moonData.elongation);
+    let   moonPhase         = moonData.phase;
 
-    const moonMaslul = (CONSTANTS.MOON.MASLUL_START.degrees + 
-                        CONSTANTS.MOON.MASLUL_START.minutes / 60 + 
-                        CONSTANTS.MOON.MASLUL_START.seconds / 3600 + 
-                        (moonMaslulMotion * daysFromBase)) % 360;
+    // which zodiac sector for tooltips/debug
+    const sunConstellation = Math.floor(sunTrueLongitude / 30);
 
-    // 3. Calculate moon's mean longitude
-    const moonMeanRadians = moonMeanLongitude * Math.PI / 180;
+    // now compute unit‐vectors for both bodies
+    const RAD       = Math.PI / 180;
+    const sunTrueX  = Math.cos(sunTrueLongitude  * RAD);
+    const sunTrueY  = Math.sin(sunTrueLongitude  * RAD);
+    const moonTrueX = Math.cos(moonTrueLongitude * RAD);
+    const moonTrueY = Math.sin(moonTrueLongitude * RAD);
 
-    // 4. Calculate eccentric offset
-    const moonEccentricRadians = CONSTANTS.MOON.GALGALIM.ECCENTRIC.ANGLE * Math.PI / 180;
-    const moonEccentricX = CONSTANTS.MOON.GALGALIM.ECCENTRIC.ECCENTRICITY * Math.cos(moonEccentricRadians);
-    const moonEccentricY = CONSTANTS.MOON.GALGALIM.ECCENTRIC.ECCENTRICITY * Math.sin(moonEccentricRadians);
-
-    // 5. Calculate deferent position (first galgal - gadol)
-    const moonDeferentX = Math.cos(moonMeanRadians);
-    const moonDeferentY = Math.sin(moonMeanRadians);
-
-    // 6. Calculate first epicycle angle (second galgal - katan)
-    const firstEpicycleAngle = (daysFromBase / CONSTANTS.MOON.GALGALIM.FIRST_EPICYCLE.REVOLUTION_PERIOD * 360 + 
-                             CONSTANTS.MOON.GALGALIM.FIRST_EPICYCLE.INITIAL_ANGLE) % 360;
-    const firstEpicycleRadians = firstEpicycleAngle * Math.PI / 180;
-
-    // 7. Calculate first epicycle contribution
-    const firstEpicycleRadius = CONSTANTS.MOON.GALGALIM.FIRST_EPICYCLE.RADIUS_RATIO;
-    const firstEpicycleX = firstEpicycleRadius * Math.cos(firstEpicycleRadians);
-    const firstEpicycleY = firstEpicycleRadius * Math.sin(firstEpicycleRadians);
-
-    // 8. Calculate second epicycle angle (third galgal - noteh)
-    const secondEpicycleAngle = (daysFromBase / CONSTANTS.MOON.GALGALIM.SECOND_EPICYCLE.REVOLUTION_PERIOD * 360 + 
-                              CONSTANTS.MOON.GALGALIM.SECOND_EPICYCLE.INITIAL_ANGLE) % 360;
-    const secondEpicycleRadians = secondEpicycleAngle * Math.PI / 180;
-
-    // 9. Calculate second epicycle contribution
-    const secondEpicycleRadius = CONSTANTS.MOON.GALGALIM.SECOND_EPICYCLE.RADIUS_RATIO;
-    const secondEpicycleX = secondEpicycleRadius * Math.cos(secondEpicycleRadians);
-    const secondEpicycleY = secondEpicycleRadius * Math.sin(secondEpicycleRadians);
-
-    // 10. Calculate latitude component (deviation from ecliptic)
-    const latitudePhase = (daysFromBase % CONSTANTS.MOON.GALGALIM.LATITUDE_CYCLE) / 
-                        CONSTANTS.MOON.GALGALIM.LATITUDE_CYCLE;
-    const moonLatitude = CONSTANTS.MOON.GALGALIM.INCLINATION * 
-                      Math.sin(2 * Math.PI * latitudePhase);
-
-    // 11. Combine all components for true position
-    const moonTrueX = (moonDeferentX + firstEpicycleX + secondEpicycleX - moonEccentricX);
-    const moonTrueY = (moonDeferentY + firstEpicycleY + secondEpicycleY - moonEccentricY);
-
-    // 12. Calculate final moon longitude from coordinates
-    const moonTrueLongitude = (Math.atan2(moonTrueY, moonTrueX) * 180 / Math.PI + 360) % 360;
-
-    // Calculate which constellation the moon is in
-    const moonConstellation = Math.floor(moonTrueLongitude / 30);
-
-    // 13. Determine if the moon is visible (approximate calculation)
-    const elongation = Math.abs((moonTrueLongitude - finalSunLongitude + 180) % 360 - 180);
-    const isVisible = elongation > 12 && Math.abs(moonLatitude) < 6;
-
-    // 14. Calculate moon phase
-    let moonPhase = "";
-    if (elongation < 45) {
-      moonPhase = "New / Waxing Crescent";
-    } else if (elongation < 90) {
-      moonPhase = "First Quarter";
-    } else if (elongation < 135) {
-      moonPhase = "Waxing Gibbous";
-    } else if (elongation < 225) {
-      moonPhase = "Full / Waning Gibbous";
-    } else if (elongation < 270) {
-      moonPhase = "Last Quarter";
-    } else {
-      moonPhase = "Waning Crescent";
-    }
+    // Calculate visibility based on the shared criteria
+    const isVisible = elongation > 12 && elongation < 348 && Math.abs(moonLatitude) < 6;
 
     // Map the moon's coordinates to canvas coordinates
-    const moonScale = 1.0 + 0.1 * (firstEpicycleX + secondEpicycleX); // Scale for distance variations
+    const moonScale = 1.0 + 0.1 * (epicycleX + epicycleY); // Scale for distance variations
 
     // Calculate moon illumination (0 = new moon, 1 = full moon)
     const moonIllumination = (1 - Math.cos(elongation * Math.PI / 180)) / 2;
@@ -560,18 +536,20 @@ const CelestialVisualization = ({ date, onDateChange, onTooltipChange }) => {
     const sunEpicycleAngle = -daysFromBase * Math.PI / 180;
     
     // Moon deferent rotates at mean lunar rate
-    const moonDeferentAngle = moonMeanRadians;
+    const moonDeferentAngle = moonData.meanLongitude * Math.PI / 180;
     
     // First epicycle rotates once per anomalistic month (~27.55 days)
     // This is about 13.06° per day
-    const moonFirstEpiAngle = firstEpicycleRadians;
+    const moonFirstEpiAngle = epicycleRadians;
     
     // Second epicycle rotates at a different rate, approximately
     // once per draconic month (~27.21 days)
     // This is about 13.23° per day
-    const moonSecondEpiAngle = secondEpicycleRadians;
+    const moonSecondEpiAngle = epicycleRadians;
     
-    // Map the moon's coordinates to canvas coordinates
+    // position Sun & Moon along their true-longitude vectors
+    const sunTrueXPos  = centerX + sunTrueX  * sunRadius;
+    const sunTrueYPos  = centerY + sunTrueY  * sunRadius;
     const moonTrueXPos = centerX + moonTrueX * moonRadius;
     const moonTrueYPos = centerY + moonTrueY * moonRadius;
 
@@ -631,13 +609,13 @@ const CelestialVisualization = ({ date, onDateChange, onTooltipChange }) => {
       
       // Sun's final position
       sun: {
-        x: centerX + (sunTrueX * sunRadius),
-        y: centerY + (sunTrueY * sunRadius),
+        x: sunTrueXPos,
+        y: sunTrueYPos,
         radius: 12,
         data: {
           title: "Sun",
           englishName: "Shemesh / שמש",
-          longitude: finalSunLongitude.toFixed(2),
+          longitude: sunTrueLongitude.toFixed(2),
           constellation: CONSTANTS.CONSTELLATIONS[sunConstellation],
           maslul: maslul.toFixed(2),
           maslulCorrection: correction.toFixed(2),
@@ -655,8 +633,8 @@ const CelestialVisualization = ({ date, onDateChange, onTooltipChange }) => {
           title: "Moon",
           englishName: "Yareach / ירח",
           longitude: moonTrueLongitude.toFixed(2),
-          latitude: moonLatitude.toFixed(2),
-          constellation: CONSTANTS.CONSTELLATIONS[moonConstellation],
+          latitude:  moonLatitude.toFixed(2),
+          constellation: CONSTANTS.CONSTELLATIONS[Math.floor(moonTrueLongitude / 30)],
           phase: moonPhase,
           visibility: isVisible ? "Potentially Visible" : "Not Visible",
           elongation: elongation.toFixed(2),
@@ -668,8 +646,8 @@ const CelestialVisualization = ({ date, onDateChange, onTooltipChange }) => {
       
       // Moon's eccentric center
       moonEccentricCenter: {
-        x: centerX + moonEccentricX * moonRadius,
-        y: centerY + moonEccentricY * moonRadius,
+        x: centerX + eccentricX * moonRadius,
+        y: centerY + eccentricY * moonRadius,
         radius: 3,
         data: {
           title: "Moon's Eccentric Center",
@@ -681,8 +659,8 @@ const CelestialVisualization = ({ date, onDateChange, onTooltipChange }) => {
       
       // Moon's deferent center
       moonDeferentCenter: {
-        x: centerX + moonEccentricX * moonRadius,
-        y: centerY + moonEccentricY * moonRadius,
+        x: centerX + eccentricX * moonRadius,
+        y: centerY + eccentricY * moonRadius,
         radius: 4,
         data: {
           title: "Moon's Deferent Center",
@@ -694,8 +672,8 @@ const CelestialVisualization = ({ date, onDateChange, onTooltipChange }) => {
       
       // Moon's first epicycle center
       moonFirstEpicycleCenter: {
-        x: centerX + moonEccentricX * moonRadius,
-        y: centerY + moonEccentricY * moonRadius,
+        x: centerX + eccentricX * moonRadius,
+        y: centerY + eccentricY * moonRadius,
         radius: 4,
         data: {
           title: "Moon's First Epicycle Center",
@@ -707,8 +685,8 @@ const CelestialVisualization = ({ date, onDateChange, onTooltipChange }) => {
       
       // Moon's second epicycle center
       moonSecondEpicycleCenter: {
-        x: centerX + moonEccentricX * moonRadius,
-        y: centerY + moonEccentricY * moonRadius,
+        x: centerX + eccentricX * moonRadius,
+        y: centerY + eccentricY * moonRadius,
         radius: 3,
         data: {
           title: "Moon's Second Epicycle Center",
@@ -735,24 +713,26 @@ const CelestialVisualization = ({ date, onDateChange, onTooltipChange }) => {
         angle: sunEpicycleAngle   // OPPOSITE direction!
       },
       galgalMoonDefer: {
-        centerX: centerX + moonEccentricX * moonRadius,
-        centerY: centerY + moonEccentricY * moonRadius,
+        centerX: centerX + eccentricX * moonRadius,
+        centerY: centerY + eccentricY * moonRadius,
         radius: moonRadius * 0.8,
         angle: moonDeferentAngle
       },
       galgalMoonFirstEpi: {
-        centerX: centerX + moonEccentricX * moonRadius,
-        centerY: centerY + moonEccentricY * moonRadius,
+        centerX: centerX + eccentricX * moonRadius,
+        centerY: centerY + eccentricY * moonRadius,
         radius: moonRadius * CONSTANTS.MOON.GALGALIM.FIRST_EPICYCLE.RADIUS_RATIO,
         angle: moonFirstEpiAngle
       },
       galgalMoonSecondEpi: {
-        centerX: centerX + moonEccentricX * moonRadius,
-        centerY: centerY + moonEccentricY * moonRadius,
+        centerX: centerX + eccentricX * moonRadius,
+        centerY: centerY + eccentricY * moonRadius,
         radius: moonRadius * CONSTANTS.MOON.GALGALIM.SECOND_EPICYCLE.RADIUS_RATIO,
         angle: moonSecondEpiAngle
       }
     };
+    
+    console.log("DEBUG:", { sun: sunData, moon: moonData });
     
     return positions;
   };
@@ -1047,6 +1027,47 @@ const CelestialVisualization = ({ date, onDateChange, onTooltipChange }) => {
         <p>Gregorian: {dateRef.current.toLocaleDateString()}</p>
         <p>Hebrew: {hebrewDateDisplay.formatted}</p>
         <p>Molad: {moladDisplay.formatted}</p>
+      </div>
+      
+      {/* Add debugging panel with improved layout */}
+      <div className="debug-panel" style={{
+        position: 'absolute',
+        bottom: '10px',
+        right: '10px',
+        background: 'rgba(0,0,0,0.8)',
+        padding: '10px',
+        borderRadius: '4px',
+        fontSize: '12px',
+        minWidth: '220px',
+        maxWidth: '300px',
+        color: 'white',
+        fontFamily: 'monospace'
+      }}>
+        <h4 style={{margin: '0 0 8px 0', borderBottom: '1px solid rgba(255,255,255,0.3)', paddingBottom: '4px'}}>Position Data</h4>
+        <table style={{width: '100%', borderCollapse: 'collapse'}}>
+          <tbody>
+            <tr>
+              <td style={{textAlign: 'left', padding: '2px 0'}}>Sun Long:</td>
+              <td style={{textAlign: 'right', padding: '2px 0'}}>{canvasRef.current?.positions?.sun?.data?.longitude || '?'}°</td>
+            </tr>
+            <tr>
+              <td style={{textAlign: 'left', padding: '2px 0'}}>Moon Long:</td>
+              <td style={{textAlign: 'right', padding: '2px 0'}}>{canvasRef.current?.positions?.moon?.data?.longitude || '?'}°</td>
+            </tr>
+            <tr>
+              <td style={{textAlign: 'left', padding: '2px 0'}}>Elongation:</td>
+              <td style={{textAlign: 'right', padding: '2px 0'}}>{canvasRef.current?.positions?.moon?.data?.elongation || '?'}°</td>
+            </tr>
+            <tr>
+              <td style={{textAlign: 'left', padding: '2px 0'}}>Moon Phase:</td>
+              <td style={{textAlign: 'right', padding: '2px 0'}}>{canvasRef.current?.positions?.moon?.data?.phase || '?'}</td>
+            </tr>
+            <tr>
+              <td style={{textAlign: 'left', padding: '2px 0'}}>Hebrew Date:</td>
+              <td style={{textAlign: 'right', padding: '2px 0'}}>{hebrewDateDisplay.day} {hebrewDateDisplay.month}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   );

@@ -159,4 +159,6 @@ export function displayHebrewDateTime(hebrewDate, moladInfo) {
       </div>
     </div>
   );
-} 
+}
+
+export { getMoonPosition } from './astronomyCalc'; 
