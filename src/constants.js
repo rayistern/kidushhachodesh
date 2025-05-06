@@ -76,12 +76,14 @@ export const CONSTANTS = {
   ],
   
   SUN: {
-    MEAN_MOTION_PER_DAY: { degrees: 0, minutes: 59, seconds: 8 },
+    // 0° 59′ 8⅓″  – Rambam KH 11:6
+    MEAN_MOTION_PER_DAY: { degrees: 0, minutes: 59, seconds: 8.333 },
     START_POSITION: { degrees: 0, minutes: 0, seconds: 0 },
     START_CONSTELLATION: 0, // Aries
     APOGEE_START: { degrees: 26, minutes: 45, seconds: 8 },
     APOGEE_CONSTELLATION: 2, // Gemini
     APOGEE_MOTION_PER_DAY: 1.5 / 3600, // 1.5 seconds per day
+    APOGEE_MOTION_PER_DAY_ARCSEC: 1.5,
     
     // Epicycle data (galgal katan)
     EPICYCLE: {
@@ -96,10 +98,12 @@ export const CONSTANTS = {
   },
   
   MOON: {
-    MEAN_MOTION_PER_DAY: { degrees: 13, minutes: 10, seconds: 35 },
+    // 13° 10′ 35 4⁄30″  – Rambam KH 11:7
+    MEAN_MOTION_PER_DAY: { degrees: 13, minutes: 10, seconds: 35.133 },
     START_POSITION: { degrees: 0, minutes: 0, seconds: 0 },
     START_CONSTELLATION: 1, // Taurus
-    MASLUL_MEAN_MOTION: { degrees: 13, minutes: 3, seconds: 54 },
+    // 13° 3′ 53⅓″
+    MASLUL_MEAN_MOTION: { degrees: 13, minutes: 3, seconds: 53.333 },
     MASLUL_START: { degrees: 84, minutes: 28, seconds: 42 },
     
     // Moon's galgalim (celestial spheres) parameters
