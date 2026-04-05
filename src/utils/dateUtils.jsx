@@ -161,4 +161,4 @@ export function displayHebrewDateTime(hebrewDate, moladInfo) {
   );
 }
 
-export { getMoonPosition } from './astronomyCalc'; 
+// getMoonPosition now available via the new engine pipeline

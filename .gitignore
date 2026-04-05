@@ -5,6 +5,10 @@
 
 # production build
 /build
+/dist
+
+# claude code
+.a5c/
 
 # env files
 .env

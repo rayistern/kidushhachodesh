@@ -2,7 +2,7 @@
   # Netlify will run this to produce your static files
   command = "npm run build"
   # This is where CRA outputs the production bundle
-  publish = "build"
+  publish = "dist"
 
 # (Optional) If you ever want to run `netlify dev`, this tells it how
 [dev]
