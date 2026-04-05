@@ -16,6 +16,7 @@
     "@radix-ui/react-tooltip": "^1.1.0",
     "@react-three/drei": "^9.0.0",
     "@react-three/fiber": "^8.0.0",
+    "events": "^3.3.0",
     "hebcal": "^2.3.2",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
@@ -25,6 +26,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.2.2",
+    "@tailwindcss/vite": "^4.2.2",
     "@vitejs/plugin-react": "^4.0.0",
     "autoprefixer": "^10.4.0",
     "postcss": "^8.4.0",
