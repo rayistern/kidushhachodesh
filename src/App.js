@@ -1,19 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
-import './App.css'; // Create this file for styling
+import './App.css';
 import CelestialVisualization from './components/CelestialVisualization';
 import DateControl from './components/DateControl';
 import AstronomicalCalculations from './components/AstronomicalCalculations';
+import { PropsDashboard } from './components/3d';
 
-// Import constants from a separate file
 import { 
   HEBREW_MONTHS_REGULAR,
   HEBREW_MONTHS_LEAP,
   CONSTANTS 
-} from './constants'; // Move constants to this file
+} from './constants';
 
 function App() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [tooltip, setTooltip] = useState(null);
+  const [activeView, setActiveView] = useState('visualization');
   const videoRefRight = useRef(null);   // For aid=5500843 (right)
   const videoRefLeft = useRef(null);    // For aid=5500842 (left)
   
@@ -120,40 +121,58 @@ function App() {
       <header className="app-header">
         <h1>קידוש החודש</h1>
         <h2>Kidush Hachodesh – Interactive Celestial Visualization</h2>
+        
+        <div className="view-tabs">
+          <button 
+            className={`view-tab ${activeView === 'visualization' ? 'active' : ''}`}
+            onClick={() => setActiveView('visualization')}
+          >
+            2D Visualization
+          </button>
+          <button 
+            className={`view-tab ${activeView === '3d' ? 'active' : ''}`}
+            onClick={() => setActiveView('3d')}
+          >
+            3D Props
+          </button>
+        </div>
       </header>
 
-      <div className="main-layout">
-        <div className="top-section">
-          {/* Main visualization area - Now takes full width */}
-          <div className="visualization-area full-width">
-            <div className="visualization-card">
-              <CelestialVisualization 
+      {activeView === 'visualization' ? (
+        <div className="main-layout">
+          <div className="top-section">
+            <div className="visualization-area full-width">
+              <div className="visualization-card">
+                <CelestialVisualization 
+                  date={currentDate} 
+                  onDateChange={handleDateChange}
+                  onTooltipChange={setTooltip} 
+                />
+              </div>
+            </div>
+          </div>
+          
+          <div className="mid-section">
+            <div className="control-card">
+              <DateControl 
                 date={currentDate} 
-                onDateChange={handleDateChange}
-                onTooltipChange={setTooltip} 
+                onDateChange={handleDateChange} 
+                hideCurrentDate={true} 
               />
             </div>
           </div>
-        </div>
-        
-        {/* Date control moved below visualization */}
-        <div className="mid-section">
-          <div className="control-card">
-            <DateControl 
-              date={currentDate} 
-              onDateChange={handleDateChange} 
-              hideCurrentDate={true} 
-            />
+          
+          <div className="bottom-section">
+            <div className="control-card full-width">
+              <AstronomicalCalculations date={currentDate} />
+            </div>
           </div>
         </div>
-        
-        {/* AstronomicalCalculations below */}
-        <div className="bottom-section">
-          <div className="control-card full-width">
-            <AstronomicalCalculations date={currentDate} />
-          </div>
+      ) : (
+        <div className="main-layout">
+          <PropsDashboard date={currentDate} />
         </div>
-      </div>
+      )}
       
       <footer className="app-footer">
         <p>Based on the Rambam's calculations in Hilchot Kiddush HaChodesh</p>

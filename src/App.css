@@ -66,6 +66,37 @@ body, .app-container {
   text-shadow: 0 1px 4px #000a;
 }
 
+.view-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}
+
+.view-tab {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  border: 2px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.view-tab:hover {
+  background: var(--color-surface-2);
+  color: var(--color-text);
+  border-color: var(--color-accent);
+}
+
+.view-tab.active {
+  background: var(--color-accent);
+  color: white;
+  border-color: var(--color-accent);
+}
+
 .main-layout {
   display: flex;
   flex-direction: column;
