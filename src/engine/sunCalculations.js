@@ -1,5 +1,19 @@
 /**
  * Sun position calculations per the Rambam's Hilchot Kiddush HaChodesh, chapters 12-13.
+ *
+ * The Rambam's procedure for the sun:
+ *   1. Find emtza hashemesh (mean longitude) — KH 12:1
+ *   2. Find govah hashemesh (apogee position) — KH 12:2
+ *   3. Calculate maslul hashemesh (distance from apogee) — KH 13:1
+ *   4. Look up maslul correction in SUN table — KH 13:4
+ *   5. Apply correction → makom amiti (true longitude) — KH 13:5
+ *
+ * Rabbi Losh's teaching: The sun has TWO galgalim:
+ *   Blue (outer) = slowly rotating, carries the govah. ~1°/70 years.
+ *   Red (inner) = off-center inside the blue, carries the sun. Bulk of the ~59'8"/day motion.
+ *   The emtzoi is the sun's address as seen from the red's center.
+ *   The amiti is the sun's address as seen from Earth (the blue's center).
+ *
  * Each function returns a CalculationStep for drill-down display.
  */
 import { CONSTANTS } from './constants.js';
@@ -13,11 +27,13 @@ export function calculateDaysFromEpoch(date) {
     name: 'Days from Epoch',
     hebrewName: 'ימים מתחילת המניין',
     rambamRef: 'KH 11:16',
+    source: 'rambam',
+    sourceNote: 'Epoch date (3 Nisan 4938) directly from the Rambam.',
     inputs: {
       date: { value: date.toISOString().slice(0, 10), label: 'Selected Date' },
       epoch: { value: '1177-04-03', label: 'Epoch (3 Nisan 4938)' },
     },
-    formula: '(date - epoch) / millisecondsPerDay',
+    formula: '(date − epoch) / millisecondsPerDay',
     result: daysFromBase,
     unit: 'days',
   };
@@ -31,12 +47,15 @@ export function getSunDailyMotion() {
     name: 'Sun Daily Motion',
     hebrewName: 'מהלך אמצע השמש ליום',
     rambamRef: 'KH 12:1',
+    source: 'rambam',
+    sourceNote: 'Nun Tes Ches (59\' 8") — the combined motion of both the blue and red galgalim together.',
+    teachingNote: 'This is NOT the motion of the red galgal alone, nor the blue alone. It is the sum total of both. The blue moves extremely slowly (~1°/70 years). The red carries the bulk of the motion. Together: 0° 59\' 8 1/3" per day.',
     inputs: {
       degrees: { value: 0, label: 'Degrees' },
       minutes: { value: 59, label: 'Minutes' },
-      seconds: { value: '8⅓', label: 'Seconds' },
+      seconds: { value: '8 1/3', label: 'Seconds' },
     },
-    formula: "0° + 59′/60 + 8⅓″/3600",
+    formula: "0° + 59'/60 + 8.333\"/3600",
     result: motion,
     unit: 'deg/day',
   };
@@ -52,12 +71,15 @@ export function calculateSunMeanLongitude(daysFromBase) {
     name: 'Sun Mean Longitude',
     hebrewName: 'אמצע השמש',
     rambamRef: 'KH 12:1-2',
+    source: 'rambam',
+    sourceNote: 'Position at epoch = 0° (conjunction with moon at 0° Aries). Daily motion per the Rambam.',
+    teachingNote: 'The emtzoi: where the sun appears in the mazalos if you were standing at the CENTER OF THE RED GALGAL. Since the red\'s center is not at Earth, this is NOT where we see the sun. But it is the essential first step — "first know the sun\'s own language, then translate to ours." (Rabbi Losh)',
     inputs: {
       startPosition: { value: startPos, label: 'Position at Epoch', unit: '°' },
       dailyMotion: { value: dailyMotion, label: 'Daily Motion', unit: '°/day' },
       daysFromBase: { value: daysFromBase, label: 'Days from Epoch' },
     },
-    formula: '(startPosition + dailyMotion × days) mod 360',
+    formula: '(startPosition + dailyMotion * days) mod 360',
     result,
     formatted: formatDms(result),
     unit: 'degrees',
@@ -75,13 +97,16 @@ export function calculateSunApogee(daysFromBase) {
     id: 'sunApogee',
     name: "Sun's Apogee (Govah)",
     hebrewName: 'גובה השמש',
-    rambamRef: 'KH 12:1',
+    rambamRef: 'KH 12:2',
+    source: 'rambam',
+    sourceNote: 'Starting position at epoch (26° 45\' 8" in Gemini) and daily motion (~1.5"/day) from the Rambam.',
+    teachingNote: 'The govah is the point on the red galgal that is FURTHEST from Earth (because the red is off-center in the blue). It moves very slowly — about 1° every 70 years. This is the motion of the BLUE galgal. When the sun is at the govah, it appears to us to move slower (covering fewer degrees per day) because it is further away. Rabbi Losh\'s airplane mashal: a plane at high altitude seems to crawl, but at low altitude the same speed looks blazing fast.',
     inputs: {
-      apogeeStart: { value: apogeeStart, label: `Apogee at Epoch (26°45′8″ in Gemini)`, unit: '°' },
-      dailyMotion: { value: dailyMotion, label: 'Apogee Daily Motion', unit: '°/day' },
+      apogeeStart: { value: apogeeStart, label: `Apogee at Epoch (26° 45' 8" in Gemini)`, unit: '°' },
+      dailyMotion: { value: dailyMotion, label: 'Apogee Daily Motion (~1.5"/day)', unit: '°/day' },
       daysFromBase: { value: daysFromBase, label: 'Days from Epoch' },
     },
-    formula: '(apogeeStart + dailyMotion × days) mod 360',
+    formula: '(apogeeStart + dailyMotion * days) mod 360',
     result,
     formatted: formatDms(result),
     unit: 'degrees',
@@ -97,30 +122,41 @@ export function calculateSunMaslul(meanLongitude, apogee) {
     name: 'Sun Maslul (Course)',
     hebrewName: 'מסלול השמש',
     rambamRef: 'KH 13:1-3',
+    source: 'rambam',
+    sourceNote: 'Maslul = distance of the sun from the govah (apogee). Directly from the Rambam.',
+    teachingNote: 'How far is the sun from the govah? This distance determines how much the emtzoi differs from the amiti. At 0° or 360° (sun at govah) there is NO difference. At 180° (sun opposite govah, closest to Earth) there is also no difference. The maximum difference (~2°) occurs around 90°, where the viewing angle between Earth and the red\'s center diverges most.',
     inputs: {
       meanLongitude: { value: meanLongitude, label: 'Sun Mean Longitude', unit: '°' },
       apogee: { value: apogee, label: 'Sun Apogee', unit: '°' },
     },
-    formula: '(meanLongitude - apogee + 360) mod 360',
+    formula: '(meanLongitude − apogee + 360) mod 360',
     result: maslul,
     formatted: formatDms(maslul),
     unit: 'degrees',
   };
 }
 
-/** Maslul correction via linear interpolation of the Rambam's table */
+/** Maslul correction via linear interpolation of the Rambam's SUN table — KH 13:4 */
 export function lookupMaslulCorrection(maslul) {
-  // For maslul > 180°, use (360 - maslul) and the correction is subtracted
   const effectiveMaslul = maslul <= 180 ? maslul : 360 - maslul;
-  const table = CONSTANTS.MASLUL_CORRECTIONS;
+  const table = CONSTANTS.SUN_MASLUL_CORRECTIONS;
 
   let correction = 0;
+  let isInterpolated = false;
+
   for (let i = 0; i < table.length - 1; i++) {
     const cur = table[i];
     const nxt = table[i + 1];
     if (effectiveMaslul >= cur.maslul && effectiveMaslul <= nxt.maslul) {
-      const ratio = (effectiveMaslul - cur.maslul) / (nxt.maslul - cur.maslul);
-      correction = cur.correction + ratio * (nxt.correction - cur.correction);
+      if (effectiveMaslul === cur.maslul) {
+        correction = cur.correction;
+      } else if (effectiveMaslul === nxt.maslul) {
+        correction = nxt.correction;
+      } else {
+        const ratio = (effectiveMaslul - cur.maslul) / (nxt.maslul - cur.maslul);
+        correction = cur.correction + ratio * (nxt.correction - cur.correction);
+        isInterpolated = true;
+      }
       break;
     }
   }
@@ -130,38 +166,47 @@ export function lookupMaslulCorrection(maslul) {
     name: 'Sun Maslul Correction',
     hebrewName: 'מנת המסלול של השמש',
     rambamRef: 'KH 13:4',
+    source: isInterpolated ? 'approximated' : 'rambam',
+    sourceNote: isInterpolated
+      ? 'Interpolated between table entries. The Rambam instructs to interpolate proportionally (KH 13:7-8).'
+      : 'Value directly from the Rambam\'s sun correction table.',
+    teachingNote: 'The menaseh hamaslul: the portion we add or subtract to translate the emtzoi to the amiti. If maslul < 180° the correction is SUBTRACTED (sun appears behind where its emtzoi says). If > 180° it is ADDED. Maximum correction: ~2° near 90° maslul.',
     inputs: {
       maslul: { value: maslul, label: 'Maslul', unit: '°' },
       effectiveMaslul: { value: effectiveMaslul, label: 'Effective Maslul (for table)', unit: '°' },
-      direction: { value: maslul <= 180 ? 'add' : 'subtract', label: 'Apply Direction' },
+      direction: { value: maslul <= 180 ? 'subtract' : 'add', label: 'Apply Direction' },
     },
-    formula: 'Linear interpolation from Rambam\'s correction table (KH 13:4)',
+    formula: "Linear interpolation from Rambam's SUN correction table (KH 13:4)",
     result: correction,
     formatted: formatDms(correction),
     unit: 'degrees',
-    tableUsed: true,
+    tableUsed: 'sun',
   };
 }
 
 /** Sun's true longitude — the final result */
 export function calculateSunTrueLongitude(meanLongitude, maslul, correction) {
+  // KH 13:2-3: if maslul < 180° subtract; if > 180° add
   const result = maslul <= 180
-    ? normalizeDegrees(meanLongitude + correction)
-    : normalizeDegrees(meanLongitude - correction);
+    ? normalizeDegrees(meanLongitude - correction)
+    : normalizeDegrees(meanLongitude + correction);
   return {
     id: 'sunTrueLongitude',
     name: 'Sun True Longitude',
     hebrewName: 'מקום השמש האמיתי',
-    rambamRef: 'KH 13:5-6',
+    rambamRef: 'KH 13:2-6',
+    source: 'rambam',
+    sourceNote: 'Direction rule (subtract if < 180°, add if > 180°) directly from the Rambam.',
+    teachingNote: 'The amiti: where the sun ACTUALLY appears in the mazalos from our perspective on Earth. This is the "lashon kodesh" — the common language that both sun and moon must be translated into before we can compare them. This is what Beis Din needs to know for the molad calculation.',
     inputs: {
       meanLongitude: { value: meanLongitude, label: 'Sun Mean Longitude', unit: '°' },
       maslul: { value: maslul, label: 'Maslul', unit: '°' },
       correction: { value: correction, label: 'Correction', unit: '°' },
-      direction: { value: maslul <= 180 ? 'add' : 'subtract', label: 'Direction' },
+      direction: { value: maslul <= 180 ? 'subtract' : 'add', label: 'Direction' },
     },
     formula: maslul <= 180
-      ? 'meanLongitude + correction'
-      : 'meanLongitude - correction',
+      ? 'meanLongitude − correction'
+      : 'meanLongitude + correction',
     result,
     formatted: formatDms(result),
     unit: 'degrees',

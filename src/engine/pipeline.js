@@ -1,11 +1,43 @@
 /**
  * Calculation pipeline — orchestrates all astronomical calculations
  * for a given date and returns the full chain of CalculationSteps.
+ *
+ * The Rambam's complete procedure:
+ *   SUN: epoch → mean lon → apogee → maslul → correction → true lon
+ *   MOON: epoch → mean lon → season correction → adjusted mean lon
+ *         → maslul → double elongation → maslul hanachon → moon correction
+ *         → true lon → node → latitude
+ *   VISIBILITY: elongation → phase → first visibility → visible?
  */
-import { calculateDaysFromEpoch, getSunDailyMotion, calculateSunMeanLongitude, calculateSunApogee, calculateSunMaslul, lookupMaslulCorrection, calculateSunTrueLongitude } from './sunCalculations.js';
-import { calculateMoonMeanLongitude, calculateMoonMaslul, lookupMoonMaslulCorrection, calculateMoonTrueLongitude, calculateMoonLatitude, calculateMoonPhase } from './moonCalculations.js';
-import { calculateElongation, calculateFirstVisibilityAngle, determineVisibility, calculateSeasonalInfo } from './visibilityCalculations.js';
+import {
+  calculateDaysFromEpoch,
+  getSunDailyMotion,
+  calculateSunMeanLongitude,
+  calculateSunApogee,
+  calculateSunMaslul,
+  lookupMaslulCorrection,
+  calculateSunTrueLongitude,
+} from './sunCalculations.js';
+import {
+  calculateMoonMeanLongitude,
+  calculateSeasonCorrection,
+  calculateMoonMaslul,
+  calculateDoubleElongation,
+  calculateMaslulHanachon,
+  lookupMoonMaslulCorrection,
+  calculateMoonTrueLongitude,
+  calculateNodePosition,
+  calculateMoonLatitude,
+  calculateMoonPhase,
+} from './moonCalculations.js';
+import {
+  calculateElongation,
+  calculateFirstVisibilityAngle,
+  determineVisibility,
+  calculateSeasonalInfo,
+} from './visibilityCalculations.js';
 import { CONSTANTS } from './constants.js';
+import { normalizeDegrees } from './dmsUtils.js';
 
 /**
  * Run all Rambam calculations for a given date.
@@ -14,32 +46,60 @@ import { CONSTANTS } from './constants.js';
  *  - sun/moon/visibility/season: convenience accessors for final values
  */
 export function getFullCalculation(date) {
-  // Step 1: Days from epoch
+  // ── Step 1: Days from epoch ──
   const epochStep = calculateDaysFromEpoch(date);
   const days = epochStep.result;
 
-  // Step 2: Sun calculations
+  // ── Step 2: Sun calculations (needed before moon's double elongation) ──
   const sunDailyMotion = getSunDailyMotion();
   const sunMeanLon = calculateSunMeanLongitude(days);
   const sunApogee = calculateSunApogee(days);
   const sunMaslul = calculateSunMaslul(sunMeanLon.result, sunApogee.result);
   const sunCorrection = lookupMaslulCorrection(sunMaslul.result);
-  const sunTrueLon = calculateSunTrueLongitude(sunMeanLon.result, sunMaslul.result, sunCorrection.result);
+  const sunTrueLon = calculateSunTrueLongitude(
+    sunMeanLon.result, sunMaslul.result, sunCorrection.result
+  );
 
-  // Step 3: Moon calculations
+  // ── Step 3: Moon mean longitude ──
   const moonMeanLon = calculateMoonMeanLongitude(days);
-  const moonMaslul = calculateMoonMaslul(days);
-  const moonCorrection = lookupMoonMaslulCorrection(moonMaslul.result);
-  const moonTrueLon = calculateMoonTrueLongitude(moonMeanLon.result, moonMaslul.result, moonCorrection.result);
-  const moonLat = calculateMoonLatitude(days);
 
-  // Step 4: Visibility calculations
+  // ── Step 4: Season correction (KH 14:5) — adjusts moon mean lon for sunset timing ──
+  const seasonCorrection = calculateSeasonCorrection(sunTrueLon.result);
+  const adjustedMoonMeanLon = normalizeDegrees(moonMeanLon.result + seasonCorrection.result);
+
+  // ── Step 5: Moon maslul (anomaly on galgal katan) ──
+  const moonMaslul = calculateMoonMaslul(days);
+
+  // ── Step 6: Double elongation (merchak kaful) — KH 15:1-2 ──
+  const doubleElong = calculateDoubleElongation(adjustedMoonMeanLon, sunMeanLon.result);
+
+  // ── Step 7: Maslul hanachon (corrected course) — KH 15:3 ──
+  const maslulHanachon = calculateMaslulHanachon(moonMaslul.result, doubleElong.result);
+
+  // ── Step 8: Moon maslul correction from MOON table — KH 15:4-6 ──
+  const moonCorrection = lookupMoonMaslulCorrection(maslulHanachon.result);
+
+  // ── Step 9: Moon true longitude — KH 15:4 ──
+  const moonTrueLon = calculateMoonTrueLongitude(
+    adjustedMoonMeanLon,
+    maslulHanachon.result,
+    moonCorrection.result,
+    moonCorrection.direction,
+  );
+
+  // ── Step 10: Node position (rosh) — KH 16:2-3 ──
+  const nodePos = calculateNodePosition(days);
+
+  // ── Step 11: Moon latitude — KH 16:9-10 ──
+  const moonLat = calculateMoonLatitude(moonTrueLon.result, nodePos.result);
+
+  // ── Step 12: Visibility calculations ──
   const elongation = calculateElongation(moonTrueLon.result, sunTrueLon.result);
   const moonPhase = calculateMoonPhase(elongation.result);
   const firstVisAngle = calculateFirstVisibilityAngle(elongation.result, moonLat.result);
   const visibility = determineVisibility(firstVisAngle.result, elongation.result, moonLat.result);
 
-  // Step 5: Season
+  // ── Step 13: Season info ──
   const season = calculateSeasonalInfo(days);
 
   // Helper: get constellation from longitude
@@ -52,20 +112,27 @@ export function getFullCalculation(date) {
     };
   };
 
-  // Ordered steps for drill-down
+  // Ordered steps for drill-down display
   const steps = [
     epochStep,
+    // --- Sun chain ---
     sunDailyMotion,
     sunMeanLon,
     sunApogee,
     sunMaslul,
     sunCorrection,
     sunTrueLon,
+    // --- Moon chain ---
     moonMeanLon,
+    seasonCorrection,
     moonMaslul,
+    doubleElong,
+    maslulHanachon,
     moonCorrection,
     moonTrueLon,
+    nodePos,
     moonLat,
+    // --- Visibility ---
     elongation,
     moonPhase,
     firstVisAngle,
@@ -95,10 +162,14 @@ export function getFullCalculation(date) {
 
     moon: {
       meanLongitude: moonMeanLon.result,
+      adjustedMeanLongitude: adjustedMoonMeanLon,
       trueLongitude: moonTrueLon.result,
       maslul: moonMaslul.result,
+      doubleElongation: doubleElong.result,
+      maslulHanachon: maslulHanachon.result,
       maslulCorrection: moonCorrection.result,
       latitude: moonLat.result,
+      nodePosition: nodePos.result,
       constellation: getConstellation(moonTrueLon.result),
       phase: moonPhase.result,
       phaseHebrew: moonPhase.hebrewResult,
@@ -135,6 +206,9 @@ export function getAstronomicalData(date) {
       latitude: calc.moon.latitude,
       maslul: calc.moon.maslul,
       maslulCorrection: calc.moon.maslulCorrection,
+      doubleElongation: calc.moon.doubleElongation,
+      maslulHanachon: calc.moon.maslulHanachon,
+      nodePosition: calc.moon.nodePosition,
       elongation: calc.moon.elongation,
       firstVisibilityAngle: calc.moon.firstVisibilityAngle,
       isVisible: calc.moon.isVisible,
@@ -144,7 +218,6 @@ export function getAstronomicalData(date) {
       positionInConstellation: calc.moon.constellation.positionInConstellation,
     },
     season: calc.season,
-    // Expose the full calculation chain for drill-down
     _steps: calc.steps,
     _stepMap: calc.stepMap,
   };

@@ -4,6 +4,7 @@ import { useCalculationStore } from '../../stores/calculationStore';
 import { useVisualizationStore } from '../../stores/visualizationStore';
 import { getHebrewDateDisplay, getMoladDisplay } from '../../utils/dateUtils';
 import { formatDms } from '../../engine/dmsUtils';
+import { SOURCE_TYPES } from '../../engine/constants';
 
 export default function Sidebar() {
   const { currentDate, setDate, adjustDays } = useCalendarStore();
@@ -16,7 +17,7 @@ export default function Sidebar() {
 
   const handleClick = (stepId, galgalId) => {
     selectStep(stepId);
-    setHighlightedGalgal(galgalId);
+    if (galgalId) setHighlightedGalgal(galgalId);
   };
 
   return (
@@ -66,6 +67,7 @@ export default function Sidebar() {
       {/* Calculation summary — each value is clickable */}
       {calculation && (
         <>
+          {/* ── SUN ── */}
           <SectionHeader title="Sun" hebrewTitle="השמש" color="var(--color-gold)" />
           <ValueRow
             label="Mean Longitude" hebrewLabel="אמצע השמש"
@@ -78,9 +80,10 @@ export default function Sidebar() {
             onClick={() => handleClick('sunTrueLongitude', 'sun')}
           />
           <ValueRow
-            label="Apogee" hebrewLabel="גובה"
+            label="Apogee (Govah)" hebrewLabel="גובה"
             value={formatDms(calculation.sun.apogee)}
             onClick={() => handleClick('sunApogee', 'sun')}
+            tooltip="The point on the red galgal furthest from Earth"
           />
           <ValueRow
             label="Maslul" hebrewLabel="מסלול"
@@ -91,17 +94,34 @@ export default function Sidebar() {
             label="Correction" hebrewLabel="מנת המסלול"
             value={formatDms(calculation.sun.maslulCorrection)}
             onClick={() => handleClick('sunMaslulCorrection', 'sun')}
+            source="approximated"
+            tooltip="Interpolated from the Rambam's table — max ~2° at 90°"
           />
           <ValueRow
             label="Constellation"
             value={`${calculation.sun.constellation.hebrew} (${calculation.sun.constellation.english})`}
           />
 
+          {/* ── MOON ── */}
           <SectionHeader title="Moon" hebrewTitle="הירח" color="var(--color-silver)" />
           <ValueRow
             label="Mean Longitude" hebrewLabel="אמצע הירח"
             value={formatDms(calculation.moon.meanLongitude)}
             onClick={() => handleClick('moonMeanLongitude', 'moon')}
+            tooltip="The center of the galgal katan (small epicycle)"
+          />
+          <ValueRow
+            label="Double Elongation" hebrewLabel="מרחק כפול"
+            value={formatDms(calculation.moon.doubleElongation)}
+            onClick={() => handleClick('doubleElongation', 'moon')}
+            source="rambam"
+            tooltip="2 x (moon mean - sun mean). Accounts for opposite motions of the outer galgalim."
+          />
+          <ValueRow
+            label="Maslul Hanachon" hebrewLabel="מסלול נכון"
+            value={formatDms(calculation.moon.maslulHanachon)}
+            onClick={() => handleClick('maslulHanachon', 'moon')}
+            tooltip="The corrected course — emtza hamaslul adjusted by the double elongation"
           />
           <ValueRow
             label="True Longitude" hebrewLabel="מקום אמיתי"
@@ -109,9 +129,10 @@ export default function Sidebar() {
             onClick={() => handleClick('moonTrueLongitude', 'moon')}
           />
           <ValueRow
-            label="Maslul" hebrewLabel="מסלול"
-            value={formatDms(calculation.moon.maslul)}
-            onClick={() => handleClick('moonMaslul', 'moon')}
+            label="Node (Rosh)" hebrewLabel="ראש התלי"
+            value={formatDms(calculation.moon.nodePosition)}
+            onClick={() => handleClick('nodePosition', 'moon')}
+            tooltip="Ascending node — where the moon's tilted orbit crosses the ecliptic northward"
           />
           <ValueRow
             label="Latitude" hebrewLabel="רוחב"
@@ -126,6 +147,7 @@ export default function Sidebar() {
           <ValueRow
             label="Phase" hebrewLabel="מופע"
             value={`${calculation.moon.phase}`}
+            source="deduced"
           />
           <ValueRow
             label="Visible?" hebrewLabel="נראה?"
@@ -134,6 +156,7 @@ export default function Sidebar() {
             onClick={() => handleClick('moonVisibility', null)}
           />
 
+          {/* ── SEASON ── */}
           <SectionHeader title="Season" hebrewTitle="תקופה" color="var(--color-accent)" />
           <ValueRow
             label="Current" value={calculation.season.currentSeason}
@@ -158,15 +181,24 @@ function SectionHeader({ title, hebrewTitle, color }) {
   );
 }
 
-function ValueRow({ label, hebrewLabel, value, onClick, highlight }) {
+function ValueRow({ label, hebrewLabel, value, onClick, highlight, source, tooltip }) {
+  const sourceInfo = source ? SOURCE_TYPES[source] : null;
   return (
     <div
       onClick={onClick}
       className={`flex justify-between items-center px-4 py-1.5 text-xs border-b border-[var(--color-border)] border-opacity-30 ${
         onClick ? 'cursor-pointer hover:bg-[var(--color-card)]' : ''
       } ${highlight ? 'bg-[var(--color-accent)] bg-opacity-10' : ''}`}
+      title={tooltip}
     >
-      <span className="text-[var(--color-text-secondary)]">
+      <span className="text-[var(--color-text-secondary)] flex items-center gap-1">
+        {sourceInfo && (
+          <span
+            className="inline-block w-1.5 h-1.5 rounded-full flex-shrink-0"
+            style={{ backgroundColor: sourceInfo.color }}
+            title={sourceInfo.description}
+          />
+        )}
         {label}
         {hebrewLabel && <span className="hebrew-text ml-1 opacity-60">({hebrewLabel})</span>}
       </span>

@@ -1,6 +1,12 @@
 /**
  * Astronomical constants from the Rambam's Hilchot Kiddush HaChodesh.
  * This is the single source of truth for all calculations and visualizations.
+ *
+ * Source key:
+ *   [R] = Directly from the Rambam's text (chapter:halacha cited)
+ *   [A] = Approximated / interpolated between Rambam's table entries
+ *   [D] = Deduced from the model or from external sources (not explicit in the Rambam)
+ *   [L] = From Rabbi Losh's teaching (colors, orientations, pedagogical framing)
  */
 
 export const HEBREW_MONTHS_REGULAR = [
@@ -14,13 +20,13 @@ export const HEBREW_MONTHS_LEAP = [
 ];
 
 export const CONSTANTS = {
-  // Epoch: 3 Nisan 4938 = April 3, 1177 CE
-  // At this moment, both Sun and Moon mean longitudes = 0° (conjunction at 0° Aries)
+  // [R] Epoch: 3 Nisan 4938 = April 3, 1177 CE — KH 12:2
   BASE_DATE: new Date(1177, 3, 3), // April 3, 1177 CE (month is 0-indexed)
   BASE_YEAR_HEBREW: 4938,
 
   // ═══════════════════════════════════════════════════════════════
   //  GALGALIM (Celestial Spheres) — Rambam's cosmological model
+  //  [R] Structure from KH 11; [L] Colors from Rabbi Losh's props
   // ═══════════════════════════════════════════════════════════════
   GALGALIM: [
     {
@@ -29,8 +35,9 @@ export const CONSTANTS = {
       englishName: "Daily Sphere (Ninth Sphere)",
       radius: 360,
       color: '#4466aa',
-      description: "The outermost sphere that rotates once every 24 hours, causing all celestial bodies to appear to revolve around Earth.",
-      reference: "Hilchot Yesodei HaTorah 3:1"
+      description: "The outermost sphere — rotates ~361°/day east-to-west, carrying all inner spheres with it.",
+      reference: "Hilchot Yesodei HaTorah 3:1",
+      source: 'rambam',
     },
     {
       id: 'constellations',
@@ -38,8 +45,9 @@ export const CONSTANTS = {
       englishName: "Sphere of Constellations (Eighth Sphere)",
       radius: 320,
       color: '#aaaa44',
-      description: "Contains the fixed stars and the 12 zodiac constellations.",
-      reference: "Kiddush HaChodesh 11:5"
+      description: "Contains the fixed stars and the 12 zodiac constellations. The kav hamazalos (ecliptic belt) is tilted ~23.5° from the equator.",
+      reference: "KH 11:5",
+      source: 'rambam',
     },
     {
       id: 'saturn',
@@ -47,7 +55,8 @@ export const CONSTANTS = {
       englishName: "Saturn Sphere",
       radius: 280,
       color: '#887744',
-      description: "Contains the planet Saturn (~30 year orbit)."
+      description: "Contains the planet Saturn (~30 year orbit).",
+      source: 'rambam',
     },
     {
       id: 'jupiter',
@@ -55,7 +64,8 @@ export const CONSTANTS = {
       englishName: "Jupiter Sphere",
       radius: 260,
       color: '#cc8844',
-      description: "Contains the planet Jupiter (~12 year orbit)."
+      description: "Contains the planet Jupiter (~12 year orbit).",
+      source: 'rambam',
     },
     {
       id: 'mars',
@@ -63,7 +73,8 @@ export const CONSTANTS = {
       englishName: "Mars Sphere",
       radius: 240,
       color: '#cc4444',
-      description: "Contains the planet Mars (~2 year orbit)."
+      description: "Contains the planet Mars (~2 year orbit).",
+      source: 'rambam',
     },
     {
       id: 'sun',
@@ -71,8 +82,10 @@ export const CONSTANTS = {
       englishName: "Sun Sphere",
       radius: 220,
       color: '#ddaa33',
-      description: "Contains the Sun (~365.25 day orbit).",
-      reference: "Kiddush HaChodesh 12:1-2"
+      description: "Contains the Sun. Comprised of TWO sub-galgalim: the blue (outer, centered on Earth) and the red (inner, off-center — creating the govah).",
+      reference: "KH 12:1-2",
+      source: 'rambam',
+      teachingNote: "Rabbi Losh: Blue = outer galgal (moves ~1°/70yr). Red = inner galgal (carries the sun, off-center). The offset between Earth's center and the red's center is what creates the emtzoi/amiti difference.",
     },
     {
       id: 'venus',
@@ -80,7 +93,8 @@ export const CONSTANTS = {
       englishName: "Venus Sphere",
       radius: 180,
       color: '#dddd88',
-      description: "Contains the planet Venus."
+      description: "Contains the planet Venus.",
+      source: 'rambam',
     },
     {
       id: 'mercury',
@@ -88,7 +102,8 @@ export const CONSTANTS = {
       englishName: "Mercury Sphere",
       radius: 140,
       color: '#aaaaaa',
-      description: "Contains the planet Mercury."
+      description: "Contains the planet Mercury.",
+      source: 'rambam',
     },
     {
       id: 'moon',
@@ -96,8 +111,10 @@ export const CONSTANTS = {
       englishName: "Moon Sphere",
       radius: 100,
       color: '#8899bb',
-      description: "The innermost sphere containing the Moon (~29.5 day synodic period).",
-      reference: "Kiddush HaChodesh 14:1"
+      description: "The innermost sphere containing the Moon. Comprised of FOUR sub-galgalim: red (domeh), blue (noteh), green (yoitzeh), and the galgal katan (small circle).",
+      reference: "KH 14:1",
+      source: 'rambam',
+      teachingNote: "Rabbi Losh's colors: Red (domeh) = aligned with ecliptic. Blue (noteh) = tilted 5° off ecliptic. Green (yoitzeh) = off-center, has its own govah. Galgal katan = the small epicycle on which the moon actually sits.",
     }
   ],
 
@@ -105,71 +122,88 @@ export const CONSTANTS = {
   //  SUN — Rambam KH chapters 12-13
   // ═══════════════════════════════════════════════════════════════
   SUN: {
-    // 0° 59′ 8⅓″ per day — Rambam KH 12:1
+    // [R] 0° 59' 8 1/3" per day — KH 12:1
     MEAN_MOTION_PER_DAY: { degrees: 0, minutes: 59, seconds: 8.333 },
     START_POSITION: { degrees: 0, minutes: 0, seconds: 0 },
     START_CONSTELLATION: 0, // Aries
 
-    // Apogee (govah) — Rambam KH 12:1
+    // [R] Apogee (govah) at epoch — KH 12:2
     APOGEE_START: { degrees: 26, minutes: 45, seconds: 8 },
     APOGEE_CONSTELLATION: 2, // Gemini (= +60°)
-    APOGEE_MOTION_PER_DAY: 1.5 / 3600, // 1.5 arcseconds per day
+    // [R] ~1.5" per day — KH 12:2
+    APOGEE_MOTION_PER_DAY: 1.5 / 3600,
 
-    // Eccentric and epicycle parameters for 3D visualization
+    // [D] 3D visualization parameters — deduced from the Rambam's correction table magnitudes
     ECCENTRICITY: 0.0167,
     ECCENTRIC_ANGLE: 65.5,
-    EPICYCLE: {
-      RADIUS_RATIO: 0.0833,
-      REVOLUTION_PERIOD: 365.25,
-      INITIAL_ANGLE: 180,
-    },
   },
 
   // ═══════════════════════════════════════════════════════════════
   //  MOON — Rambam KH chapters 14-17
   // ═══════════════════════════════════════════════════════════════
   MOON: {
-    // 13° 10′ 35″ 4⁄30 per day — Rambam KH 14:1
+    // [R] 13° 10' 35.133" per day — KH 14:1
     MEAN_MOTION_PER_DAY: { degrees: 13, minutes: 10, seconds: 35.133 },
-    START_POSITION: { degrees: 0, minutes: 0, seconds: 0 },
+    START_POSITION: { degrees: 1, minutes: 14, seconds: 43 }, // [R] KH 14:4 — 1°14'43" in Taurus
     START_CONSTELLATION: 1, // Taurus
 
-    // Moon's maslul (anomaly) — Rambam KH 14:2
-    // 13° 3′ 53⅓″ per day
+    // [R] Moon's maslul (anomaly) — KH 14:2-3
+    // 13° 3' 53 1/3" per day
     MASLUL_MEAN_MOTION: { degrees: 13, minutes: 3, seconds: 53.333 },
+    // [R] Maslul at epoch — KH 14:4: 84° 28' 42"
     MASLUL_START: { degrees: 84, minutes: 28, seconds: 42 },
 
-    // Rambam: Sun and Moon in conjunction at epoch → Moon at 0°
-    MEAN_LONGITUDE_AT_EPOCH: 0,
+    // [R] KH 14:4 — Mean longitude at epoch
+    MEAN_LONGITUDE_AT_EPOCH: 1 + 14 / 60 + 43 / 3600, // 1°14'43" in Taurus = 31°14'43" absolute
 
-    // Galgalim parameters for 3D visualization
+    // [D] Galgalim parameters for 3D visualization
     GALGALIM: {
-      DEFERENT: {
-        RADIUS_RATIO: 1.0,
-        REVOLUTION_PERIOD: 27.32166, // Sidereal month
+      // [L] Rabbi Losh's four galgalim of the moon
+      RED_DOMEH: {
+        description: "Outermost moon galgal — aligned with kav hamazalos (ecliptic)",
+        // [R] Combined with blue, moves 11°12' per day mi'mizrach l'maarav — from class transcription
+        DAILY_MOTION: -(11 + 12 / 60), // negative = eastward regression
+        color: '#cc4444',
       },
-      FIRST_EPICYCLE: {
-        RADIUS_RATIO: 0.0575,
-        REVOLUTION_PERIOD: 13.6608,
+      BLUE_NOTEH: {
+        description: "Second moon galgal — tilted 5° off the ecliptic, creating rosh/zanav",
+        // The blue is carried by the red; its own tilt creates the latitude
+        INCLINATION: 5, // [R] KH 16:1 — 5° max latitude
+        color: '#4488cc',
       },
-      SECOND_EPICYCLE: {
-        RADIUS_RATIO: 0.038,
-        REVOLUTION_PERIOD: 13.6608,
-      },
-      ECCENTRIC: {
+      GREEN_YOITZEH: {
+        description: "Third moon galgal — off-center (has its own govah), holds the galgal katan",
+        // [R] Moves 24°23' per day mi'maarav l'mizrach — from class transcription
+        DAILY_MOTION: 24 + 23 / 60,
+        // [D] Eccentricity deduced from the max correction magnitude (~5°)
         ECCENTRICITY: 0.0549,
-        ANGLE: 83.3,
+        color: '#44aa44',
       },
-      INCLINATION: 5.145,
-      LATITUDE_CYCLE: 27.21222, // Draconic month
+      GALGAL_KATAN: {
+        description: "The small epicycle — moon sits on its edge, 5° radius",
+        // [R] KH 14:2 — moves 13° 3' 53.33" per day
+        DAILY_MOTION: 13 + 3 / 60 + 53.333 / 3600,
+        // [R] KH 15:9 — diameter is 10°, so radius is 5° (the Rambam writes 5°5' from our perspective)
+        RADIUS_DEGREES: 5,
+        color: '#dddd44',
+      },
+      LATITUDE_CYCLE: 27.21222, // [D] Draconic month — deduced, not explicit in the Rambam
     },
+  },
+
+  // [R] Ascending node (rosh) — KH 16:2
+  NODE: {
+    // [R] KH 16:2 — moves 3'11" per day backwards (achoranim)
+    DAILY_MOTION: { degrees: 0, minutes: 3, seconds: 11 },
+    // [R] KH 16:3 — position at epoch: 180° 57' 28" from Aries
+    START_POSITION: { degrees: 180, minutes: 57, seconds: 28 },
   },
 
   // ═══════════════════════════════════════════════════════════════
   //  ZODIAC
   // ═══════════════════════════════════════════════════════════════
   CONSTELLATIONS: [
-    "טלה", "שור", "תאומים", "סרטן", "��ריה", "בתולה",
+    "טלה", "שור", "תאומים", "סרטן", "אריה", "בתולה",
     "מאזנים", "עקרב", "קשת", "גדי", "דלי", "דגים"
   ],
 
@@ -186,35 +220,137 @@ export const CONSTANTS = {
   },
 
   // ═══════════════════════════════════════════════════════════════
-  //  MASLUL CORRECTION TABLE — Rambam KH 13:4 (Sun) / 15:3 (Moon)
-  //  Linear interpolation between these points.
-  //  For maslul > 180°, use (360 - maslul) and subtract the correction.
+  //  SUN MASLUL CORRECTION TABLE — [R] KH 13:4
+  //  Linear interpolation between these points → marked [A]
+  //  For maslul > 180°, use (360 - maslul) and ADD the correction.
   // ═══════════════════════════════════════════════════════════════
-  MASLUL_CORRECTIONS: [
+  SUN_MASLUL_CORRECTIONS: [
     { maslul: 0,   correction: 0 },
-    { maslul: 10,  correction: 20 / 60 },
-    { maslul: 20,  correction: 40 / 60 },
-    { maslul: 30,  correction: 58 / 60 },
-    { maslul: 40,  correction: 1 + 15 / 60 },
-    { maslul: 50,  correction: 1 + 29 / 60 },
-    { maslul: 60,  correction: 1 + 41 / 60 },
-    { maslul: 70,  correction: 1 + 51 / 60 },
-    { maslul: 80,  correction: 1 + 57 / 60 },
-    { maslul: 90,  correction: 1 + 59 / 60 },
-    { maslul: 100, correction: 1 + 58 / 60 },
-    { maslul: 110, correction: 1 + 53 / 60 },
-    { maslul: 120, correction: 1 + 45 / 60 },
-    { maslul: 130, correction: 1 + 33 / 60 },
-    { maslul: 140, correction: 1 + 19 / 60 },
-    { maslul: 150, correction: 1 + 1 / 60 },
-    { maslul: 160, correction: 42 / 60 },
-    { maslul: 170, correction: 21 / 60 },
+    { maslul: 10,  correction: 20 / 60 },          // 0° 20'
+    { maslul: 20,  correction: 40 / 60 },          // 0° 40'
+    { maslul: 30,  correction: 58 / 60 },          // 0° 58'
+    { maslul: 40,  correction: 1 + 15 / 60 },     // 1° 15'
+    { maslul: 50,  correction: 1 + 29 / 60 },     // 1° 29'
+    { maslul: 60,  correction: 1 + 41 / 60 },     // 1° 41'
+    { maslul: 70,  correction: 1 + 51 / 60 },     // 1° 51'
+    { maslul: 80,  correction: 1 + 57 / 60 },     // 1° 57'
+    { maslul: 90,  correction: 1 + 59 / 60 },     // 1° 59'
+    { maslul: 100, correction: 1 + 58 / 60 },     // 1° 58'
+    { maslul: 110, correction: 1 + 53 / 60 },     // 1° 53'
+    { maslul: 120, correction: 1 + 45 / 60 },     // 1° 45'
+    { maslul: 130, correction: 1 + 33 / 60 },     // 1° 33'
+    { maslul: 140, correction: 1 + 19 / 60 },     // 1° 19'
+    { maslul: 150, correction: 1 + 1 / 60 },      // 1° 01'
+    { maslul: 160, correction: 42 / 60 },          // 0° 42'
+    { maslul: 170, correction: 21 / 60 },          // 0° 21'
     { maslul: 180, correction: 0 },
+  ],
+
+  // Keep backward-compatible alias
+  get MASLUL_CORRECTIONS() { return this.SUN_MASLUL_CORRECTIONS; },
+
+  // ═══════════════════════════════════════════════════════════════
+  //  MOON MASLUL CORRECTION TABLE — [R] KH 15:4-6
+  //  This is the menaseh for the maslul hanachon (corrected course).
+  //  DIFFERENT from the sun's table — peaks at ~5°5' near 90-100°.
+  //  For maslul hanachon > 180°, subtract from 360° and ADD correction.
+  // ═══════════════════════════════════════════════════════════════
+  MOON_MASLUL_CORRECTIONS: [
+    { maslul: 0,   correction: 0 },
+    { maslul: 10,  correction: 52 / 60 },          // 0° 52'
+    { maslul: 20,  correction: 1 + 43 / 60 },     // 1° 43'
+    { maslul: 30,  correction: 2 + 30 / 60 },     // 2° 30'
+    { maslul: 40,  correction: 3 + 13 / 60 },     // 3° 13'
+    { maslul: 50,  correction: 3 + 44 / 60 },     // 3° 44'
+    { maslul: 60,  correction: 4 + 16 / 60 },     // 4° 16'
+    { maslul: 70,  correction: 4 + 41 / 60 },     // 4° 41'
+    { maslul: 80,  correction: 5 + 0 / 60 },      // 5° 00'
+    { maslul: 90,  correction: 5 + 5 / 60 },      // 5° 05'
+    { maslul: 100, correction: 5 + 8 / 60 },      // 5° 08'
+    { maslul: 110, correction: 4 + 59 / 60 },     // 4° 59'
+    { maslul: 120, correction: 4 + 40 / 60 },     // 4° 40'
+    { maslul: 130, correction: 4 + 11 / 60 },     // 4° 11'
+    { maslul: 140, correction: 3 + 33 / 60 },     // 3° 33'
+    { maslul: 150, correction: 2 + 48 / 60 },     // 2° 48'
+    { maslul: 160, correction: 2 + 5 / 60 },      // 2° 05'
+    { maslul: 170, correction: 59 / 60 },          // 0° 59'
+    { maslul: 180, correction: 0 },
+  ],
+
+  // ═══════════════════════════════════════════════════════════════
+  //  DOUBLE ELONGATION ADJUSTMENT — [R] KH 15:3
+  //  The merchak kaful (double elongation) adjusts the emtza hamaslul
+  //  to produce the maslul hanachon (corrected course).
+  //  This accounts for the nekudah hanichaches (prosneusis point).
+  // ═══════════════════════════════════════════════════════════════
+  DOUBLE_ELONGATION_ADJUSTMENTS: [
+    { minElongation: 0,  maxElongation: 5,   adjustment: 0 },
+    { minElongation: 6,  maxElongation: 11,  adjustment: 1 },
+    { minElongation: 12, maxElongation: 18,  adjustment: 2 },
+    { minElongation: 19, maxElongation: 24,  adjustment: 3 },
+    { minElongation: 25, maxElongation: 31,  adjustment: 4 },
+    { minElongation: 32, maxElongation: 38,  adjustment: 5 },
+    { minElongation: 39, maxElongation: 45,  adjustment: 6 },
+    { minElongation: 46, maxElongation: 51,  adjustment: 7 },
+    { minElongation: 52, maxElongation: 59,  adjustment: 8 },
+    { minElongation: 60, maxElongation: 63,  adjustment: 9 },
+    // Beyond 63°: the Rambam only specifies up to 63° because that is the
+    // max merchak kaful for new-moon visibility calculations.
+    // For general computation, we extrapolate:
+    { minElongation: 64, maxElongation: 90,  adjustment: 9, source: 'approximated' },
+    { minElongation: 91, maxElongation: 180, adjustment: 9, source: 'approximated' },
+  ],
+
+  // ═══════════════════════════════════════════════════════════════
+  //  MOON LATITUDE TABLE — [R] KH 16:9-10
+  //  Given the moon's angular distance from the ascending node (rosh),
+  //  this table gives the latitude (rochav) north or south of the ecliptic.
+  //  0-90° from rosh = northward; 90-180° = returning; 180-270° = southward; 270-360° = returning north.
+  // ═══════════════════════════════════════════════════════════════
+  MOON_LATITUDE_TABLE: [
+    { distance: 0,   latitude: 0 },
+    { distance: 10,  latitude: 52 / 60 },          // 0° 52'
+    { distance: 20,  latitude: 1 + 43 / 60 },     // 1° 43'
+    { distance: 30,  latitude: 2 + 30 / 60 },     // 2° 30'
+    { distance: 40,  latitude: 3 + 13 / 60 },     // 3° 13'
+    { distance: 50,  latitude: 3 + 44 / 60 },     // 3° 44'
+    { distance: 60,  latitude: 4 + 16 / 60 },     // 4° 16'
+    { distance: 70,  latitude: 4 + 41 / 60 },     // 4° 41'
+    { distance: 80,  latitude: 5 + 0 / 60 },      // 5° 00'
+    { distance: 90,  latitude: 5 + 0 / 60 },      // 5° 00'
+  ],
+
+  // ═══════════════════════════════════════════════════════════════
+  //  SEASON CORRECTION — [R] KH 14:5
+  //  Adjusts the moon's mean longitude for the time difference between
+  //  6:00 PM and actual sunset. The moon moves ~½° per hour, so if
+  //  sunset is later (summer), the moon has moved further.
+  // ═══════════════════════════════════════════════════════════════
+  SEASON_CORRECTIONS: [
+    // { sunFrom: degrees, sunTo: degrees, adjustment: chalakim }
+    // Each range is defined by the sun's true longitude
+    { sunFrom: 315, sunTo: 345, adjustment: 0 },       // Mid-Aquarius to mid-Aries: no adjustment
+    { sunFrom: 345, sunTo: 360, adjustment: 15 / 60 }, // Mid-Aries to Aries end: +15'
+    { sunFrom: 0,   sunTo: 30,  adjustment: 15 / 60 }, // Aries to Taurus: +15'
+    { sunFrom: 30,  sunTo: 60,  adjustment: 15 / 60 }, // Taurus to start of Gemini: +15'
+    { sunFrom: 60,  sunTo: 90,  adjustment: 30 / 60 }, // Start of Gemini to mid-Cancer: +30'
+    { sunFrom: 90,  sunTo: 120, adjustment: 15 / 60 }, // Mid-Cancer to start of Leo: +15'
+    { sunFrom: 120, sunTo: 150, adjustment: -15 / 60 }, // Start of Leo to mid-Virgo: -15'
+    { sunFrom: 150, sunTo: 195, adjustment: 0 },        // Mid-Virgo to mid-Libra: no adjustment
+    { sunFrom: 195, sunTo: 240, adjustment: -15 / 60 }, // Mid-Libra to start of Sagittarius: -15'
+    { sunFrom: 240, sunTo: 270, adjustment: -30 / 60 }, // Start of Sagittarius to start of Capricorn: -30'
+    { sunFrom: 270, sunTo: 315, adjustment: -15 / 60 }, // Start of Capricorn to mid-Aquarius: -15'
   ],
 };
 
-// Node regression for lunar latitude — Rambam KH 16:1
-export const NODE_REGRESSION_DEG_PER_DAY = -0.0529538;
+// ═══════════════════════════════════════════════════════════════
+//  ADDITIONAL EXPORTS
+// ═══════════════════════════════════════════════════════════════
+
+// [R] Node regression for lunar latitude — KH 16:2
+export const NODE_REGRESSION_DEG_PER_DAY = -(3 / 60 + 11 / 3600); // -3'11"/day (backwards)
+
+// [R] Galgal noteh inclination — KH 16:1
 export const GALGAL_NOTEH_INCLINATION_DEG = 5;
 
 // Moon phase definitions by elongation angle
@@ -229,3 +365,38 @@ export const MOON_PHASES = [
   { min: 275, max: 345, name: "Waning Crescent", hebrewName: "סהר הולך ופוחת" },
   { min: 345, max: 360, name: "New Moon", hebrewName: "מולד" },
 ];
+
+/**
+ * Source type labels for the UI.
+ * Each CalculationStep has a `source` field using one of these keys.
+ */
+export const SOURCE_TYPES = {
+  rambam: {
+    label: 'Rambam',
+    hebrewLabel: 'רמב"ם',
+    color: '#4ea1f7', // blue
+    icon: 'R',
+    description: 'Value directly specified in the Rambam\'s Hilchot Kiddush HaChodesh',
+  },
+  approximated: {
+    label: 'Interpolated',
+    hebrewLabel: 'קירוב',
+    color: '#f7b84e', // amber
+    icon: '~',
+    description: 'Value interpolated between entries in the Rambam\'s table, or rounded per his instruction',
+  },
+  deduced: {
+    label: 'Deduced',
+    hebrewLabel: 'נלמד',
+    color: '#b74ef7', // purple
+    icon: 'D',
+    description: 'Not explicitly in the Rambam — deduced from the model or borrowed from astronomical sources',
+  },
+  losh: {
+    label: 'Rabbi Losh',
+    hebrewLabel: 'הרב לוש',
+    color: '#4ef7a1', // green
+    icon: 'L',
+    description: 'From Rabbi Yosef Losh\'s teaching tradition — colors, orientations, pedagogical framing',
+  },
+};
