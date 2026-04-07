@@ -40,7 +40,7 @@ export const useVisualizationStore = create((set, get) => ({
   animationSpeed: 30,
   setAnimationSpeed: (speed) => set({ animationSpeed: speed }),
 
-  isPlaying: false,
+  isPlaying: true,
   setIsPlaying: (playing) => set({ isPlaying: playing }),
   togglePlaying: () => set((s) => ({ isPlaying: !s.isPlaying })),
 

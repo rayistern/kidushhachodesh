@@ -37,25 +37,15 @@ export default function AppShell() {
     compute(currentDate);
   }, [currentDate, compute]);
 
-  // Watch for viewport changes — auto-collapse panels on the wide↔narrow
-  // transition only, so the user's manual toggling is preserved within a
-  // size class.
+  // Track viewport size so the layout can switch between inline and overlay
+  // drawer behavior. Panels remain closed by default regardless — the user
+  // opens them from the header toggles.
   useEffect(() => {
-    let prevWide = window.innerWidth >= 768;
-    setIsWideViewport(prevWide);
-
-    const handler = () => {
-      const wide = window.innerWidth >= 768;
-      if (wide !== prevWide) {
-        prevWide = wide;
-        setIsWideViewport(wide);
-        setLeftPanelOpen(wide);
-        setRightPanelOpen(wide);
-      }
-    };
+    setIsWideViewport(window.innerWidth >= 768);
+    const handler = () => setIsWideViewport(window.innerWidth >= 768);
     window.addEventListener('resize', handler);
     return () => window.removeEventListener('resize', handler);
-  }, [setIsWideViewport, setLeftPanelOpen, setRightPanelOpen]);
+  }, [setIsWideViewport]);
 
   // On narrow screens panels overlay; on wide screens they're inline.
   const overlay = !isWideViewport;
@@ -66,9 +56,14 @@ export default function AppShell() {
       {/* Top bar */}
       <header className="flex items-center justify-between px-2 sm:px-6 py-1.5 sm:py-3 border-b border-[var(--color-border)] bg-[var(--color-surface)] z-30 safe-top">
         <div className="flex items-center gap-1 sm:gap-3 min-w-0">
-          <IconButton onClick={toggleLeftPanel} aria-label="Toggle values panel" active={leftPanelOpen}>
+          <PanelToggle
+            onClick={toggleLeftPanel}
+            active={leftPanelOpen}
+            label="Values"
+            aria-label="Toggle values panel"
+          >
             <HamburgerIcon />
-          </IconButton>
+          </PanelToggle>
           <h1 className="text-sm sm:text-xl font-bold text-[var(--color-text)] truncate">
             <span className="hebrew-text text-lg sm:text-2xl">קידוש החודש</span>
           </h1>
@@ -80,9 +75,14 @@ export default function AppShell() {
           <NavButton icon="🔭" label="Explore" />
           <NavButton icon="🧮" label="Calculate" />
           <NavButton icon="📖" label="Learn" />
-          <IconButton onClick={toggleRightPanel} aria-label="Toggle drill-down panel" active={rightPanelOpen}>
+          <PanelToggle
+            onClick={toggleRightPanel}
+            active={rightPanelOpen}
+            label="Details"
+            aria-label="Toggle drill-down panel"
+          >
             <PanelIcon />
-          </IconButton>
+          </PanelToggle>
         </div>
       </header>
 
@@ -227,18 +227,27 @@ function PanelDrawer({ side, open, overlay, width, children, onClose, title }) {
   );
 }
 
-function IconButton({ children, onClick, active, ...rest }) {
+/**
+ * PanelToggle — header button that opens/closes a side drawer. Shows a
+ * text label next to the icon so users can see the panels exist even when
+ * they are collapsed. A subtle accent border when closed invites the click;
+ * filled accent when open confirms the active state.
+ */
+function PanelToggle({ children, onClick, active, label, ...rest }) {
   return (
     <button
       onClick={onClick}
       {...rest}
-      className={`tap-target flex items-center justify-center rounded-lg transition-colors ${
+      className={`tap-target flex items-center justify-center gap-1.5 px-2 sm:px-3 rounded-lg border transition-colors ${
         active
-          ? 'text-[var(--color-accent)] bg-[var(--color-card)]'
-          : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-card)]'
+          ? 'text-[var(--color-accent)] bg-[var(--color-card)] border-[var(--color-accent)]'
+          : 'text-[var(--color-text-secondary)] border-[var(--color-border)] hover:text-[var(--color-accent)] hover:border-[var(--color-accent)] hover:bg-[var(--color-card)]'
       }`}
     >
       {children}
+      <span className="hidden sm:inline text-xs font-semibold uppercase tracking-wide">
+        {label}
+      </span>
     </button>
   );
 }
