@@ -110,6 +110,28 @@
   status = 200
   force = true
 
+# OAuth protected-resource metadata (RFC 9728). claude.ai's hosted MCP
+# connector probes these BEFORE attempting the MCP handshake. Must be
+# reachable both at the apex (some clients use the resource origin) and
+# under the /kh prefix (for the Vercel-proxied path).
+[[redirects]]
+  from = "/kh/.well-known/oauth-protected-resource"
+  to = "/.well-known/oauth-protected-resource"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/kh/.well-known/oauth-protected-resource/mcp"
+  to = "/.well-known/oauth-protected-resource/mcp"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/kh/.well-known/oauth-authorization-server"
+  to = "/.well-known/oauth-authorization-server"
+  status = 200
+  force = true
+
 [[redirects]]
   from = "/kh/api/*"
   to = "/api/:splat"

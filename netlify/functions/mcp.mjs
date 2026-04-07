@@ -250,29 +250,117 @@ async function callTool(name, args) {
 }
 
 // ─── HTTP handler ─────────────────────────────────────────────
+//
+// Implements just enough of the MCP Streamable HTTP transport spec for
+// claude.ai's hosted connector to be happy:
+//
+//   • Accept: text/event-stream → respond with an SSE-framed single
+//     message (the spec allows the response stream to contain just one
+//     `message` event and then close).
+//   • Accept: application/json → respond with a plain JSON body.
+//   • Mcp-Session-Id header → echo it back on every response so clients
+//     that track sessions stay happy. We do not actually persist server
+//     state per session — every request is stateless — but echoing the
+//     header keeps spec-strict clients from rejecting the response.
+//   • OPTIONS preflight allows the same headers + Mcp-Protocol-Version.
+//
+// Note: a separate function file `oauth-metadata.mjs` serves
+// /.well-known/oauth-protected-resource so claude.ai's discovery probe
+// finds the resource and proceeds without auth.
+
+function sseResponse(payload, sessionId) {
+  // Streamable HTTP "single message in a stream" pattern: emit one
+  // `event: message` with the JSON-RPC payload as data, then end.
+  const text = `event: message\ndata: ${JSON.stringify(payload)}\n\n`;
+  const headers = {
+    'content-type': 'text/event-stream; charset=utf-8',
+    'cache-control': 'no-cache, no-transform',
+    connection: 'keep-alive',
+    'access-control-allow-origin': '*',
+    'access-control-expose-headers': 'mcp-session-id',
+  };
+  if (sessionId) headers['mcp-session-id'] = sessionId;
+  return new Response(text, { status: 200, headers });
+}
+
+function jsonResponse(payload, sessionId, status = 200) {
+  const headers = {
+    'content-type': 'application/json; charset=utf-8',
+    'access-control-allow-origin': '*',
+    'access-control-expose-headers': 'mcp-session-id',
+  };
+  if (sessionId) headers['mcp-session-id'] = sessionId;
+  return new Response(JSON.stringify(payload), { status, headers });
+}
+
+function newSessionId() {
+  // Cheap, no-state-tracking session id. Real clients echo it back; we
+  // don't actually do anything with it server-side.
+  return (
+    'kh-' +
+    Date.now().toString(36) +
+    '-' +
+    Math.random().toString(36).slice(2, 10)
+  );
+}
+
 export default async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, {
       status: 204,
       headers: {
         'access-control-allow-origin': '*',
-        'access-control-allow-methods': 'GET, POST, OPTIONS',
-        'access-control-allow-headers': 'content-type, mcp-session-id',
+        'access-control-allow-methods': 'GET, POST, DELETE, OPTIONS',
+        'access-control-allow-headers':
+          'content-type, mcp-session-id, mcp-protocol-version, authorization',
+        'access-control-max-age': '86400',
       },
     });
   }
 
-  // GET → human/agent-readable descriptor
+  // Session id: echo whatever the client sent, or mint a new one on
+  // initialize. Either way it's just a token, no server state attached.
+  const incomingSession = req.headers.get('mcp-session-id') || null;
+
+  // GET → can either be the human-readable descriptor or an SSE stream.
+  // Some clients (Streamable HTTP spec) open a long-lived GET to receive
+  // server-initiated messages. We don't push any, so we return an empty
+  // stream that closes immediately for SSE-Accept clients, or the JSON
+  // descriptor otherwise.
   if (req.method === 'GET') {
-    return json(200, {
-      server: SERVER_INFO,
-      protocol: 'mcp',
-      protocolVersion: PROTOCOL_VERSION,
-      transport: 'streamable-http',
-      endpoint: '/mcp',
-      tools: TOOLS.map((t) => ({ name: t.name, description: t.description })),
-      stats: corpusStats(),
-      note: 'POST JSON-RPC 2.0 messages to this URL. See /llms.txt for the full site map.',
+    const accept = req.headers.get('accept') || '';
+    if (accept.includes('text/event-stream')) {
+      const headers = {
+        'content-type': 'text/event-stream; charset=utf-8',
+        'cache-control': 'no-cache, no-transform',
+        connection: 'keep-alive',
+        'access-control-allow-origin': '*',
+        'access-control-expose-headers': 'mcp-session-id',
+      };
+      if (incomingSession) headers['mcp-session-id'] = incomingSession;
+      // Empty stream — we have no server-initiated messages to send.
+      return new Response(': keep-alive\n\n', { status: 200, headers });
+    }
+    return jsonResponse(
+      {
+        server: SERVER_INFO,
+        protocol: 'mcp',
+        protocolVersion: PROTOCOL_VERSION,
+        transport: 'streamable-http',
+        endpoint: '/mcp',
+        tools: TOOLS.map((t) => ({ name: t.name, description: t.description })),
+        stats: corpusStats(),
+        note: 'POST JSON-RPC 2.0 messages to this URL. See /llms.txt for the full site map.',
+      },
+      incomingSession
+    );
+  }
+
+  // DELETE → client closing a session. Spec compliance: 204.
+  if (req.method === 'DELETE') {
+    return new Response(null, {
+      status: 204,
+      headers: { 'access-control-allow-origin': '*' },
     });
   }
 
@@ -284,21 +372,49 @@ export default async (req) => {
   try {
     body = await req.json();
   } catch {
-    return json(400, { jsonrpc: '2.0', id: null, error: { code: -32700, message: 'Parse error' } });
+    return jsonResponse(
+      { jsonrpc: '2.0', id: null, error: { code: -32700, message: 'Parse error' } },
+      incomingSession,
+      400
+    );
   }
 
+  // Handle batched requests
+  let result;
   if (Array.isArray(body)) {
     const out = [];
     for (const msg of body) {
       const resp = await handleRpc(msg);
       if (resp) out.push(resp);
     }
-    return json(200, out);
+    result = out;
+  } else {
+    result = await handleRpc(body);
   }
 
-  const resp = await handleRpc(body);
-  if (resp === null) return new Response(null, { status: 202 });
-  return json(200, resp);
+  // Notification-only request: no response payload.
+  if (result === null || (Array.isArray(result) && result.length === 0)) {
+    return new Response(null, {
+      status: 202,
+      headers: {
+        'access-control-allow-origin': '*',
+        ...(incomingSession ? { 'mcp-session-id': incomingSession } : {}),
+      },
+    });
+  }
+
+  // On `initialize`, mint a session id if the client didn't supply one.
+  let sessionId = incomingSession;
+  const isInit =
+    !Array.isArray(body) && body && body.method === 'initialize';
+  if (isInit && !sessionId) sessionId = newSessionId();
+
+  // Respect the client's preferred response format.
+  const accept = req.headers.get('accept') || '';
+  if (accept.includes('text/event-stream')) {
+    return sseResponse(result, sessionId);
+  }
+  return jsonResponse(result, sessionId);
 };
 
 export const config = { path: ['/mcp', '/.well-known/mcp'] };
