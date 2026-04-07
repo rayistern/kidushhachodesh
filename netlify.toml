@@ -1,16 +1,33 @@
 [build]
-  # Netlify will run this to produce your static files
   command = "npm run build"
-  # This is where CRA outputs the production bundle
   publish = "dist"
 
-# (Optional) If you ever want to run `netlify dev`, this tells it how
 [dev]
   command = "npm start"
   port    = 8888
 
-# Redirect all 404s to /index.html for SPA routing
+# This site is served behind a Vercel rewrite at https://shluchimexchange.ai/kh,
+# so requests reaching Netlify keep the /kh prefix. Vite is configured with
+# base = '/kh/', so built assets are referenced as /kh/assets/*.
+# Map the /kh-prefixed requests to the actual files in dist/.
+
+[[redirects]]
+  from = "/kh/assets/*"
+  to = "/assets/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/kh"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/kh/*"
+  to = "/index.html"
+  status = 200
+
+# Fallback for direct Netlify access (no /kh prefix): also serve the SPA.
 [[redirects]]
   from = "/*"
-  to   = "/index.html"
-  status = 200 
+  to = "/index.html"
+  status = 200
