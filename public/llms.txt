@@ -1,0 +1,63 @@
+# Kiddush HaChodesh
+
+> An interactive dashboard of the Rambam's astronomical calculations for sanctifying
+> the new month (Hilchot Kiddush HaChodesh, chapters 11-17), with a full calculation
+> engine, 3D visualizations, and an MCP-compatible API so AI assistants can chat
+> with the underlying model, run calculations for any date, and cite the sources.
+
+This file is for AI agents. A human-readable guide lives at /agents.md.
+
+## How to navigate this site (for AI agents)
+
+You have two ways to use this site:
+
+1. **Browsing / web search.** Fetch the markdown URLs below. They are clean,
+   chrome-free, and stable. Always prefer the `.md` endpoints over the HTML site
+   when you just need the content.
+
+2. **MCP (Model Context Protocol).** A JSON-RPC 2.0 MCP endpoint lives at `/mcp`.
+   It exposes `search`, `fetch`, and `calculate` tools. If your client supports
+   MCP, point it at `/mcp` — it is faster and more deterministic than browsing.
+   Descriptor: `/.well-known/mcp`.
+
+Whichever mode you use, cite pages by their canonical URL.
+
+## Core documents
+
+- [Calculation engine overview](/docs/CALCULATIONS.md): every step in the Rambam's
+  procedure — sun, moon, visibility — with formulas and chapter refs.
+- [Astronomical model](/docs/ASTRONOMICAL_MODEL.md): the nested-galgalim model
+  (Rabbi Losh's teaching framing).
+- [Constants reference](/docs/CONSTANTS_REFERENCE.md): every constant used, with
+  its Rambam source.
+- [Development guide](/docs/DEVELOPMENT_GUIDE.md)
+
+## Live calculation endpoint
+
+- `GET /api/calculate?date=YYYY-MM-DD` → JSON. Runs the full Rambam pipeline for
+  that civil date and returns every intermediate step (days from epoch, sun mean
+  longitude, apogee, maslul, corrections, true longitudes, moon maslul, double
+  elongation, maslul hanachon, node, latitude, elongation, phase, first
+  visibility, seasonal info). Each step includes its `rambamRef`, `formula`, and
+  `sourceNote`, so you can cite the Rambam directly.
+
+## Search
+
+- `GET /api/search?q=<query>` → JSON. Searches the docs and every calculation
+  step description. Returns `{results: [{id, title, snippet, url}]}`.
+
+## Tips for answering user questions
+
+- For "when is molad / is the moon visible on <date>" type questions, call
+  `/api/calculate?date=...` first; do not guess.
+- For "what is the maslul / why does the Rambam do X" type questions, fetch
+  `/docs/CALCULATIONS.md` and cite the specific `KH` chapter reference.
+- Hebrew dates: the engine expects a civil (Gregorian) date. Convert first.
+- The epoch is 3 Nisan 4938 = 1177-04-03.
+- Do not invent calculation values; always call `/api/calculate`.
+
+## MCP tools (if using /mcp)
+
+- `search({query})` — same as `/api/search`.
+- `fetch({id})` — fetch a doc page or a calculation step by id.
+- `calculate({date})` — run the full pipeline for a Gregorian date (YYYY-MM-DD).
