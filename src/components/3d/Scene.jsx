@@ -16,6 +16,10 @@ const DEG2RAD = Math.PI / 180;
 /** Scale galgalim radii to scene units */
 const SCALE = 1 / 30;
 
+// [D] Visualization-only ratios (not present in engine/constants.js)
+const SUN_EPICYCLE_RATIO = 0.0833;
+const MOON_FIRST_EPICYCLE_RATIO = 0.0575;
+
 function CelestialScene() {
   const calculation = useCalculationStore((s) => s.calculation);
   const selectStep = useCalculationStore((s) => s.selectStep);
@@ -109,7 +113,7 @@ function CelestialScene() {
 
       {/* Sun epicycle disc (orange) */}
       <OrbitalDisc
-        outerRadius={positions.sun.radius * CONSTANTS.SUN.EPICYCLE.RADIUS_RATIO}
+        outerRadius={positions.sun.radius * SUN_EPICYCLE_RATIO}
         color="#ee8833"
         opacity={0.3}
         position={[positions.sun.x, 0, positions.sun.z]}
@@ -127,7 +131,7 @@ function CelestialScene() {
 
       {/* Moon first epicycle disc (blue) */}
       <OrbitalDisc
-        outerRadius={positions.moon.radius * CONSTANTS.MOON.GALGALIM.FIRST_EPICYCLE.RADIUS_RATIO}
+        outerRadius={positions.moon.radius * MOON_FIRST_EPICYCLE_RATIO}
         color="#4488cc"
         opacity={0.3}
         position={[positions.moon.x, 0, positions.moon.z]}
@@ -140,7 +144,7 @@ function CelestialScene() {
         innerRadius={positions.moon.radius * 0.5}
         color="#8855aa"
         opacity={0.12}
-        rotation={[CONSTANTS.MOON.GALGALIM.INCLINATION * DEG2RAD, 0, 0]}
+        rotation={[CONSTANTS.MOON.GALGALIM.BLUE_NOTEH.INCLINATION * DEG2RAD, 0, 0]}
         visible={showDiscs}
       />
 
