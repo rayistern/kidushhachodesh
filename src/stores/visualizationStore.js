@@ -101,7 +101,11 @@ export const useVisualizationStore = create((set, get) => ({
   animationSpeed: 30,
   setAnimationSpeed: (speed) => set({ animationSpeed: speed }),
 
-  isPlaying: true,
+  // Default to PAUSED on first load — autoplay was running the scene's
+  // useFrame loop + several force-re-render intervals immediately on
+  // mount, which made the page feel sluggish before the user did
+  // anything. The ▶ button in the playback overlay starts it.
+  isPlaying: false,
   setIsPlaying: (playing) => set({ isPlaying: playing }),
   togglePlaying: () => set((s) => ({ isPlaying: !s.isPlaying })),
 

@@ -16,7 +16,11 @@ import { moladsAround, MOLAD_INTERVAL_DAYS } from '../../engine/moladTimeline';
 const RANGE = 365; // ± days around calendar date
 
 export default function DateScrubber() {
-  const animationDays = useVisualizationStore((s) => s.animationDays);
+  // Don't subscribe to `animationDays` directly — it changes every
+  // animation frame while playing, which would re-render the scrubber
+  // (and its surrounding sidebar) at 60fps. Instead, hold our own
+  // local "displayed" value and poll the store at 4Hz only while
+  // playing. User drag still pushes through immediately via setAnimationDays.
   const setAnimationDays = useVisualizationStore((s) => s.setAnimationDays);
   const resetAnimation = useVisualizationStore((s) => s.resetAnimation);
   const isPlaying = useVisualizationStore((s) => s.isPlaying);
@@ -24,7 +28,21 @@ export default function DateScrubber() {
   const calculation = useCalculationStore((s) => s.calculation);
   const currentDate = useCalendarStore((s) => s.currentDate);
 
+  const [animationDays, setLocalDays] = React.useState(
+    () => useVisualizationStore.getState().animationDays,
+  );
   const [snap, setSnap] = React.useState(false);
+
+  // Poll the store while playing; sync once on stop so the final
+  // position lands accurately. Cheap subscription on isPlaying only.
+  React.useEffect(() => {
+    setLocalDays(useVisualizationStore.getState().animationDays);
+    if (!isPlaying) return;
+    const id = setInterval(() => {
+      setLocalDays(useVisualizationStore.getState().animationDays);
+    }, 250);
+    return () => clearInterval(id);
+  }, [isPlaying]);
 
   const daysFromEpoch = calculation?.daysFromEpoch ?? 0;
 
@@ -48,6 +66,7 @@ export default function DateScrubber() {
       next = Math.round(best.daysFromEpoch - daysFromEpoch);
     }
     setAnimationDays(next);
+    setLocalDays(next);
   };
 
   // Visible date = calendar + animationDays.
