@@ -231,6 +231,19 @@ export default function RambamReader() {
 }
 
 function HalachotList({ text, filteredIdx, query, showHebrew, showEnglish, chapter, bookmarks, toggleBookmark }) {
+  // Pre-parse all halachot ONCE per chapter so chip wrapping doesn't
+  // re-run the 40+ regex keyword pass on every keystroke / re-render.
+  // The keyed memo keeps the chip-parsed HTML stable across search input.
+  const parsed = useMemo(() => {
+    const out = { he: [], en: [] };
+    const N = Math.max(text.hebrew.length, text.english.length);
+    for (let i = 0; i < N; i++) {
+      out.he[i] = text.hebrew[i] ? parseHalachaHTML(text.hebrew[i]) : '';
+      out.en[i] = text.english[i] ? parseHalachaHTML(text.english[i]) : '';
+    }
+    return out;
+  }, [text]);
+
   const indices = filteredIdx ?? text.hebrew.map((_, i) => i);
   if (indices.length === 0) {
     return (
@@ -244,8 +257,8 @@ function HalachotList({ text, filteredIdx, query, showHebrew, showEnglish, chapt
       {indices.map((i) => {
         const ref = `${chapter}:${i + 1}`;
         const bookmarked = bookmarks.includes(ref);
-        const he = text.hebrew[i];
-        const en = text.english[i];
+        const he = parsed.he[i];
+        const en = parsed.en[i];
         return (
           <div key={i} className="pb-3 border-b border-[var(--color-border)] border-opacity-30">
             <div className="flex items-center justify-between mb-1">
@@ -264,13 +277,13 @@ function HalachotList({ text, filteredIdx, query, showHebrew, showEnglish, chapt
             {showHebrew && he && (
               <div
                 className="hebrew-text text-sm leading-relaxed text-[var(--color-text)] mb-2"
-                dangerouslySetInnerHTML={{ __html: highlight(parseHalachaHTML(he), query) }}
+                dangerouslySetInnerHTML={{ __html: query ? highlight(he, query) : he }}
               />
             )}
             {showEnglish && en && (
               <div
                 className="text-xs leading-relaxed text-[var(--color-text-secondary)]"
-                dangerouslySetInnerHTML={{ __html: highlight(parseHalachaHTML(en), query) }}
+                dangerouslySetInnerHTML={{ __html: query ? highlight(en, query) : en }}
               />
             )}
           </div>
