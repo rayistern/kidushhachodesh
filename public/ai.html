@@ -117,7 +117,7 @@
       <h2>The URL</h2>
       <p>One URL. Two doors. The AI picks the right one automatically.</p>
       <div class="url-box">
-        <code id="site-url">https://kidushhachodesh.netlify.app</code>
+        <code id="site-url">https://shluchimexchange.ai/kh</code>
         <button class="copy" data-copy="site-url">Copy</button>
       </div>
 
@@ -130,7 +130,7 @@
             Cursor, etc. Add this as an MCP server:
           </p>
           <div class="url-box">
-            <code id="mcp-url">https://kidushhachodesh.netlify.app/mcp</code>
+            <code id="mcp-url">https://shluchimexchange.ai/kh/mcp</code>
             <button class="copy" data-copy="mcp-url">Copy</button>
           </div>
           <p>
@@ -148,9 +148,9 @@
             For consumer ChatGPT, Claude with web search, Perplexity, Gemini,
             or anything that can fetch URLs. Just tell the AI:
           </p>
-          <pre>Browse kidushhachodesh.netlify.app
-and read /llms.txt first — it is a
-map of the site written for you.
+          <pre id="browse-instructions">Browse shluchimexchange.ai/kh
+and read /kh/llms.txt first — it is
+a map of the site written for you.
 Then answer my question.</pre>
           <p>
             No install, no setup. Works in every browsing-capable AI today.
@@ -181,7 +181,7 @@ Then answer my question.</pre>
         </li>
         <li>
           <strong>Fork and remix.</strong> The engine is served live at
-          <a href="/engine/pipeline.js"><code>/engine/pipeline.js</code></a>
+          <a href="/kh/engine/pipeline.js"><code>/kh/engine/pipeline.js</code></a>
           so any generated artifact just <code>import</code>s it — no build
           step, no copy-paste.
         </li>
@@ -195,7 +195,7 @@ Then answer my question.</pre>
           <li>Open Claude Desktop or claude.ai.</li>
           <li>
             In Settings → Connectors (or via Desktop config), add an MCP
-            server with URL <code>https://kidushhachodesh.netlify.app/mcp</code>.
+            server with URL <code id="mcp-url-2">https://shluchimexchange.ai/kh/mcp</code>.
           </li>
           <li>
             Start a new chat and ask: <em>"When is the next time the new
@@ -210,10 +210,10 @@ Then answer my question.</pre>
         <ol>
           <li>Open ChatGPT with web search enabled.</li>
           <li>
-            Paste: <em>"Browse kidushhachodesh.netlify.app and read
-            /llms.txt. Then explain the difference between emtzoi and amiti
-            for the sun, with a specific example for today's date using
-            /api/calculate."</em>
+            Paste: <em>"Browse shluchimexchange.ai/kh and read
+            /kh/llms.txt. Then explain the difference between emtzoi and
+            amiti for the sun, with a specific example for today's date
+            using /kh/api/calculate."</em>
           </li>
           <li>
             The model will fetch the site map, then the concept page, then
@@ -231,8 +231,8 @@ Then answer my question.</pre>
 the moon's phase and visibility for every
 day of Nisan 5786. Use our live engine.</pre>
         <p>
-          The AI will fetch <a href="/templates/standalone-calculator.html">
-          <code>/templates/standalone-calculator.html</code></a>, modify it
+          The AI will fetch <a href="/kh/templates/standalone-calculator.html">
+          <code>/kh/templates/standalone-calculator.html</code></a>, modify it
           for your request, and hand it to you as a working artifact that
           already imports our engine.
         </p>
@@ -241,7 +241,7 @@ day of Nisan 5786. Use our live engine.</pre>
       <h2>What it knows (content index)</h2>
       <p>
         Call <code>stats</code> via MCP or just visit
-        <a href="/mcp"><code>/mcp</code></a> in a browser for the live count.
+        <a href="/kh/mcp"><code>/kh/mcp</code></a> in a browser for the live count.
         Current corpus:
       </p>
       <ul>
@@ -258,29 +258,29 @@ day of Nisan 5786. Use our live engine.</pre>
       <ul>
         <li>
           Full site map for agents:
-          <a href="/llms.txt"><code>/llms.txt</code></a>
+          <a href="/kh/llms.txt"><code>/kh/llms.txt</code></a>
         </li>
         <li>
           MCP descriptor:
-          <a href="/mcp"><code>/mcp</code></a> /
-          <a href="/.well-known/mcp"><code>/.well-known/mcp</code></a>
+          <a href="/kh/mcp"><code>/kh/mcp</code></a> /
+          <a href="/kh/.well-known/mcp"><code>/kh/.well-known/mcp</code></a>
         </li>
         <li>
-          HTTP API: <code>/api/search</code>, <code>/api/calculate</code>,
-          <code>/api/source</code>
+          HTTP API: <code>/kh/api/search</code>, <code>/kh/api/calculate</code>,
+          <code>/kh/api/source</code>
         </li>
         <li>
           Live engine modules:
-          <a href="/engine/index.json"><code>/engine/</code></a>
+          <a href="/kh/engine/index.json"><code>/kh/engine/</code></a>
         </li>
         <li>
           Templates:
-          <a href="/templates/"><code>/templates/</code></a>
+          <a href="/kh/templates/"><code>/kh/templates/</code></a>
         </li>
         <li>
           Building guide:
-          <a href="/docs/BUILDING_WITH_THE_ENGINE.md">
-            <code>/docs/BUILDING_WITH_THE_ENGINE.md</code>
+          <a href="/kh/docs/BUILDING_WITH_THE_ENGINE.md">
+            <code>/kh/docs/BUILDING_WITH_THE_ENGINE.md</code>
           </a>
         </li>
         <li>
@@ -302,10 +302,28 @@ day of Nisan 5786. Use our live engine.</pre>
     </main>
 
     <script>
-      // Use the real origin at runtime so the copy buttons work on any deploy.
-      const origin = location.origin;
-      document.getElementById('site-url').textContent = origin;
-      document.getElementById('mcp-url').textContent = origin + '/mcp';
+      // Compute the dashboard base URL from the current location, so the
+      // displayed URLs are always correct regardless of host/proxy. We strip
+      // a trailing /ai.html (or any final segment) off the path to get the
+      // dashboard root — e.g. /kh/ai.html → /kh — and prefix the origin.
+      const base = location.pathname.replace(/\/[^/]*$/, '') || '';
+      const baseUrl = location.origin + base;
+      const setText = (id, text) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = text;
+      };
+      setText('site-url', baseUrl);
+      setText('mcp-url', baseUrl + '/mcp');
+      setText('mcp-url-2', baseUrl + '/mcp');
+      const browse = document.getElementById('browse-instructions');
+      if (browse) {
+        const host = location.host + base;
+        browse.textContent =
+          'Browse ' + host + '\n' +
+          'and read ' + base + '/llms.txt first — it is\n' +
+          'a map of the site written for you.\n' +
+          'Then answer my question.';
+      }
       for (const btn of document.querySelectorAll('button.copy')) {
         btn.addEventListener('click', () => {
           const text = document.getElementById(btn.dataset.copy).textContent;

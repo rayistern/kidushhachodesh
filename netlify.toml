@@ -92,6 +92,60 @@
   status = 200
   force = true
 
+# Function paths reachable under the /kh prefix. The Vercel proxy at
+# shluchimexchange.ai only forwards /kh* requests, so each function
+# endpoint (which self-registers at /mcp, /api/*, /docs/*, /engine/*,
+# /templates/*) needs a /kh-prefixed alias that strips the prefix before
+# the request hits the function. status=200 = internal rewrite, the
+# browser URL stays /kh/... and the function still receives the request.
+[[redirects]]
+  from = "/kh/mcp"
+  to = "/mcp"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/kh/.well-known/mcp"
+  to = "/.well-known/mcp"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/kh/api/*"
+  to = "/api/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/kh/docs/*"
+  to = "/docs/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/kh/engine"
+  to = "/engine"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/kh/engine/*"
+  to = "/engine/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/kh/templates"
+  to = "/templates"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/kh/templates/*"
+  to = "/templates/:splat"
+  status = 200
+  force = true
+
 # SPA fallback for client-side paths under /kh. The bare /kh case has its
 # own rule because /kh/* doesn't match /kh (no trailing slash, no splat).
 [[redirects]]
