@@ -31,6 +31,8 @@ export default function MoonMechanism({
   showLabels = true,
 }) {
   const showRadii = useVisualizationStore((s) => s.showRadii);
+  const showGhosts = useVisualizationStore((s) => s.showGhosts);
+  const galgalVisible = useVisualizationStore((s) => s.galgalVisible);
   const highlightedGalgal = useVisualizationStore((s) => s.highlightedGalgal);
   const setHighlightedGalgal = useVisualizationStore((s) => s.setHighlightedGalgal);
   const selectStep = useCalculationStore((s) => s.selectStep);
@@ -74,6 +76,8 @@ export default function MoonMechanism({
   const moonHandleRef = useRef();
   const radiusEarthMoonRef = useRef();
   const labelRef = useRef();
+  const ghostRef = useRef();
+  const ghostLineRef = useRef();
 
   useFrame(() => {
     const days = daysFromEpoch + useVisualizationStore.getState().animationDays;
@@ -109,13 +113,31 @@ export default function MoonMechanism({
     }
 
     // ── 5. Update radius line + label ──
-    if (showRadii && radiusEarthMoonRef.current && moonHandleRef.current) {
-      const moonWorld = new THREE.Vector3();
+    let moonWorld = null;
+    if (moonHandleRef.current) {
+      moonWorld = new THREE.Vector3();
       moonHandleRef.current.getWorldPosition(moonWorld);
+    }
+    if (showRadii && radiusEarthMoonRef.current && moonWorld) {
       radiusEarthMoonRef.current.geometry.setFromPoints([
         new THREE.Vector3(0, 0, 0),
         moonWorld,
       ]);
+    }
+
+    // ── 6. Ghost moon at the emtzoi position. The gap to the real moon
+    // shows the combined effect of the maslul correction. ──
+    if (showGhosts && ghostRef.current) {
+      const a = -meanLon * DEG2RAD;
+      const ghostX = redRadius * Math.cos(a);
+      const ghostZ = redRadius * Math.sin(a);
+      ghostRef.current.position.set(ghostX, 0, ghostZ);
+      if (ghostLineRef.current && moonWorld) {
+        ghostLineRef.current.geometry.setFromPoints([
+          new THREE.Vector3(ghostX, 0, ghostZ),
+          moonWorld,
+        ]);
+      }
     }
 
     if (labelRef.current) {
@@ -125,6 +147,10 @@ export default function MoonMechanism({
 
   const isHighlighted = highlightedGalgal === 'moon';
   const op = (base) => (isHighlighted ? base * 2.5 : base);
+  const showRed = galgalVisible['moon-red'] !== false;
+  const showBlue = galgalVisible['moon-blue'] !== false;
+  const showGreen = galgalVisible['moon-green'] !== false;
+  const showKatan = galgalVisible['moon-katan'] !== false;
 
   return (
     <group
@@ -135,41 +161,47 @@ export default function MoonMechanism({
     >
       {/* ── RED domeh — outer, rotates with node regression ── */}
       <group ref={redGroupRef}>
-        <GalgalSphere
-          radius={redRadius}
-          color="#9c4f5f"
-          ringColor="#c47588"
-          gridColor="#dc97a8"
-          opacity={op(0.04)}
-          gridOpacity={isHighlighted ? 0.32 : 0.16}
-        />
+        {showRed && (
+          <GalgalSphere
+            radius={redRadius}
+            color="#9c4f5f"
+            ringColor="#c47588"
+            gridColor="#dc97a8"
+            opacity={op(0.04)}
+            gridOpacity={isHighlighted ? 0.32 : 0.16}
+          />
+        )}
 
         {/* ── BLUE noteh — tilted 5°, rotates at moon mean motion (relative to node) ── */}
         <group ref={blueGroupRef}>
-          <GalgalSphere
-            radius={blueRadius}
-            color="#3d6a78"
-            ringColor="#6aa0b4"
-            gridColor="#88c0d8"
-            opacity={op(0.05)}
-            gridOpacity={isHighlighted ? 0.32 : 0.16}
-          />
+          {showBlue && (
+            <GalgalSphere
+              radius={blueRadius}
+              color="#3d6a78"
+              ringColor="#6aa0b4"
+              gridColor="#88c0d8"
+              opacity={op(0.05)}
+              gridOpacity={isHighlighted ? 0.32 : 0.16}
+            />
+          )}
 
           {/* ── GREEN yoitzeh — off-center inside blue ── */}
           <group ref={greenGroupRef} position={[greenOffset, 0, 0]}>
-            <GalgalSphere
-              radius={greenRadius}
-              color="#5a7a5a"
-              ringColor="#8fb088"
-              gridColor="#b0d0a4"
-              opacity={op(0.06)}
-              gridOpacity={isHighlighted ? 0.34 : 0.18}
-              onClick={(e) => {
-                e.stopPropagation();
-                setHighlightedGalgal('moon');
-                selectStep('moonMaslul');
-              }}
-            />
+            {showGreen && (
+              <GalgalSphere
+                radius={greenRadius}
+                color="#5a7a5a"
+                ringColor="#8fb088"
+                gridColor="#b0d0a4"
+                opacity={op(0.06)}
+                gridOpacity={isHighlighted ? 0.34 : 0.18}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setHighlightedGalgal('moon');
+                  selectStep('moonMaslul');
+                }}
+              />
+            )}
 
             {/* Green's center marker (its govah) */}
             <mesh>
@@ -179,18 +211,20 @@ export default function MoonMechanism({
 
             {/* ── GALGAL KATAN — small epicycle, rotates at maslul rate ── */}
             <group ref={katanGroupRef} position={[greenRadius, 0, 0]}>
-              <GalgalSphere
-                radius={katanRadius}
-                color="#c4a978"
-                ringColor="#e4cf9a"
-                gridColor="#f4dfa8"
-                opacity={op(0.18)}
-                gridOpacity={0.5}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  selectStep('maslulHanachon');
-                }}
-              />
+              {showKatan && (
+                <GalgalSphere
+                  radius={katanRadius}
+                  color="#c4a978"
+                  ringColor="#e4cf9a"
+                  gridColor="#f4dfa8"
+                  opacity={op(0.18)}
+                  gridOpacity={0.5}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    selectStep('maslulHanachon');
+                  }}
+                />
+              )}
 
               {/* katan center marker = the moon's mean position */}
               <mesh>
@@ -255,6 +289,20 @@ export default function MoonMechanism({
           <bufferGeometry />
           <lineBasicMaterial color="#b6c2d4" transparent opacity={0.4} />
         </line>
+      )}
+
+      {/* ── GHOST MOON at the emtzoi (mean longitude) position ── */}
+      {showGhosts && (
+        <>
+          <mesh ref={ghostRef}>
+            <sphereGeometry args={[0.11, 14, 10]} />
+            <meshBasicMaterial color="#e8e4d8" transparent opacity={0.32} wireframe />
+          </mesh>
+          <line ref={ghostLineRef}>
+            <bufferGeometry />
+            <lineBasicMaterial color="#e8e4d8" transparent opacity={0.5} />
+          </line>
+        </>
       )}
     </group>
   );

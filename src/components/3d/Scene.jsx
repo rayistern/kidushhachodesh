@@ -136,6 +136,8 @@ function PlaybackOverlay() {
   const toggleRadii = useVisualizationStore((s) => s.toggleRadii);
   const showLabels = useVisualizationStore((s) => s.showLabels);
   const toggleLabels = useVisualizationStore((s) => s.toggleLabels);
+  const showGhosts = useVisualizationStore((s) => s.showGhosts);
+  const toggleGhosts = useVisualizationStore((s) => s.toggleGhosts);
 
   // Force re-render at 4Hz while playing so the offset readout + scrubber update.
   const [, force] = React.useState(0);
@@ -270,6 +272,13 @@ function PlaybackOverlay() {
           <button onClick={toggleLabels} style={btnStyle(showLabels ? '#4ea1f7' : '#555', isNarrow)}>
             Labels {showLabels ? '✓' : ''}
           </button>
+          <button
+            onClick={toggleGhosts}
+            style={btnStyle(showGhosts ? '#fde29a' : '#555', isNarrow)}
+            title="Show emtzoi (mean longitude) ghost markers"
+          >
+            Ghosts {showGhosts ? '✓' : ''}
+          </button>
         </div>
       )}
     </div>
@@ -357,23 +366,104 @@ function LegendOverlay() {
       {open && (
         <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 8 }}>
           <Section title="Sun (KH 12-13)">
-            <Item color="#7fa8d8" label="Blue galgal" sub="outer, Earth-centered, ~1°/70yr" />
-            <Item color="#d8895a" label="Red galgal" sub="off-center, carries the sun" />
+            <ToggleItem id="sun-blue" color="#7fa8d8" label="Blue galgal" sub="outer, Earth-centered, ~1°/70yr" />
+            <ToggleItem id="sun-red" color="#d8895a" label="Red galgal" sub="off-center, carries the sun" />
             <Item color="#fde29a" label="Sun" sub="on the red's rim" />
           </Section>
           <Section title="Moon (KH 14-16)">
-            <Item color="#c47588" label="Red (domeh)" sub="ecliptic-aligned" />
-            <Item color="#6aa0b4" label="Blue (noteh)" sub="tilted 5° → latitude" />
-            <Item color="#8fb088" label="Green (yoitzeh)" sub="off-center, has its own govah" />
-            <Item color="#e4cf9a" label="Galgal katan" sub="small epicycle (radius 5°)" />
+            <ToggleItem id="moon-red" color="#c47588" label="Red (domeh)" sub="ecliptic-aligned" />
+            <ToggleItem id="moon-blue" color="#6aa0b4" label="Blue (noteh)" sub="tilted 5° → latitude" />
+            <ToggleItem id="moon-green" color="#8fb088" label="Green (yoitzeh)" sub="off-center, has its own govah" />
+            <ToggleItem id="moon-katan" color="#e4cf9a" label="Galgal katan" sub="small epicycle (radius 5°)" />
             <Item color="#e8e4d8" label="Moon" sub="on the katan's rim" />
           </Section>
+          <LegendActions />
           <div style={{ fontSize: 10, opacity: 0.6, marginTop: 4 }}>
             Eccentricities exaggerated for visibility (real values are ~1-5%).
+            <br />
+            <span style={{ opacity: 0.85 }}>Click an item to hide; double-click to solo.</span>
           </div>
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * A legend row that toggles a galgal's visibility on click and solos on
+ * double-click. Reads its visibility from the store.
+ */
+function ToggleItem({ id, color, label, sub }) {
+  const visible = useVisualizationStore((s) => s.galgalVisible[id] !== false);
+  const toggleGalgalVisible = useVisualizationStore((s) => s.toggleGalgalVisible);
+  const soloGalgal = useVisualizationStore((s) => s.soloGalgal);
+
+  return (
+    <div
+      role="button"
+      onClick={() => toggleGalgalVisible(id)}
+      onDoubleClick={() => soloGalgal(id)}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 6,
+        cursor: 'pointer',
+        padding: '4px 6px',
+        margin: '-4px -6px',
+        borderRadius: 4,
+        opacity: visible ? 1 : 0.4,
+        userSelect: 'none',
+      }}
+      title={`${label} — click to ${visible ? 'hide' : 'show'}, double-click to solo`}
+    >
+      <span
+        style={{
+          display: 'inline-block',
+          width: 10,
+          height: 10,
+          borderRadius: '50%',
+          background: visible ? color : 'transparent',
+          border: `1.5px solid ${color}`,
+          flexShrink: 0,
+        }}
+      />
+      <span style={{ flex: 1 }}>
+        <span
+          style={{
+            fontWeight: 600,
+            textDecoration: visible ? 'none' : 'line-through',
+          }}
+        >
+          {label}
+        </span>{' '}
+        <span style={{ opacity: 0.6, fontSize: 10 }}>— {sub}</span>
+      </span>
+      <span style={{ opacity: 0.5, fontSize: 10 }}>{visible ? '👁' : '∅'}</span>
+    </div>
+  );
+}
+
+/**
+ * Reset-all button for the visibility toggles.
+ */
+function LegendActions() {
+  const resetGalgalVisibility = useVisualizationStore((s) => s.resetGalgalVisibility);
+  return (
+    <button
+      onClick={resetGalgalVisibility}
+      style={{
+        background: 'transparent',
+        color: 'var(--color-text-secondary)',
+        border: '1px solid var(--color-border)',
+        borderRadius: 6,
+        padding: '4px 8px',
+        fontSize: 10,
+        cursor: 'pointer',
+        marginTop: 2,
+      }}
+    >
+      Show all galgalim
+    </button>
   );
 }
 

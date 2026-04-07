@@ -5,6 +5,7 @@ import { useUIStore } from '../../stores/uiStore';
 import Sidebar from './Sidebar';
 import InfoPanel from './InfoPanel';
 import Scene3D from '../3d/Scene';
+import EclipticRibbon from '../visualizations/EclipticRibbon';
 
 /**
  * AppShell — three-zone layout with auto-collapsing side panels.
@@ -99,9 +100,12 @@ export default function AppShell() {
           <Sidebar />
         </PanelDrawer>
 
-        {/* Center — 3D visualization (always full-bleed in its container) */}
-        <main className="flex-1 relative min-w-0">
-          <div className="absolute inset-0">
+        {/* Center — ecliptic ribbon + 3D visualization stacked vertically.
+            The ribbon stays fixed at the top so it's always visible while
+            the 3D scene fills the rest of the column. */}
+        <main className="flex-1 relative min-w-0 flex flex-col">
+          <EclipticRibbon />
+          <div className="flex-1 relative min-h-0">
             <Scene3D dimmed={overlay && anyPanelOpen} />
           </div>
         </main>

@@ -63,4 +63,49 @@ export const useVisualizationStore = create((set, get) => ({
   // Show the radius lines from Earth → eccentric → body
   showRadii: true,
   toggleRadii: () => set((s) => ({ showRadii: !s.showRadii })),
+
+  // Show "ghost" bodies at the emtzoi (mean longitude) position. The
+  // gap to the solid body is the maslul correction made visible.
+  showGhosts: false,
+  toggleGhosts: () => set((s) => ({ showGhosts: !s.showGhosts })),
+
+  // Per-galgal visibility for the V3 isolation toggles. Default all on.
+  // Keys: 'sun-blue', 'sun-red', 'moon-red', 'moon-blue', 'moon-green',
+  //       'moon-katan'
+  galgalVisible: {
+    'sun-blue': true,
+    'sun-red': true,
+    'moon-red': true,
+    'moon-blue': true,
+    'moon-green': true,
+    'moon-katan': true,
+  },
+  toggleGalgalVisible: (id) =>
+    set((s) => ({
+      galgalVisible: {
+        ...s.galgalVisible,
+        [id]: !s.galgalVisible[id],
+      },
+    })),
+  soloGalgal: (id) =>
+    set((s) => {
+      // If the only-visible galgal is already this one, restore all.
+      const allOff = Object.entries(s.galgalVisible).every(
+        ([k, v]) => (k === id ? v : !v),
+      );
+      if (allOff) {
+        const all = {};
+        Object.keys(s.galgalVisible).forEach((k) => (all[k] = true));
+        return { galgalVisible: all };
+      }
+      const next = {};
+      Object.keys(s.galgalVisible).forEach((k) => (next[k] = k === id));
+      return { galgalVisible: next };
+    }),
+  resetGalgalVisibility: () =>
+    set((s) => {
+      const all = {};
+      Object.keys(s.galgalVisible).forEach((k) => (all[k] = true));
+      return { galgalVisible: all };
+    }),
 }));

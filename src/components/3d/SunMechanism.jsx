@@ -36,6 +36,8 @@ export default function SunMechanism({
   const animationSpeed = useVisualizationStore((s) => s.animationSpeed);
   const advanceAnimation = useVisualizationStore((s) => s.advanceAnimation);
   const showRadii = useVisualizationStore((s) => s.showRadii);
+  const showGhosts = useVisualizationStore((s) => s.showGhosts);
+  const galgalVisible = useVisualizationStore((s) => s.galgalVisible);
   const highlightedGalgal = useVisualizationStore((s) => s.highlightedGalgal);
   const setHighlightedGalgal = useVisualizationStore((s) => s.setHighlightedGalgal);
   const selectStep = useCalculationStore((s) => s.selectStep);
@@ -66,6 +68,8 @@ export default function SunMechanism({
   const lastFrameTimeRef = useRef(null);
   const labelRef = useRef();
   const sunHandleRef = useRef();
+  const ghostRef = useRef();
+  const ghostLineRef = useRef();
 
   useFrame((state) => {
     // ── 1. Advance the animation clock ──
@@ -96,10 +100,13 @@ export default function SunMechanism({
     }
 
     // ── 4. Update radius lines + label ──
-    if (showRadii && sunHandleRef.current) {
-      const sunWorld = new THREE.Vector3();
+    let sunWorld = null;
+    if (sunHandleRef.current) {
+      sunWorld = new THREE.Vector3();
       sunHandleRef.current.getWorldPosition(sunWorld);
+    }
 
+    if (showRadii && sunWorld) {
       // Eccentric world position (also a child of blue group)
       const eccWorld = new THREE.Vector3(eccentricOffset, 0, 0);
       if (blueGroupRef.current) eccWorld.applyMatrix4(blueGroupRef.current.matrixWorld);
@@ -121,6 +128,22 @@ export default function SunMechanism({
       }
     }
 
+    // ── 5. Position the ghost (mean longitude) at distance redRadius
+    // along the meanLon angle in world space. The gap from this ghost
+    // to the real sun is exactly the maslul correction made visible. ──
+    if (showGhosts && ghostRef.current) {
+      const a = -meanLon * DEG2RAD; // negate to match screen-coord convention
+      const ghostX = redRadius * Math.cos(a);
+      const ghostZ = redRadius * Math.sin(a);
+      ghostRef.current.position.set(ghostX, 0, ghostZ);
+      if (ghostLineRef.current && sunWorld) {
+        ghostLineRef.current.geometry.setFromPoints([
+          new THREE.Vector3(ghostX, 0, ghostZ),
+          sunWorld,
+        ]);
+      }
+    }
+
     if (labelRef.current) {
       labelRef.current.textContent = `emtzoi ${formatDms(meanLon)}  •  apogee ${formatDms(apogee)}`;
     }
@@ -129,6 +152,8 @@ export default function SunMechanism({
   const isHighlighted = highlightedGalgal === 'sun';
   const blueOpacity = isHighlighted ? 0.16 : 0.05;
   const redOpacity = isHighlighted ? 0.2 : 0.08;
+  const showBlue = galgalVisible['sun-blue'] !== false;
+  const showRed = galgalVisible['sun-red'] !== false;
 
   return (
     <group
@@ -139,14 +164,16 @@ export default function SunMechanism({
     >
       {/* ── BLUE GALGAL (outer, Earth-centered) ── */}
       <group ref={blueGroupRef}>
-        <GalgalSphere
-          radius={blueRadius}
-          color="#3a5478"
-          ringColor="#7fa8d8"
-          opacity={blueOpacity}
-          gridColor="#9bc0e8"
-          gridOpacity={isHighlighted ? 0.35 : 0.18}
-        />
+        {showBlue && (
+          <GalgalSphere
+            radius={blueRadius}
+            color="#3a5478"
+            ringColor="#7fa8d8"
+            opacity={blueOpacity}
+            gridColor="#9bc0e8"
+            gridOpacity={isHighlighted ? 0.35 : 0.18}
+          />
+        )}
 
         {/* Eccentric center marker — sits inside blue at offset */}
         <mesh position={[eccentricOffset, 0, 0]}>
@@ -156,19 +183,21 @@ export default function SunMechanism({
 
         {/* ── RED GALGAL (off-center, carries the sun) ── */}
         <group ref={redGroupRef} position={[eccentricOffset, 0, 0]}>
-          <GalgalSphere
-            radius={redRadius}
-            color="#a8623a"
-            ringColor="#d8895a"
-            opacity={redOpacity}
-            gridColor="#f0b090"
-            gridOpacity={isHighlighted ? 0.4 : 0.22}
-            onClick={(e) => {
-              e.stopPropagation();
-              setHighlightedGalgal('sun');
-              selectStep('sunMeanLongitude');
-            }}
-          />
+          {showRed && (
+            <GalgalSphere
+              radius={redRadius}
+              color="#a8623a"
+              ringColor="#d8895a"
+              opacity={redOpacity}
+              gridColor="#f0b090"
+              gridOpacity={isHighlighted ? 0.4 : 0.22}
+              onClick={(e) => {
+                e.stopPropagation();
+                setHighlightedGalgal('sun');
+                selectStep('sunMeanLongitude');
+              }}
+            />
+          )}
 
           {/* ── THE SUN — fixed to red's rim ── */}
           <group ref={sunHandleRef} position={[redRadius, 0, 0]}>
@@ -234,6 +263,26 @@ export default function SunMechanism({
           <line ref={radiusEccSunRef}>
             <bufferGeometry />
             <lineBasicMaterial color="#d8895a" transparent opacity={0.5} />
+          </line>
+        </>
+      )}
+
+      {/* ── GHOST SUN at the emtzoi (mean longitude) position ──
+          The gap from this ghost to the real sun IS the maslul correction. */}
+      {showGhosts && (
+        <>
+          <mesh ref={ghostRef}>
+            <sphereGeometry args={[0.16, 16, 12]} />
+            <meshBasicMaterial
+              color="#fde29a"
+              transparent
+              opacity={0.35}
+              wireframe
+            />
+          </mesh>
+          <line ref={ghostLineRef}>
+            <bufferGeometry />
+            <lineBasicMaterial color="#fde29a" transparent opacity={0.55} />
           </line>
         </>
       )}
