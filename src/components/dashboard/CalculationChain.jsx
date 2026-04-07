@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useCalculationStore } from '../../stores/calculationStore';
 import { formatDms } from '../../engine/dmsUtils';
 import { CONSTANTS, SOURCE_TYPES } from '../../engine/constants';
+import MaslulGraph from '../visualizations/MaslulGraph';
 
 /**
  * Displays the full calculation derivation chain.
@@ -60,8 +61,27 @@ export default function CalculationChain() {
         </div>
       )}
 
-      {/* Both correction tables */}
-      <div className="mt-4 space-y-4">
+      {/* Maslul correction graphs — interactive sine charts */}
+      <div className="mt-4 space-y-3">
+        <MaslulGraph
+          title="Sun Maslul Correction"
+          hebrewTitle="מנת מסלול השמש"
+          reference="KH 13:4"
+          table={CONSTANTS.SUN_MASLUL_CORRECTIONS}
+          currentMaslul={calculation.sun.maslul}
+          color="#e4b94a"
+          height={90}
+        />
+        <MaslulGraph
+          title="Moon Maslul Correction"
+          hebrewTitle="מנת מסלול הירח"
+          reference="KH 15:4-6"
+          table={CONSTANTS.MOON_MASLUL_CORRECTIONS}
+          currentMaslul={calculation.moon.maslulHanachon}
+          color="#b6c2d4"
+          height={90}
+        />
+
         <CorrectionTable
           title="Sun Correction Table"
           hebrewTitle="מנת מסלול השמש"
@@ -154,7 +174,7 @@ function StepCard({ step, onClick }) {
   return (
     <div
       onClick={onClick}
-      className="p-2.5 mb-1.5 rounded-lg bg-[var(--color-card)] border cursor-pointer hover:border-[var(--color-accent)] transition-colors"
+      className="p-3 mb-1.5 rounded-lg bg-[var(--color-card)] border cursor-pointer hover:border-[var(--color-accent)] active:border-[var(--color-accent)] transition-colors min-h-[44px]"
       style={{ borderColor: `${sourceInfo.color}30` }}
     >
       <div className="flex justify-between items-start gap-2">

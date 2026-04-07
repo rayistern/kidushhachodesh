@@ -40,12 +40,15 @@ export const useVisualizationStore = create((set, get) => ({
   animationSpeed: 30,
   setAnimationSpeed: (speed) => set({ animationSpeed: speed }),
 
-  isPlaying: false,
+  isPlaying: true,
   setIsPlaying: (playing) => set({ isPlaying: playing }),
   togglePlaying: () => set((s) => ({ isPlaying: !s.isPlaying })),
 
   // ── Display toggles ──
-  sidewaysAxis: false,
+  // Default sideways: looking at the ecliptic edge-on with east at the top.
+  // This is Rabbi Losh's preferred orientation — the sun moves "up" through
+  // the zodiac as it ages, not "around" a north-pole-down map.
+  sidewaysAxis: true,
   toggleSidewaysAxis: () => set((s) => ({ sidewaysAxis: !s.sidewaysAxis })),
 
   showGalgalim: true,
@@ -54,10 +57,57 @@ export const useVisualizationStore = create((set, get) => ({
   showDiscs: true,
   toggleDiscs: () => set((s) => ({ showDiscs: !s.showDiscs })),
 
-  showLabels: true,
+  // Start with labels off — the 3D Html labels overlap heavily when bodies
+  // are close. User can toggle them back on from the playback overlay.
+  showLabels: false,
   toggleLabels: () => set((s) => ({ showLabels: !s.showLabels })),
 
   // Show the radius lines from Earth → eccentric → body
-  showRadii: true,
+  showRadii: false,
   toggleRadii: () => set((s) => ({ showRadii: !s.showRadii })),
+
+  // Show "ghost" bodies at the emtzoi (mean longitude) position. The
+  // gap to the solid body is the maslul correction made visible.
+  showGhosts: false,
+  toggleGhosts: () => set((s) => ({ showGhosts: !s.showGhosts })),
+
+  // Per-galgal visibility for the V3 isolation toggles. Default all on.
+  // Keys: 'sun-blue', 'sun-red', 'moon-red', 'moon-blue', 'moon-green',
+  //       'moon-katan'
+  galgalVisible: {
+    'sun-blue': true,
+    'sun-red': true,
+    'moon-red': true,
+    'moon-blue': true,
+    'moon-green': true,
+    'moon-katan': true,
+  },
+  toggleGalgalVisible: (id) =>
+    set((s) => ({
+      galgalVisible: {
+        ...s.galgalVisible,
+        [id]: !s.galgalVisible[id],
+      },
+    })),
+  soloGalgal: (id) =>
+    set((s) => {
+      // If the only-visible galgal is already this one, restore all.
+      const allOff = Object.entries(s.galgalVisible).every(
+        ([k, v]) => (k === id ? v : !v),
+      );
+      if (allOff) {
+        const all = {};
+        Object.keys(s.galgalVisible).forEach((k) => (all[k] = true));
+        return { galgalVisible: all };
+      }
+      const next = {};
+      Object.keys(s.galgalVisible).forEach((k) => (next[k] = k === id));
+      return { galgalVisible: next };
+    }),
+  resetGalgalVisibility: () =>
+    set((s) => {
+      const all = {};
+      Object.keys(s.galgalVisible).forEach((k) => (all[k] = true));
+      return { galgalVisible: all };
+    }),
 }));

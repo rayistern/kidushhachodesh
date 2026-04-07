@@ -9,7 +9,7 @@ export default function InfoPanel() {
   const setRightPanel = useUIStore((s) => s.setRightPanel);
 
   return (
-    <aside className="w-80 border-l border-[var(--color-border)] bg-[var(--color-surface)] overflow-y-auto flex-shrink-0 flex flex-col">
+    <aside className="w-full h-full border-l border-[var(--color-border)] bg-[var(--color-surface)] overflow-y-auto flex flex-col">
       {/* Panel tabs */}
       <div className="flex border-b border-[var(--color-border)]">
         <PanelTab
@@ -37,10 +37,10 @@ function PanelTab({ active, onClick, label }) {
   return (
     <button
       onClick={onClick}
-      className={`flex-1 px-4 py-2 text-xs font-medium transition-colors ${
+      className={`flex-1 px-4 py-3 text-xs font-medium transition-colors min-h-[44px] ${
         active
           ? 'text-[var(--color-accent)] border-b-2 border-[var(--color-accent)]'
-          : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text)]'
+          : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text)] active:text-[var(--color-text)]'
       }`}
     >
       {label}

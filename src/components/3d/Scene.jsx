@@ -33,8 +33,17 @@ function CelestialScene() {
 
   const daysFromEpoch = calculation.daysFromEpoch;
 
+  // Sideways (Rabbi Losh) = look at the ecliptic head-on with east at the
+  // top of the screen. Achieved by rotating the scene 90° around X (lifting
+  // the ecliptic plane upright) and 90° around Z (so longitude 0° / Aries
+  // sits at the top instead of the right).
+  // Top-down = the standard astronomical map view with north at top.
+  const sceneRotation = sidewaysAxis
+    ? [Math.PI / 2, 0, Math.PI / 2]
+    : [0, 0, 0];
+
   return (
-    <group rotation={sidewaysAxis ? [0, 0, Math.PI / 2] : [0, 0, 0]}>
+    <group rotation={sceneRotation}>
       <Stars radius={80} depth={50} count={2500} factor={2} fade speed={0.4} />
 
       {/* ── EARTH at the center ── */}
@@ -74,34 +83,44 @@ function CelestialScene() {
 
 /**
  * Top-level Canvas wrapper.
+ *
+ * `dimmed` is true when a side drawer is open over the scene on mobile —
+ * we hide the overlays in that state so they don't compete with the panel
+ * content the user is reading.
  */
-export default function Scene3D() {
+export default function Scene3D({ dimmed = false }) {
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
       <Canvas
         gl={{ antialias: true, alpha: true, sortObjects: false }}
         style={{ background: '#070a12', borderRadius: '12px' }}
       >
-        <PerspectiveCamera makeDefault position={[0, 6, 12]} fov={55} />
+        <PerspectiveCamera makeDefault position={[0, 2, 14]} fov={55} />
         <OrbitControls
           enableDamping
           dampingFactor={0.08}
           minDistance={2}
           maxDistance={40}
           maxPolarAngle={Math.PI}
+          enableZoom
+          enableRotate
+          enablePan
+          touches={{ ONE: 0 /* ROTATE */, TWO: 2 /* DOLLY_PAN */ }}
         />
         <Suspense fallback={null}>
           <CelestialScene />
         </Suspense>
       </Canvas>
-      <PlaybackOverlay />
-      <LegendOverlay />
+      {!dimmed && <PlaybackOverlay />}
+      {!dimmed && <LegendOverlay />}
     </div>
   );
 }
 
 /**
  * Bottom overlay with play/pause + speed selector + scrubber + display toggles.
+ * On narrow screens the second toggle row collapses behind a "More" button
+ * to keep the overlay shallow.
  */
 function PlaybackOverlay() {
   const isPlaying = useVisualizationStore((s) => s.isPlaying);
@@ -117,6 +136,8 @@ function PlaybackOverlay() {
   const toggleRadii = useVisualizationStore((s) => s.toggleRadii);
   const showLabels = useVisualizationStore((s) => s.showLabels);
   const toggleLabels = useVisualizationStore((s) => s.toggleLabels);
+  const showGhosts = useVisualizationStore((s) => s.showGhosts);
+  const toggleGhosts = useVisualizationStore((s) => s.toggleGhosts);
 
   // Force re-render at 4Hz while playing so the offset readout + scrubber update.
   const [, force] = React.useState(0);
@@ -126,60 +147,104 @@ function PlaybackOverlay() {
     return () => clearInterval(id);
   }, [isPlaying]);
 
-  const speeds = [
-    { v: 1, label: '1 d/s' },
-    { v: 30, label: '1 mo/s' },
-    { v: 365, label: '1 yr/s' },
-    { v: 3650, label: '10 yr/s' },
-    { v: 25550, label: '70 yr/s' },
-  ];
+  const [moreOpen, setMoreOpen] = React.useState(false);
+  const [isNarrow, setIsNarrow] = React.useState(
+    typeof window !== 'undefined' ? window.innerWidth < 640 : false,
+  );
+  useEffect(() => {
+    const handler = () => setIsNarrow(window.innerWidth < 640);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+
+  // Speed presets — abbreviated labels on narrow screens
+  const speeds = isNarrow
+    ? [
+        { v: 1, label: '1d' },
+        { v: 30, label: '1mo' },
+        { v: 365, label: '1yr' },
+        { v: 3650, label: '10y' },
+      ]
+    : [
+        { v: 1, label: '1 d/s' },
+        { v: 30, label: '1 mo/s' },
+        { v: 365, label: '1 yr/s' },
+        { v: 3650, label: '10 yr/s' },
+        { v: 25550, label: '70 yr/s' },
+      ];
 
   return (
     <div
+      className="safe-bottom"
       style={{
         position: 'absolute',
-        bottom: 12,
-        left: 12,
-        right: 12,
-        background: 'rgba(10, 14, 22, 0.85)',
-        backdropFilter: 'blur(8px)',
+        bottom: 8,
+        left: 8,
+        right: 8,
+        background: 'rgba(24, 28, 32, 0.92)',
+        backdropFilter: 'blur(10px)',
         border: '1px solid rgba(120, 140, 180, 0.25)',
-        borderRadius: 10,
-        padding: '10px 14px',
-        color: '#dde',
+        borderRadius: 12,
+        padding: isNarrow ? '8px 10px' : '10px 14px',
+        color: 'var(--color-text)',
         fontSize: 12,
         display: 'flex',
         flexDirection: 'column',
-        gap: 8,
+        gap: isNarrow ? 8 : 8,
+        zIndex: 5,
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: isNarrow ? 4 : 6, flexWrap: 'wrap' }}>
         <button
           onClick={togglePlaying}
-          style={btnStyle(isPlaying ? '#4ef7a1' : '#aaa')}
+          style={btnStyle(isPlaying ? '#4ef7a1' : '#c9d6e3', isNarrow, true)}
           title={isPlaying ? 'Pause' : 'Play'}
+          aria-label={isPlaying ? 'Pause' : 'Play'}
         >
           {isPlaying ? '❚❚' : '▶'}
         </button>
-        <button onClick={resetAnimation} style={btnStyle('#aaa')} title="Reset to selected date">
+        <button
+          onClick={resetAnimation}
+          style={btnStyle('#c9d6e3', isNarrow, true)}
+          title="Reset"
+          aria-label="Reset animation"
+        >
           ↺
         </button>
 
-        <span style={{ opacity: 0.7, marginLeft: 4 }}>Speed:</span>
         {speeds.map((s) => (
           <button
             key={s.v}
             onClick={() => setAnimationSpeed(s.v)}
-            style={btnStyle(animationSpeed === s.v ? '#4ea1f7' : '#555')}
+            style={btnStyle(animationSpeed === s.v ? '#4ea1f7' : '#555', isNarrow)}
           >
             {s.label}
           </button>
         ))}
 
-        <span style={{ marginLeft: 'auto', opacity: 0.7, fontFamily: 'monospace' }}>
-          offset: {animationDays >= 0 ? '+' : ''}
-          {animationDays.toFixed(1)} d
+        <span
+          style={{
+            marginLeft: 'auto',
+            opacity: 0.75,
+            fontFamily: 'monospace',
+            fontSize: isNarrow ? 11 : 11,
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {animationDays >= 0 ? '+' : ''}
+          {animationDays.toFixed(0)}d
         </span>
+
+        {isNarrow && (
+          <button
+            onClick={() => setMoreOpen((o) => !o)}
+            style={btnStyle('#c9d6e3', isNarrow, true)}
+            title="More controls"
+            aria-label="More controls"
+          >
+            ⋯
+          </button>
+        )}
       </div>
 
       <input
@@ -189,93 +254,216 @@ function PlaybackOverlay() {
         step={0.5}
         value={animationDays}
         onChange={(e) => setAnimationDays(parseFloat(e.target.value))}
-        style={{ width: '100%', accentColor: '#4ea1f7' }}
+        style={{
+          width: '100%',
+          accentColor: '#4ea1f7',
+          height: isNarrow ? 28 : 20,
+        }}
       />
 
-      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-        <button onClick={toggleSidewaysAxis} style={btnStyle(sidewaysAxis ? '#4ef7a1' : '#555')}>
-          Rabbi Losh view {sidewaysAxis ? '✓' : ''}
-        </button>
-        <button onClick={toggleRadii} style={btnStyle(showRadii ? '#4ea1f7' : '#555')}>
-          Radii {showRadii ? '✓' : ''}
-        </button>
-        <button onClick={toggleLabels} style={btnStyle(showLabels ? '#4ea1f7' : '#555')}>
-          Labels {showLabels ? '✓' : ''}
-        </button>
-      </div>
+      {(!isNarrow || moreOpen) && (
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          <button onClick={toggleSidewaysAxis} style={btnStyle(!sidewaysAxis ? '#e4b94a' : '#555', isNarrow)}>
+            Top-down {!sidewaysAxis ? '✓' : ''}
+          </button>
+          <button onClick={toggleRadii} style={btnStyle(showRadii ? '#4ea1f7' : '#555', isNarrow)}>
+            Radii {showRadii ? '✓' : ''}
+          </button>
+          <button onClick={toggleLabels} style={btnStyle(showLabels ? '#4ea1f7' : '#555', isNarrow)}>
+            Labels {showLabels ? '✓' : ''}
+          </button>
+          <button
+            onClick={toggleGhosts}
+            style={btnStyle(showGhosts ? '#fde29a' : '#555', isNarrow)}
+            title="Show emtzoi (mean longitude) ghost markers"
+          >
+            Ghosts {showGhosts ? '✓' : ''}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
 
-function btnStyle(color) {
+function btnStyle(color, isNarrow = false, square = false) {
+  // Mobile gets bigger tap targets — at least 36px tall for finger use.
+  // The icon-only buttons (play, reset, more) get a square shape so they
+  // read as buttons, not text labels.
+  const minHeight = isNarrow ? 36 : 26;
+  const padX = square ? (isNarrow ? 12 : 8) : isNarrow ? 10 : 8;
+  const padY = isNarrow ? 6 : 3;
   return {
     background: 'transparent',
     color,
     border: `1px solid ${color}`,
-    borderRadius: 6,
-    padding: '3px 8px',
-    fontSize: 11,
+    borderRadius: 8,
+    padding: `${padY}px ${padX}px`,
+    minHeight,
+    minWidth: square ? minHeight : undefined,
+    fontSize: isNarrow ? 12 : 11,
     fontWeight: 600,
     cursor: 'pointer',
     fontFamily: 'inherit',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   };
 }
 
 /**
  * Top-right legend explaining the colors of each galgal.
+ * Default collapsed on narrow viewports.
  */
 function LegendOverlay() {
-  const [open, setOpen] = React.useState(true);
+  const [isNarrow, setIsNarrow] = React.useState(
+    typeof window !== 'undefined' ? window.innerWidth < 640 : false,
+  );
+  const [open, setOpen] = React.useState(
+    typeof window === 'undefined' ? true : window.innerWidth >= 768,
+  );
+  useEffect(() => {
+    const handler = () => setIsNarrow(window.innerWidth < 640);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
 
   return (
     <div
       style={{
         position: 'absolute',
-        top: 12,
-        right: 12,
-        background: 'rgba(10, 14, 22, 0.85)',
-        backdropFilter: 'blur(8px)',
+        top: 8,
+        right: 8,
+        background: 'rgba(24, 28, 32, 0.92)',
+        backdropFilter: 'blur(10px)',
         border: '1px solid rgba(120, 140, 180, 0.25)',
         borderRadius: 10,
-        padding: open ? '10px 14px' : '6px 10px',
-        color: '#dde',
+        padding: open ? '10px 14px' : isNarrow ? '0' : '6px 10px',
+        color: 'var(--color-text)',
         fontSize: 11,
-        maxWidth: 260,
+        maxWidth: isNarrow ? 220 : 260,
+        zIndex: 5,
       }}
     >
       <div
         onClick={() => setOpen((o) => !o)}
+        role="button"
+        aria-label="Toggle legend"
         style={{
           cursor: 'pointer',
           fontWeight: 700,
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
+          gap: 8,
+          minHeight: isNarrow && !open ? 40 : undefined,
+          minWidth: isNarrow && !open ? 40 : undefined,
+          padding: isNarrow && !open ? '8px 12px' : 0,
         }}
       >
-        <span>Galgalim Legend</span>
-        <span style={{ opacity: 0.6 }}>{open ? '−' : '+'}</span>
+        <span>{isNarrow && !open ? 'ℹ' : 'Galgalim Legend'}</span>
+        {(!isNarrow || open) && <span style={{ opacity: 0.6 }}>{open ? '−' : '+'}</span>}
       </div>
       {open && (
         <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 8 }}>
           <Section title="Sun (KH 12-13)">
-            <Item color="#3b6fd4" label="Blue galgal" sub="outer, Earth-centered, ~1°/70yr" />
-            <Item color="#d44747" label="Red galgal" sub="off-center, carries the sun" />
-            <Item color="#ffdd44" label="Sun" sub="on the red's rim" />
+            <ToggleItem id="sun-blue" color="#7fa8d8" label="Blue galgal" sub="outer, Earth-centered, ~1°/70yr" />
+            <ToggleItem id="sun-red" color="#d8895a" label="Red galgal" sub="off-center, carries the sun" />
+            <Item color="#fde29a" label="Sun" sub="on the red's rim" />
           </Section>
           <Section title="Moon (KH 14-16)">
-            <Item color="#cc4444" label="Red (domeh)" sub="ecliptic-aligned" />
-            <Item color="#4488cc" label="Blue (noteh)" sub="tilted 5° → latitude" />
-            <Item color="#44aa44" label="Green (yoitzeh)" sub="off-center, has its own govah" />
-            <Item color="#dddd44" label="Galgal katan" sub="small epicycle (radius 5°)" />
-            <Item color="#dddde0" label="Moon" sub="on the katan's rim" />
+            <ToggleItem id="moon-red" color="#c47588" label="Red (domeh)" sub="ecliptic-aligned" />
+            <ToggleItem id="moon-blue" color="#6aa0b4" label="Blue (noteh)" sub="tilted 5° → latitude" />
+            <ToggleItem id="moon-green" color="#8fb088" label="Green (yoitzeh)" sub="off-center, has its own govah" />
+            <ToggleItem id="moon-katan" color="#e4cf9a" label="Galgal katan" sub="small epicycle (radius 5°)" />
+            <Item color="#e8e4d8" label="Moon" sub="on the katan's rim" />
           </Section>
+          <LegendActions />
           <div style={{ fontSize: 10, opacity: 0.6, marginTop: 4 }}>
             Eccentricities exaggerated for visibility (real values are ~1-5%).
+            <br />
+            <span style={{ opacity: 0.85 }}>Click an item to hide; double-click to solo.</span>
           </div>
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * A legend row that toggles a galgal's visibility on click and solos on
+ * double-click. Reads its visibility from the store.
+ */
+function ToggleItem({ id, color, label, sub }) {
+  const visible = useVisualizationStore((s) => s.galgalVisible[id] !== false);
+  const toggleGalgalVisible = useVisualizationStore((s) => s.toggleGalgalVisible);
+  const soloGalgal = useVisualizationStore((s) => s.soloGalgal);
+
+  return (
+    <div
+      role="button"
+      onClick={() => toggleGalgalVisible(id)}
+      onDoubleClick={() => soloGalgal(id)}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 6,
+        cursor: 'pointer',
+        padding: '4px 6px',
+        margin: '-4px -6px',
+        borderRadius: 4,
+        opacity: visible ? 1 : 0.4,
+        userSelect: 'none',
+      }}
+      title={`${label} — click to ${visible ? 'hide' : 'show'}, double-click to solo`}
+    >
+      <span
+        style={{
+          display: 'inline-block',
+          width: 10,
+          height: 10,
+          borderRadius: '50%',
+          background: visible ? color : 'transparent',
+          border: `1.5px solid ${color}`,
+          flexShrink: 0,
+        }}
+      />
+      <span style={{ flex: 1 }}>
+        <span
+          style={{
+            fontWeight: 600,
+            textDecoration: visible ? 'none' : 'line-through',
+          }}
+        >
+          {label}
+        </span>{' '}
+        <span style={{ opacity: 0.6, fontSize: 10 }}>— {sub}</span>
+      </span>
+      <span style={{ opacity: 0.5, fontSize: 10 }}>{visible ? '👁' : '∅'}</span>
+    </div>
+  );
+}
+
+/**
+ * Reset-all button for the visibility toggles.
+ */
+function LegendActions() {
+  const resetGalgalVisibility = useVisualizationStore((s) => s.resetGalgalVisibility);
+  return (
+    <button
+      onClick={resetGalgalVisibility}
+      style={{
+        background: 'transparent',
+        color: 'var(--color-text-secondary)',
+        border: '1px solid var(--color-border)',
+        borderRadius: 6,
+        padding: '4px 8px',
+        fontSize: 10,
+        cursor: 'pointer',
+        marginTop: 2,
+      }}
+    >
+      Show all galgalim
+    </button>
   );
 }
 

@@ -1,48 +1,87 @@
 @import "tailwindcss";
 
 @theme {
-  --color-bg: #0a0e14;
-  --color-surface: #131820;
-  --color-card: #1a2030;
-  --color-border: #2a3040;
+  /* Restored from original 2D palette: warmer, more readable */
+  --color-bg: #181c20;
+  --color-surface: #1f242c;
+  --color-card: #23272f;
+  --color-border: #2d323a;
   --color-accent: #4ea1f7;
   --color-accent-hover: #6ec1ff;
-  --color-gold: #ddaa33;
-  --color-silver: #8899bb;
+  --color-gold: #e4b94a;
+  --color-silver: #b6c2d4;
   --color-text: #f8fafc;
-  --color-text-secondary: #8899aa;
+  --color-text-secondary: #c9d6e3;
 }
 
 * {
   box-sizing: border-box;
 }
 
-body {
+html, body {
   margin: 0;
+  /* Prevent the iOS rubber-band scroll from yanking the layout when the
+     user drags inside the 3D canvas. */
+  overscroll-behavior: none;
+  /* Use dvh where available so mobile browsers' chrome (URL bar, etc.)
+     don't cause the layout to jump when they show/hide. */
+  height: 100dvh;
+}
+
+body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
   background: var(--color-bg);
   color: var(--color-text);
-  min-height: 100vh;
+  /* Disable iOS double-tap-to-zoom — it interferes with rapid taps on
+     calculation rows. Pinch zoom inside elements still works for the
+     OrbitControls because we set touch-action on the canvas itself. */
+  touch-action: manipulation;
 }
 
-/* Hebrew text support */
+/* The 3D canvas needs full touch handling so OrbitControls can do
+   one-finger rotate, two-finger pan, pinch zoom. */
+canvas {
+  touch-action: none;
+}
+
+/* Hebrew text support — Hebrew glyphs visually render smaller than
+   Latin at the same px size, so we bump them slightly. */
 [dir="rtl"], .hebrew-text {
   direction: rtl;
   font-family: 'Frank Ruhl Libre', 'David', 'Noto Sans Hebrew', serif;
+  font-size: 1.08em;
+  line-height: 1.4;
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
+/* Custom scrollbar (desktop only — mobile uses native overlay scrollbars). */
+@media (pointer: fine) {
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-surface);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-accent);
+  }
 }
-::-webkit-scrollbar-track {
-  background: var(--color-surface);
+
+/* Reusable tap-target helper — applied to interactive elements that
+   would otherwise be too small for a finger. 44px is Apple's HIG minimum. */
+.tap-target {
+  min-height: 44px;
+  min-width: 44px;
 }
-::-webkit-scrollbar-thumb {
-  background: var(--color-border);
-  border-radius: 3px;
+
+/* Safe-area utilities for notch / home-indicator devices. */
+.safe-bottom {
+  padding-bottom: max(8px, env(safe-area-inset-bottom));
 }
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-accent);
+.safe-top {
+  padding-top: max(0px, env(safe-area-inset-top));
 }
