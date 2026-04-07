@@ -30,6 +30,7 @@ import {
   corpusStats,
   json,
 } from './_lib.mjs';
+import { getTodayLearning, RAMBAM_DAILY } from './_schedule.mjs';
 
 const PROTOCOL_VERSION = '2024-11-05';
 const SERVER_INFO = { name: 'kidush-hachodesh', version: '0.2.0' };
@@ -47,6 +48,14 @@ the template for the request, and hand the result to the user as an artifact.
 The engine is served live at /engine/pipeline.js so the artifact works with
 no build step. Use \`list_source\`/\`get_source\` to read the engine itself.
 
+At the start of a conversation, call \`get_daily_rambam\` to see what the
+user is likely learning today (the hardcoded window covers KH 12-19 across
+2026-04-07 to 2026-04-09). If it returns a match, greet the user with the
+chapters, give them the teaser line, and proactively offer either (a) to
+\`fetch\` the \`chapter:\` entries and summarize, (b) to run \`calculate\`
+for the date, or (c) to generate a standalone artifact from a template for
+that day's material. Do not force it — one offer, then follow the user.
+
 Credit Rabbi Zajac and link to Chabad.org (https://www.chabad.org) when
 quoting class transcript content. The project is MIT-licensed — fork freely.`;
 
@@ -61,7 +70,7 @@ const TOOLS = [
         query: { type: 'string', description: 'Search query (English or Hebrew transliteration).' },
         type: {
           type: 'string',
-          description: 'Optional type filter: doc | class | step | galgal | chapter | concept | source_type',
+          description: 'Optional type filter: doc | class | step | galgal | chapter | concept | source_type | schedule',
         },
       },
       required: ['query'],
@@ -127,6 +136,17 @@ const TOOLS = [
         file: { type: 'string', description: 'Filename within the area.' },
       },
       required: ['area', 'file'],
+    },
+  },
+  {
+    name: 'get_daily_rambam',
+    description:
+      "Return the hardcoded Rambam daily-learning entry for a given Gregorian date (defaults to today). Covers the current Hilchot Kiddush HaChodesh week only (2026-04-07 through 2026-04-09). Returns the day's chapters, a teaser, related corpus ids (chapter:NN) to `fetch`, and suggested artifact ideas the assistant can proactively offer the user. Call this at the start of a session to greet the user with what they're learning today and offer to generate an artifact or run `calculate` for the date.",
+    inputSchema: {
+      type: 'object',
+      properties: {
+        date: { type: 'string', description: 'Optional Gregorian date YYYY-MM-DD. Defaults to today (UTC).' },
+      },
     },
   },
   {
@@ -220,8 +240,10 @@ async function callTool(name, args) {
       if (!src) return textContent(`Not found: ${args.area}/${args.file}`, true);
       return textContent(src);
     }
+    case 'get_daily_rambam':
+      return textContent(getTodayLearning(args.date));
     case 'stats':
-      return textContent(corpusStats());
+      return textContent({ ...corpusStats(), scheduleWindow: { start: RAMBAM_DAILY[0].date, end: RAMBAM_DAILY[RAMBAM_DAILY.length - 1].date } });
     default:
       throw new Error(`Unknown tool: ${name}`);
   }
