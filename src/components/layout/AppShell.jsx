@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useCalendarStore } from '../../stores/calendarStore';
 import { useCalculationStore } from '../../stores/calculationStore';
 import { useUIStore } from '../../stores/uiStore';
@@ -13,11 +13,10 @@ import Scene3D from '../3d/Scene';
  * open by default. The 3D scene fills whatever space is left.
  *
  * Narrow viewports (< 768px): the 3D scene is full-bleed and the side
- * panels become absolute-positioned drawers that overlay the scene. They
- * default closed; toggle them from the header icons.
- *
- * The user can collapse panels on any size — the only difference is the
- * default state and whether they overlay or push.
+ * panels become absolute drawers that overlay the scene. They default
+ * closed; toggle them from the header icons. Only one drawer can be open
+ * at a time on mobile (toggling one closes the other). Drawers can be
+ * dismissed by tapping the backdrop or swiping them off-screen.
  */
 export default function AppShell() {
   const currentDate = useCalendarStore((s) => s.currentDate);
@@ -30,15 +29,16 @@ export default function AppShell() {
   const rightPanelOpen = useUIStore((s) => s.rightPanelOpen);
   const toggleLeftPanel = useUIStore((s) => s.toggleLeftPanel);
   const toggleRightPanel = useUIStore((s) => s.toggleRightPanel);
+  const closeAllPanels = useUIStore((s) => s.closeAllPanels);
 
   // Recompute on date change
   useEffect(() => {
     compute(currentDate);
   }, [currentDate, compute]);
 
-  // Watch for viewport changes — auto-collapse panels on mobile,
-  // auto-expand on desktop. Only triggers on the wide↔narrow transition
-  // so the user's manual toggling is preserved within a size class.
+  // Watch for viewport changes — auto-collapse panels on the wide↔narrow
+  // transition only, so the user's manual toggling is preserved within a
+  // size class.
   useEffect(() => {
     let prevWide = window.innerWidth >= 768;
     setIsWideViewport(prevWide);
@@ -58,37 +58,30 @@ export default function AppShell() {
 
   // On narrow screens panels overlay; on wide screens they're inline.
   const overlay = !isWideViewport;
+  const anyPanelOpen = leftPanelOpen || rightPanelOpen;
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-[var(--color-bg)]">
+    <div className="flex flex-col h-[100dvh] overflow-hidden bg-[var(--color-bg)]">
       {/* Top bar */}
-      <header className="flex items-center justify-between px-3 sm:px-6 py-2 sm:py-3 border-b border-[var(--color-border)] bg-[var(--color-surface)] z-30">
-        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-          <button
-            onClick={toggleLeftPanel}
-            aria-label="Toggle values panel"
-            className="p-1.5 rounded-lg text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-card)]"
-          >
+      <header className="flex items-center justify-between px-2 sm:px-6 py-1.5 sm:py-3 border-b border-[var(--color-border)] bg-[var(--color-surface)] z-30 safe-top">
+        <div className="flex items-center gap-1 sm:gap-3 min-w-0">
+          <IconButton onClick={toggleLeftPanel} aria-label="Toggle values panel" active={leftPanelOpen}>
             <HamburgerIcon />
-          </button>
-          <h1 className="text-base sm:text-xl font-bold text-[var(--color-text)] truncate">
+          </IconButton>
+          <h1 className="text-sm sm:text-xl font-bold text-[var(--color-text)] truncate">
             <span className="hebrew-text text-lg sm:text-2xl">קידוש החודש</span>
           </h1>
           <span className="hidden md:inline text-sm text-[var(--color-text-secondary)]">
             Rambam's Celestial Dashboard
           </span>
         </div>
-        <div className="flex items-center gap-1 sm:gap-2">
+        <div className="flex items-center gap-0.5 sm:gap-2">
           <NavButton icon="🔭" label="Explore" />
           <NavButton icon="🧮" label="Calculate" />
           <NavButton icon="📖" label="Learn" />
-          <button
-            onClick={toggleRightPanel}
-            aria-label="Toggle drill-down panel"
-            className="p-1.5 rounded-lg text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-card)]"
-          >
+          <IconButton onClick={toggleRightPanel} aria-label="Toggle drill-down panel" active={rightPanelOpen}>
             <PanelIcon />
-          </button>
+          </IconButton>
         </div>
       </header>
 
@@ -99,7 +92,9 @@ export default function AppShell() {
           side="left"
           open={leftPanelOpen}
           overlay={overlay}
-          width="w-72"
+          width={overlay ? 'w-[min(85vw,340px)]' : 'w-72'}
+          onClose={() => setLeftPanelOpen(false)}
+          title="Values"
         >
           <Sidebar />
         </PanelDrawer>
@@ -107,7 +102,7 @@ export default function AppShell() {
         {/* Center — 3D visualization (always full-bleed in its container) */}
         <main className="flex-1 relative min-w-0">
           <div className="absolute inset-0">
-            <Scene3D />
+            <Scene3D dimmed={overlay && anyPanelOpen} />
           </div>
         </main>
 
@@ -116,19 +111,18 @@ export default function AppShell() {
           side="right"
           open={rightPanelOpen}
           overlay={overlay}
-          width="w-80"
+          width={overlay ? 'w-[min(90vw,380px)]' : 'w-80'}
+          onClose={() => setRightPanelOpen(false)}
+          title="Drill-Down"
         >
           <InfoPanel />
         </PanelDrawer>
 
         {/* Backdrop on mobile when a panel is open */}
-        {overlay && (leftPanelOpen || rightPanelOpen) && (
+        {overlay && anyPanelOpen && (
           <div
-            onClick={() => {
-              setLeftPanelOpen(false);
-              setRightPanelOpen(false);
-            }}
-            className="absolute inset-0 bg-black/40 z-10"
+            onClick={closeAllPanels}
+            className="absolute inset-0 bg-black/50 z-10 backdrop-blur-[1px]"
             aria-hidden
           />
         )}
@@ -139,23 +133,81 @@ export default function AppShell() {
 
 /**
  * PanelDrawer — handles inline vs overlay positioning + slide animation.
+ * On overlay (mobile) it adds a sticky close header and supports swipe
+ * dismissal in the natural off-screen direction.
  */
-function PanelDrawer({ side, open, overlay, width, children }) {
-  // Inline (desktop): the panel takes its width slot in the flex row.
-  // When closed, collapses to width 0 with overflow hidden.
-  // Overlay (mobile): absolute positioned, slides in from the side, z-20.
+function PanelDrawer({ side, open, overlay, width, children, onClose, title }) {
+  const startX = useRef(null);
+  const deltaX = useRef(0);
+  const containerRef = useRef(null);
+
+  // Touch handlers — only used in overlay mode. Drag the drawer in the
+  // direction of dismissal (left for the left drawer, right for the right
+  // drawer) and release past 60px to close.
+  const handleTouchStart = (e) => {
+    if (!overlay) return;
+    startX.current = e.touches[0].clientX;
+    deltaX.current = 0;
+  };
+  const handleTouchMove = (e) => {
+    if (!overlay || startX.current == null) return;
+    const dx = e.touches[0].clientX - startX.current;
+    // Only allow drag in the dismiss direction
+    const dismissDx = side === 'left' ? Math.min(0, dx) : Math.max(0, dx);
+    deltaX.current = dismissDx;
+    if (containerRef.current) {
+      containerRef.current.style.transform = `translateX(${dismissDx}px)`;
+      containerRef.current.style.transition = 'none';
+    }
+  };
+  const handleTouchEnd = () => {
+    if (!overlay || startX.current == null) return;
+    if (containerRef.current) {
+      containerRef.current.style.transition = '';
+      containerRef.current.style.transform = '';
+    }
+    if (Math.abs(deltaX.current) > 60) onClose && onClose();
+    startX.current = null;
+    deltaX.current = 0;
+  };
+
   if (overlay) {
     return (
       <div
+        ref={containerRef}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
         className={`absolute top-0 ${side}-0 h-full ${width} z-20 transform transition-transform duration-300 ${
           open
             ? 'translate-x-0'
             : side === 'left'
             ? '-translate-x-full'
             : 'translate-x-full'
-        } shadow-2xl`}
+        } shadow-2xl bg-[var(--color-surface)] flex flex-col`}
       >
-        {children}
+        {/* Mobile-only sticky close header so the user always has an
+            obvious way out without aiming at the tiny header buttons. */}
+        <div className="flex items-center justify-between px-3 py-2 border-b border-[var(--color-border)] flex-shrink-0">
+          <span className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-secondary)]">
+            {title}
+          </span>
+          <button
+            onClick={onClose}
+            aria-label="Close panel"
+            className="tap-target flex items-center justify-center text-[var(--color-text-secondary)] hover:text-[var(--color-text)]"
+          >
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path
+                d="M5 5l10 10M15 5L5 15"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+            </svg>
+          </button>
+        </div>
+        <div className="flex-1 min-h-0 overflow-hidden">{children}</div>
       </div>
     );
   }
@@ -171,10 +223,26 @@ function PanelDrawer({ side, open, overlay, width, children }) {
   );
 }
 
+function IconButton({ children, onClick, active, ...rest }) {
+  return (
+    <button
+      onClick={onClick}
+      {...rest}
+      className={`tap-target flex items-center justify-center rounded-lg transition-colors ${
+        active
+          ? 'text-[var(--color-accent)] bg-[var(--color-card)]'
+          : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-card)]'
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
 function NavButton({ icon, label }) {
   return (
-    <button className="px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-card)] transition-colors">
-      <span>{icon}</span>
+    <button className="tap-target px-2 sm:px-3 rounded-lg text-xs sm:text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-card)] transition-colors">
+      <span className="text-base sm:text-sm">{icon}</span>
       <span className="hidden sm:inline ml-1">{label}</span>
     </button>
   );
@@ -182,7 +250,7 @@ function NavButton({ icon, label }) {
 
 function HamburgerIcon() {
   return (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+    <svg width="22" height="22" viewBox="0 0 20 20" fill="none">
       <path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
     </svg>
   );
@@ -190,7 +258,7 @@ function HamburgerIcon() {
 
 function PanelIcon() {
   return (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+    <svg width="22" height="22" viewBox="0 0 20 20" fill="none">
       <rect x="3" y="4" width="14" height="12" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
       <path d="M13 4v12" stroke="currentColor" strokeWidth="1.5" />
     </svg>

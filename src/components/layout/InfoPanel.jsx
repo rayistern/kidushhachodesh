@@ -37,10 +37,10 @@ function PanelTab({ active, onClick, label }) {
   return (
     <button
       onClick={onClick}
-      className={`flex-1 px-4 py-2 text-xs font-medium transition-colors ${
+      className={`flex-1 px-4 py-3 text-xs font-medium transition-colors min-h-[44px] ${
         active
           ? 'text-[var(--color-accent)] border-b-2 border-[var(--color-accent)]'
-          : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text)]'
+          : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text)] active:text-[var(--color-text)]'
       }`}
     >
       {label}

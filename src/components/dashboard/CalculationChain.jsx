@@ -154,7 +154,7 @@ function StepCard({ step, onClick }) {
   return (
     <div
       onClick={onClick}
-      className="p-2.5 mb-1.5 rounded-lg bg-[var(--color-card)] border cursor-pointer hover:border-[var(--color-accent)] transition-colors"
+      className="p-3 mb-1.5 rounded-lg bg-[var(--color-card)] border cursor-pointer hover:border-[var(--color-accent)] active:border-[var(--color-accent)] transition-colors min-h-[44px]"
       style={{ borderColor: `${sourceInfo.color}30` }}
     >
       <div className="flex justify-between items-start gap-2">

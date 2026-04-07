@@ -24,8 +24,18 @@ export const useUIStore = create((set) => ({
   rightPanelOpen: isWide(),
   setLeftPanelOpen: (open) => set({ leftPanelOpen: open }),
   setRightPanelOpen: (open) => set({ rightPanelOpen: open }),
-  toggleLeftPanel: () => set((s) => ({ leftPanelOpen: !s.leftPanelOpen })),
-  toggleRightPanel: () => set((s) => ({ rightPanelOpen: !s.rightPanelOpen })),
+  // On mobile, opening one panel closes the other so they don't fight for space.
+  toggleLeftPanel: () =>
+    set((s) => ({
+      leftPanelOpen: !s.leftPanelOpen,
+      rightPanelOpen: s.isWideViewport ? s.rightPanelOpen : false,
+    })),
+  toggleRightPanel: () =>
+    set((s) => ({
+      rightPanelOpen: !s.rightPanelOpen,
+      leftPanelOpen: s.isWideViewport ? s.leftPanelOpen : false,
+    })),
+  closeAllPanels: () => set({ leftPanelOpen: false, rightPanelOpen: false }),
 
   // Track viewport size for the layout to react to
   isWideViewport: isWide(),

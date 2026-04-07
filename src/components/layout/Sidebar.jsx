@@ -2,6 +2,7 @@ import React from 'react';
 import { useCalendarStore } from '../../stores/calendarStore';
 import { useCalculationStore } from '../../stores/calculationStore';
 import { useVisualizationStore } from '../../stores/visualizationStore';
+import { useUIStore } from '../../stores/uiStore';
 import { getHebrewDateDisplay, getMoladDisplay } from '../../utils/dateUtils';
 import { formatDms } from '../../engine/dmsUtils';
 import { SOURCE_TYPES } from '../../engine/constants';
@@ -11,32 +12,44 @@ export default function Sidebar() {
   const calculation = useCalculationStore((s) => s.calculation);
   const selectStep = useCalculationStore((s) => s.selectStep);
   const setHighlightedGalgal = useVisualizationStore((s) => s.setHighlightedGalgal);
+  const setRightPanel = useUIStore((s) => s.setRightPanel);
+  const isWideViewport = useUIStore((s) => s.isWideViewport);
+  const setLeftPanelOpen = useUIStore((s) => s.setLeftPanelOpen);
+  const setRightPanelOpen = useUIStore((s) => s.setRightPanelOpen);
 
   const hebrew = getHebrewDateDisplay(currentDate);
   const molad = getMoladDisplay(currentDate);
 
+  // Clicking a value: select the step, highlight the relevant galgal, and
+  // (on mobile) swap the left drawer for the right drilldown drawer so the
+  // user immediately sees the result of their tap.
   const handleClick = (stepId, galgalId) => {
     selectStep(stepId);
+    setRightPanel('drilldown');
     if (galgalId) setHighlightedGalgal(galgalId);
+    if (!isWideViewport) {
+      setLeftPanelOpen(false);
+      setRightPanelOpen(true);
+    }
   };
 
   return (
     <aside className="w-full h-full border-r border-[var(--color-border)] bg-[var(--color-surface)] overflow-y-auto">
-      {/* Date section */}
-      <div className="p-4 border-b border-[var(--color-border)]">
+      {/* Date section — sticky so the user can scrub time without losing it */}
+      <div className="p-3 sm:p-4 border-b border-[var(--color-border)] bg-[var(--color-surface)] sticky top-0 z-10">
         <label className="text-xs text-[var(--color-text-secondary)] uppercase tracking-wide">Date</label>
         <input
           type="date"
           value={currentDate.toISOString().slice(0, 10)}
           onChange={(e) => setDate(new Date(e.target.value))}
-          className="w-full mt-1 px-3 py-1.5 rounded-lg bg-[var(--color-card)] border border-[var(--color-border)] text-[var(--color-text)] text-sm"
+          className="w-full mt-1 px-3 py-2 rounded-lg bg-[var(--color-card)] border border-[var(--color-border)] text-[var(--color-text)] text-sm tap-target"
         />
-        <div className="flex gap-1 mt-2">
+        <div className="grid grid-cols-6 gap-1 mt-2">
           {[-365, -30, -1, 1, 30, 365].map((d) => (
             <button
               key={d}
               onClick={() => adjustDays(d)}
-              className="flex-1 px-1 py-1 rounded text-xs font-mono bg-[var(--color-card)] text-[var(--color-text-secondary)] hover:bg-[var(--color-border)] transition-colors"
+              className="px-1 py-2 rounded text-xs font-mono bg-[var(--color-card)] text-[var(--color-text-secondary)] hover:bg-[var(--color-border)] active:bg-[var(--color-border)] transition-colors min-h-[36px]"
             >
               {d > 0 ? `+${d}` : d}
             </button>
@@ -186,8 +199,8 @@ function ValueRow({ label, hebrewLabel, value, onClick, highlight, source, toolt
   return (
     <div
       onClick={onClick}
-      className={`flex justify-between items-center gap-2 px-4 py-1.5 text-xs border-b border-[var(--color-border)] border-opacity-30 ${
-        onClick ? 'cursor-pointer hover:bg-[var(--color-card)]' : ''
+      className={`flex justify-between items-center gap-2 px-4 py-2.5 sm:py-1.5 text-xs border-b border-[var(--color-border)] border-opacity-30 ${
+        onClick ? 'cursor-pointer hover:bg-[var(--color-card)] active:bg-[var(--color-card)]' : ''
       } ${highlight ? 'bg-[var(--color-accent)] bg-opacity-10' : ''}`}
       title={tooltip}
     >
