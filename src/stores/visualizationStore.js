@@ -20,8 +20,10 @@ export const STEP_CONTRIBUTORS = {
 
   // Moon
   moonMeanLongitude: ['moon-blue'],
+  moonSeasonCorrection: ['sun-blue', 'moon-blue'],
   doubleElongation: ['sun-blue', 'moon-blue'],
   moonMaslul: ['moon-green', 'moon-katan'],
+  moonMaslulCorrection: ['moon-green', 'moon-katan'],
   maslulHanachon: ['moon-green', 'moon-katan'],
   moonTrueLongitude: ['moon-red', 'moon-blue', 'moon-green', 'moon-katan'],
   nodePosition: ['moon-red'],
@@ -29,7 +31,8 @@ export const STEP_CONTRIBUTORS = {
 
   // Visibility (sun and moon together)
   elongation: ['sun-red', 'moon-katan'],
-  moonVisibility: ['sun-red', 'moon-katan'],
+  firstVisibilityAngle: ['sun-red', 'moon-red', 'moon-katan'],
+  moonVisibility: ['sun-red', 'moon-katan', 'moon-red'],
 };
 
 /**
