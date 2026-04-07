@@ -6,27 +6,11 @@
   command = "npm start"
   port    = 8888
 
-# This site is served behind a Vercel rewrite at https://shluchimexchange.ai/kh,
-# so requests reaching Netlify keep the /kh prefix. Vite is configured with
-# base = '/kh/', so built assets are referenced as /kh/assets/*.
-# Map the /kh-prefixed requests to the actual files in dist/.
-
-[[redirects]]
-  from = "/kh/assets/*"
-  to = "/assets/:splat"
-  status = 200
-
-[[redirects]]
-  from = "/kh"
-  to = "/index.html"
-  status = 200
-
-[[redirects]]
-  from = "/kh/*"
-  to = "/index.html"
-  status = 200
-
-# Fallback for direct Netlify access (no /kh prefix): also serve the SPA.
+# Single-page-app fallback. Assets are referenced as /assets/* (root-relative)
+# regardless of the URL the user is on, so the SPA works whether you visit
+# the bare Netlify URL or any subpath like /kh that a reverse-proxy mounts it
+# under (e.g. https://shluchimexchange.ai/kh — the proxy can rewrite or pass
+# through; either way the browser fetches /assets/* from the document root).
 [[redirects]]
   from = "/*"
   to = "/index.html"
