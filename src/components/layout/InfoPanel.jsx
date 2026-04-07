@@ -3,6 +3,7 @@ import { useUIStore } from '../../stores/uiStore';
 import CalculationChain from '../dashboard/CalculationChain';
 import RambamReader from '../content/RambamReader';
 import VisibilityHorizon from '../visualizations/VisibilityHorizon';
+import GuidedWalkthrough from '../content/GuidedWalkthrough';
 
 export default function InfoPanel() {
   const rightPanel = useUIStore((s) => s.rightPanel);
@@ -27,6 +28,11 @@ export default function InfoPanel() {
           onClick={() => setRightPanel('rambam')}
           label="Rambam Text"
         />
+        <PanelTab
+          active={rightPanel === 'walkthrough'}
+          onClick={() => setRightPanel('walkthrough')}
+          label="Tour"
+        />
       </div>
 
       {/* Panel content */}
@@ -34,6 +40,7 @@ export default function InfoPanel() {
         {rightPanel === 'drilldown' && <CalculationChain />}
         {rightPanel === 'visibility' && <VisibilityHorizon />}
         {rightPanel === 'rambam' && <RambamReader />}
+        {rightPanel === 'walkthrough' && <GuidedWalkthrough />}
       </div>
     </aside>
   );

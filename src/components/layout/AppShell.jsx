@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { useCalendarStore } from '../../stores/calendarStore';
 import { useCalculationStore } from '../../stores/calculationStore';
 import { useUIStore } from '../../stores/uiStore';
@@ -6,6 +7,8 @@ import Sidebar from './Sidebar';
 import InfoPanel from './InfoPanel';
 import Scene3D from '../3d/Scene';
 import EclipticRibbon from '../visualizations/EclipticRibbon';
+import { useRouteSync } from '../../hooks/useRouteSync';
+import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 
 /**
  * AppShell — three-zone layout that behaves differently on desktop vs mobile.
@@ -21,7 +24,9 @@ import EclipticRibbon from '../visualizations/EclipticRibbon';
  * backdrop. Only one drawer can be open at a time; dismissed by tapping
  * the backdrop or swiping off-screen.
  */
-export default function AppShell() {
+export default function AppShell({ initialPreset = 'home' }) {
+  useRouteSync(initialPreset);
+  useKeyboardShortcuts();
   const currentDate = useCalendarStore((s) => s.currentDate);
   const compute = useCalculationStore((s) => s.compute);
   const isWideViewport = useUIStore((s) => s.isWideViewport);
@@ -75,9 +80,10 @@ export default function AppShell() {
           </span>
         </div>
         <div className="flex items-center gap-0.5 sm:gap-2">
-          <NavButton icon="🔭" label="Explore" />
-          <NavButton icon="🧮" label="Calculate" />
-          <NavButton icon="📖" label="Learn" />
+          <NavButton to="/explore" icon="🔭" label="Explore" />
+          <NavButton to="/calculate" icon="🧮" label="Calculate" />
+          <NavButton to="/learn" icon="📖" label="Learn" />
+          <NavButton to="/compare" icon="⚖️" label="Compare" />
           <a
             href={`${import.meta.env.BASE_URL}ai.html`}
             className="tap-target px-2 sm:px-3 rounded-lg text-xs sm:text-sm font-medium text-white bg-[var(--color-accent,#2b6cb0)] hover:opacity-90 transition-opacity flex items-center"
@@ -276,12 +282,15 @@ function PanelToggle({ children, onClick, active, label, ...rest }) {
   );
 }
 
-function NavButton({ icon, label }) {
+function NavButton({ to, icon, label }) {
   return (
-    <button className="tap-target px-2 sm:px-3 rounded-lg text-xs sm:text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-card)] transition-colors">
+    <Link
+      to={to}
+      className="tap-target px-2 sm:px-3 rounded-lg text-xs sm:text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-card)] transition-colors flex items-center"
+    >
       <span className="text-base sm:text-sm">{icon}</span>
       <span className="hidden sm:inline ml-1">{label}</span>
-    </button>
+    </Link>
   );
 }
 
