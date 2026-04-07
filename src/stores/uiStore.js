@@ -19,21 +19,24 @@ export const useUIStore = create((set) => ({
   activeChapter: 12,
   setActiveChapter: (ch) => set({ activeChapter: ch }),
 
-  // Side panel visibility — default open on desktop, closed on mobile
-  leftPanelOpen: isWide(),
-  rightPanelOpen: isWide(),
+  // Side panels default closed on every viewport so the 3D visualization
+  // gets center stage on first load. Header toggles make their existence
+  // obvious.
+  leftPanelOpen: false,
+  rightPanelOpen: false,
   setLeftPanelOpen: (open) => set({ leftPanelOpen: open }),
   setRightPanelOpen: (open) => set({ rightPanelOpen: open }),
-  // On mobile, opening one panel closes the other so they don't fight for space.
+  // Opening one panel always closes the other — both panels are overlay
+  // drawers, and stacking them would hide the scene entirely.
   toggleLeftPanel: () =>
     set((s) => ({
       leftPanelOpen: !s.leftPanelOpen,
-      rightPanelOpen: s.isWideViewport ? s.rightPanelOpen : false,
+      rightPanelOpen: false,
     })),
   toggleRightPanel: () =>
     set((s) => ({
       rightPanelOpen: !s.rightPanelOpen,
-      leftPanelOpen: s.isWideViewport ? s.leftPanelOpen : false,
+      leftPanelOpen: false,
     })),
   closeAllPanels: () => set({ leftPanelOpen: false, rightPanelOpen: false }),
 
