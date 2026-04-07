@@ -5,7 +5,12 @@
   # 301 on /kh, which was bouncing off Vercel's slash-stripping and
   # producing the redirect loop. Our force=true rewrites below map
   # /kh/* requests onto the renamed _app/* files.
-  command = "npm run build && rm -rf dist/_app && mv dist/kh dist/_app"
+  #
+  # `set -e` makes the script fail loudly if any step fails. The
+  # buildmarker.txt write at the end is so we can curl /buildmarker.txt
+  # in production and verify Netlify actually ran THIS commit's build
+  # command (and didn't serve a cached prior deploy).
+  command = "set -e; echo '=== KH BUILD COMMAND RAN ==='; npm run build; rm -rf dist/_app; mv dist/kh dist/_app; printf 'commit=%s\\nbuilt_at=%s\\n' \"${COMMIT_REF:-unknown}\" \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\" > dist/_app/buildmarker.txt; echo '=== buildmarker:'; cat dist/_app/buildmarker.txt; echo '=== dist/_app contents:'; ls -la dist/_app; echo '=== dist/_app/assets:'; ls -la dist/_app/assets"
   publish = "dist"
 
 # Disable Netlify's HTML post-processing. The "pretty_urls" feature normalizes
@@ -50,6 +55,14 @@
 # when a real file would otherwise be served — required so its trailing
 # -slash auto-handling doesn't fight the rules and create a loop with
 # the upstream Vercel proxy. Order matters: more specific rules first.
+
+# Build marker — lets us curl /buildmarker.txt and see the commit hash
+# the deploy was built from. MUST come before the catch-all rules below.
+[[redirects]]
+  from = "/buildmarker.txt"
+  to = "/_app/buildmarker.txt"
+  status = 200
+  force = true
 
 # Vite-emitted static assets. MUST come before the SPA fallback so that
 # JS/CSS requests aren't rewritten to index.html (which would serve HTML
