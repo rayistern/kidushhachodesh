@@ -30,77 +30,77 @@ Living document. Current focus: deepen pedagogical value before / during Rabbi Z
 
 ## Phase 1.5 — Mobile UX pass
 
-- [ ] Touch-friendly tap targets (min 44px) on all controls
+- [x] Touch-friendly tap targets (min 44px) on all controls
 - [ ] Swipe-to-dismiss on overlay drawers
 - [ ] Bottom-sheet pattern for narrow viewports (instead of side drawer)
-- [ ] Compact header on mobile (title abbreviated, fewer chrome buttons)
+- [x] Compact header on mobile (title abbreviated, fewer chrome buttons)
 - [ ] Hide playback overlay's secondary controls behind a single ⋯ button on phones
 - [ ] Verify pinch-zoom doesn't conflict with OrbitControls
 - [ ] Test landscape vs portrait — separate breakpoint behavior
-- [ ] Larger Hebrew text on mobile (Hebrew often renders smaller than Latin at the same px)
-- [ ] Sticky date picker so user can scrub time without losing the visualization
+- [x] Larger Hebrew text on mobile (Hebrew often renders smaller than Latin at the same px)
+- [x] Sticky date picker so user can scrub time without losing the visualization
 
 ---
 
 ## Phase 2 — High-impact visualizations
 
-These are the next batch to build. Ordered by pedagogical leverage for chs 12-17.
+V1-V7 shipped (commits 1eeb080, 3e2dc47). Sources under `src/components/visualizations/` and `src/components/3d/Trails.jsx`.
 
 ### V1. Ecliptic ribbon strip
 Horizontal 360° unwound zodiac under the 3D scene.
-- [ ] 12 mazalot with Hebrew labels
-- [ ] Live markers: sun, moon, sun apogee (govah), moon node (rosh)
-- [ ] Markers slide in real time as animation runs
-- [ ] Click a marker → opens its drill-down in right panel
-- [ ] Highlights current mazal as date changes
+- [x] 12 mazalot with Hebrew labels
+- [x] Live markers: sun, moon, sun apogee (govah), moon node (rosh)
+- [x] Markers slide in real time as animation runs
+- [x] Click a marker → opens its drill-down in right panel
+- [x] Highlights current mazal as date changes
 - **Why it matters:** bridges the abstract 3D position with the actual longitude *number*. Students who can't read 3D can read a strip.
 
 ### V2. Mean vs True ghost bodies
 Two semi-transparent copies of each body in the 3D scene.
-- [ ] Ghost at *emtzoi* position (mean longitude — concentric model)
-- [ ] Solid body at *amiti* position (true — eccentric model)
-- [ ] Faint connector line between them = the maslul correction made visible
-- [ ] Toggle to show/hide ghosts
+- [x] Ghost at *emtzoi* position (mean longitude — concentric model)
+- [x] Solid body at *amiti* position (true — eccentric model)
+- [x] Faint connector line between them = the maslul correction made visible
+- [x] Toggle to show/hide ghosts
 - **Why it matters:** the gap IS the maslul. Once seen, never forgotten.
 
 ### V3. Galgal isolation toggles
 Eye-icon next to each galgal in the legend.
-- [ ] Click to hide a single galgal
-- [ ] "Solo" double-click (hides everything else)
-- [ ] "Show all" reset
+- [x] Click to hide a single galgal
+- [x] "Solo" double-click (hides everything else)
+- [x] "Show all" reset
 - **Why it matters:** answers "what does THIS galgal actually do?" — the heart of Rabbi Losh's pedagogy.
 
 ### V4. Maslul correction graph
 Small chart showing the correction value across one full anomalistic cycle.
-- [ ] Sine-shaped curve from the actual table values (Rambam 13:7-8 and 15:6-7)
-- [ ] Moving dot at today's anomaly position
-- [ ] Click any point → jumps date to that anomaly
-- [ ] Separate panels for sun maslul and moon maslul
+- [x] Sine-shaped curve from the actual table values (Rambam 13:7-8 and 15:6-7)
+- [x] Moving dot at today's anomaly position
+- [x] Click any point → jumps date to that anomaly
+- [x] Separate panels for sun maslul and moon maslul
 - **Why it matters:** turns the static lookup table into a living shape. Students see WHERE in the cycle they are.
 
 ### V5. Time-lapse trails
 Faint trail showing recent positions of sun & moon.
-- [ ] Configurable trail length (1 day / 1 week / 1 month / 1 year)
-- [ ] Different colors for sun vs moon
-- [ ] Visible bunching where the maslul slows the body down
-- [ ] Toggle on/off (off by default to avoid clutter)
+- [x] Configurable trail length (1 day / 1 week / 1 month / 1 year)
+- [x] Different colors for sun vs moon
+- [x] Visible bunching where the maslul slows the body down
+- [x] Toggle on/off (off by default to avoid clutter)
 - **Why it matters:** reveals the loops the moon makes against the sun's smooth march.
 
 ### V6. Visibility horizon diagram
 Side-view of western horizon at sunset for Rosh Chodesh.
-- [ ] Sun position below horizon
-- [ ] Moon position above
-- [ ] Arc of vision (קשת הראיה) shaded
-- [ ] First light (אור ראשון) marker
-- [ ] Four conditions of ch 17 as a checklist with current values
+- [x] Sun position below horizon
+- [x] Moon position above
+- [x] Arc of vision (קשת הראיה) shaded
+- [x] First light (אור ראשון) marker
+- [x] Four conditions of ch 17 as a checklist with current values
 - **Why it matters:** ch 17 is the climax of the astronomical section — visibility is the entire point of the model.
 
 ### V7. Conjunction / molad timeline
 Horizontal timeline of upcoming/past moladot.
-- [ ] Pin every molad
-- [ ] Step backward / forward by molad
-- [ ] Show difference between mean molad and true conjunction
-- [ ] Click any pin → date jumps, scene updates
+- [x] Pin every molad
+- [x] Step backward / forward by molad
+- [x] Show difference between mean molad and true conjunction
+- [x] Click any pin → date jumps, scene updates
 - **Why it matters:** the ~29.5 day rhythm vs true conjunction is hard to grasp without seeing both.
 
 ### V8. Modern overlay (optional)
