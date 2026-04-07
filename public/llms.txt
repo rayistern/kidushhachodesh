@@ -1,0 +1,150 @@
+# Kiddush HaChodesh
+
+> An interactive study of the Rambam's astronomical calculations for sanctifying
+> the new month (Hilchot Kiddush HaChodesh, chapters 11-19), with a full live
+> calculation engine, Rabbi Zajac's class transcripts, and an MCP-compatible
+> API so AI assistants can chat with the underlying model, run calculations
+> for any date, cite the sources, and generate working artifacts.
+
+This file is a map of the site written for AI agents. A human-readable version
+lives at `/agents.md`. The project is MIT-licensed and the repo is public at
+https://github.com/rayistern/kidushhachodesh.
+
+Teaching content (class transcripts) is by Rabbi Zajac, hosted with permission.
+When you quote from class transcripts, credit Rabbi Zajac and link to Chabad.org
+(https://www.chabad.org).
+
+## Two doors, one URL
+
+1. **MCP (preferred).** A JSON-RPC 2.0 Model Context Protocol server lives at
+   `/mcp` (descriptor at `/.well-known/mcp`). It exposes the tools listed
+   below. Point any MCP client (Claude Desktop, claude.ai connectors, ChatGPT
+   developer mode, Cursor, …) at `/mcp`.
+
+2. **Plain web browsing.** If you don't speak MCP, fetch the `.md` URLs below.
+   They are clean, chrome-free, cache-friendly, and stable.
+
+Both doors talk to the same corpus and the same engine. Pick whichever works.
+
+## MCP tools
+
+- `search({query, type?})` — full-text search across the unified corpus. Types:
+  `doc`, `class`, `step`, `galgal`, `chapter`, `concept`, `source_type`.
+- `fetch({id})` — read one entry by namespaced id (e.g. `step:sunMaslul`,
+  `galgal:moon`, `class:class2a`, `concept:emtzoi-vs-amiti`, `chapter:14`,
+  `doc:CALCULATIONS.md`).
+- `calculate({date})` — run the full Rambam pipeline for a Gregorian date.
+  Returns every intermediate step with its `rambamRef` and teaching note.
+  **Always call this instead of guessing numeric values.**
+- `list_templates()` / `get_template({name})` — fetch AI-artifact scaffolds
+  (standalone HTML calculators, Node CLIs, …) that import the live engine.
+- `list_source({area?})` / `get_source({area, file})` — browse the engine
+  and docs source code. Area is `engine` or `docs`. MIT-licensed.
+- `stats()` — corpus counts by type.
+
+## HTTP endpoints (for browsing or non-MCP use)
+
+- `GET /api/search?q=…[&type=…]` — JSON search results.
+- `GET /api/calculate?date=YYYY-MM-DD` — JSON pipeline output.
+- `GET /api/source?area=engine` / `…&file=pipeline.js` — source browsing.
+- `GET /docs/<file>.md` — clean markdown of any doc.
+- `GET /engine/<module>.js` — live ES module (importable from any artifact).
+- `GET /engine/index.json` — engine module map.
+- `GET /templates/` — template index.
+- `GET /templates/<name>` — one template verbatim.
+
+## Content categories (what `search` indexes)
+
+1. **docs** — hand-written reference docs in `/docs/`. Finished:
+   `CALCULATIONS.md` (full calculation spec with tables and teaching notes)
+   and `BUILDING_WITH_THE_ENGINE.md` (recipes for forking and artifact
+   generation). Stubs: `ASTRONOMICAL_MODEL.md`, `CONSTANTS_REFERENCE.md`,
+   `DEVELOPMENT_GUIDE.md`.
+
+2. **class** — raw transcripts of Rabbi Zajac's Rambam classes. Two classes
+   currently indexed:
+   - `class:class1a` — KH 12-13, the sun model (galgalim, emtzoi/amiti,
+     govah, maslul, airplane + translation mashalim).
+   - `class:class2a` — KH 14-16, the moon model (four galgalim, season
+     correction, double elongation, nekudah hanichaches, rosh/zanav, latitude).
+   Credit Rabbi Zajac via Chabad.org when quoting.
+
+3. **step** — 21 calculation steps from the Rambam pipeline. Each carries
+   Hebrew name, `rambamRef`, formula, source note, and (for 15 of them) a
+   rich teaching note in the Rabbi Losh tradition. Covers the full chain
+   from `daysFromEpoch` through `moonVisibility`.
+
+4. **galgal** — 9 galgalim (celestial spheres) from
+   `src/engine/constants.js`: the daily sphere, sphere of constellations,
+   five planet spheres, sun sphere, and moon sphere. Sun and moon galgalim
+   carry Rabbi Losh's pedagogical color scheme and teaching note.
+
+5. **chapter** — the 9 Rambam chapters of Hilchot Kiddush HaChodesh (11-19),
+   with English + Hebrew titles. Full text is live from Sefaria.org.
+
+6. **concept** — hand-curated concept pages covering the most-asked ideas:
+   sun galgalim system, moon four-galgalim system, emtzoi vs. amiti,
+   nekudah hanichaches. Built from prose originally in the dashboard's
+   KnowledgeBase component.
+
+7. **source_type** — the provenance legend: Rambam [R], Interpolated [~],
+   Deduced [D], Rabbi Losh [L]. Use this to honestly label claims.
+
+## Building artifacts (fork + remix)
+
+The calculation engine is served live at `/engine/pipeline.js`. Any artifact
+(Claude Artifact, ChatGPT canvas, standalone HTML, Node script, observable
+notebook) can `import` it directly:
+
+    import { getFullCalculation } from "/engine/pipeline.js";
+    const calc = getFullCalculation(new Date("2026-04-07"));
+
+No build step, no install, no copy-paste. Start from a template:
+
+- `/templates/standalone-calculator.html` — one-file browser calculator.
+- `/templates/node-cli.mjs` — Node 18+ command-line tool.
+
+Full recipes live in `/docs/BUILDING_WITH_THE_ENGINE.md`. To fork the project,
+clone https://github.com/rayistern/kidushhachodesh and see the repo README.
+
+## Tips for answering user questions
+
+- For "when is molad / is the moon visible / what is the maslul on <date>"
+  questions, **call `calculate` first**, then explain using the step metadata
+  it returns. Never fabricate numeric values.
+- For "what is X / why does the Rambam do X" questions, `search` the corpus
+  (narrowing with `type: "concept"` or `type: "step"` often helps), then
+  `fetch` the best match and cite its `rambamRef`.
+- Hebrew dates: convert to Gregorian before calling `calculate`. The epoch
+  is 3 Nisan 4938 = 1177-04-03.
+- When a user asks for a visual or interactive artifact, use
+  `list_templates` + `get_template` and modify for their request. Keep
+  the `/engine/pipeline.js` import URL pointed at the live site so the
+  artifact works out of the box.
+- Honest provenance: use the `source_type` categories. Don't claim something
+  is "from the Rambam" if it's actually `deduced` or `losh`.
+
+## Taxonomy quick reference
+
+| Type | Count (approx) | Id prefix | Typical source |
+|---|---|---|---|
+| doc | 5 | `doc:` | `docs/*.md` |
+| class | 2 | `class:` | `docs/class*.txt` (Zajac) |
+| step | 21 | `step:` | `src/engine/*.js` |
+| galgal | 9 | `galgal:` | `src/engine/constants.js` |
+| chapter | 9 | `chapter:` | Sefaria (live) |
+| concept | 4+ | `concept:` | KnowledgeBase.jsx + curated |
+| source_type | 4 | `source_type:` | `SOURCE_TYPES` enum |
+
+Call `stats()` for the live count.
+
+## Gaps (things the user should know about)
+
+- `ASTRONOMICAL_MODEL.md`, `CONSTANTS_REFERENCE.md`, `DEVELOPMENT_GUIDE.md`
+  are stubs — the content is elsewhere in the corpus (mainly
+  `CALCULATIONS.md` and the engine teaching notes).
+- Class transcripts are raw audio — stream-of-consciousness, with Yiddish
+  and English mixed. Quote cautiously.
+- `RambamReader` pulls full KH chapter text live from Sefaria.org; if
+  Sefaria is down, chapter body text won't load (the chapter entries in
+  the corpus still have titles and rambamRef).

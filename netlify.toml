@@ -2,30 +2,86 @@
   command = "npm run build"
   publish = "dist"
 
+# Disable Netlify's HTML post-processing. The "pretty_urls" feature normalizes
+# trailing slashes (e.g. /kh ↔ /kh/) and that interacts badly with the Vercel
+# proxy at shluchimexchange.ai/kh — one side adds the slash, the other strips
+# it, and the result is an infinite redirect loop. Forcing every redirect
+# rule (with force = true) and turning pretty_urls off makes our rules the
+# single source of truth.
+[build.processing.html]
+  pretty_urls = false
+
 [dev]
   command = "npm start"
   port    = 8888
 
-# Vite is built with base='/kh/' AND outDir='dist/kh', so the actual files
-# live at dist/kh/index.html and dist/kh/assets/*. With publish='dist', those
-# files are served at the URL paths /kh/index.html and /kh/assets/* — exactly
-# what the asset references in index.html ask for. No rewrites needed for
-# the asset hops.
-#
-# We only need a SPA fallback so that visiting /kh (no slash), the bare
-# Netlify URL (/), or any unknown path drops the user onto the SPA shell.
+# Bundle the docs and calculation engine into the serverless functions so
+# they can read markdown files and run the Rambam pipeline at request time.
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+  included_files = ["docs/**", "src/engine/**", "templates/**"]
 
+# Edge function on "/" that serves /llms.txt to known AI bots and browsers
+# that ask for non-HTML content. Real browsers pass through to the SPA.
+[[edge_functions]]
+  function = "agent-router"
+  path = "/"
+
+# ── How the SPA is served ──
+# Vite builds with base='/kh/' AND outDir='dist/kh', so the actual files
+# live at dist/kh/index.html and dist/kh/assets/*. With publish='dist',
+# those are served directly at /kh/index.html and /kh/assets/* — exactly
+# what the asset references inside index.html ask for. No rewrite hops
+# for the assets, which kept failing under the prefix proxy.
+#
+# Function and static-file lookups happen BEFORE redirects, so /mcp,
+# /api/*, /docs/*, /engine/*, /templates/*, and any real file in dist/kh/
+# (including llms.txt, ai.html, agents.md) take precedence over these.
+#
+# `force = true` on every rule means Netlify applies our redirect even
+# when a real file would otherwise be served — required so its trailing-
+# slash auto-handling doesn't fight the rules and create a loop with
+# the upstream Vercel proxy.
+
+# Make the agent-discoverable files reachable at the root, even though
+# Vite's outDir put them under /kh/. AI agents and the edge function
+# look for them at /llms.txt etc.
+[[redirects]]
+  from = "/llms.txt"
+  to = "/kh/llms.txt"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/ai.html"
+  to = "/kh/ai.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/agents.md"
+  to = "/kh/agents.md"
+  status = 200
+  force = true
+
+# SPA fallback for client-side paths under /kh.
 [[redirects]]
   from = "/kh"
   to = "/kh/index.html"
   status = 200
+  force = true
 
 [[redirects]]
   from = "/kh/*"
   to = "/kh/index.html"
   status = 200
+  force = true
 
+# Bare URL and any unknown path: drop into the SPA shell. (The agent-router
+# edge function intercepts "/" first, so AI agents get llms.txt instead.)
 [[redirects]]
   from = "/*"
   to = "/kh/index.html"
   status = 200
+  force = true

@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Chat with Kiddush HaChodesh — AI access</title>
+    <meta
+      name="description"
+      content="Point Claude, ChatGPT, or any AI at this project. Search the Rambam's calculations, ask questions, and generate working artifacts from our live engine."
+    />
+    <style>
+      :root {
+        --fg: #1a1a1a;
+        --muted: #666;
+        --bg: #fafaf8;
+        --card: #fff;
+        --border: #e5e5e0;
+        --accent: #2b6cb0;
+        --accent-hover: #234e7e;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --fg: #f0eee8;
+          --muted: #a8a49c;
+          --bg: #14130f;
+          --card: #1e1c17;
+          --border: #2d2a23;
+          --accent: #60a5fa;
+          --accent-hover: #93c5fd;
+        }
+      }
+      * { box-sizing: border-box; }
+      body {
+        font: 16px/1.6 -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+        color: var(--fg);
+        background: var(--bg);
+        margin: 0;
+      }
+      main { max-width: 780px; margin: 0 auto; padding: 2rem 1.2rem 4rem; }
+      nav { font-size: 14px; margin-bottom: 2rem; }
+      nav a { color: var(--muted); text-decoration: none; }
+      nav a:hover { color: var(--accent); }
+      h1 { font-size: 2.2rem; margin: 0 0 0.3em; line-height: 1.15; }
+      .hebrew { font-family: 'David', 'Times New Roman', serif; direction: rtl; font-size: 1.8rem; color: var(--muted); display: block; margin-bottom: 0.4em; }
+      .lede { color: var(--muted); font-size: 1.1rem; margin-top: 0; }
+      h2 { margin-top: 2.5rem; font-size: 1.4rem; border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
+      h3 { margin-top: 1.8rem; font-size: 1.1rem; }
+      .url-box {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 0.8rem 1rem;
+        font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+        font-size: 15px;
+        margin: 1rem 0;
+        word-break: break-all;
+      }
+      .url-box code { flex: 1; }
+      button.copy {
+        font: inherit;
+        font-size: 13px;
+        background: var(--accent);
+        color: white;
+        border: 0;
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      button.copy:hover { background: var(--accent-hover); }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 1.2rem 1.4rem;
+        margin: 1.2rem 0;
+      }
+      .card h3 { margin-top: 0; }
+      ol, ul { padding-left: 1.3rem; }
+      li { margin: 0.4rem 0; }
+      code { background: var(--card); padding: 0.15em 0.4em; border-radius: 4px; font-size: 0.92em; }
+      pre { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; overflow-x: auto; font-size: 13px; }
+      .grid { display: grid; grid-template-columns: 1fr; gap: 1rem; margin: 1rem 0; }
+      @media (min-width: 640px) { .grid.two { grid-template-columns: 1fr 1fr; } }
+      .pill {
+        display: inline-block;
+        background: var(--accent);
+        color: white;
+        padding: 0.15em 0.6em;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      a { color: var(--accent); }
+      a:hover { color: var(--accent-hover); }
+      footer { margin-top: 4rem; padding-top: 1.5rem; border-top: 1px solid var(--border); color: var(--muted); font-size: 14px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <nav><a href="/">← Back to dashboard</a></nav>
+
+      <span class="hebrew">קידוש החודש</span>
+      <h1>Chat with this whole project</h1>
+      <p class="lede">
+        Point any AI (Claude, ChatGPT, Perplexity, Cursor…) at this site and
+        have a real conversation with the Rambam's calculations, the class
+        transcripts, and every concept in the system. The AI can even build
+        you working artifacts from our live calculation engine.
+      </p>
+
+      <h2>The URL</h2>
+      <p>One URL. Two doors. The AI picks the right one automatically.</p>
+      <div class="url-box">
+        <code id="site-url">https://kidushhachodesh.netlify.app</code>
+        <button class="copy" data-copy="site-url">Copy</button>
+      </div>
+
+      <div class="grid two">
+        <div class="card">
+          <span class="pill">Door 1</span>
+          <h3>MCP (recommended)</h3>
+          <p>
+            For Claude Desktop, claude.ai connectors, ChatGPT developer mode,
+            Cursor, etc. Add this as an MCP server:
+          </p>
+          <div class="url-box">
+            <code id="mcp-url">https://kidushhachodesh.netlify.app/mcp</code>
+            <button class="copy" data-copy="mcp-url">Copy</button>
+          </div>
+          <p>
+            The AI gets 8 tools: <code>search</code>, <code>fetch</code>,
+            <code>calculate</code>, <code>list_templates</code>,
+            <code>get_template</code>, <code>list_source</code>,
+            <code>get_source</code>, <code>stats</code>.
+          </p>
+        </div>
+
+        <div class="card">
+          <span class="pill">Door 2</span>
+          <h3>Web browsing</h3>
+          <p>
+            For consumer ChatGPT, Claude with web search, Perplexity, Gemini,
+            or anything that can fetch URLs. Just tell the AI:
+          </p>
+          <pre>Browse kidushhachodesh.netlify.app
+and read /llms.txt first — it is a
+map of the site written for you.
+Then answer my question.</pre>
+          <p>
+            No install, no setup. Works in every browsing-capable AI today.
+          </p>
+        </div>
+      </div>
+
+      <h2>What the AI can do</h2>
+      <ul>
+        <li>
+          <strong>Answer questions</strong> about the Rambam's astronomy,
+          the galgalim, emtzoi vs. amiti, maslul, nekudah hanichaches,
+          moon visibility, molad timing — citing the exact KH chapter.
+        </li>
+        <li>
+          <strong>Run calculations</strong> for any Gregorian date and walk
+          you through all 21 pipeline steps.
+        </li>
+        <li>
+          <strong>Pull from the class transcripts</strong> — Rabbi Zajac's
+          lectures on KH 12-16 are indexed and searchable.
+        </li>
+        <li>
+          <strong>Build you an artifact.</strong> Ask for "a standalone page
+          that shows me the next 30 days of moon visibility" or "a Node
+          script that dumps the maslul table" and the AI can generate it
+          using our live engine.
+        </li>
+        <li>
+          <strong>Fork and remix.</strong> The engine is served live at
+          <a href="/engine/pipeline.js"><code>/engine/pipeline.js</code></a>
+          so any generated artifact just <code>import</code>s it — no build
+          step, no copy-paste.
+        </li>
+      </ul>
+
+      <h2>Try it right now</h2>
+
+      <div class="card">
+        <h3>With Claude</h3>
+        <ol>
+          <li>Open Claude Desktop or claude.ai.</li>
+          <li>
+            In Settings → Connectors (or via Desktop config), add an MCP
+            server with URL <code>https://kidushhachodesh.netlify.app/mcp</code>.
+          </li>
+          <li>
+            Start a new chat and ask: <em>"When is the next time the new
+            moon is visible at sunset in Jerusalem? Use the Rambam's
+            calculations."</em>
+          </li>
+        </ol>
+      </div>
+
+      <div class="card">
+        <h3>With ChatGPT (browsing mode)</h3>
+        <ol>
+          <li>Open ChatGPT with web search enabled.</li>
+          <li>
+            Paste: <em>"Browse kidushhachodesh.netlify.app and read
+            /llms.txt. Then explain the difference between emtzoi and amiti
+            for the sun, with a specific example for today's date using
+            /api/calculate."</em>
+          </li>
+          <li>
+            The model will fetch the site map, then the concept page, then
+            call the calculate endpoint, then answer.
+          </li>
+        </ol>
+      </div>
+
+      <div class="card">
+        <h3>Build yourself an artifact</h3>
+        <p>
+          With either Claude or ChatGPT connected, try:
+        </p>
+        <pre>Build me a one-page calculator showing
+the moon's phase and visibility for every
+day of Nisan 5786. Use our live engine.</pre>
+        <p>
+          The AI will fetch <a href="/templates/standalone-calculator.html">
+          <code>/templates/standalone-calculator.html</code></a>, modify it
+          for your request, and hand it to you as a working artifact that
+          already imports our engine.
+        </p>
+      </div>
+
+      <h2>What it knows (content index)</h2>
+      <p>
+        Call <code>stats</code> via MCP or just visit
+        <a href="/mcp"><code>/mcp</code></a> in a browser for the live count.
+        Current corpus:
+      </p>
+      <ul>
+        <li><strong>6 docs</strong> — calculation spec, building guide, etc.</li>
+        <li><strong>2 class transcripts</strong> — Rabbi Zajac, via Chabad.org</li>
+        <li><strong>21 calculation steps</strong> — every step in the Rambam pipeline, with Hebrew names, KH refs, formulas, and teaching notes</li>
+        <li><strong>9 galgalim</strong> — celestial spheres with Rabbi Losh's pedagogical framing</li>
+        <li><strong>9 Rambam chapters</strong> — KH 11-19, linked to Sefaria</li>
+        <li><strong>4 concept pages</strong> — sun/moon galgalim, emtzoi vs. amiti, nekudah hanichaches</li>
+        <li><strong>4 source categories</strong> — provenance (Rambam / Interpolated / Deduced / Losh)</li>
+      </ul>
+
+      <h2>Under the hood</h2>
+      <ul>
+        <li>
+          Full site map for agents:
+          <a href="/llms.txt"><code>/llms.txt</code></a>
+        </li>
+        <li>
+          MCP descriptor:
+          <a href="/mcp"><code>/mcp</code></a> /
+          <a href="/.well-known/mcp"><code>/.well-known/mcp</code></a>
+        </li>
+        <li>
+          HTTP API: <code>/api/search</code>, <code>/api/calculate</code>,
+          <code>/api/source</code>
+        </li>
+        <li>
+          Live engine modules:
+          <a href="/engine/index.json"><code>/engine/</code></a>
+        </li>
+        <li>
+          Templates:
+          <a href="/templates/"><code>/templates/</code></a>
+        </li>
+        <li>
+          Building guide:
+          <a href="/docs/BUILDING_WITH_THE_ENGINE.md">
+            <code>/docs/BUILDING_WITH_THE_ENGINE.md</code>
+          </a>
+        </li>
+        <li>
+          Source:
+          <a href="https://github.com/rayistern/kidushhachodesh">
+            github.com/rayistern/kidushhachodesh
+          </a>
+          (MIT)
+        </li>
+      </ul>
+
+      <footer>
+        Class transcripts are teachings by Rabbi Zajac, hosted with permission.
+        Please credit Rabbi Zajac and link to
+        <a href="https://www.chabad.org">Chabad.org</a> when quoting from them.
+        Calculation engine implements the Rambam's Hilchot Kiddush HaChodesh,
+        chapters 11-19. MIT-licensed — fork, remix, and build freely.
+      </footer>
+    </main>
+
+    <script>
+      // Use the real origin at runtime so the copy buttons work on any deploy.
+      const origin = location.origin;
+      document.getElementById('site-url').textContent = origin;
+      document.getElementById('mcp-url').textContent = origin + '/mcp';
+      for (const btn of document.querySelectorAll('button.copy')) {
+        btn.addEventListener('click', () => {
+          const text = document.getElementById(btn.dataset.copy).textContent;
+          navigator.clipboard.writeText(text).then(() => {
+            const orig = btn.textContent;
+            btn.textContent = 'Copied!';
+            setTimeout(() => (btn.textContent = orig), 1200);
+          });
+        });
+      }
+    </script>
+  </body>
+</html>

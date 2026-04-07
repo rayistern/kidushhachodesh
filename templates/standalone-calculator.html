@@ -1,0 +1,97 @@
+<!doctype html>
+<!--
+  Kiddush HaChodesh — Standalone Calculator
+  ==========================================
+  A single HTML file that computes the Rambam's full astronomical pipeline
+  for any Gregorian date, by importing the live engine from the project site.
+
+  No build step, no dependencies. Drop this file anywhere (or paste it into
+  a Claude Artifact / ChatGPT canvas) and it will work.
+
+  Replace ENGINE_BASE with your deployment URL if you're self-hosting.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Kiddush HaChodesh — Standalone Calculator</title>
+    <style>
+      body { font: 15px/1.5 system-ui, sans-serif; max-width: 820px; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; }
+      h1 { margin-bottom: 0.2em; }
+      .sub { color: #666; margin-top: 0; }
+      label { display: block; margin: 1rem 0 0.3rem; font-weight: 600; }
+      input[type=date] { font: inherit; padding: 0.4rem 0.6rem; border: 1px solid #ccc; border-radius: 6px; }
+      button { font: inherit; padding: 0.5rem 1rem; border: 0; background: #2b6cb0; color: white; border-radius: 6px; cursor: pointer; margin-left: 0.5rem; }
+      table { border-collapse: collapse; margin-top: 1rem; width: 100%; }
+      th, td { text-align: left; padding: 0.4rem 0.6rem; border-bottom: 1px solid #eee; font-size: 14px; }
+      th { background: #f5f5f5; }
+      td.num { font-family: ui-monospace, monospace; text-align: right; }
+      .ref { color: #888; font-size: 12px; }
+      footer { margin-top: 3rem; color: #888; font-size: 13px; }
+    </style>
+  </head>
+  <body>
+    <h1>Kiddush HaChodesh Calculator</h1>
+    <p class="sub">Rambam's full pipeline — sun, moon, and visibility — for any Gregorian date.</p>
+
+    <label for="d">Date</label>
+    <input type="date" id="d" />
+    <button id="go">Calculate</button>
+
+    <div id="out"></div>
+
+    <footer>
+      Engine imported live from
+      <a id="src" href="#">/engine/pipeline.js</a>.
+      Source: <a href="https://github.com/rayistern/kidushhachodesh">github.com/rayistern/kidushhachodesh</a> (MIT).
+      Teachings by Rabbi Zajac via <a href="https://www.chabad.org">Chabad.org</a>.
+    </footer>
+
+    <script type="module">
+      // Change this to your deployment if self-hosting.
+      const ENGINE_BASE = new URL('.', location.href).origin;
+      document.getElementById('src').href = ENGINE_BASE + '/engine/pipeline.js';
+
+      const { getFullCalculation } = await import(ENGINE_BASE + '/engine/pipeline.js');
+
+      const dateInput = document.getElementById('d');
+      dateInput.value = new Date().toISOString().slice(0, 10);
+
+      document.getElementById('go').addEventListener('click', run);
+      run();
+
+      function run() {
+        const d = new Date(dateInput.value + 'T12:00:00Z');
+        const calc = getFullCalculation(d);
+        const out = document.getElementById('out');
+        out.innerHTML = `
+          <h2>Summary</h2>
+          <table>
+            <tr><td>Sun true longitude</td><td class="num">${fmt(calc.sun.trueLongitude)}°</td></tr>
+            <tr><td>Moon true longitude</td><td class="num">${fmt(calc.moon.trueLongitude)}°</td></tr>
+            <tr><td>Elongation</td><td class="num">${fmt(calc.moon.elongation)}°</td></tr>
+            <tr><td>Moon phase</td><td>${calc.moon.phaseHebrew} (${fmt(calc.moon.phase)})</td></tr>
+            <tr><td>Visible at sunset?</td><td>${calc.moon.isVisible ? 'yes' : 'no'}</td></tr>
+            <tr><td>Sun constellation</td><td>${calc.sun.constellation.english} / ${calc.sun.constellation.hebrew}</td></tr>
+            <tr><td>Moon constellation</td><td>${calc.moon.constellation.english} / ${calc.moon.constellation.hebrew}</td></tr>
+          </table>
+          <h2>All steps</h2>
+          <table>
+            <tr><th>Step</th><th>Rambam</th><th>Result</th></tr>
+            ${calc.steps.map((s) => `
+              <tr>
+                <td>${s.name}<div class="ref">${s.hebrewName || ''}</div></td>
+                <td class="ref">${s.rambamRef || ''}</td>
+                <td class="num">${fmt(s.result)} ${s.unit || ''}</td>
+              </tr>`).join('')}
+          </table>
+        `;
+      }
+
+      function fmt(v) {
+        if (typeof v !== 'number') return String(v);
+        return v.toFixed(4);
+      }
+    </script>
+  </body>
+</html>
