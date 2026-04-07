@@ -12,170 +12,112 @@ const DEG2RAD = Math.PI / 180;
 /**
  * MoonMechanism — the Rambam's four-galgal model of the moon (KH 14-16).
  *
- * Per Rabbi Losh's colored props:
+ * Hierarchy (the moon is PASSIVE — every galgal in the chain drags it):
  *
- *   1. RED galgal (domeh) — outermost, aligned with the kav hamazalos (ecliptic).
- *      Earth-centered. Carries the blue.
+ *   Earth (origin)
+ *   └── Red domeh group           (rotation.y = -nodeLon — slow node regression)
+ *       └── Blue noteh group      (pre-tilted 5° around X, then rotates to track moon's mean lon)
+ *           └── Green yoitzeh group (off-center inside blue, rotates at maslul rate)
+ *               └── Galgal katan group at (greenRadius, 0, 0)  (rotates at maslul rate)
+ *                   └── Moon fixed at (katanRadius, 0, 0)
  *
- *   2. BLUE galgal (noteh) — tilted 5° off the ecliptic. This tilt is what
- *      creates the moon's latitude (rosh/zanav). The blue's intersection with
- *      the ecliptic IS the rosh (ascending node). Carries the green.
- *
- *   3. GREEN galgal (yoitzeh) — OFF-CENTER inside the blue (it has its own
- *      govah). Carries the galgal katan on its rim.
- *      Daily motion: 24°23' per day.
- *
- *   4. GALGAL KATAN — small epicycle (radius 5°) on which the MOON sits.
- *      The moon's position on this small circle is the maslul (anomaly).
- *      Daily motion: 13° 3' 53.33" per day.
- *
- * The rosh slowly regresses 3'11"/day along the ecliptic (KH 16:2).
- *
- * Animation works the same way as SunMechanism: positions are computed
- * from days-since-epoch + animationDays offset directly in useFrame.
+ * Each galgal sphere wears wireframe gridlines so you can see it spin.
+ * The five-degree blue tilt is what creates the moon's latitude (rosh/zanav).
+ * The slow node regression along the ecliptic (3'11"/day) is the red rotation.
  */
 export default function MoonMechanism({
   daysFromEpoch,
-  scale = 2.5, // smaller than sun
+  scale = 2.5,
   showLabels = true,
 }) {
-  const animationSpeed = useVisualizationStore((s) => s.animationSpeed);
-  const isPlaying = useVisualizationStore((s) => s.isPlaying);
   const showRadii = useVisualizationStore((s) => s.showRadii);
   const highlightedGalgal = useVisualizationStore((s) => s.highlightedGalgal);
   const setHighlightedGalgal = useVisualizationStore((s) => s.setHighlightedGalgal);
   const selectStep = useCalculationStore((s) => s.selectStep);
 
   // ── Constants ──
-  // Moon mean longitude motion (~13°10'35"/day)
   const moonDailyMotion = useMemo(
     () => dmsToDecimal(CONSTANTS.MOON.MEAN_MOTION_PER_DAY),
     [],
   );
   const moonStartLon = CONSTANTS.MOON.MEAN_LONGITUDE_AT_EPOCH +
-    CONSTANTS.MOON.START_CONSTELLATION * 30; // absolute degrees
+    CONSTANTS.MOON.START_CONSTELLATION * 30;
 
-  // Maslul motion on the galgal katan
   const maslulDailyMotion = useMemo(
     () => dmsToDecimal(CONSTANTS.MOON.MASLUL_MEAN_MOTION),
     [],
   );
-  const maslulStart = useMemo(
-    () => dmsToDecimal(CONSTANTS.MOON.MASLUL_START),
-    [],
-  );
+  const maslulStart = useMemo(() => dmsToDecimal(CONSTANTS.MOON.MASLUL_START), []);
 
-  // Node (rosh) regression
   const nodeDailyMotion = useMemo(
-    () => -dmsToDecimal(CONSTANTS.NODE.DAILY_MOTION), // negative = regression
+    () => -dmsToDecimal(CONSTANTS.NODE.DAILY_MOTION),
     [],
   );
   const nodeStart = useMemo(() => dmsToDecimal(CONSTANTS.NODE.START_POSITION), []);
 
   const inclinationDeg = CONSTANTS.MOON.GALGALIM.BLUE_NOTEH.INCLINATION;
+  const inclinationRad = inclinationDeg * DEG2RAD;
 
   // ── Geometry ──
-  // The "moon's distance from earth" gets compressed for visibility — it
-  // would be too small relative to the sun otherwise. This is a [D]educed
-  // visualization choice. Real Rambam ratios are not preserved across
-  // different planet galgalim.
-  const redRadius = scale; // outer (Earth-centered)
-  // Eccentric offset of green inside blue — exaggerated for visibility.
-  // Real eccentricity is small (~5.5%); we use ~12%.
+  const redRadius = scale;
+  const blueRadius = redRadius * 0.97;
   const greenEccentricFraction = 0.12;
-  const blueRadius = redRadius * 0.96; // visually distinct, ecliptic-aligned
   const greenRadius = blueRadius * (1 - greenEccentricFraction);
   const greenOffset = blueRadius * greenEccentricFraction;
-  // Galgal katan radius — exaggerated. Rambam: 5° angular = small fraction of green.
   const katanRadius = greenRadius * 0.18;
 
-  // Refs for mutation
-  const blueGroupRef = useRef(); // tilted 5° around the rosh axis
-  const greenGroupRef = useRef(); // off-center inside blue, follows mean lon
-  const katanGroupRef = useRef(); // on green's rim, follows mean lon
-  const moonRef = useRef(); // on katan's rim, follows maslul
-
+  // Refs
+  const redGroupRef = useRef();
+  const blueGroupRef = useRef();
+  const greenGroupRef = useRef();
+  const katanGroupRef = useRef();
+  const moonHandleRef = useRef();
   const radiusEarthMoonRef = useRef();
-  const radiusGreenKatanRef = useRef();
-  const radiusKatanMoonRef = useRef();
-
   const labelRef = useRef();
 
   useFrame(() => {
     const days = daysFromEpoch + useVisualizationStore.getState().animationDays;
 
-    // ── 1. Compute angles ──
     const meanLon = normalizeDegrees(moonStartLon + moonDailyMotion * days);
     const maslul = normalizeDegrees(maslulStart + maslulDailyMotion * days);
     const node = normalizeDegrees(nodeStart + nodeDailyMotion * days);
 
-    const meanRad = meanLon * DEG2RAD;
-    const maslulRad = maslul * DEG2RAD;
-    const nodeRad = node * DEG2RAD;
+    // ── 1. Red domeh — rotates at the rate the rosh regresses along the ecliptic ──
+    if (redGroupRef.current) {
+      redGroupRef.current.rotation.y = -node * DEG2RAD;
+    }
 
-    // ── 2. Tilt the blue galgal (noteh) so that it's inclined 5° around
-    // the line of nodes. The line of nodes points in the direction of `node`
-    // (in the ecliptic plane). We achieve this by rotating the blue group:
-    //   first by `node` around Y (pointing the node line to its longitude)
-    //   then by `inclination` around X
-    //   then back by -`node` around Y
-    // — but we can simplify by using a quaternion that rotates the ecliptic
-    // normal (Y axis) by `inclination` around the node-direction axis.
+    // ── 2. Blue noteh — pre-tilted 5° around its local X axis,
+    // then rotated to track the moon's mean longitude RELATIVE to the node.
+    // (mean longitude minus node = position along the inclined orbit)
     if (blueGroupRef.current) {
-      const nodeAxis = new THREE.Vector3(
-        Math.cos(nodeRad),
-        0,
-        -Math.sin(nodeRad),
-      );
-      const q = new THREE.Quaternion().setFromAxisAngle(
-        nodeAxis,
-        inclinationDeg * DEG2RAD,
-      );
-      blueGroupRef.current.quaternion.copy(q);
+      // We use Euler with order 'YXZ': first Y rotation (mean - node),
+      // then X tilt (the 5° inclination).
+      blueGroupRef.current.rotation.order = 'YXZ';
+      blueGroupRef.current.rotation.y = -(meanLon - node) * DEG2RAD;
+      blueGroupRef.current.rotation.x = inclinationRad;
     }
 
-    // ── 3. Position the green galgal off-center inside the blue. The
-    // green's center sits at distance `greenOffset` from blue's center,
-    // in a direction that — per the Rambam's model — points toward the
-    // moon's mean longitude. (This is what makes the green's center the
-    // anchor of the moon's mean motion.)
-    const greenLocalX = greenOffset * Math.cos(meanRad);
-    const greenLocalZ = -greenOffset * Math.sin(meanRad);
-    if (greenGroupRef.current) {
-      greenGroupRef.current.position.set(greenLocalX, 0, greenLocalZ);
-    }
+    // ── 3. Green yoitzeh — sits off-center inside blue. We do not rotate it
+    // additionally; its position offset is what creates the eccentricity.
+    // The galgal katan inside it carries the maslul motion.
+    // (greenGroupRef has fixed position; no rotation needed at this layer.)
 
-    // ── 4. Position the galgal katan on green's rim, in the direction of
-    // the mean longitude. The katan's CENTER is the moon's mean position.
-    const katanLocalX = greenRadius * Math.cos(meanRad);
-    const katanLocalZ = -greenRadius * Math.sin(meanRad);
+    // ── 4. Galgal katan — rotates at the maslul rate ──
     if (katanGroupRef.current) {
-      katanGroupRef.current.position.set(katanLocalX, 0, katanLocalZ);
+      katanGroupRef.current.rotation.y = -maslul * DEG2RAD;
     }
 
-    // ── 5. Position the moon on the katan's rim per the maslul angle.
-    // The maslul measured FROM the line connecting earth → katan center.
-    // Local katan coordinates: angle from the same line.
-    // We rotate the maslul into world space by adding meanRad.
-    const moonLocalAngle = meanRad + maslulRad + Math.PI; // +180° because katan is "leading"
-    const moonLocalX = katanRadius * Math.cos(moonLocalAngle);
-    const moonLocalZ = -katanRadius * Math.sin(moonLocalAngle);
-    if (moonRef.current) {
-      moonRef.current.position.set(moonLocalX, 0, moonLocalZ);
-    }
-
-    // ── 6. Update radius lines ──
-    if (showRadii && radiusEarthMoonRef.current) {
-      // Compute moon's world position by walking up the parent chain
+    // ── 5. Update radius line + label ──
+    if (showRadii && radiusEarthMoonRef.current && moonHandleRef.current) {
       const moonWorld = new THREE.Vector3();
-      if (moonRef.current) moonRef.current.getWorldPosition(moonWorld);
+      moonHandleRef.current.getWorldPosition(moonWorld);
       radiusEarthMoonRef.current.geometry.setFromPoints([
         new THREE.Vector3(0, 0, 0),
         moonWorld,
       ]);
     }
 
-    // ── 7. Update label ──
     if (labelRef.current) {
       labelRef.current.textContent = `emtzoi ${formatDms(meanLon)}  •  maslul ${formatDms(maslul)}`;
     }
@@ -191,162 +133,185 @@ export default function MoonMechanism({
         setHighlightedGalgal('moon');
       }}
     >
-      {/* ── RED galgal (domeh) — outer, ecliptic-aligned ── */}
-      <mesh renderOrder={-3}>
-        <sphereGeometry args={[redRadius, 48, 32]} />
-        <meshPhysicalMaterial
-          color="#cc4444"
-          transparent
-          opacity={op(0.05)}
-          transmission={0.85}
-          roughness={0.2}
-          thickness={0.3}
-          side={THREE.DoubleSide}
-          depthWrite={false}
+      {/* ── RED domeh — outer, rotates with node regression ── */}
+      <group ref={redGroupRef}>
+        <GalgalSphere
+          radius={redRadius}
+          color="#9c4f5f"
+          ringColor="#c47588"
+          gridColor="#dc97a8"
+          opacity={op(0.04)}
+          gridOpacity={isHighlighted ? 0.32 : 0.16}
         />
-      </mesh>
-      <mesh rotation={[Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[redRadius - 0.008, redRadius + 0.008, 96]} />
-        <meshBasicMaterial color="#ee6666" transparent opacity={0.5} side={THREE.DoubleSide} />
-      </mesh>
 
-      {/* ── BLUE galgal (noteh) — tilted 5° ── */}
-      <group ref={blueGroupRef}>
-        <mesh renderOrder={-2}>
-          <sphereGeometry args={[blueRadius, 48, 32]} />
-          <meshPhysicalMaterial
-            color="#4488cc"
-            transparent
-            opacity={op(0.06)}
-            transmission={0.85}
-            roughness={0.2}
-            thickness={0.3}
-            side={THREE.DoubleSide}
-            depthWrite={false}
+        {/* ── BLUE noteh — tilted 5°, rotates at moon mean motion (relative to node) ── */}
+        <group ref={blueGroupRef}>
+          <GalgalSphere
+            radius={blueRadius}
+            color="#3d6a78"
+            ringColor="#6aa0b4"
+            gridColor="#88c0d8"
+            opacity={op(0.05)}
+            gridOpacity={isHighlighted ? 0.32 : 0.16}
           />
-        </mesh>
-        {/* Blue equator ring shows the tilted plane */}
-        <mesh rotation={[Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[blueRadius - 0.008, blueRadius + 0.008, 96]} />
-          <meshBasicMaterial color="#66aaff" transparent opacity={0.6} side={THREE.DoubleSide} />
-        </mesh>
 
-        {/* ── GREEN galgal (yoitzeh) — off-center, has its own govah ── */}
-        <group
-          ref={greenGroupRef}
-          onClick={(e) => {
-            e.stopPropagation();
-            setHighlightedGalgal('moon');
-            selectStep('moonMaslul');
-          }}
-        >
-          <mesh renderOrder={-1}>
-            <sphereGeometry args={[greenRadius, 40, 28]} />
-            <meshPhysicalMaterial
-              color="#44aa44"
-              transparent
-              opacity={op(0.07)}
-              transmission={0.85}
-              roughness={0.2}
-              thickness={0.3}
-              side={THREE.DoubleSide}
-              depthWrite={false}
-            />
-          </mesh>
-          <mesh rotation={[Math.PI / 2, 0, 0]}>
-            <ringGeometry args={[greenRadius - 0.008, greenRadius + 0.008, 96]} />
-            <meshBasicMaterial color="#66cc66" transparent opacity={0.6} side={THREE.DoubleSide} />
-          </mesh>
-
-          {/* Green's center marker (its govah) */}
-          <mesh>
-            <sphereGeometry args={[0.05, 16, 12]} />
-            <meshBasicMaterial color="#88ff88" />
-          </mesh>
-
-          {/* ── GALGAL KATAN — small epicycle ── */}
-          <group ref={katanGroupRef}>
-            <mesh
+          {/* ── GREEN yoitzeh — off-center inside blue ── */}
+          <group ref={greenGroupRef} position={[greenOffset, 0, 0]}>
+            <GalgalSphere
+              radius={greenRadius}
+              color="#5a7a5a"
+              ringColor="#8fb088"
+              gridColor="#b0d0a4"
+              opacity={op(0.06)}
+              gridOpacity={isHighlighted ? 0.34 : 0.18}
               onClick={(e) => {
                 e.stopPropagation();
-                selectStep('maslulHanachon');
+                setHighlightedGalgal('moon');
+                selectStep('moonMaslul');
               }}
-            >
-              <sphereGeometry args={[katanRadius, 24, 16]} />
-              <meshPhysicalMaterial
-                color="#dddd44"
-                transparent
-                opacity={op(0.18)}
-                transmission={0.7}
-                roughness={0.2}
-                side={THREE.DoubleSide}
-                depthWrite={false}
-              />
-            </mesh>
-            <mesh rotation={[Math.PI / 2, 0, 0]}>
-              <ringGeometry args={[katanRadius - 0.005, katanRadius + 0.005, 64]} />
-              <meshBasicMaterial color="#ffff66" transparent opacity={0.7} side={THREE.DoubleSide} />
-            </mesh>
+            />
 
-            {/* katan center marker = the moon's mean position */}
+            {/* Green's center marker (its govah) */}
             <mesh>
-              <sphereGeometry args={[0.04, 12, 8]} />
-              <meshBasicMaterial color="#ffff88" />
+              <sphereGeometry args={[0.05, 16, 12]} />
+              <meshBasicMaterial color="#a8c89a" />
             </mesh>
 
-            {/* ── THE MOON ── */}
-            <group ref={moonRef}>
-              <mesh
+            {/* ── GALGAL KATAN — small epicycle, rotates at maslul rate ── */}
+            <group ref={katanGroupRef} position={[greenRadius, 0, 0]}>
+              <GalgalSphere
+                radius={katanRadius}
+                color="#c4a978"
+                ringColor="#e4cf9a"
+                gridColor="#f4dfa8"
+                opacity={op(0.18)}
+                gridOpacity={0.5}
                 onClick={(e) => {
                   e.stopPropagation();
-                  selectStep('moonTrueLongitude');
-                  setHighlightedGalgal('moon');
+                  selectStep('maslulHanachon');
                 }}
-              >
-                <sphereGeometry args={[0.11, 24, 16]} />
-                <meshStandardMaterial
-                  color="#dddde0"
-                  emissive="#666677"
-                  emissiveIntensity={0.4}
-                />
-              </mesh>
+              />
+
+              {/* katan center marker = the moon's mean position */}
               <mesh>
-                <sphereGeometry args={[0.18, 12, 10]} />
-                <meshBasicMaterial color="#ffffff" transparent opacity={0.12} depthWrite={false} />
+                <sphereGeometry args={[0.04, 12, 8]} />
+                <meshBasicMaterial color="#f4e4a8" />
               </mesh>
 
-              {showLabels && (
-                <Html
-                  position={[0, 0.28, 0]}
-                  center
-                  style={{ pointerEvents: 'none', userSelect: 'none' }}
+              {/* ── THE MOON — fixed to the katan's rim ── */}
+              <group ref={moonHandleRef} position={[katanRadius, 0, 0]}>
+                <mesh
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    selectStep('moonTrueLongitude');
+                    setHighlightedGalgal('moon');
+                  }}
                 >
-                  <div
-                    style={{
-                      color: '#ddddff',
-                      fontSize: '11px',
-                      fontWeight: 700,
-                      textShadow: '0 0 6px #000',
-                      whiteSpace: 'nowrap',
-                    }}
+                  <sphereGeometry args={[0.13, 24, 16]} />
+                  <meshStandardMaterial
+                    color="#e8e4d8"
+                    emissive="#888a98"
+                    emissiveIntensity={0.6}
+                  />
+                </mesh>
+                <mesh>
+                  <sphereGeometry args={[0.22, 12, 10]} />
+                  <meshBasicMaterial color="#e8e4d8" transparent opacity={0.18} depthWrite={false} />
+                </mesh>
+                <mesh>
+                  <sphereGeometry args={[0.36, 10, 8]} />
+                  <meshBasicMaterial color="#ccd0e0" transparent opacity={0.06} depthWrite={false} />
+                </mesh>
+
+                {showLabels && (
+                  <Html
+                    position={[0, 0.32, 0]}
+                    center
+                    style={{ pointerEvents: 'none', userSelect: 'none' }}
                   >
-                    <div style={{ fontSize: '13px' }}>ירח</div>
-                    <div ref={labelRef} style={{ fontSize: '9px', opacity: 0.85 }}>—</div>
-                  </div>
-                </Html>
-              )}
+                    <div
+                      style={{
+                        color: '#e8e4d8',
+                        fontSize: '11px',
+                        fontWeight: 700,
+                        textShadow: '0 0 8px #000, 0 0 4px #000',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      <div style={{ fontSize: '13px' }}>ירח</div>
+                      <div ref={labelRef} style={{ fontSize: '9px', opacity: 0.85 }}>—</div>
+                    </div>
+                  </Html>
+                )}
+              </group>
             </group>
           </group>
         </group>
       </group>
 
-      {/* ── RADIUS LINE: Earth → Moon (in world coordinates) ── */}
+      {/* ── RADIUS LINE: Earth → Moon ── */}
       {showRadii && (
         <line ref={radiusEarthMoonRef}>
           <bufferGeometry />
-          <lineBasicMaterial color="#aaccff" transparent opacity={0.4} />
+          <lineBasicMaterial color="#b6c2d4" transparent opacity={0.4} />
         </line>
       )}
+    </group>
+  );
+}
+
+/**
+ * Galgal sphere with body + equator ring + wireframe gridlines + prime meridian.
+ * The wireframe is what makes the rotation visible.
+ */
+function GalgalSphere({
+  radius,
+  color,
+  ringColor,
+  gridColor,
+  opacity,
+  gridOpacity,
+  onClick,
+}) {
+  return (
+    <group onClick={onClick}>
+      <mesh renderOrder={-radius}>
+        <sphereGeometry args={[radius, 48, 32]} />
+        <meshPhysicalMaterial
+          color={color}
+          transparent
+          opacity={opacity}
+          transmission={0.88}
+          roughness={0.18}
+          thickness={0.4}
+          side={THREE.DoubleSide}
+          depthWrite={false}
+        />
+      </mesh>
+
+      {/* Wireframe gridlines — show rotation */}
+      <mesh renderOrder={-radius + 0.1}>
+        <sphereGeometry args={[radius * 1.001, 16, 10]} />
+        <meshBasicMaterial
+          color={gridColor}
+          transparent
+          opacity={gridOpacity}
+          wireframe
+          depthWrite={false}
+        />
+      </mesh>
+
+      {/* Equator ring */}
+      <mesh rotation={[Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[radius - 0.012, radius + 0.012, 96]} />
+        <meshBasicMaterial color={ringColor} side={THREE.DoubleSide} transparent opacity={0.6} />
+      </mesh>
+
+      {/* Prime meridian (great circle) */}
+      <mesh rotation={[0, 0, 0]}>
+        <ringGeometry args={[radius - 0.008, radius + 0.008, 96]} />
+        <meshBasicMaterial color={ringColor} side={THREE.DoubleSide} transparent opacity={0.4} />
+      </mesh>
     </group>
   );
 }

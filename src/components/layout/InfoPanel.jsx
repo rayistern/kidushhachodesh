@@ -9,7 +9,7 @@ export default function InfoPanel() {
   const setRightPanel = useUIStore((s) => s.setRightPanel);
 
   return (
-    <aside className="w-80 border-l border-[var(--color-border)] bg-[var(--color-surface)] overflow-y-auto flex-shrink-0 flex flex-col">
+    <aside className="w-full h-full border-l border-[var(--color-border)] bg-[var(--color-surface)] overflow-y-auto flex flex-col">
       {/* Panel tabs */}
       <div className="flex border-b border-[var(--color-border)]">
         <PanelTab

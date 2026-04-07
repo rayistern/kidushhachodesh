@@ -45,7 +45,10 @@ export const useVisualizationStore = create((set, get) => ({
   togglePlaying: () => set((s) => ({ isPlaying: !s.isPlaying })),
 
   // ── Display toggles ──
-  sidewaysAxis: false,
+  // Default sideways: looking at the ecliptic edge-on with east at the top.
+  // This is Rabbi Losh's preferred orientation — the sun moves "up" through
+  // the zodiac as it ages, not "around" a north-pole-down map.
+  sidewaysAxis: true,
   toggleSidewaysAxis: () => set((s) => ({ sidewaysAxis: !s.sidewaysAxis })),
 
   showGalgalim: true,

@@ -21,7 +21,7 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="w-72 border-r border-[var(--color-border)] bg-[var(--color-surface)] overflow-y-auto flex-shrink-0">
+    <aside className="w-full h-full border-r border-[var(--color-border)] bg-[var(--color-surface)] overflow-y-auto">
       {/* Date section */}
       <div className="p-4 border-b border-[var(--color-border)]">
         <label className="text-xs text-[var(--color-text-secondary)] uppercase tracking-wide">Date</label>
@@ -186,12 +186,12 @@ function ValueRow({ label, hebrewLabel, value, onClick, highlight, source, toolt
   return (
     <div
       onClick={onClick}
-      className={`flex justify-between items-center px-4 py-1.5 text-xs border-b border-[var(--color-border)] border-opacity-30 ${
+      className={`flex justify-between items-center gap-2 px-4 py-1.5 text-xs border-b border-[var(--color-border)] border-opacity-30 ${
         onClick ? 'cursor-pointer hover:bg-[var(--color-card)]' : ''
       } ${highlight ? 'bg-[var(--color-accent)] bg-opacity-10' : ''}`}
       title={tooltip}
     >
-      <span className="text-[var(--color-text-secondary)] flex items-center gap-1">
+      <span className="text-[var(--color-text-secondary)] flex items-center gap-1 min-w-0 flex-1">
         {sourceInfo && (
           <span
             className="inline-block w-1.5 h-1.5 rounded-full flex-shrink-0"
@@ -199,10 +199,12 @@ function ValueRow({ label, hebrewLabel, value, onClick, highlight, source, toolt
             title={sourceInfo.description}
           />
         )}
-        {label}
-        {hebrewLabel && <span className="hebrew-text ml-1 opacity-60">({hebrewLabel})</span>}
+        <span className="truncate">{label}</span>
+        {hebrewLabel && (
+          <span className="hebrew-text opacity-60 truncate flex-shrink min-w-0">({hebrewLabel})</span>
+        )}
       </span>
-      <span className="font-mono text-[var(--color-text)]">{value}</span>
+      <span className="font-mono text-[var(--color-text)] flex-shrink-0 whitespace-nowrap">{value}</span>
     </div>
   );
 }

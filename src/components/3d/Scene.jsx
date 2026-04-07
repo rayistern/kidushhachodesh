@@ -33,8 +33,17 @@ function CelestialScene() {
 
   const daysFromEpoch = calculation.daysFromEpoch;
 
+  // Sideways (Rabbi Losh) = look at the ecliptic head-on with east at the
+  // top of the screen. Achieved by rotating the scene 90° around X (lifting
+  // the ecliptic plane upright) and 90° around Z (so longitude 0° / Aries
+  // sits at the top instead of the right).
+  // Top-down = the standard astronomical map view with north at top.
+  const sceneRotation = sidewaysAxis
+    ? [Math.PI / 2, 0, Math.PI / 2]
+    : [0, 0, 0];
+
   return (
-    <group rotation={sidewaysAxis ? [0, 0, Math.PI / 2] : [0, 0, 0]}>
+    <group rotation={sceneRotation}>
       <Stars radius={80} depth={50} count={2500} factor={2} fade speed={0.4} />
 
       {/* ── EARTH at the center ── */}
@@ -82,7 +91,7 @@ export default function Scene3D() {
         gl={{ antialias: true, alpha: true, sortObjects: false }}
         style={{ background: '#070a12', borderRadius: '12px' }}
       >
-        <PerspectiveCamera makeDefault position={[0, 6, 12]} fov={55} />
+        <PerspectiveCamera makeDefault position={[0, 2, 14]} fov={55} />
         <OrbitControls
           enableDamping
           dampingFactor={0.08}
@@ -102,6 +111,8 @@ export default function Scene3D() {
 
 /**
  * Bottom overlay with play/pause + speed selector + scrubber + display toggles.
+ * On narrow screens the second toggle row collapses behind a "More" button
+ * to keep the overlay shallow.
  */
 function PlaybackOverlay() {
   const isPlaying = useVisualizationStore((s) => s.isPlaying);
@@ -126,46 +137,64 @@ function PlaybackOverlay() {
     return () => clearInterval(id);
   }, [isPlaying]);
 
-  const speeds = [
-    { v: 1, label: '1 d/s' },
-    { v: 30, label: '1 mo/s' },
-    { v: 365, label: '1 yr/s' },
-    { v: 3650, label: '10 yr/s' },
-    { v: 25550, label: '70 yr/s' },
-  ];
+  const [moreOpen, setMoreOpen] = React.useState(false);
+  const [isNarrow, setIsNarrow] = React.useState(
+    typeof window !== 'undefined' ? window.innerWidth < 640 : false,
+  );
+  useEffect(() => {
+    const handler = () => setIsNarrow(window.innerWidth < 640);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+
+  // Speed presets — abbreviated labels on narrow screens
+  const speeds = isNarrow
+    ? [
+        { v: 1, label: '1d' },
+        { v: 30, label: '1mo' },
+        { v: 365, label: '1yr' },
+        { v: 3650, label: '10y' },
+      ]
+    : [
+        { v: 1, label: '1 d/s' },
+        { v: 30, label: '1 mo/s' },
+        { v: 365, label: '1 yr/s' },
+        { v: 3650, label: '10 yr/s' },
+        { v: 25550, label: '70 yr/s' },
+      ];
 
   return (
     <div
       style={{
         position: 'absolute',
-        bottom: 12,
-        left: 12,
-        right: 12,
-        background: 'rgba(10, 14, 22, 0.85)',
+        bottom: 8,
+        left: 8,
+        right: 8,
+        background: 'rgba(24, 28, 32, 0.88)',
         backdropFilter: 'blur(8px)',
         border: '1px solid rgba(120, 140, 180, 0.25)',
         borderRadius: 10,
-        padding: '10px 14px',
-        color: '#dde',
+        padding: isNarrow ? '6px 8px' : '10px 14px',
+        color: 'var(--color-text)',
         fontSize: 12,
         display: 'flex',
         flexDirection: 'column',
-        gap: 8,
+        gap: isNarrow ? 5 : 8,
+        zIndex: 5,
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
         <button
           onClick={togglePlaying}
-          style={btnStyle(isPlaying ? '#4ef7a1' : '#aaa')}
+          style={btnStyle(isPlaying ? '#4ef7a1' : '#c9d6e3')}
           title={isPlaying ? 'Pause' : 'Play'}
         >
           {isPlaying ? '❚❚' : '▶'}
         </button>
-        <button onClick={resetAnimation} style={btnStyle('#aaa')} title="Reset to selected date">
+        <button onClick={resetAnimation} style={btnStyle('#c9d6e3')} title="Reset">
           ↺
         </button>
 
-        <span style={{ opacity: 0.7, marginLeft: 4 }}>Speed:</span>
         {speeds.map((s) => (
           <button
             key={s.v}
@@ -176,10 +205,28 @@ function PlaybackOverlay() {
           </button>
         ))}
 
-        <span style={{ marginLeft: 'auto', opacity: 0.7, fontFamily: 'monospace' }}>
-          offset: {animationDays >= 0 ? '+' : ''}
-          {animationDays.toFixed(1)} d
+        <span
+          style={{
+            marginLeft: 'auto',
+            opacity: 0.75,
+            fontFamily: 'monospace',
+            fontSize: isNarrow ? 10 : 11,
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {animationDays >= 0 ? '+' : ''}
+          {animationDays.toFixed(0)}d
         </span>
+
+        {isNarrow && (
+          <button
+            onClick={() => setMoreOpen((o) => !o)}
+            style={btnStyle('#c9d6e3')}
+            title="More controls"
+          >
+            ⋯
+          </button>
+        )}
       </div>
 
       <input
@@ -192,17 +239,19 @@ function PlaybackOverlay() {
         style={{ width: '100%', accentColor: '#4ea1f7' }}
       />
 
-      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-        <button onClick={toggleSidewaysAxis} style={btnStyle(sidewaysAxis ? '#4ef7a1' : '#555')}>
-          Rabbi Losh view {sidewaysAxis ? '✓' : ''}
-        </button>
-        <button onClick={toggleRadii} style={btnStyle(showRadii ? '#4ea1f7' : '#555')}>
-          Radii {showRadii ? '✓' : ''}
-        </button>
-        <button onClick={toggleLabels} style={btnStyle(showLabels ? '#4ea1f7' : '#555')}>
-          Labels {showLabels ? '✓' : ''}
-        </button>
-      </div>
+      {(!isNarrow || moreOpen) && (
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          <button onClick={toggleSidewaysAxis} style={btnStyle(!sidewaysAxis ? '#e4b94a' : '#555')}>
+            Top-down {!sidewaysAxis ? '✓' : ''}
+          </button>
+          <button onClick={toggleRadii} style={btnStyle(showRadii ? '#4ea1f7' : '#555')}>
+            Radii {showRadii ? '✓' : ''}
+          </button>
+          <button onClick={toggleLabels} style={btnStyle(showLabels ? '#4ea1f7' : '#555')}>
+            Labels {showLabels ? '✓' : ''}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -223,24 +272,28 @@ function btnStyle(color) {
 
 /**
  * Top-right legend explaining the colors of each galgal.
+ * Default collapsed on narrow viewports.
  */
 function LegendOverlay() {
-  const [open, setOpen] = React.useState(true);
+  const [open, setOpen] = React.useState(
+    typeof window === 'undefined' ? true : window.innerWidth >= 768,
+  );
 
   return (
     <div
       style={{
         position: 'absolute',
-        top: 12,
-        right: 12,
-        background: 'rgba(10, 14, 22, 0.85)',
+        top: 8,
+        right: 8,
+        background: 'rgba(24, 28, 32, 0.88)',
         backdropFilter: 'blur(8px)',
         border: '1px solid rgba(120, 140, 180, 0.25)',
         borderRadius: 10,
         padding: open ? '10px 14px' : '6px 10px',
-        color: '#dde',
+        color: 'var(--color-text)',
         fontSize: 11,
         maxWidth: 260,
+        zIndex: 5,
       }}
     >
       <div
@@ -259,16 +312,16 @@ function LegendOverlay() {
       {open && (
         <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 8 }}>
           <Section title="Sun (KH 12-13)">
-            <Item color="#3b6fd4" label="Blue galgal" sub="outer, Earth-centered, ~1°/70yr" />
-            <Item color="#d44747" label="Red galgal" sub="off-center, carries the sun" />
-            <Item color="#ffdd44" label="Sun" sub="on the red's rim" />
+            <Item color="#7fa8d8" label="Blue galgal" sub="outer, Earth-centered, ~1°/70yr" />
+            <Item color="#d8895a" label="Red galgal" sub="off-center, carries the sun" />
+            <Item color="#fde29a" label="Sun" sub="on the red's rim" />
           </Section>
           <Section title="Moon (KH 14-16)">
-            <Item color="#cc4444" label="Red (domeh)" sub="ecliptic-aligned" />
-            <Item color="#4488cc" label="Blue (noteh)" sub="tilted 5° → latitude" />
-            <Item color="#44aa44" label="Green (yoitzeh)" sub="off-center, has its own govah" />
-            <Item color="#dddd44" label="Galgal katan" sub="small epicycle (radius 5°)" />
-            <Item color="#dddde0" label="Moon" sub="on the katan's rim" />
+            <Item color="#c47588" label="Red (domeh)" sub="ecliptic-aligned" />
+            <Item color="#6aa0b4" label="Blue (noteh)" sub="tilted 5° → latitude" />
+            <Item color="#8fb088" label="Green (yoitzeh)" sub="off-center, has its own govah" />
+            <Item color="#e4cf9a" label="Galgal katan" sub="small epicycle (radius 5°)" />
+            <Item color="#e8e4d8" label="Moon" sub="on the katan's rim" />
           </Section>
           <div style={{ fontSize: 10, opacity: 0.6, marginTop: 4 }}>
             Eccentricities exaggerated for visibility (real values are ~1-5%).

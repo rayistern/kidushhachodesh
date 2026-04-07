@@ -12,30 +12,26 @@ const DEG2RAD = Math.PI / 180;
 /**
  * SunMechanism — the Rambam's two-galgal model of the sun (KH 12-13).
  *
- * What you are seeing:
- *   • BLUE galgal (outer)  — centered on Earth. Carries the red galgal.
- *                            Rotates extremely slowly (~1°/70yr) — visually static.
- *   • RED galgal (inner)   — OFF-CENTER inside the blue. Its center is the
- *                            "eccentric point" (the govah's anchor).
- *                            Carries the sun on its rim.
- *                            Rotates ~59'8"/day — most of the visible motion.
- *   • SUN — sits on the rim of the red galgal.
+ * Hierarchy (the body is PASSIVE — the galgalim drag it):
  *
- *   The sun's emtzoi (mean longitude) is its angle as seen from the RED'S CENTER.
- *   The sun's amiti (true longitude) is its angle as seen from EARTH.
- *   The difference = the maslul correction (max ~2°).
+ *   Earth (origin)
+ *   └── Blue galgal group   (rotation.y = -apogee)
+ *       ├── Eccentric point marker (at offset, 0, 0)
+ *       └── Red galgal group at (offset, 0, 0)   (rotation.y = -maslul)
+ *           └── Sun fixed at (redRadius, 0, 0)
  *
- * Animation:
- *   The mechanism is driven directly by days-since-epoch + animationDays offset
- *   from the visualization store. Engine functions are not re-run per frame —
- *   we just compute the two cheap angles in JS.
+ * The blue rotates extremely slowly (~1°/70 yr — apogee precession). Within
+ * its frame, the red rotates at the maslul rate (~59'/day relative to apogee).
+ * Combined, the sun's absolute longitude = apogee + maslul = emtzoi. ✓
+ *
+ * Both galgalim wear visible meridian/parallel gridlines so you can SEE the
+ * rotation — without those, a rotating sphere looks identical to a static one.
  */
 export default function SunMechanism({
   daysFromEpoch,
-  scale = 4, // scene units per "blue galgal radius"
+  scale = 4,
   showLabels = true,
 }) {
-  const animationDays = useVisualizationStore((s) => s.animationDays);
   const isPlaying = useVisualizationStore((s) => s.isPlaying);
   const animationSpeed = useVisualizationStore((s) => s.animationSpeed);
   const advanceAnimation = useVisualizationStore((s) => s.advanceAnimation);
@@ -56,24 +52,20 @@ export default function SunMechanism({
   const apogeeMotion = CONSTANTS.SUN.APOGEE_MOTION_PER_DAY;
 
   // ── Geometry ──
-  const blueRadius = scale; // Earth-centered (the actual sphere of the sun)
-  // Eccentric offset — keep it visually obvious (~10% of radius) even though
-  // physically it's only ~1.7%. This is a [D]educed visualization choice.
+  const blueRadius = scale;
   const eccentricFraction = 0.18;
-  const redRadius = blueRadius * (1 - eccentricFraction); // sits inside the blue
+  const redRadius = blueRadius * (1 - eccentricFraction);
   const eccentricOffset = blueRadius * eccentricFraction;
 
-  // Refs that we mutate from useFrame so we never trigger React re-renders
-  const sunRef = useRef();
-  const eccentricGroupRef = useRef();
-  const redRingRef = useRef();
+  // Refs
+  const blueGroupRef = useRef();
+  const redGroupRef = useRef();
   const radiusEarthSunRef = useRef();
   const radiusEarthEccRef = useRef();
   const radiusEccSunRef = useRef();
   const lastFrameTimeRef = useRef(null);
-
-  // Static refs — for the meanLon HTML overlay
   const labelRef = useRef();
+  const sunHandleRef = useRef();
 
   useFrame((state) => {
     // ── 1. Advance the animation clock ──
@@ -88,71 +80,55 @@ export default function SunMechanism({
       lastFrameTimeRef.current = null;
     }
 
-    // ── 2. Compute current days ──
+    // ── 2. Compute angles ──
     const days = daysFromEpoch + useVisualizationStore.getState().animationDays;
-
-    // ── 3. Apogee + mean longitude ──
     const apogee = normalizeDegrees(apogeeStart + apogeeMotion * days);
     const meanLon = normalizeDegrees(startPos + dailyMotion * days);
+    // The maslul is the sun's angle from the apogee = emtzoi - apogee
+    const maslul = normalizeDegrees(meanLon - apogee);
 
-    // ── 4. Position the eccentric point ──
-    // The line from Earth → eccentric points toward the apogee direction.
-    const apogeeRad = apogee * DEG2RAD;
-    const eccX = eccentricOffset * Math.cos(apogeeRad);
-    const eccZ = -eccentricOffset * Math.sin(apogeeRad);
-    if (eccentricGroupRef.current) {
-      eccentricGroupRef.current.position.set(eccX, 0, eccZ);
+    // ── 3. Drive the rotations (negative because of screen-coord convention) ──
+    if (blueGroupRef.current) {
+      blueGroupRef.current.rotation.y = -apogee * DEG2RAD;
+    }
+    if (redGroupRef.current) {
+      redGroupRef.current.rotation.y = -maslul * DEG2RAD;
     }
 
-    // ── 5. Position the sun on the red galgal ──
-    // The sun's angle FROM THE ECCENTRIC POINT equals meanLon (this is what
-    // "emtzoi" means in the Rambam — the angle as seen from the red's center).
-    const meanRad = meanLon * DEG2RAD;
-    const sunLocalX = redRadius * Math.cos(meanRad);
-    const sunLocalZ = -redRadius * Math.sin(meanRad);
-    // World coordinates of the sun (eccentric origin + local)
-    const sunWorldX = eccX + sunLocalX;
-    const sunWorldZ = eccZ + sunLocalZ;
-    if (sunRef.current) {
-      sunRef.current.position.set(sunWorldX, 0, sunWorldZ);
-    }
+    // ── 4. Update radius lines + label ──
+    if (showRadii && sunHandleRef.current) {
+      const sunWorld = new THREE.Vector3();
+      sunHandleRef.current.getWorldPosition(sunWorld);
 
-    // ── 6. Update radius lines ──
-    if (showRadii) {
+      // Eccentric world position (also a child of blue group)
+      const eccWorld = new THREE.Vector3(eccentricOffset, 0, 0);
+      if (blueGroupRef.current) eccWorld.applyMatrix4(blueGroupRef.current.matrixWorld);
+
       if (radiusEarthEccRef.current) {
         radiusEarthEccRef.current.geometry.setFromPoints([
           new THREE.Vector3(0, 0, 0),
-          new THREE.Vector3(eccX, 0, eccZ),
+          eccWorld,
         ]);
       }
       if (radiusEarthSunRef.current) {
         radiusEarthSunRef.current.geometry.setFromPoints([
           new THREE.Vector3(0, 0, 0),
-          new THREE.Vector3(sunWorldX, 0, sunWorldZ),
+          sunWorld,
         ]);
       }
       if (radiusEccSunRef.current) {
-        radiusEccSunRef.current.geometry.setFromPoints([
-          new THREE.Vector3(eccX, 0, eccZ),
-          new THREE.Vector3(sunWorldX, 0, sunWorldZ),
-        ]);
+        radiusEccSunRef.current.geometry.setFromPoints([eccWorld, sunWorld]);
       }
     }
 
-    // ── 7. Update label text via DOM (no React re-render) ──
     if (labelRef.current) {
-      // Compute amiti (true longitude) for the label
-      const trueAngle = normalizeDegrees(
-        Math.atan2(-sunWorldZ, sunWorldX) / DEG2RAD,
-      );
-      labelRef.current.textContent =
-        `emtzoi ${formatDms(meanLon)}  →  amiti ${formatDms(trueAngle)}`;
+      labelRef.current.textContent = `emtzoi ${formatDms(meanLon)}  •  apogee ${formatDms(apogee)}`;
     }
   });
 
   const isHighlighted = highlightedGalgal === 'sun';
-  const blueOpacity = isHighlighted ? 0.18 : 0.06;
-  const redOpacity = isHighlighted ? 0.22 : 0.1;
+  const blueOpacity = isHighlighted ? 0.16 : 0.05;
+  const redOpacity = isHighlighted ? 0.2 : 0.08;
 
   return (
     <group
@@ -162,133 +138,170 @@ export default function SunMechanism({
       }}
     >
       {/* ── BLUE GALGAL (outer, Earth-centered) ── */}
-      <mesh renderOrder={-2}>
-        <sphereGeometry args={[blueRadius, 48, 32]} />
-        <meshPhysicalMaterial
-          color="#3b6fd4"
-          transparent
+      <group ref={blueGroupRef}>
+        <GalgalSphere
+          radius={blueRadius}
+          color="#3a5478"
+          ringColor="#7fa8d8"
           opacity={blueOpacity}
-          transmission={0.85}
-          roughness={0.2}
-          thickness={0.3}
-          side={THREE.DoubleSide}
-          depthWrite={false}
+          gridColor="#9bc0e8"
+          gridOpacity={isHighlighted ? 0.35 : 0.18}
         />
-      </mesh>
-      {/* Blue equator ring (the sun's deferent in the ecliptic plane) */}
-      <mesh rotation={[Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[blueRadius - 0.01, blueRadius + 0.01, 96]} />
-        <meshBasicMaterial
-          color="#5e8fe6"
-          side={THREE.DoubleSide}
-          transparent
-          opacity={0.6}
-        />
-      </mesh>
 
-      {/* ── ECCENTRIC GROUP (carries the red galgal) ── */}
-      <group ref={eccentricGroupRef}>
-        {/* Red galgal — sphere */}
-        <mesh
-          ref={redRingRef}
-          onClick={(e) => {
-            e.stopPropagation();
-            setHighlightedGalgal('sun');
-            selectStep('sunMeanLongitude');
-          }}
-        >
-          <sphereGeometry args={[redRadius, 48, 32]} />
-          <meshPhysicalMaterial
-            color="#d44747"
-            transparent
+        {/* Eccentric center marker — sits inside blue at offset */}
+        <mesh position={[eccentricOffset, 0, 0]}>
+          <sphereGeometry args={[0.07, 16, 12]} />
+          <meshBasicMaterial color="#e4b94a" />
+        </mesh>
+
+        {/* ── RED GALGAL (off-center, carries the sun) ── */}
+        <group ref={redGroupRef} position={[eccentricOffset, 0, 0]}>
+          <GalgalSphere
+            radius={redRadius}
+            color="#a8623a"
+            ringColor="#d8895a"
             opacity={redOpacity}
-            transmission={0.8}
-            roughness={0.2}
-            thickness={0.3}
-            side={THREE.DoubleSide}
-            depthWrite={false}
+            gridColor="#f0b090"
+            gridOpacity={isHighlighted ? 0.4 : 0.22}
+            onClick={(e) => {
+              e.stopPropagation();
+              setHighlightedGalgal('sun');
+              selectStep('sunMeanLongitude');
+            }}
           />
-        </mesh>
-        {/* Red equator ring */}
-        <mesh rotation={[Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[redRadius - 0.01, redRadius + 0.01, 96]} />
-          <meshBasicMaterial
-            color="#ff7777"
-            side={THREE.DoubleSide}
-            transparent
-            opacity={0.7}
-          />
-        </mesh>
 
-        {/* Eccentric center marker */}
-        <mesh>
-          <sphereGeometry args={[0.06, 16, 12]} />
-          <meshBasicMaterial color="#ff9966" />
-        </mesh>
-      </group>
-
-      {/* ── THE SUN ── */}
-      <group ref={sunRef}>
-        <mesh
-          onClick={(e) => {
-            e.stopPropagation();
-            selectStep('sunTrueLongitude');
-            setHighlightedGalgal('sun');
-          }}
-        >
-          <sphereGeometry args={[0.18, 32, 24]} />
-          <meshStandardMaterial
-            color="#ffdd44"
-            emissive="#ffaa00"
-            emissiveIntensity={1.6}
-          />
-        </mesh>
-        {/* Soft glow */}
-        <mesh>
-          <sphereGeometry args={[0.32, 16, 12]} />
-          <meshBasicMaterial color="#ffdd44" transparent opacity={0.18} depthWrite={false} />
-        </mesh>
-        <pointLight color="#ffeeaa" intensity={1.2} distance={20} />
-
-        {showLabels && (
-          <Html
-            position={[0, 0.45, 0]}
-            center
-            style={{ pointerEvents: 'none', userSelect: 'none' }}
-          >
-            <div
-              style={{
-                color: '#ffdd66',
-                fontSize: '11px',
-                fontWeight: 700,
-                textShadow: '0 0 6px #000',
-                whiteSpace: 'nowrap',
+          {/* ── THE SUN — fixed to red's rim ── */}
+          <group ref={sunHandleRef} position={[redRadius, 0, 0]}>
+            <mesh
+              onClick={(e) => {
+                e.stopPropagation();
+                selectStep('sunTrueLongitude');
+                setHighlightedGalgal('sun');
               }}
             >
-              <div style={{ fontSize: '13px' }}>שמש</div>
-              <div ref={labelRef} style={{ fontSize: '9px', opacity: 0.85 }}>—</div>
-            </div>
-          </Html>
-        )}
+              <sphereGeometry args={[0.2, 32, 24]} />
+              <meshStandardMaterial
+                color="#fde29a"
+                emissive="#e4b94a"
+                emissiveIntensity={1.8}
+              />
+            </mesh>
+            <mesh>
+              <sphereGeometry args={[0.36, 16, 12]} />
+              <meshBasicMaterial color="#f4cf6c" transparent opacity={0.22} depthWrite={false} />
+            </mesh>
+            <mesh>
+              <sphereGeometry args={[0.55, 12, 10]} />
+              <meshBasicMaterial color="#f4cf6c" transparent opacity={0.08} depthWrite={false} />
+            </mesh>
+            <pointLight color="#fff0c4" intensity={1.5} distance={22} />
+
+            {showLabels && (
+              <Html
+                position={[0, 0.5, 0]}
+                center
+                style={{ pointerEvents: 'none', userSelect: 'none' }}
+              >
+                <div
+                  style={{
+                    color: '#fde29a',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    textShadow: '0 0 8px #000, 0 0 4px #000',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  <div style={{ fontSize: '13px' }}>שמש</div>
+                  <div ref={labelRef} style={{ fontSize: '9px', opacity: 0.85 }}>—</div>
+                </div>
+              </Html>
+            )}
+          </group>
+        </group>
       </group>
 
-      {/* ── RADIUS LINES ── */}
+      {/* ── RADIUS LINES (in world space) ── */}
       {showRadii && (
         <>
           <line ref={radiusEarthEccRef}>
             <bufferGeometry />
-            <lineBasicMaterial color="#ff9966" transparent opacity={0.6} />
+            <lineBasicMaterial color="#e4b94a" transparent opacity={0.55} />
           </line>
           <line ref={radiusEarthSunRef}>
             <bufferGeometry />
-            <lineBasicMaterial color="#ffdd44" transparent opacity={0.5} />
+            <lineBasicMaterial color="#fde29a" transparent opacity={0.5} />
           </line>
           <line ref={radiusEccSunRef}>
             <bufferGeometry />
-            <lineBasicMaterial color="#ff7777" transparent opacity={0.5} />
+            <lineBasicMaterial color="#d8895a" transparent opacity={0.5} />
           </line>
         </>
       )}
+    </group>
+  );
+}
+
+/**
+ * A galgal sphere with a transparent body, an equator ring, AND a wireframe
+ * grid of meridians and parallels so you can SEE the rotation.
+ *
+ * Note: this geometry is local to its parent group, so when the parent rotates,
+ * the entire sphere (gridlines included) rotates visibly.
+ */
+function GalgalSphere({
+  radius,
+  color,
+  ringColor,
+  opacity,
+  gridColor,
+  gridOpacity,
+  onClick,
+}) {
+  return (
+    <group onClick={onClick}>
+      {/* Body */}
+      <mesh renderOrder={-radius}>
+        <sphereGeometry args={[radius, 48, 32]} />
+        <meshPhysicalMaterial
+          color={color}
+          transparent
+          opacity={opacity}
+          transmission={0.88}
+          roughness={0.18}
+          thickness={0.4}
+          side={THREE.DoubleSide}
+          depthWrite={false}
+        />
+      </mesh>
+
+      {/* Wireframe grid — this is what shows the rotation */}
+      <mesh renderOrder={-radius + 0.1}>
+        <sphereGeometry args={[radius * 1.001, 16, 10]} />
+        <meshBasicMaterial
+          color={gridColor}
+          transparent
+          opacity={gridOpacity}
+          wireframe
+          depthWrite={false}
+        />
+      </mesh>
+
+      {/* Equator ring (heavier than the wireframe) */}
+      <mesh rotation={[Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[radius - 0.012, radius + 0.012, 96]} />
+        <meshBasicMaterial color={ringColor} side={THREE.DoubleSide} transparent opacity={0.6} />
+      </mesh>
+
+      {/* Prime meridian — a vertical great-circle ring at longitude 0 */}
+      <mesh rotation={[0, 0, 0]}>
+        <ringGeometry args={[radius - 0.008, radius + 0.008, 96]} />
+        <meshBasicMaterial
+          color={ringColor}
+          side={THREE.DoubleSide}
+          transparent
+          opacity={0.45}
+        />
+      </mesh>
     </group>
   );
 }
