@@ -13,6 +13,12 @@
   node_bundler = "esbuild"
   included_files = ["docs/**", "src/engine/**", "templates/**"]
 
+# Edge function on "/" that serves /llms.txt to known AI bots and browsers
+# that ask for non-HTML content. Real browsers pass through to the SPA.
+[[edge_functions]]
+  function = "agent-router"
+  path = "/"
+
 # SPA fallback — functions and static files take precedence automatically,
 # so /mcp, /api/*, /docs/*.md, /llms.txt, and /agents.md are unaffected.
 [[redirects]]

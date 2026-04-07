@@ -88,6 +88,39 @@
       </div>
     </noscript>
     <div id="root"></div>
+
+    <!--
+      Agent-visible block OUTSIDE #root. React only hydrates into #root,
+      so this content survives rendering. Browsing AIs that execute JS
+      (Claude's web tool, ChatGPT with browsing, Perplexity, etc.) extract
+      text from the rendered DOM and will see this. Styled small and
+      unobtrusive for humans.
+    -->
+    <aside
+      id="agent-map"
+      style="
+        position: fixed;
+        right: 8px;
+        bottom: 8px;
+        max-width: 260px;
+        padding: 8px 10px;
+        font: 11px/1.4 system-ui, sans-serif;
+        color: #888;
+        background: rgba(20, 20, 24, 0.72);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 6px;
+        z-index: 5;
+        pointer-events: auto;
+      "
+      aria-label="For AI assistants"
+    >
+      <strong style="color:#aaa">🤖 AI agents:</strong> this is a JS-rendered
+      React app. Read <a href="/llms.txt" style="color:#8ab4f8">/llms.txt</a>
+      for the site map, or use the MCP endpoint at
+      <a href="/mcp" style="color:#8ab4f8">/mcp</a>. Humans:
+      <a href="/ai.html" style="color:#8ab4f8">chat with this project using any AI</a>.
+    </aside>
+
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
