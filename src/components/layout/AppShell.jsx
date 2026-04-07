@@ -9,6 +9,7 @@ import Scene3D from '../3d/Scene';
 import EclipticRibbon from '../visualizations/EclipticRibbon';
 import { useRouteSync } from '../../hooks/useRouteSync';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
+import { useT } from '../../i18n';
 
 /**
  * AppShell — three-zone layout that behaves differently on desktop vs mobile.
@@ -27,6 +28,9 @@ import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 export default function AppShell({ initialPreset = 'home' }) {
   useRouteSync(initialPreset);
   useKeyboardShortcuts();
+  const t = useT();
+  const locale = useUIStore((s) => s.locale);
+  const setLocale = useUIStore((s) => s.setLocale);
   const currentDate = useCalendarStore((s) => s.currentDate);
   const compute = useCalculationStore((s) => s.compute);
   const isWideViewport = useUIStore((s) => s.isWideViewport);
@@ -67,8 +71,10 @@ export default function AppShell({ initialPreset = 'home' }) {
           <PanelToggle
             onClick={toggleLeftPanel}
             active={leftPanelOpen}
-            label="Values"
+            label={t('values')}
             aria-label="Toggle values panel"
+            aria-expanded={leftPanelOpen}
+            aria-controls="kh-left-panel"
           >
             <HamburgerIcon />
           </PanelToggle>
@@ -80,10 +86,18 @@ export default function AppShell({ initialPreset = 'home' }) {
           </span>
         </div>
         <div className="flex items-center gap-0.5 sm:gap-2">
-          <NavButton to="/explore" icon="🔭" label="Explore" />
-          <NavButton to="/calculate" icon="🧮" label="Calculate" />
-          <NavButton to="/learn" icon="📖" label="Learn" />
-          <NavButton to="/compare" icon="⚖️" label="Compare" />
+          <NavButton to="/explore" icon="🔭" label={t('explore')} />
+          <NavButton to="/calculate" icon="🧮" label={t('calculate')} />
+          <NavButton to="/learn" icon="📖" label={t('learn')} />
+          <NavButton to="/compare" icon="⚖️" label={t('compare')} />
+          <button
+            onClick={() => setLocale(locale === 'en' ? 'he' : 'en')}
+            className="tap-target px-2 rounded-lg text-xs font-mono text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-card)] transition-colors"
+            aria-label="Toggle interface language"
+            title="Toggle interface language (English / Hebrew)"
+          >
+            {locale === 'en' ? 'עב' : 'EN'}
+          </button>
           <a
             href={`${import.meta.env.BASE_URL}ai.html`}
             className="tap-target px-2 sm:px-3 rounded-lg text-xs sm:text-sm font-medium text-white bg-[var(--color-accent,#2b6cb0)] hover:opacity-90 transition-opacity flex items-center"
@@ -95,8 +109,10 @@ export default function AppShell({ initialPreset = 'home' }) {
           <PanelToggle
             onClick={toggleRightPanel}
             active={rightPanelOpen}
-            label="Details"
+            label={t('details')}
             aria-label="Toggle drill-down panel"
+            aria-expanded={rightPanelOpen}
+            aria-controls="kh-right-panel"
           >
             <PanelIcon />
           </PanelToggle>
