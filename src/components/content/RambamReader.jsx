@@ -3,6 +3,7 @@ import { useUIStore } from '../../stores/uiStore';
 import { useCalculationStore } from '../../stores/calculationStore';
 import { useVisualizationStore } from '../../stores/visualizationStore';
 import { parseHalachaHTML } from '../../lib/rambamChips';
+import { tourForStep } from '../../content/walkthroughs';
 
 const CHAPTERS = Array.from({ length: 9 }, (_, i) => i + 11);
 
@@ -63,9 +64,13 @@ export default function RambamReader() {
   const bookmarks = useUIStore((s) => s.bookmarks);
   const toggleBookmark = useUIStore((s) => s.toggleBookmark);
   const showDrilldown = useUIStore((s) => s.showDrilldown);
+  const setRightPanel = useUIStore((s) => s.setRightPanel);
   const isWideViewport = useUIStore((s) => s.isWideViewport);
   const selectStep = useCalculationStore((s) => s.selectStep);
   const pulseStep = useVisualizationStore((s) => s.pulseStep);
+
+  const relatedStep = chapterToStep[activeChapter];
+  const relatedTour = relatedStep ? tourForStep(relatedStep) : null;
 
   const [text, setText] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -160,12 +165,21 @@ export default function RambamReader() {
           >
             English
           </button>
-          {chapterToStep[activeChapter] && !showBookmarks && (
+          {relatedStep && !showBookmarks && (
             <button
-              onClick={() => { selectStep(chapterToStep[activeChapter]); pulseStep(chapterToStep[activeChapter]); }}
+              onClick={() => { selectStep(relatedStep); pulseStep(relatedStep); setRightPanel('drilldown'); }}
               className="px-2 py-0.5 rounded text-xs bg-[var(--color-gold)] bg-opacity-20 text-[var(--color-gold)]"
             >
-              View Calculation
+              🧮 View Calculation
+            </button>
+          )}
+          {relatedTour && !showBookmarks && (
+            <button
+              onClick={() => setRightPanel('walkthrough')}
+              className="px-2 py-0.5 rounded text-xs bg-[var(--color-accent)] bg-opacity-20 text-[var(--color-accent)]"
+              title="Open a guided tour related to this chapter"
+            >
+              🎬 Take the tour
             </button>
           )}
         </div>
