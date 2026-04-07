@@ -8,16 +8,18 @@ import Scene3D from '../3d/Scene';
 import EclipticRibbon from '../visualizations/EclipticRibbon';
 
 /**
- * AppShell — three-zone layout with auto-collapsing side panels.
+ * AppShell — three-zone layout that behaves differently on desktop vs mobile.
  *
- * Wide viewports (>= 768px): three columns side-by-side, both panels pinned
- * open by default. The 3D scene fills whatever space is left.
+ * Wide viewports (>= 768px): the side panels are DOCKED — they're regular
+ * flex children that take up real layout space, and the 3D scene shrinks
+ * to fill what's left. Closing a panel collapses its width to zero (with
+ * a smooth transition) so the scene reclaims the room. No backdrop, no
+ * dimming — they're not overlays.
  *
  * Narrow viewports (< 768px): the 3D scene is full-bleed and the side
- * panels become absolute drawers that overlay the scene. They default
- * closed; toggle them from the header icons. Only one drawer can be open
- * at a time on mobile (toggling one closes the other). Drawers can be
- * dismissed by tapping the backdrop or swiping them off-screen.
+ * panels become absolute drawers that overlay the scene with a dimming
+ * backdrop. Only one drawer can be open at a time; dismissed by tapping
+ * the backdrop or swiping off-screen.
  */
 export default function AppShell() {
   const currentDate = useCalendarStore((s) => s.currentDate);
@@ -47,9 +49,10 @@ export default function AppShell() {
     return () => window.removeEventListener('resize', handler);
   }, [setIsWideViewport]);
 
-  // Panels always overlay the scene — keeps the 3D view at full width and
-  // makes "closed" mean actually off-screen on every viewport.
+  // Panels are docked (inline) on desktop and overlay drawers on mobile.
+  // Backdrop only applies when overlays are open (i.e. on mobile).
   const anyPanelOpen = leftPanelOpen || rightPanelOpen;
+  const overlayMode = !isWideViewport;
 
   return (
     <div className="flex flex-col h-[100dvh] overflow-hidden bg-[var(--color-bg)]">
@@ -89,15 +92,21 @@ export default function AppShell() {
       {/* Main content area */}
       <div className="flex flex-1 relative overflow-hidden">
         {/* Left sidebar — date control + summary values */}
-        <PanelDrawer
-          side="left"
-          open={leftPanelOpen}
-          width="w-[min(85vw,340px)]"
-          onClose={() => setLeftPanelOpen(false)}
-          title="Values"
-        >
-          <Sidebar />
-        </PanelDrawer>
+        {overlayMode ? (
+          <PanelDrawer
+            side="left"
+            open={leftPanelOpen}
+            width="w-[min(85vw,340px)]"
+            onClose={() => setLeftPanelOpen(false)}
+            title="Values"
+          >
+            <Sidebar />
+          </PanelDrawer>
+        ) : (
+          <DockedPanel side="left" open={leftPanelOpen} width={320}>
+            <Sidebar />
+          </DockedPanel>
+        )}
 
         {/* Center — ecliptic ribbon + 3D visualization stacked vertically.
             The ribbon stays fixed at the top so it's always visible while
@@ -105,23 +114,29 @@ export default function AppShell() {
         <main className="flex-1 relative min-w-0 flex flex-col">
           <EclipticRibbon />
           <div className="flex-1 relative min-h-0">
-            <Scene3D dimmed={anyPanelOpen} />
+            <Scene3D dimmed={overlayMode && anyPanelOpen} />
           </div>
         </main>
 
         {/* Right info panel */}
-        <PanelDrawer
-          side="right"
-          open={rightPanelOpen}
-          width="w-[min(90vw,380px)] md:w-[380px]"
-          onClose={() => setRightPanelOpen(false)}
-          title="Drill-Down"
-        >
-          <InfoPanel />
-        </PanelDrawer>
+        {overlayMode ? (
+          <PanelDrawer
+            side="right"
+            open={rightPanelOpen}
+            width="w-[min(90vw,380px)]"
+            onClose={() => setRightPanelOpen(false)}
+            title="Drill-Down"
+          >
+            <InfoPanel />
+          </PanelDrawer>
+        ) : (
+          <DockedPanel side="right" open={rightPanelOpen} width={400}>
+            <InfoPanel />
+          </DockedPanel>
+        )}
 
-        {/* Backdrop whenever a panel is open */}
-        {anyPanelOpen && (
+        {/* Backdrop only when an overlay drawer is open (mobile) */}
+        {overlayMode && anyPanelOpen && (
           <div
             onClick={closeAllPanels}
             className="absolute inset-0 bg-black/50 z-10 backdrop-blur-[1px]"
@@ -130,6 +145,29 @@ export default function AppShell() {
         )}
       </div>
     </div>
+  );
+}
+
+/**
+ * DockedPanel — desktop-only inline panel that takes real layout space.
+ * The outer wrapper animates its width between 0 and the target width;
+ * the inner div holds a fixed-width content frame so the children don't
+ * reflow as the wrapper collapses.
+ */
+function DockedPanel({ side, open, width, children }) {
+  const borderClass =
+    side === 'left'
+      ? 'border-r border-[var(--color-border)]'
+      : 'border-l border-[var(--color-border)]';
+  return (
+    <aside
+      className={`flex-shrink-0 overflow-hidden transition-[width] duration-300 ease-out bg-[var(--color-surface)] ${borderClass}`}
+      style={{ width: open ? width : 0 }}
+    >
+      <div style={{ width }} className="h-full">
+        {children}
+      </div>
+    </aside>
   );
 }
 
