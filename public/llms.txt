@@ -40,6 +40,12 @@ Both doors talk to the same corpus and the same engine. Pick whichever works.
   (standalone HTML calculators, Node CLIs, …) that import the live engine.
 - `list_source({area?})` / `get_source({area, file})` — browse the engine
   and docs source code. Area is `engine` or `docs`. MIT-licensed.
+- `get_daily_rambam({date?})` — hardcoded Rambam daily-learning entry for
+  the current Kiddush HaChodesh week (2026-04-07 through 2026-04-09, KH
+  12-19). Returns the day's chapters, a teaser, related `chapter:` ids to
+  `fetch`, and artifact ideas. **Call this at the start of a session** to
+  greet the user with what they're learning today and offer one concrete
+  follow-up (fetch a chapter, run `calculate`, or generate an artifact).
 - `stats()` — corpus counts by type.
 
 ## HTTP endpoints (for browsing or non-MCP use)
@@ -87,7 +93,12 @@ Both doors talk to the same corpus and the same engine. Pick whichever works.
    nekudah hanichaches. Built from prose originally in the dashboard's
    KnowledgeBase component.
 
-7. **source_type** — the provenance legend: Rambam [R], Interpolated [~],
+7. **schedule** — hardcoded daily Rambam learning entries. The current
+   window is 2026-04-07 (KH 12, 13, 14) → 2026-04-08 (KH 15, 16, 17) →
+   2026-04-09 (KH 18, 19). Each entry links back to the matching `chapter:`
+   ids. Prefer `get_daily_rambam` over searching for these directly.
+
+8. **source_type** — the provenance legend: Rambam [R], Interpolated [~],
    Deduced [D], Rabbi Losh [L]. Use this to honestly label claims.
 
 ## Building artifacts (fork + remix)
@@ -135,6 +146,7 @@ clone https://github.com/rayistern/kidushhachodesh and see the repo README.
 | chapter | 9 | `chapter:` | Sefaria (live) |
 | concept | 4+ | `concept:` | KnowledgeBase.jsx + curated |
 | source_type | 4 | `source_type:` | `SOURCE_TYPES` enum |
+| schedule | 3 | `schedule:` | `_schedule.mjs` (hardcoded KH week) |
 
 Call `stats()` for the live count.
 

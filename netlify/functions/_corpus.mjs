@@ -29,6 +29,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { getFullCalculation } from '../../src/engine/pipeline.js';
 import { CONSTANTS, SOURCE_TYPES } from '../../src/engine/constants.js';
+import { RAMBAM_DAILY } from './_schedule.mjs';
 
 const ROOT = process.cwd();
 const DOCS_DIR = path.resolve(ROOT, 'docs');
@@ -270,6 +271,27 @@ function loadSourceTypes() {
 }
 
 // ─────────────────────────────────────────────────────────────
+// 8. Daily Rambam schedule (hardcoded KH week)
+// ─────────────────────────────────────────────────────────────
+function loadSchedule() {
+  return RAMBAM_DAILY.map((d) => ({
+    id: `schedule:${d.date}`,
+    type: 'schedule',
+    title: `Rambam daily learning — ${d.date} (${d.label})`,
+    rambamRef: d.chapters.map((c) => `KH ${c.num}`).join(', '),
+    url: `/api/daily?date=${d.date}`,
+    body: [
+      `Date: ${d.date}`,
+      `Label: ${d.label}`,
+      `Chapters: ${d.chapters.map((c) => `Hilchot ${c.tractate} ${c.num}`).join('; ')}`,
+      `Teaser: ${d.teaser}`,
+      `Related corpus ids: ${d.chapters.map((c) => `chapter:${c.num}`).join(', ')}`,
+    ].join('\n\n'),
+    tags: ['schedule', 'daily', 'rambam', 'kiddush-hachodesh'],
+  }));
+}
+
+// ─────────────────────────────────────────────────────────────
 // Assemble the full corpus
 // ─────────────────────────────────────────────────────────────
 let _corpusCache = null;
@@ -283,6 +305,7 @@ export function loadCorpus() {
     ...loadChapters(),
     ...CONCEPT_ENTRIES,
     ...loadSourceTypes(),
+    ...loadSchedule(),
   ];
   return _corpusCache;
 }
