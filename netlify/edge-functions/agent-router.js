@@ -40,6 +40,23 @@ const AGENT_UA_PATTERNS = [
   /mistralai/i,
   /youbot/i,
   /duckassistbot/i,
+  // Generic catch-all — anything clearly not a real browser. Real browser
+  // UAs always contain "Mozilla/5.0" as the first token, so these match
+  // plain fetchers (curl, python-requests, node-fetch, undici, etc.) that
+  // are almost certainly not human users sitting at a browser.
+  /\bbot\b/i,
+  /\bcrawler\b/i,
+  /\bspider\b/i,
+  /\bscraper\b/i,
+  /\bfetch\b/i,
+  /\bagent\b/i,
+  /python-requests/i,
+  /node-fetch/i,
+  /undici/i,
+  /axios/i,
+  /curl\//i,
+  /wget/i,
+  /httpie/i,
 ];
 
 function isAgent(req) {

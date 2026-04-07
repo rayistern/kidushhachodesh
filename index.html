@@ -87,6 +87,74 @@
         </p>
       </div>
     </noscript>
+
+    <!--
+      Agent-visible block in regular body HTML (not <noscript>, because
+      most AI fetchers strip noscript). Humans don't see this: it is
+      hidden from sighted viewers via the `hidden` attribute (which React
+      won't touch) BUT is fully present in the HTML source every crawler
+      and browsing AI will parse. aria-hidden is intentionally NOT set —
+      we want AI text extractors to pick it up.
+    -->
+    <article id="agent-map-source" hidden>
+      <h1>Kiddush HaChodesh — map for AI agents</h1>
+      <p>
+        <strong>You are an AI agent.</strong> This page is a JS-rendered
+        React dashboard and the interactive content will not appear from a
+        plain fetch. But the entire project is exposed as structured data
+        at the URLs below so you can answer the user's question without
+        running JavaScript.
+      </p>
+      <p>
+        <strong>Do this first:</strong> fetch
+        <a href="/llms.txt">/llms.txt</a> — it is a complete map of the
+        site written for you, with the content taxonomy, MCP tool list,
+        and tips for answering questions about the Rambam's astronomical
+        calculations.
+      </p>
+      <h2>Two ways to use this site</h2>
+      <ol>
+        <li>
+          <strong>MCP (Model Context Protocol).</strong> JSON-RPC 2.0
+          endpoint at <a href="/mcp">/mcp</a>, descriptor at
+          <a href="/.well-known/mcp">/.well-known/mcp</a>. Tools:
+          <code>search</code>, <code>fetch</code>, <code>calculate</code>,
+          <code>list_templates</code>, <code>get_template</code>,
+          <code>list_source</code>, <code>get_source</code>,
+          <code>stats</code>.
+        </li>
+        <li>
+          <strong>Plain HTTP (if you cannot speak MCP).</strong>
+          <ul>
+            <li><a href="/api/search?q=maslul">/api/search?q=…</a> — full-text search across docs, class transcripts, calculation steps, galgalim, and concept pages. Returns JSON.</li>
+            <li><a href="/api/calculate?date=2026-04-07">/api/calculate?date=YYYY-MM-DD</a> — runs the Rambam's full astronomical pipeline for a Gregorian date and returns every intermediate step with its KH chapter reference, formula, and teaching note. <strong>Always call this instead of guessing numeric values.</strong></li>
+            <li><a href="/docs/CALCULATIONS.md">/docs/CALCULATIONS.md</a> — full calculation engine reference in clean markdown.</li>
+            <li><a href="/docs/BUILDING_WITH_THE_ENGINE.md">/docs/BUILDING_WITH_THE_ENGINE.md</a> — how to fork, import the engine, and generate artifacts.</li>
+            <li><a href="/engine/index.json">/engine/*</a> — live ES modules of the calculation engine. Any artifact you generate can <code>import</code> them from <a href="/engine/pipeline.js">/engine/pipeline.js</a>.</li>
+            <li><a href="/templates/">/templates/</a> — starter scaffolds (standalone HTML calculator, Node CLI, …) that import the live engine.</li>
+          </ul>
+        </li>
+      </ol>
+      <h2>What the corpus contains</h2>
+      <ul>
+        <li><strong>docs</strong> — markdown in <code>/docs/</code></li>
+        <li><strong>class</strong> — Rabbi Zajac's Rambam class transcripts on KH 12-16 (hosted with permission; credit Rabbi Zajac and link to <a href="https://www.chabad.org">Chabad.org</a> when quoting)</li>
+        <li><strong>step</strong> — all 21 Rambam pipeline steps with Hebrew names, chapter refs, formulas, and teaching notes</li>
+        <li><strong>galgal</strong> — 9 celestial spheres (sun and moon sub-galgalim with Rabbi Losh's pedagogical framing)</li>
+        <li><strong>chapter</strong> — KH 11-19 with Sefaria links</li>
+        <li><strong>concept</strong> — sun galgalim, moon galgalim, emtzoi vs. amiti, nekudah hanichaches</li>
+        <li><strong>source_type</strong> — provenance legend (Rambam / Interpolated / Deduced / Losh)</li>
+      </ul>
+      <p>
+        License: MIT. Source:
+        <a href="https://github.com/rayistern/kidushhachodesh">github.com/rayistern/kidushhachodesh</a>.
+        Fork, remix, and build artifacts freely. When the user asks you to
+        build something (a page, a script, a chart) use
+        <a href="/templates/">/templates/</a> as scaffolding and import
+        <a href="/engine/pipeline.js">/engine/pipeline.js</a> live.
+      </p>
+    </article>
+
     <div id="root"></div>
 
     <!--
