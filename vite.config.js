@@ -21,6 +21,10 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: 'dist',
+    // Build into dist/kh so the published files actually live at the URL
+    // path /kh/* on Netlify. Combined with base='/kh/', the references in
+    // index.html resolve to real files on disk — no Netlify rewrites needed.
+    outDir: 'dist/kh',
+    emptyOutDir: true,
   },
 });

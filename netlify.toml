@@ -6,34 +6,26 @@
   command = "npm start"
   port    = 8888
 
-# Vite is built with base='/kh/' so the SPA can be served behind a
-# /kh path-prefix proxy at shluchimexchange.ai/kh. Built assets are
-# referenced in index.html as /kh/assets/* but the actual files live
-# in dist/assets/* — rewrite the prefix away so Netlify can find them.
-[[redirects]]
-  from = "/kh/assets/*"
-  to = "/assets/:splat"
-  status = 200
+# Vite is built with base='/kh/' AND outDir='dist/kh', so the actual files
+# live at dist/kh/index.html and dist/kh/assets/*. With publish='dist', those
+# files are served at the URL paths /kh/index.html and /kh/assets/* — exactly
+# what the asset references in index.html ask for. No rewrites needed for
+# the asset hops.
+#
+# We only need a SPA fallback so that visiting /kh (no slash), the bare
+# Netlify URL (/), or any unknown path drops the user onto the SPA shell.
 
-# SPA fallback for any /kh path: serve dist/index.html directly.
 [[redirects]]
   from = "/kh"
-  to = "/index.html"
+  to = "/kh/index.html"
   status = 200
 
 [[redirects]]
   from = "/kh/*"
-  to = "/index.html"
+  to = "/kh/index.html"
   status = 200
-
-# When the bare Netlify URL is hit, bounce to /kh/ so the asset paths
-# referenced inside index.html (which start with /kh/) actually resolve.
-[[redirects]]
-  from = "/"
-  to = "/kh/"
-  status = 302
 
 [[redirects]]
   from = "/*"
-  to = "/kh/"
-  status = 302
+  to = "/kh/index.html"
+  status = 200
