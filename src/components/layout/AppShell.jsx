@@ -1,8 +1,6 @@
-import React, { useEffect, Suspense, lazy } from 'react';
+import React, { useEffect } from 'react';
 import { useCalendarStore } from '../../stores/calendarStore';
 import { useCalculationStore } from '../../stores/calculationStore';
-import { useVisualizationStore } from '../../stores/visualizationStore';
-import { useUIStore } from '../../stores/uiStore';
 import Sidebar from './Sidebar';
 import InfoPanel from './InfoPanel';
 import Scene3D from '../3d/Scene';
@@ -10,7 +8,6 @@ import Scene3D from '../3d/Scene';
 export default function AppShell() {
   const currentDate = useCalendarStore((s) => s.currentDate);
   const compute = useCalculationStore((s) => s.compute);
-  const viewMode = useVisualizationStore((s) => s.viewMode);
 
   // Recompute on date change
   useEffect(() => {
@@ -41,13 +38,11 @@ export default function AppShell() {
         {/* Left sidebar — date control + summary values */}
         <Sidebar />
 
-        {/* Center — 3D visualization */}
+        {/* Center — 3D visualization (Scene3D has its own playback overlay) */}
         <main className="flex-1 relative">
           <div className="absolute inset-0">
             <Scene3D />
           </div>
-          {/* View controls overlay */}
-          <ViewControls />
         </main>
 
         {/* Right panel — drill-down or Rambam text */}
@@ -72,52 +67,3 @@ function NavButton({ icon, label }) {
   );
 }
 
-function ViewControls() {
-  const {
-    sidewaysAxis, toggleSidewaysAxis,
-    showGalgalim, toggleGalgalim,
-    showDiscs, toggleDiscs,
-    showLabels, toggleLabels,
-    animationSpeed, setAnimationSpeed,
-  } = useVisualizationStore();
-
-  return (
-    <div className="absolute bottom-4 left-4 flex flex-col gap-1 z-10">
-      <ToggleButton active={sidewaysAxis} onClick={toggleSidewaysAxis} label="Sideways (Rabbi Losh)" />
-      <ToggleButton active={showGalgalim} onClick={toggleGalgalim} label="Galgalim" />
-      <ToggleButton active={showDiscs} onClick={toggleDiscs} label="Orbital Discs" />
-      <ToggleButton active={showLabels} onClick={toggleLabels} label="Labels" />
-      <div className="flex items-center gap-2 mt-1">
-        <span className="text-xs text-[var(--color-text-secondary)]">Speed:</span>
-        {[1, 30, 365].map((s) => (
-          <button
-            key={s}
-            onClick={() => setAnimationSpeed(s)}
-            className={`px-2 py-0.5 rounded text-xs font-mono ${
-              animationSpeed === s
-                ? 'bg-[var(--color-accent)] text-white'
-                : 'bg-[var(--color-card)] text-[var(--color-text-secondary)]'
-            }`}
-          >
-            {s}x
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function ToggleButton({ active, onClick, label }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
-        active
-          ? 'bg-[var(--color-accent)] bg-opacity-20 text-[var(--color-accent)]'
-          : 'bg-[var(--color-card)] text-[var(--color-text-secondary)]'
-      }`}
-    >
-      {active ? '●' : '○'} {label}
-    </button>
-  );
-}
