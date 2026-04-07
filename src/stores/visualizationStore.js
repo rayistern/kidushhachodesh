@@ -98,7 +98,7 @@ export const useVisualizationStore = create((set, get) => ({
   animationSpeed: 30,
   setAnimationSpeed: (speed) => set({ animationSpeed: speed }),
 
-  isPlaying: false,
+  isPlaying: true,
   setIsPlaying: (playing) => set({ isPlaying: playing }),
   togglePlaying: () => set((s) => ({ isPlaying: !s.isPlaying })),
 
@@ -115,11 +115,13 @@ export const useVisualizationStore = create((set, get) => ({
   showDiscs: true,
   toggleDiscs: () => set((s) => ({ showDiscs: !s.showDiscs })),
 
-  showLabels: true,
+  // Start with labels off — the 3D Html labels overlap heavily when bodies
+  // are close. User can toggle them back on from the playback overlay.
+  showLabels: false,
   toggleLabels: () => set((s) => ({ showLabels: !s.showLabels })),
 
   // Show the radius lines from Earth → eccentric → body
-  showRadii: true,
+  showRadii: false,
   toggleRadii: () => set((s) => ({ showRadii: !s.showRadii })),
 
   // Show "ghost" bodies at the emtzoi (mean longitude) position. The
