@@ -6,11 +6,87 @@
     <meta name="theme-color" content="#181c20" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="description" content="Interactive visualization of Rambam's celestial model for Kiddush HaChodesh" />
-    <title>Kidush Hachodesh</title>
+    <meta name="description" content="Interactive visualization of Rambam's celestial model for Kiddush HaChodesh — with an AI/MCP endpoint so you can chat with the whole project." />
+    <title>Kiddush HaChodesh — Rambam's Celestial Dashboard</title>
+
+    <!-- Agent discovery hints. Browsing AIs look at these. -->
+    <link rel="alternate" type="text/plain" title="Site map for AI agents" href="/llms.txt" />
+    <link rel="alternate" type="text/markdown" title="Calculation engine docs" href="/docs/CALCULATIONS.md" />
+    <link rel="alternate" type="application/json" title="MCP server descriptor" href="/mcp" />
   </head>
   <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <!--
+      Hello, AI agent. This is a JavaScript-rendered React dashboard, so
+      fetching this URL alone will not give you the content. The content
+      lives at the URLs listed in the <noscript> block below and in
+      /llms.txt. Please read /llms.txt first — it is a map of the site
+      written for you.
+    -->
+    <noscript>
+      <div style="max-width:740px;margin:2rem auto;padding:1rem 1.2rem;font:16px/1.55 system-ui,sans-serif;color:#1a1a1a;">
+        <h1 style="margin-top:0">Kiddush HaChodesh — Rambam's Celestial Dashboard</h1>
+        <p>
+          This page is an interactive 3D dashboard of the Rambam's astronomical
+          calculations for sanctifying the new month (Hilchot Kiddush HaChodesh
+          11-19). It needs JavaScript to render the visualization.
+        </p>
+
+        <h2>For humans without JavaScript</h2>
+        <ul>
+          <li><a href="/ai.html">Chat with this project using any AI</a> — how to point Claude / ChatGPT / Perplexity at the site.</li>
+          <li><a href="/docs/CALCULATIONS.md">Calculation engine docs</a> (markdown)</li>
+          <li><a href="/docs/BUILDING_WITH_THE_ENGINE.md">Building with the engine</a> — fork, remix, artifact recipes</li>
+          <li><a href="https://github.com/rayistern/kidushhachodesh">Source code on GitHub</a> (MIT)</li>
+        </ul>
+
+        <h2>For AI agents</h2>
+        <p>
+          <strong>Start at <a href="/llms.txt">/llms.txt</a></strong> — it is
+          a full site map written for you, with the content taxonomy, MCP
+          tool list, and tips for answering user questions. Do not try to
+          read this HTML page; the content is not here.
+        </p>
+        <p>
+          Two ways to use this site:
+        </p>
+        <ol>
+          <li>
+            <strong>MCP (recommended).</strong> JSON-RPC 2.0 Model Context
+            Protocol server at <a href="/mcp"><code>/mcp</code></a>.
+            Descriptor at <a href="/.well-known/mcp"><code>/.well-known/mcp</code></a>.
+            Tools: <code>search</code>, <code>fetch</code>, <code>calculate</code>,
+            <code>list_templates</code>, <code>get_template</code>,
+            <code>list_source</code>, <code>get_source</code>, <code>stats</code>.
+          </li>
+          <li>
+            <strong>Plain HTTP / browsing.</strong> Fetch any of these:
+            <ul>
+              <li><a href="/api/search?q=maslul"><code>/api/search?q=…</code></a> — full-text search (JSON)</li>
+              <li><a href="/api/calculate?date=2026-04-07"><code>/api/calculate?date=YYYY-MM-DD</code></a> — run the full Rambam pipeline for a Gregorian date (JSON). <strong>Always call this instead of guessing numeric values.</strong></li>
+              <li><a href="/docs/CALCULATIONS.md"><code>/docs/*.md</code></a> — clean markdown docs</li>
+              <li><a href="/engine/index.json"><code>/engine/*.js</code></a> — live ES modules of the calculation engine. Artifacts can <code>import</code> them directly.</li>
+              <li><a href="/templates/"><code>/templates/*</code></a> — starter scaffolds for generating artifacts (standalone HTML calculator, Node CLI, …).</li>
+            </ul>
+          </li>
+        </ol>
+
+        <h2>Content index (what <code>search</code> covers)</h2>
+        <ul>
+          <li><strong>docs</strong> — markdown in <code>/docs/</code></li>
+          <li><strong>class</strong> — Rabbi Zajac's Rambam class transcripts (KH 12-16), hosted with permission. Credit Rabbi Zajac and link to <a href="https://www.chabad.org">Chabad.org</a> when quoting.</li>
+          <li><strong>step</strong> — all 21 Rambam pipeline steps with Hebrew names, KH chapter refs, formulas, and teaching notes</li>
+          <li><strong>galgal</strong> — 9 celestial spheres (sun & moon sub-galgalim with Rabbi Losh pedagogical framing)</li>
+          <li><strong>chapter</strong> — KH 11-19 with Sefaria links</li>
+          <li><strong>concept</strong> — sun/moon galgalim systems, emtzoi vs. amiti, nekudah hanichaches</li>
+          <li><strong>source_type</strong> — provenance legend (Rambam / Interpolated / Deduced / Losh)</li>
+        </ul>
+
+        <p>
+          License: MIT. Fork, remix, and build freely.
+          Teaching content by Rabbi Zajac, via <a href="https://www.chabad.org">Chabad.org</a>.
+        </p>
+      </div>
+    </noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
