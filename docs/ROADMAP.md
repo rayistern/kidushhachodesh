@@ -103,24 +103,17 @@ Horizontal timeline of upcoming/past moladot.
 - [x] Click any pin → date jumps, scene updates
 - **Why it matters:** the ~29.5 day rhythm vs true conjunction is hard to grasp without seeing both.
 
-### V8. Modern overlay (optional)
-Thin line at the modern-astronomy position of each body.
-- [ ] Sun position from VSOP87 or similar
-- [ ] Moon position from ELP-2000 or similar
-- [ ] Difference badge (e.g. "Rambam: 12°34', Modern: 12°31'")
-- **Why it matters:** demonstrates how astonishingly close the Rambam gets, usually within a fraction of a degree.
-
 ---
 
 ## Phase 3 — Drill-downs and linking
 
-### D1. Click-galgal-for-details
-- [ ] Click any galgal in 3D → right panel switches to its info card
-- [ ] Card shows: Hebrew name, Rambam ref, current rotation, daily motion, role, related halachot
+### D1. Click-galgal-for-details (shipped, 3e2dc47)
+- [x] Click any galgal in 3D → right panel switches to its info card
+- [x] Card shows: Hebrew name, Rambam ref, current rotation, daily motion, role, related halachot
 
-### D2. Click-value-highlights-chain
-- [ ] Click "True longitude" in sidebar → all contributing galgalim pulse in 3D
-- [ ] Click any intermediate value → shows its derivation chain visually
+### D2. Click-value-highlights-chain (shipped, 3e2dc47)
+- [x] Click "True longitude" in sidebar → all contributing galgalim pulse in 3D
+- [x] Click any intermediate value → shows its derivation chain visually
 
 ### D3. Halacha ↔ value cross-links
 - [ ] Numerical values inside Rambam reader become clickable chips
@@ -145,8 +138,8 @@ Thin line at the modern-astronomy position of each body.
 
 ## Phase 4 — Rambam text integration
 
-- [ ] Sefaria API fetch for chs 11-19
-- [ ] Hebrew + English side-by-side
+- [x] Sefaria API fetch for chs 11-19 (`RambamReader.jsx`)
+- [x] Hebrew + English side-by-side
 - [ ] Cross-reference links (D3 above)
 - [ ] Save/bookmark current halacha
 - [ ] Search within chapters
