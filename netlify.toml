@@ -11,7 +11,7 @@
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
-  included_files = ["docs/**", "src/engine/**"]
+  included_files = ["docs/**", "src/engine/**", "templates/**"]
 
 # SPA fallback — functions and static files take precedence automatically,
 # so /mcp, /api/*, /docs/*.md, /llms.txt, and /agents.md are unaffected.
