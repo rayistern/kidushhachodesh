@@ -54,6 +54,27 @@ canvas {
   line-height: 1.4;
 }
 
+/* Rambam chip buttons inside halacha text — inline, subtle accent, no
+   layout disruption. Clickable to jump to the matching calc step. */
+.kh-chip {
+  display: inline;
+  padding: 0 2px;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--color-accent) 18%, transparent);
+  color: var(--color-accent);
+  border: none;
+  font: inherit;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.kh-chip:hover {
+  background: color-mix(in srgb, var(--color-accent) 35%, transparent);
+}
+mark {
+  background: color-mix(in srgb, var(--color-gold) 50%, transparent);
+  color: inherit;
+}
+
 /* Custom scrollbar (desktop only — mobile uses native overlay scrollbars). */
 @media (pointer: fine) {
   ::-webkit-scrollbar {

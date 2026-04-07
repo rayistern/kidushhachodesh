@@ -23,6 +23,7 @@ import { useUIStore } from '../../stores/uiStore';
 import { getHebrewDateDisplay, getMoladDisplay } from '../../utils/dateUtils';
 import { formatDms } from '../../engine/dmsUtils';
 import { SOURCE_TYPES } from '../../engine/constants';
+import DateScrubber from './DateScrubber';
 
 export default function Sidebar() {
   const { currentDate, setDate, adjustDays } = useCalendarStore();
@@ -96,6 +97,10 @@ export default function Sidebar() {
           </div>
         )}
       </div>
+
+      {/* D5 — date scrubber lives right below the date header so it's
+          always reachable while scrolling values. */}
+      <DateScrubber />
 
       {/* Calculation summary — each value is clickable */}
       {calculation && (

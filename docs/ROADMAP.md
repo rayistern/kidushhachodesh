@@ -115,24 +115,23 @@ Horizontal timeline of upcoming/past moladot.
 - [x] Click "True longitude" in sidebar → all contributing galgalim pulse in 3D
 - [x] Click any intermediate value → shows its derivation chain visually
 
-### D3. Halacha ↔ value cross-links
-- [ ] Numerical values inside Rambam reader become clickable chips
-- [ ] Click chip → calculation step scrolls into view + galgal pulses
+### D3. Halacha ↔ value cross-links — `src/lib/rambamChips.js`
+- [x] Numerical values inside Rambam reader become clickable chips
+- [x] Click chip → calculation step selected + galgalim pulse
 
-### D4. Guided "Why is the moon there tonight?" walkthrough
-- [ ] Step-by-step text bubbles
-- [ ] Each step animates its relevant galgal
+### D4. Guided "Why is the moon there tonight?" walkthrough — `GuidedWalkthrough.jsx`
+- [x] Step-by-step text bubbles (`src/content/walkthroughs.js`)
+- [x] Each step animates its relevant galgal + swings camera
 - [ ] No audio yet — future audio sync replaces text
 
-### D5. Date scrubber linked to everything
-- [ ] Drag timeline → date, calcs, 3D, current halacha all update
-- [ ] Snap-to-molad option
+### D5. Date scrubber linked to everything — `DateScrubber.jsx`
+- [x] Drag slider → live scene offset updates without losing calendar date
+- [x] Snap-to-molad option
 
-### D6. Compare two dates side-by-side
-- [ ] Pick "today" and any other date
-- [ ] Two mini 3D scenes
-- [ ] Diff of calculation chain showing what changed
-- [ ] Useful for: why this month is 29 vs 30, why molad walks forward, etc.
+### D6. Compare two dates side-by-side — `CompareView.jsx` at `/compare`
+- [x] Pick two dates with independent pickers
+- [~] Skipped twin 3D scenes (perf risk) — rich side-by-side summary instead
+- [x] Diff of calculation chain showing what changed (red/green by row)
 
 ---
 
@@ -140,19 +139,20 @@ Horizontal timeline of upcoming/past moladot.
 
 - [x] Sefaria API fetch for chs 11-19 (`RambamReader.jsx`)
 - [x] Hebrew + English side-by-side
-- [ ] Cross-reference links (D3 above)
-- [ ] Save/bookmark current halacha
-- [ ] Search within chapters
+- [x] Cross-reference links (D3 above)
+- [x] Save/bookmark current halacha (localStorage `kh:bookmarks`)
+- [x] Search within chapters (client-side, highlights matches)
 
 ---
 
 ## Phase 5 — Routing
 
-- [ ] react-router-dom v7
-- [ ] `/` Dashboard
-- [ ] `/explore` Free 3D
-- [ ] `/calculate/:date?` Drill-down focus
-- [ ] `/learn/:chapter?` Rambam reader
+- [x] react-router-dom v7 wired in `src/main.jsx` + `src/App.jsx`
+- [x] `/` Dashboard
+- [x] `/explore` Free 3D (panels closed)
+- [x] `/calculate/:date?` Drill-down focus (opens right panel)
+- [x] `/learn/:chapter?` Rambam reader
+- [x] `/compare` Two-date compare
 
 ---
 
@@ -167,10 +167,10 @@ Horizontal timeline of upcoming/past moladot.
 
 ## Cross-cutting
 
-- [ ] Test coverage for engine (vitest)
-- [ ] Accessibility pass (keyboard nav, ARIA, screen reader)
-- [ ] Print stylesheet for sharing calculation chains
-- [ ] i18n scaffolding (Hebrew interface option, not just Hebrew content)
+- [x] Test coverage for engine (vitest) — `src/engine/__tests__/pipeline.test.js` + chip parser tests
+- [~] Accessibility pass (keyboard shortcuts `[`/`]`/`Esc` via `useKeyboardShortcuts`, existing aria-labels; full screen-reader audit still TODO)
+- [x] Print stylesheet for sharing calculation chains (`src/styles/print.css`)
+- [x] i18n scaffolding (`src/i18n/index.js`, `uiStore.locale`)
 
 ---
 

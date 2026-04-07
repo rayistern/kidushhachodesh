@@ -1,0 +1,38 @@
+/* Print stylesheet — hide 3D, drawers, playback overlays; show the
+   calculation chain and current halacha in a clean, linear flow. */
+@media print {
+  header,
+  canvas,
+  .playback-overlay,
+  [data-no-print] {
+    display: none !important;
+  }
+
+  body,
+  #root,
+  .flex {
+    display: block !important;
+    background: white !important;
+    color: black !important;
+  }
+
+  aside,
+  main {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+    box-shadow: none !important;
+    border: none !important;
+    page-break-inside: auto;
+  }
+
+  a[href]::after {
+    content: ' (' attr(href) ')';
+    font-size: 0.8em;
+    color: #555;
+  }
+
+  .hebrew-text {
+    font-size: 1.1em;
+  }
+}
