@@ -79,7 +79,7 @@ export default function AppShell() {
           <NavButton icon="🧮" label="Calculate" />
           <NavButton icon="📖" label="Learn" />
           <a
-            href="/ai.html"
+            href={`${import.meta.env.BASE_URL}ai.html`}
             className="tap-target px-2 sm:px-3 rounded-lg text-xs sm:text-sm font-medium text-white bg-[var(--color-accent,#2b6cb0)] hover:opacity-90 transition-opacity flex items-center"
             title="Chat with this whole project using Claude, ChatGPT, or any AI. Build artifacts from our engine."
           >
