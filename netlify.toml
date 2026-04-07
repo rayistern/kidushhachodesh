@@ -6,12 +6,34 @@
   command = "npm start"
   port    = 8888
 
-# Single-page-app fallback. Assets are referenced as /assets/* (root-relative)
-# regardless of the URL the user is on, so the SPA works whether you visit
-# the bare Netlify URL or any subpath like /kh that a reverse-proxy mounts it
-# under (e.g. https://shluchimexchange.ai/kh — the proxy can rewrite or pass
-# through; either way the browser fetches /assets/* from the document root).
+# Vite is built with base='/kh/' so the SPA can be served behind a
+# /kh path-prefix proxy at shluchimexchange.ai/kh. Built assets are
+# referenced in index.html as /kh/assets/* but the actual files live
+# in dist/assets/* — rewrite the prefix away so Netlify can find them.
 [[redirects]]
-  from = "/*"
+  from = "/kh/assets/*"
+  to = "/assets/:splat"
+  status = 200
+
+# SPA fallback for any /kh path: serve dist/index.html directly.
+[[redirects]]
+  from = "/kh"
   to = "/index.html"
   status = 200
+
+[[redirects]]
+  from = "/kh/*"
+  to = "/index.html"
+  status = 200
+
+# When the bare Netlify URL is hit, bounce to /kh/ so the asset paths
+# referenced inside index.html (which start with /kh/) actually resolve.
+[[redirects]]
+  from = "/"
+  to = "/kh/"
+  status = 302
+
+[[redirects]]
+  from = "/*"
+  to = "/kh/"
+  status = 302
