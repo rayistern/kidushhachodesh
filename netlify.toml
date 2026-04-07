@@ -1,5 +1,11 @@
 [build]
-  command = "npm run build"
+  # Vite outputs to dist/kh because base='/kh/'. We rename that directory
+  # to dist/_app after the build so there is NO directory literally named
+  # "kh" in the publish dir. That kills Netlify's auto trailing-slash
+  # 301 on /kh, which was bouncing off Vercel's slash-stripping and
+  # producing the redirect loop. Our force=true rewrites below map
+  # /kh/* requests onto the renamed _app/* files.
+  command = "npm run build && rm -rf dist/_app && mv dist/kh dist/_app"
   publish = "dist"
 
 # Disable Netlify's HTML post-processing. The "pretty_urls" feature normalizes
@@ -29,52 +35,81 @@
   path = "/"
 
 # ── How the SPA is served ──
-# Vite builds with base='/kh/' AND outDir='dist/kh', so the actual files
-# live at dist/kh/index.html and dist/kh/assets/*. With publish='dist',
-# those are served directly at /kh/index.html and /kh/assets/* — exactly
-# what the asset references inside index.html ask for. No rewrite hops
-# for the assets, which kept failing under the prefix proxy.
+# Vite builds with base='/kh/' AND outDir='dist/kh', then the build command
+# renames dist/kh → dist/_app so the publish dir contains NO directory
+# literally named "kh". Asset URLs in the built index.html still reference
+# /kh/assets/... (because of base='/kh/'), so we rewrite /kh/assets/* to
+# /_app/assets/:splat below. The SPA shell is served at /_app/index.html
+# via the same rewrite trick.
 #
-# Function and static-file lookups happen BEFORE redirects, so /mcp,
-# /api/*, /docs/*, /engine/*, /templates/*, and any real file in dist/kh/
-# (including llms.txt, ai.html, agents.md) take precedence over these.
+# Function paths (/mcp, /api/*, /docs/*, /engine/*, /templates/*) and the
+# edge function on "/" are matched BEFORE redirects, so they still take
+# precedence over these rules.
 #
 # `force = true` on every rule means Netlify applies our redirect even
-# when a real file would otherwise be served — required so its trailing-
-# slash auto-handling doesn't fight the rules and create a loop with
-# the upstream Vercel proxy.
+# when a real file would otherwise be served — required so its trailing
+# -slash auto-handling doesn't fight the rules and create a loop with
+# the upstream Vercel proxy. Order matters: more specific rules first.
 
-# Make the agent-discoverable files reachable at the root, even though
-# Vite's outDir put them under /kh/. AI agents and the edge function
-# look for them at /llms.txt etc.
+# Vite-emitted static assets. MUST come before the SPA fallback so that
+# JS/CSS requests aren't rewritten to index.html (which would serve HTML
+# for a script tag and trigger a MIME-type error).
 [[redirects]]
-  from = "/llms.txt"
-  to = "/kh/llms.txt"
+  from = "/kh/assets/*"
+  to = "/_app/assets/:splat"
+  status = 200
+  force = true
+
+# Agent-discoverable files reachable under the /kh prefix.
+[[redirects]]
+  from = "/kh/llms.txt"
+  to = "/_app/llms.txt"
   status = 200
   force = true
 
 [[redirects]]
-  from = "/ai.html"
-  to = "/kh/ai.html"
+  from = "/kh/ai.html"
+  to = "/_app/ai.html"
   status = 200
   force = true
 
 [[redirects]]
-  from = "/agents.md"
-  to = "/kh/agents.md"
+  from = "/kh/agents.md"
+  to = "/_app/agents.md"
   status = 200
   force = true
 
-# SPA fallback for client-side paths under /kh.
+# SPA fallback for client-side paths under /kh. The bare /kh case has its
+# own rule because /kh/* doesn't match /kh (no trailing slash, no splat).
 [[redirects]]
   from = "/kh"
-  to = "/kh/index.html"
+  to = "/_app/index.html"
   status = 200
   force = true
 
 [[redirects]]
   from = "/kh/*"
-  to = "/kh/index.html"
+  to = "/_app/index.html"
+  status = 200
+  force = true
+
+# Same agent files reachable from the bare root (no /kh prefix). Used by
+# the agent-router edge function and AI bots that scan the apex domain.
+[[redirects]]
+  from = "/llms.txt"
+  to = "/_app/llms.txt"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/ai.html"
+  to = "/_app/ai.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/agents.md"
+  to = "/_app/agents.md"
   status = 200
   force = true
 
@@ -82,6 +117,6 @@
 # edge function intercepts "/" first, so AI agents get llms.txt instead.)
 [[redirects]]
   from = "/*"
-  to = "/kh/index.html"
+  to = "/_app/index.html"
   status = 200
   force = true
