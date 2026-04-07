@@ -1,8 +1,8 @@
 import React from 'react';
 import { useUIStore } from '../../stores/uiStore';
-import { useCalculationStore } from '../../stores/calculationStore';
 import CalculationChain from '../dashboard/CalculationChain';
 import RambamReader from '../content/RambamReader';
+import VisibilityHorizon from '../visualizations/VisibilityHorizon';
 
 export default function InfoPanel() {
   const rightPanel = useUIStore((s) => s.rightPanel);
@@ -18,6 +18,11 @@ export default function InfoPanel() {
           label="Drill-Down"
         />
         <PanelTab
+          active={rightPanel === 'visibility'}
+          onClick={() => setRightPanel('visibility')}
+          label="Visibility"
+        />
+        <PanelTab
           active={rightPanel === 'rambam'}
           onClick={() => setRightPanel('rambam')}
           label="Rambam Text"
@@ -27,6 +32,7 @@ export default function InfoPanel() {
       {/* Panel content */}
       <div className="flex-1 overflow-y-auto">
         {rightPanel === 'drilldown' && <CalculationChain />}
+        {rightPanel === 'visibility' && <VisibilityHorizon />}
         {rightPanel === 'rambam' && <RambamReader />}
       </div>
     </aside>

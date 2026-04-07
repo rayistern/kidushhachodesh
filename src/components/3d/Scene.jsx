@@ -4,6 +4,7 @@ import { OrbitControls, Stars, PerspectiveCamera, Html } from '@react-three/drei
 import SunMechanism from './SunMechanism';
 import MoonMechanism from './MoonMechanism';
 import ZodiacBelt from './ZodiacBelt';
+import Trails from './Trails';
 import { useVisualizationStore } from '../../stores/visualizationStore';
 import { useCalculationStore } from '../../stores/calculationStore';
 
@@ -74,6 +75,9 @@ function CelestialScene() {
       <SunMechanism daysFromEpoch={daysFromEpoch} scale={4.2} showLabels={showLabels} />
       <MoonMechanism daysFromEpoch={daysFromEpoch} scale={2.4} showLabels={showLabels} />
 
+      {/* ── Optional time-lapse trails ── */}
+      <Trails daysFromEpoch={daysFromEpoch} scale={4.2} />
+
       {/* ── Lights ── */}
       <ambientLight intensity={0.45} />
       <directionalLight position={[10, 10, 5]} intensity={0.4} />
@@ -138,6 +142,8 @@ function PlaybackOverlay() {
   const toggleLabels = useVisualizationStore((s) => s.toggleLabels);
   const showGhosts = useVisualizationStore((s) => s.showGhosts);
   const toggleGhosts = useVisualizationStore((s) => s.toggleGhosts);
+  const showTrails = useVisualizationStore((s) => s.showTrails);
+  const toggleTrails = useVisualizationStore((s) => s.toggleTrails);
 
   // Force re-render at 4Hz while playing so the offset readout + scrubber update.
   const [, force] = React.useState(0);
@@ -278,6 +284,13 @@ function PlaybackOverlay() {
             title="Show emtzoi (mean longitude) ghost markers"
           >
             Ghosts {showGhosts ? '✓' : ''}
+          </button>
+          <button
+            onClick={toggleTrails}
+            style={btnStyle(showTrails ? '#4ef7a1' : '#555', isNarrow)}
+            title="Show 30-day position trails"
+          >
+            Trails {showTrails ? '✓' : ''}
           </button>
         </div>
       )}

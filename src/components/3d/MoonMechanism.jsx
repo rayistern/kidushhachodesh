@@ -6,6 +6,7 @@ import { CONSTANTS } from '../../engine/constants.js';
 import { dmsToDecimal, normalizeDegrees, formatDms } from '../../engine/dmsUtils.js';
 import { useVisualizationStore } from '../../stores/visualizationStore';
 import { useCalculationStore } from '../../stores/calculationStore';
+import { useUIStore } from '../../stores/uiStore';
 
 const DEG2RAD = Math.PI / 180;
 
@@ -36,6 +37,12 @@ export default function MoonMechanism({
   const highlightedGalgal = useVisualizationStore((s) => s.highlightedGalgal);
   const setHighlightedGalgal = useVisualizationStore((s) => s.setHighlightedGalgal);
   const selectStep = useCalculationStore((s) => s.selectStep);
+  const showDrilldown = useUIStore((s) => s.showDrilldown);
+
+  const focusStep = (stepId) => {
+    selectStep(stepId);
+    showDrilldown();
+  };
 
   // ── Constants ──
   const moonDailyMotion = useMemo(
@@ -146,7 +153,20 @@ export default function MoonMechanism({
   });
 
   const isHighlighted = highlightedGalgal === 'moon';
-  const op = (base) => (isHighlighted ? base * 2.5 : base);
+  const pulsing = useVisualizationStore((s) => s.pulsingGalgalim);
+  const isPulsing = (id) => pulsing.includes(id);
+  // op() boosts a base opacity for the highlighted/pulsing state. A galgal
+  // that is being pulsed by the sidebar D2 click gets the strongest boost.
+  const op = (id, base) => {
+    if (isPulsing(id)) return Math.min(base * 6, 0.45);
+    if (isHighlighted) return base * 2.5;
+    return base;
+  };
+  const grid = (id, base, hi) => {
+    if (isPulsing(id)) return Math.min(hi * 1.6, 0.6);
+    if (isHighlighted) return hi;
+    return base;
+  };
   const showRed = galgalVisible['moon-red'] !== false;
   const showBlue = galgalVisible['moon-blue'] !== false;
   const showGreen = galgalVisible['moon-green'] !== false;
@@ -167,8 +187,8 @@ export default function MoonMechanism({
             color="#9c4f5f"
             ringColor="#c47588"
             gridColor="#dc97a8"
-            opacity={op(0.04)}
-            gridOpacity={isHighlighted ? 0.32 : 0.16}
+            opacity={op('moon-red', 0.04)}
+            gridOpacity={grid('moon-red', 0.16, 0.32)}
           />
         )}
 
@@ -180,8 +200,8 @@ export default function MoonMechanism({
               color="#3d6a78"
               ringColor="#6aa0b4"
               gridColor="#88c0d8"
-              opacity={op(0.05)}
-              gridOpacity={isHighlighted ? 0.32 : 0.16}
+              opacity={op('moon-blue', 0.05)}
+              gridOpacity={grid('moon-blue', 0.16, 0.32)}
             />
           )}
 
@@ -193,12 +213,12 @@ export default function MoonMechanism({
                 color="#5a7a5a"
                 ringColor="#8fb088"
                 gridColor="#b0d0a4"
-                opacity={op(0.06)}
-                gridOpacity={isHighlighted ? 0.34 : 0.18}
+                opacity={op('moon-green', 0.06)}
+                gridOpacity={grid('moon-green', 0.18, 0.34)}
                 onClick={(e) => {
                   e.stopPropagation();
                   setHighlightedGalgal('moon');
-                  selectStep('moonMaslul');
+                  focusStep('moonMaslul');
                 }}
               />
             )}
@@ -217,11 +237,11 @@ export default function MoonMechanism({
                   color="#c4a978"
                   ringColor="#e4cf9a"
                   gridColor="#f4dfa8"
-                  opacity={op(0.18)}
-                  gridOpacity={0.5}
+                  opacity={op('moon-katan', 0.18)}
+                  gridOpacity={grid('moon-katan', 0.5, 0.6)}
                   onClick={(e) => {
                     e.stopPropagation();
-                    selectStep('maslulHanachon');
+                    focusStep('maslulHanachon');
                   }}
                 />
               )}
@@ -237,7 +257,7 @@ export default function MoonMechanism({
                 <mesh
                   onClick={(e) => {
                     e.stopPropagation();
-                    selectStep('moonTrueLongitude');
+                    focusStep('moonTrueLongitude');
                     setHighlightedGalgal('moon');
                   }}
                 >

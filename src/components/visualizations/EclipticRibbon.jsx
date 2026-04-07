@@ -23,6 +23,7 @@ export default function EclipticRibbon() {
   const isPlaying = useVisualizationStore((s) => s.isPlaying);
   const animationDays = useVisualizationStore((s) => s.animationDays);
   const setHighlightedGalgal = useVisualizationStore((s) => s.setHighlightedGalgal);
+  const pulseStep = useVisualizationStore((s) => s.pulseStep);
   const isWideViewport = useUIStore((s) => s.isWideViewport);
   const setRightPanel = useUIStore((s) => s.setRightPanel);
   const setLeftPanelOpen = useUIStore((s) => s.setLeftPanelOpen);
@@ -46,6 +47,7 @@ export default function EclipticRibbon() {
   const handleClickMarker = (stepId, galgalId) => {
     selectStep(stepId);
     if (galgalId) setHighlightedGalgal(galgalId);
+    pulseStep(stepId);
     setRightPanel('drilldown');
     if (!isWideViewport) {
       setLeftPanelOpen(false);

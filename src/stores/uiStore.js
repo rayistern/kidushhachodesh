@@ -37,6 +37,18 @@ export const useUIStore = create((set) => ({
     })),
   closeAllPanels: () => set({ leftPanelOpen: false, rightPanelOpen: false }),
 
+  /**
+   * Open the drill-down drawer focused on a specific step. On mobile this
+   * pops the right drawer open and closes the left one. On desktop both
+   * stay as they were — the right panel just switches tabs.
+   */
+  showDrilldown: () =>
+    set((s) => ({
+      rightPanel: 'drilldown',
+      rightPanelOpen: true,
+      leftPanelOpen: s.isWideViewport ? s.leftPanelOpen : false,
+    })),
+
   // Track viewport size for the layout to react to
   isWideViewport: isWide(),
   setIsWideViewport: (wide) => set({ isWideViewport: wide }),

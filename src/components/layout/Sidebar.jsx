@@ -12,6 +12,7 @@ export default function Sidebar() {
   const calculation = useCalculationStore((s) => s.calculation);
   const selectStep = useCalculationStore((s) => s.selectStep);
   const setHighlightedGalgal = useVisualizationStore((s) => s.setHighlightedGalgal);
+  const pulseStep = useVisualizationStore((s) => s.pulseStep);
   const setRightPanel = useUIStore((s) => s.setRightPanel);
   const isWideViewport = useUIStore((s) => s.isWideViewport);
   const setLeftPanelOpen = useUIStore((s) => s.setLeftPanelOpen);
@@ -20,13 +21,15 @@ export default function Sidebar() {
   const hebrew = getHebrewDateDisplay(currentDate);
   const molad = getMoladDisplay(currentDate);
 
-  // Clicking a value: select the step, highlight the relevant galgal, and
-  // (on mobile) swap the left drawer for the right drilldown drawer so the
-  // user immediately sees the result of their tap.
+  // Clicking a value: select the step, highlight the relevant mechanism,
+  // pulse every galgal that contributes to that step (D2), and (on mobile)
+  // swap the left drawer for the right drilldown drawer so the user
+  // immediately sees the result of their tap.
   const handleClick = (stepId, galgalId) => {
     selectStep(stepId);
     setRightPanel('drilldown');
     if (galgalId) setHighlightedGalgal(galgalId);
+    pulseStep(stepId);
     if (!isWideViewport) {
       setLeftPanelOpen(false);
       setRightPanelOpen(true);

@@ -6,6 +6,7 @@ import { CONSTANTS } from '../../engine/constants.js';
 import { dmsToDecimal, normalizeDegrees, formatDms } from '../../engine/dmsUtils.js';
 import { useVisualizationStore } from '../../stores/visualizationStore';
 import { useCalculationStore } from '../../stores/calculationStore';
+import { useUIStore } from '../../stores/uiStore';
 
 const DEG2RAD = Math.PI / 180;
 
@@ -41,6 +42,12 @@ export default function SunMechanism({
   const highlightedGalgal = useVisualizationStore((s) => s.highlightedGalgal);
   const setHighlightedGalgal = useVisualizationStore((s) => s.setHighlightedGalgal);
   const selectStep = useCalculationStore((s) => s.selectStep);
+  const showDrilldown = useUIStore((s) => s.showDrilldown);
+
+  const focusStep = (stepId) => {
+    selectStep(stepId);
+    showDrilldown();
+  };
 
   // ── Constants in decimal degrees ──
   const dailyMotion = useMemo(() => dmsToDecimal(CONSTANTS.SUN.MEAN_MOTION_PER_DAY), []);
@@ -150,8 +157,12 @@ export default function SunMechanism({
   });
 
   const isHighlighted = highlightedGalgal === 'sun';
-  const blueOpacity = isHighlighted ? 0.16 : 0.05;
-  const redOpacity = isHighlighted ? 0.2 : 0.08;
+  const pulsing = useVisualizationStore((s) => s.pulsingGalgalim);
+  const isPulsing = (id) => pulsing.includes(id);
+  const blueOpacity = isPulsing('sun-blue') ? 0.32 : isHighlighted ? 0.16 : 0.05;
+  const redOpacity = isPulsing('sun-red') ? 0.34 : isHighlighted ? 0.2 : 0.08;
+  const blueGrid = isPulsing('sun-blue') ? 0.55 : isHighlighted ? 0.35 : 0.18;
+  const redGrid = isPulsing('sun-red') ? 0.6 : isHighlighted ? 0.4 : 0.22;
   const showBlue = galgalVisible['sun-blue'] !== false;
   const showRed = galgalVisible['sun-red'] !== false;
 
@@ -171,7 +182,7 @@ export default function SunMechanism({
             ringColor="#7fa8d8"
             opacity={blueOpacity}
             gridColor="#9bc0e8"
-            gridOpacity={isHighlighted ? 0.35 : 0.18}
+            gridOpacity={blueGrid}
           />
         )}
 
@@ -190,11 +201,11 @@ export default function SunMechanism({
               ringColor="#d8895a"
               opacity={redOpacity}
               gridColor="#f0b090"
-              gridOpacity={isHighlighted ? 0.4 : 0.22}
+              gridOpacity={redGrid}
               onClick={(e) => {
                 e.stopPropagation();
                 setHighlightedGalgal('sun');
-                selectStep('sunMeanLongitude');
+                focusStep('sunMeanLongitude');
               }}
             />
           )}
@@ -204,7 +215,7 @@ export default function SunMechanism({
             <mesh
               onClick={(e) => {
                 e.stopPropagation();
-                selectStep('sunTrueLongitude');
+                focusStep('sunTrueLongitude');
                 setHighlightedGalgal('sun');
               }}
             >
