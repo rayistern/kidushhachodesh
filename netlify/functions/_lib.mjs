@@ -22,7 +22,11 @@ const DOCS_DIR = path.resolve(ROOT, 'docs');
 export function searchCorpus(query, opts = {}) {
   const q = (query || '').trim().toLowerCase();
   if (!q) return [];
-  const terms = q.split(/\s+/).filter(Boolean);
+  // Drop terms that are too short — single-char terms like "1" match
+  // thousands of positions in the corpus and cause the scoring loop to
+  // exceed the Netlify function timeout on longer queries.
+  const terms = q.split(/\s+/).filter((t) => t.length >= 2);
+  if (terms.length === 0) return [];
   const typeFilter = opts.type; // optional: 'step' | 'doc' | 'class' | ...
   const scored = [];
 
@@ -43,11 +47,15 @@ export function searchCorpus(query, opts = {}) {
       // Weight title hits higher than body hits.
       const titleHits = (entry.title.toLowerCase().match(new RegExp(escapeRe(t), 'g')) || []).length;
       score += titleHits * 10;
+      // Cap body hits per term to avoid runaway iteration on common
+      // substrings (e.g. "59" appearing in every numeric table).
       let idx = 0;
-      while ((idx = hay.indexOf(t, idx)) !== -1) {
-        score += 1;
+      let bodyHits = 0;
+      while ((idx = hay.indexOf(t, idx)) !== -1 && bodyHits < 50) {
+        bodyHits += 1;
         idx += t.length;
       }
+      score += bodyHits;
     }
     if (score === 0) continue;
 

@@ -59,6 +59,16 @@ that day's material. Do not force it — one offer, then follow the user.
 Credit Rabbi Zajac and link to Chabad.org (https://www.chabad.org) when
 quoting class transcript content. The project is MIT-licensed — fork freely.`;
 
+// All tools are read-only — annotate so clients like claude.ai can
+// auto-approve without a per-call confirmation prompt.
+const TOOL_ANNOTATIONS = {
+  title: 'Kiddush HaChodesh',
+  readOnlyHint: true,
+  destructiveHint: false,
+  idempotentHint: true,
+  openWorldHint: false,
+};
+
 const TOOLS = [
   {
     name: 'search',
@@ -75,6 +85,7 @@ const TOOLS = [
       },
       required: ['query'],
     },
+    annotations: TOOL_ANNOTATIONS,
   },
   {
     name: 'fetch',
@@ -85,6 +96,7 @@ const TOOLS = [
       properties: { id: { type: 'string' } },
       required: ['id'],
     },
+    annotations: TOOL_ANNOTATIONS,
   },
   {
     name: 'calculate',
@@ -97,12 +109,14 @@ const TOOLS = [
       },
       required: ['date'],
     },
+    annotations: TOOL_ANNOTATIONS,
   },
   {
     name: 'list_templates',
     description:
       'List starter templates for generating AI artifacts (standalone HTML calculators, Node CLIs, notebooks, etc.) that import the live engine. Follow up with `get_template` to read one, then modify for the user.',
     inputSchema: { type: 'object', properties: {} },
+    annotations: TOOL_ANNOTATIONS,
   },
   {
     name: 'get_template',
@@ -113,6 +127,7 @@ const TOOLS = [
       properties: { name: { type: 'string', description: 'Template filename, e.g. "standalone-calculator.html".' } },
       required: ['name'],
     },
+    annotations: TOOL_ANNOTATIONS,
   },
   {
     name: 'list_source',
@@ -124,6 +139,7 @@ const TOOLS = [
         area: { type: 'string', description: 'Optional: "engine" | "docs". Omit for a list of areas.' },
       },
     },
+    annotations: TOOL_ANNOTATIONS,
   },
   {
     name: 'get_source',
@@ -137,6 +153,7 @@ const TOOLS = [
       },
       required: ['area', 'file'],
     },
+    annotations: TOOL_ANNOTATIONS,
   },
   {
     name: 'get_daily_rambam',
@@ -148,11 +165,13 @@ const TOOLS = [
         date: { type: 'string', description: 'Optional Gregorian date YYYY-MM-DD. Defaults to today (UTC).' },
       },
     },
+    annotations: TOOL_ANNOTATIONS,
   },
   {
     name: 'stats',
     description: 'Return corpus statistics — total entries and counts per type. Useful for sanity-checking what is indexed.',
     inputSchema: { type: 'object', properties: {} },
+    annotations: TOOL_ANNOTATIONS,
   },
 ];
 
