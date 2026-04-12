@@ -1,8 +1,18 @@
 import React, { useState } from 'react';
 import { useCalculationStore } from '../../stores/calculationStore';
+import { useUIStore } from '../../stores/uiStore';
 import { formatDms } from '../../engine/dmsUtils';
 import { CONSTANTS, SOURCE_TYPES } from '../../engine/constants';
 import MaslulGraph from '../visualizations/MaslulGraph';
+import { tourForStep } from '../../content/walkthroughs';
+
+/** Parse a "KH 14:3" / "KH 17:9-11" style ref → { chapter, halacha } */
+function parseRambamRef(ref) {
+  if (!ref) return null;
+  const m = ref.match(/(\d+)\s*:\s*(\d+)/);
+  if (!m) return null;
+  return { chapter: parseInt(m[1], 10), halacha: parseInt(m[2], 10) };
+}
 
 /**
  * Displays the full calculation derivation chain.
@@ -203,6 +213,15 @@ function StepCard({ step, onClick }) {
 function StepDetail({ step, onClickInput }) {
   const [showTeaching, setShowTeaching] = useState(true);
   const sourceInfo = SOURCE_TYPES[step.source] || SOURCE_TYPES.rambam;
+  const setRightPanel = useUIStore((s) => s.setRightPanel);
+  const setActiveChapter = useUIStore((s) => s.setActiveChapter);
+  const refTarget = parseRambamRef(step.rambamRef);
+  const tourId = tourForStep(step.id);
+  const openRambam = () => {
+    if (refTarget) setActiveChapter(refTarget.chapter);
+    setRightPanel('rambam');
+  };
+  const openTour = () => setRightPanel('walkthrough');
 
   return (
     <div
@@ -226,6 +245,26 @@ function StepDetail({ step, onClickInput }) {
             {step.sourceNote}
           </div>
         )}
+
+        {/* Cross-links: open this step in the Rambam reader, or take a guided tour. */}
+        <div className="flex gap-2 mt-2">
+          {(refTarget || step.rambamRef) && (
+            <button
+              onClick={openRambam}
+              className="text-[10px] px-2 py-1 rounded bg-[var(--color-surface)] border border-[var(--color-border)] hover:bg-[var(--color-card)] text-[var(--color-text-secondary)] hover:text-[var(--color-text)]"
+            >
+              📖 Read in Rambam
+            </button>
+          )}
+          {tourId && (
+            <button
+              onClick={openTour}
+              className="text-[10px] px-2 py-1 rounded bg-[var(--color-surface)] border border-[var(--color-border)] hover:bg-[var(--color-card)] text-[var(--color-text-secondary)] hover:text-[var(--color-text)]"
+            >
+              🎬 Take a tour
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Teaching Note (from classes) */}
