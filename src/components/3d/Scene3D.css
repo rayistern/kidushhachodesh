@@ -1,0 +1,404 @@
+/* Scene3D.css - Styles for 3D Digital Props System */
+
+/* ============== Container Styles ============== */
+
+.scene-3d-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 600px;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+/* ============== Loading Screen ============== */
+
+.scene-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 10, 10, 0.95);
+  padding: 2rem;
+  border-radius: 12px;
+  color: white;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.loader-spinner {
+  width: 50px;
+  height: 50px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: #4a90d9;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ============== Galgal Labels (3D Overlay) ============== */
+
+.galgal-label {
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  pointer-events: none;
+  white-space: nowrap;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: opacity 0.2s ease;
+}
+
+.galgal-label .hebrew {
+  display: block;
+  font-family: 'David Libre', 'Times New Roman', serif;
+  font-size: 14px;
+  margin-bottom: 2px;
+  color: #70e1c8;
+}
+
+.galgal-label .english {
+  display: block;
+  font-size: 10px;
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.galgal-label .detail {
+  display: block;
+  font-size: 9px;
+  opacity: 0.6;
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Specific label variants */
+.earth-label .hebrew {
+  color: #4a90d9;
+}
+
+.sun-label .hebrew {
+  color: #FFD700;
+}
+
+.moon-label .hebrew {
+  color: #C0C0FF;
+}
+
+.epicycle-label .hebrew {
+  color: #ffffff;
+  font-size: 12px;
+}
+
+.zodiac-label {
+  background: rgba(26, 34, 54, 0.9);
+}
+
+.zodiac-label .hebrew {
+  color: #ffffff;
+  font-size: 13px;
+}
+
+.zodiac-label .degree {
+  display: block;
+  font-size: 9px;
+  opacity: 0.5;
+  margin-top: 2px;
+}
+
+.visible-indicator {
+  display: block;
+  color: #4ade80;
+  font-size: 10px;
+  margin-top: 4px;
+}
+
+/* ============== Camera Controls UI ============== */
+
+.camera-controls {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.5rem;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 0.5rem;
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+  z-index: 100;
+}
+
+.camera-control-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.camera-control-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.camera-control-btn.active {
+  background: rgba(74, 144, 217, 0.3);
+  border-color: #4a90d9;
+}
+
+/* ============== Mode Toggle ============== */
+
+.mode-toggle {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 100;
+  display: flex;
+  gap: 0.5rem;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 0.5rem;
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+}
+
+.mode-toggle-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mode-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.mode-toggle-btn.active {
+  background: rgba(74, 144, 217, 0.3);
+  border-color: #4a90d9;
+}
+
+/* ============== Tooltip Overlay ============== */
+
+.tooltip-3d {
+  position: absolute;
+  background: rgba(26, 34, 54, 0.95);
+  border: 1px solid rgba(112, 225, 200, 0.3);
+  border-radius: 8px;
+  padding: 1rem;
+  max-width: 250px;
+  color: white;
+  pointer-events: none;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+}
+
+.tooltip-3d h4 {
+  margin: 0 0 0.5rem 0;
+  color: #70e1c8;
+  font-size: 14px;
+  border-bottom: 1px solid rgba(112, 225, 200, 0.2);
+  padding-bottom: 0.5rem;
+}
+
+.tooltip-3d p {
+  margin: 0.25rem 0;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.tooltip-3d .coordinate {
+  color: #4a90d9;
+  font-family: monospace;
+}
+
+.tooltip-3d .reference {
+  font-style: italic;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ============== Animation Controls ============== */
+
+.animation-controls {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+}
+
+.animation-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.animation-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.animation-btn.playing {
+  background: rgba(74, 144, 217, 0.3);
+  border-color: #4a90d9;
+}
+
+.animation-speed {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* ============== Legend ============== */
+
+.legend-3d {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 1rem;
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+  min-width: 150px;
+}
+
+.legend-3d h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.5rem 0;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.legend-color.sun { background: #FFD700; }
+.legend-color.moon-1 { background: #C0C0FF; }
+.legend-color.moon-2 { background: #FF8080; }
+.legend-color.earth { background: #4a90d9; }
+.legend-color.galgal { background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.3); }
+
+/* ============== Responsive Styles ============== */
+
+@media (max-width: 768px) {
+  .scene-3d-container {
+    min-height: 400px;
+  }
+  
+  .camera-controls {
+    flex-wrap: wrap;
+    max-width: 90%;
+    justify-content: center;
+  }
+  
+  .camera-control-btn {
+    padding: 0.4rem 0.75rem;
+    font-size: 11px;
+  }
+  
+  .galgal-label {
+    padding: 4px 8px;
+    font-size: 10px;
+  }
+  
+  .galgal-label .hebrew {
+    font-size: 11px;
+  }
+  
+  .legend-3d {
+    display: none; /* Hide legend on mobile */
+  }
+}
+
+@media (max-width: 480px) {
+  .mode-toggle {
+    top: 0.5rem;
+    left: 0.5rem;
+  }
+  
+  .animation-controls {
+    top: 0.5rem;
+    right: 0.5rem;
+  }
+  
+  .camera-controls {
+    bottom: 0.5rem;
+    padding: 0.4rem;
+    gap: 0.3rem;
+  }
+}
+
+/* ============== Dark Mode Enhancements ============== */
+
+@media (prefers-color-scheme: dark) {
+  .galgal-label {
+    background: rgba(0, 0, 0, 0.85);
+  }
+}
+
+/* ============== Reduced Motion ============== */
+
+@media (prefers-reduced-motion: reduce) {
+  .loader-spinner {
+    animation: none;
+    border-color: #4a90d9;
+  }
+  
+  .camera-control-btn,
+  .mode-toggle-btn,
+  .animation-btn {
+    transition: none;
+  }
+}
