@@ -1,141 +1,54 @@
-import { CONSTANTS } from '../constants';
+/**
+ * Thin compatibility wrapper over the engine pipeline.
+ *
+ * Historical note: this file used to be a parallel (and subtly buggy)
+ * implementation of the Rambam's calculations — notably it inverted the
+ * sun's correction-direction rule and used the sun's correction table
+ * for the moon. It also bypassed the Hebrew-native day count.
+ *
+ * Rather than maintain two pipelines, this now delegates to the engine
+ * and keeps the string-formatted shape that existing consumers
+ * (CelestialVisualization, AstronomicalCalculations) already expect.
+ */
+import { getAstronomicalData as engineGetAstronomicalData } from '../engine/pipeline.js';
+import { daysFromEpoch } from '../engine/epochDays.js';
 
-/* ----------------  helpers (copied from AstronomicalCalculations.js) -------- */
-const calculateLunarLatitude = (daysFromBase) => {
-  const latitudeCycle = 27.32166;          // draconic month
-  const maxLatitude   = 5.0;               // deg
-  const phase = (daysFromBase % latitudeCycle) / latitudeCycle;
-  return maxLatitude * Math.sin(2 * Math.PI * phase);
-};
-
-const calculateFirstVisibility = (elongation, latitude) =>
-  elongation + 0.3 * Math.abs(latitude);
-
-const calculateSeasonalInfo = (daysFromBase) => {
-  const solarYear = 365.25;
-  const seasonLen = solarYear / 4;
-  const yearPos   = (daysFromBase % solarYear) / solarYear;
-  const dayInYear = Math.floor(daysFromBase % solarYear);
-
-  const seasonIdx = Math.floor(yearPos * 4);          // 0-3
-  const seasonArr = ['Spring', 'Summer', 'Fall', 'Winter'];
-  return {
-    currentSeason: seasonArr[seasonIdx],
-    daysUntilNextSeason: Math.ceil(seasonLen - (dayInYear % seasonLen))
-  };
-};
-/* --------------------------------------------------------------------------- */
+const fmt = (n) => (typeof n === 'number' ? n.toFixed(2) : n);
 
 export function getAstronomicalData(date) {
-  const baseDate     = CONSTANTS.BASE_DATE;
-  const daysFromBase = Math.floor((date - baseDate) / 8.64e7); // ms → days
-
-  /* ---------- SUN -------------- */
-  const sunMeanMotionDeg =
-      CONSTANTS.SUN.MEAN_MOTION_PER_DAY.degrees +
-      CONSTANTS.SUN.MEAN_MOTION_PER_DAY.minutes / 60 +
-      CONSTANTS.SUN.MEAN_MOTION_PER_DAY.seconds / 3600;
-
-  const sunMeanLon =
-      (CONSTANTS.SUN.START_POSITION.degrees +
-       CONSTANTS.SUN.START_POSITION.minutes / 60 +
-       CONSTANTS.SUN.START_POSITION.seconds / 3600 +
-       sunMeanMotionDeg * daysFromBase) % 360;
-
-  const apogeeStart =
-      CONSTANTS.SUN.APOGEE_START.degrees +
-      CONSTANTS.SUN.APOGEE_CONSTELLATION * 30;
-
-  const apogeePos =
-      (apogeeStart +
-       CONSTANTS.SUN.APOGEE_MOTION_PER_DAY * daysFromBase) % 360;
-
-  let sunMaslul = sunMeanLon - apogeePos;
-  if (sunMaslul < 0) sunMaslul += 360;
-
-  /*  maslul-correction (linear interpolation)  */
-  let sunMaslulCorr = 0;
-  for (let i = 0; i < CONSTANTS.MASLUL_CORRECTIONS.length - 1; i++) {
-    const cur = CONSTANTS.MASLUL_CORRECTIONS[i];
-    const nxt = CONSTANTS.MASLUL_CORRECTIONS[i + 1];
-    if (sunMaslul >= cur.maslul && sunMaslul < nxt.maslul) {
-      const r = (sunMaslul - cur.maslul) / (nxt.maslul - cur.maslul);
-      sunMaslulCorr = cur.correction + r * (nxt.correction - cur.correction);
-      break;
-    }
-  }
-  const sunTrueLon =
-      (sunMaslul <= 180)
-        ? (sunMeanLon + sunMaslulCorr) % 360
-        : (sunMeanLon - sunMaslulCorr + 360) % 360;
-
-  /* ---------- MOON -------------- */
-  /* daily mean motion (deg + min + sec) */
-  const moonMeanMotionDeg =
-      CONSTANTS.MOON.MEAN_MOTION_PER_DAY.degrees +
-      CONSTANTS.MOON.MEAN_MOTION_PER_DAY.minutes / 60 +
-      CONSTANTS.MOON.MEAN_MOTION_PER_DAY.seconds / 3600;
-
-  /* Rambam epoch ⇒ conjunction ⇒ mean-Moon longitude = 0°  */
-  const moonMeanLon =
-      (CONSTANTS.MOON.MEAN_LONGITUDE_AT_EPOCH +
-       moonMeanMotionDeg * daysFromBase) % 360;
-
-  const moonMaslul =
-      (CONSTANTS.MOON.MASLUL_START.degrees +
-       CONSTANTS.MOON.MASLUL_MEAN_MOTION.degrees * daysFromBase) % 360;
-
-  let moonMaslulCorr = 0;
-  for (let i = 0; i < CONSTANTS.MASLUL_CORRECTIONS.length - 1; i++) {
-    const cur = CONSTANTS.MASLUL_CORRECTIONS[i];
-    const nxt = CONSTANTS.MASLUL_CORRECTIONS[i + 1];
-    if (moonMaslul >= cur.maslul && moonMaslul < nxt.maslul) {
-      const r = (moonMaslul - cur.maslul) / (nxt.maslul - cur.maslul);
-      moonMaslulCorr = cur.correction + r * (nxt.correction - cur.correction);
-      break;
-    }
-  }
-
-  const lunarLat  = calculateLunarLatitude(daysFromBase);
-  const moonTrueLon = (moonMeanLon + moonMaslulCorr) % 360;
-
-  const elong = (moonTrueLon - sunTrueLon + 360) % 360;
-  const firstVis = calculateFirstVisibility(elong, lunarLat);
-  const visible  = firstVis > 12;
-
-  let phase = '';
-  if (elong < 90) phase = 'Waxing Crescent';
-  else if (elong < 180) phase = 'Waxing Gibbous';
-  else if (elong < 270) phase = 'Waning Gibbous';
-  else phase = 'Waning Crescent';
+  const engine = engineGetAstronomicalData(date);
+  const days = daysFromEpoch(date);
 
   return {
-    sun : {
-      meanLongitude   : sunMeanLon.toFixed(2),
-      trueLongitude   : sunTrueLon.toFixed(2),
-      apogee          : apogeePos.toFixed(2),
-      maslul          : sunMaslul.toFixed(2),
-      maslulCorrection: sunMaslulCorr.toFixed(2),
-      constellation   : CONSTANTS.CONSTELLATIONS[Math.floor(sunMeanLon / 30)],
-      positionInConstellation: (sunMeanLon % 30).toFixed(2)
+    sun: {
+      meanLongitude: fmt(engine.sun.meanLongitude),
+      trueLongitude: fmt(engine.sun.trueLongitude),
+      apogee: fmt(engine.sun.apogee),
+      maslul: fmt(engine.sun.maslul),
+      maslulCorrection: fmt(engine.sun.maslulCorrection),
+      constellation: engine.sun.constellation,
+      positionInConstellation: fmt(engine.sun.positionInConstellation),
     },
     moon: {
-      meanLongitude      : moonMeanLon.toFixed(2),
-      correctedLongitude : moonTrueLon.toFixed(2),
-      latitude           : lunarLat.toFixed(2),
-      maslul             : moonMaslul.toFixed(2),
-      maslulCorrection   : moonMaslulCorr.toFixed(2),
-      elongation         : elong.toFixed(2),
-      firstVisibilityAngle: firstVis.toFixed(2),
-      isVisible          : visible,
-      phase,
-      constellation      : CONSTANTS.CONSTELLATIONS[Math.floor(moonTrueLon / 30)],
-      positionInConstellation: (moonTrueLon % 30).toFixed(2)
+      meanLongitude: fmt(engine.moon.meanLongitude),
+      correctedLongitude: fmt(engine.moon.correctedLongitude),
+      latitude: fmt(engine.moon.latitude),
+      maslul: fmt(engine.moon.maslul),
+      maslulCorrection: fmt(engine.moon.maslulCorrection),
+      elongation: fmt(engine.moon.elongation),
+      firstVisibilityAngle: fmt(engine.moon.firstVisibilityAngle),
+      isVisible: engine.moon.isVisible,
+      phase: engine.moon.phase,
+      constellation: engine.moon.constellation,
+      positionInConstellation: fmt(engine.moon.positionInConstellation),
     },
-    season: calculateSeasonalInfo(daysFromBase)
+    season: {
+      currentSeason: engine.season?.currentSeason ?? '',
+      daysUntilNextSeason: engine.season?.daysUntilNextSeason ?? 0,
+    },
+    _daysFromEpoch: days,
   };
 }
 
-/* convenience exports */
 export const getMoonPosition = (date) => getAstronomicalData(date).moon;
-export const getSunPosition  = (date) => getAstronomicalData(date).sun; 
+export const getSunPosition = (date) => getAstronomicalData(date).sun;

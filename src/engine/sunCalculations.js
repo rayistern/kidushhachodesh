@@ -18,22 +18,29 @@
  */
 import { CONSTANTS } from './constants.js';
 import { dmsToDecimal, normalizeDegrees, formatDms } from './dmsUtils.js';
+import { daysFromEpoch, HDate } from './epochDays.js';
 
-/** Calculate days from the Rambam's epoch (3 Nisan 4938 / April 3, 1177 CE) */
+/**
+ * Calculate Hebrew-calendar days from the Rambam's epoch (3 Nisan 4938 AM).
+ *
+ * Accepts a JS Date or an HDate. Uses hebcal's absolute-day count so the
+ * calculation path never round-trips through Gregorian/Julian civil dates.
+ */
 export function calculateDaysFromEpoch(date) {
-  const daysFromBase = Math.floor((date - CONSTANTS.BASE_DATE) / 8.64e7);
+  const hd = date instanceof HDate ? date : new HDate(date);
+  const daysFromBase = daysFromEpoch(hd);
   return {
     id: 'daysFromEpoch',
     name: 'Days from Epoch',
     hebrewName: 'ימים מתחילת המניין',
     rambamRef: 'KH 11:16',
     source: 'rambam',
-    sourceNote: 'Epoch date (3 Nisan 4938) directly from the Rambam.',
+    sourceNote: 'Epoch date (3 Nisan 4938 AM, ליל חמישי) directly from the Rambam. Day count uses Hebrew-calendar absolute days, not Gregorian.',
     inputs: {
-      date: { value: date.toISOString().slice(0, 10), label: 'Selected Date' },
-      epoch: { value: '1177-04-03', label: 'Epoch (3 Nisan 4938)' },
+      date: { value: hd.toString(), label: 'Selected Date (Hebrew)' },
+      epoch: { value: '3 Nisan 4938', label: 'Epoch' },
     },
-    formula: '(date − epoch) / millisecondsPerDay',
+    formula: 'HDate(date).abs() − HDate(3 Nisan 4938).abs()',
     result: daysFromBase,
     unit: 'days',
   };
@@ -72,7 +79,7 @@ export function calculateSunMeanLongitude(daysFromBase) {
     hebrewName: 'אמצע השמש',
     rambamRef: 'KH 12:1-2',
     source: 'rambam',
-    sourceNote: 'Position at epoch = 0° (conjunction with moon at 0° Aries). Daily motion per the Rambam.',
+    sourceNote: 'Position at epoch = 7°3\'32" in Aries (KH 12:2). Daily motion per the Rambam.',
     teachingNote: 'The emtzoi: where the sun appears in the mazalos if you were standing at the CENTER OF THE RED GALGAL. Since the red\'s center is not at Earth, this is NOT where we see the sun. But it is the essential first step — "first know the sun\'s own language, then translate to ours." (Rabbi Losh)',
     inputs: {
       startPosition: { value: startPos, label: 'Position at Epoch', unit: '°' },

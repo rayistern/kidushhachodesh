@@ -16,19 +16,24 @@ import { liveAll } from './liveLongitudes.js';
 const MOLAD_INTERVAL_DAYS = 29 + 12 / 24 + 793 / (24 * 1080); // ~29.530594
 
 /**
- * Find the molad nearest to the given days-from-epoch value.
- * Returns the days-from-epoch of that molad.
+ * Days-from-epoch of a molad close to the Rambam's epoch.
  *
- * Approach: scan a small window of mean moladot around the anchor and
- * return the one closest in time. This is good enough for sub-day
- * accuracy without needing to know the exact epoch molad.
+ * In principle this should be derived from BaHaRaD (KH 6:8) — the
+ * Rambam's first molad (Tishrei year 1 AM at day 2, hour 5, parts 204) —
+ * by adding the mean synodic month × (number of months from year 1 AM
+ * Tishrei to the nearest molad to 3 Nisan 4938). We have NOT yet pinned
+ * that derivation to a single absolute-time anchor that matches hebcal's
+ * year-1-AM convention (different traditions place Rosh Hashanah of
+ * year 1 AM on either Monday or Friday, changing the arithmetic by 4
+ * days), so for now this keeps the empirical fiducial that pre-existed
+ * the 2026 epoch fix. It is used ONLY to phase the timeline tick marks;
+ * calendrical molad calculations should use hebcal's own molad functions.
  *
- * For the timeline we just want round-number conjunctions for visual
- * reference, so we use a fiducial: at days=0 (epoch 3 Nisan 4938) the
- * sun is at 0° and the moon is at 31°14'43" — they were not conjunct.
- * The mean conjunction nearest the epoch is therefore at ~ -2.4 days.
+ * TODO: pin against a modern molad from Rambam KH 6:15 text (molad of
+ * Nisan 4938) once we've fetched it, then verify against the empirical
+ * value below.
  */
-const EPOCH_OFFSET_TO_FIRST_MOLAD = -2.36; // approximate, in days
+const EPOCH_OFFSET_TO_FIRST_MOLAD = -2.36; // days, empirical; see comment
 
 /**
  * Returns an array of moladot in [anchorDays - count*interval, anchorDays + count*interval].

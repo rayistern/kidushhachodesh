@@ -20,9 +20,19 @@ export const HEBREW_MONTHS_LEAP = [
 ];
 
 export const CONSTANTS = {
-  // [R] Epoch: 3 Nisan 4938 = April 3, 1177 CE — KH 12:2
-  BASE_DATE: new Date(1177, 3, 3), // April 3, 1177 CE (month is 0-indexed)
+  // [R] Epoch: 3 Nisan 4938 AM — KH 11:16 ("mi-techilat leil chamishi,
+  // shlishi l'Nisan, 4938 l'yetzira"). Hebrew-native; do NOT convert to
+  // a JS Date for day-count arithmetic — the Rambam's day counter is a
+  // Hebrew-calendar day count, and any Gregorian/Julian round-trip is a
+  // conversion bug waiting to happen (we lived it). Day-count is:
+  //   HDate(input).abs() - HDate(3, 'Nisan', 4938).abs()
+  EPOCH_HEBREW: { year: 4938, month: 'Nisan', day: 3 },
   BASE_YEAR_HEBREW: 4938,
+
+  // [display-only] Proleptic Gregorian rendering of the epoch, for UI
+  // that shows "epoch = March 30 1178 CE". NEVER subtract this from
+  // another Date to get a day count — use EPOCH_HEBREW for that.
+  BASE_DATE_DISPLAY: new Date(Date.UTC(1178, 2, 30)),
 
   // ═══════════════════════════════════════════════════════════════
   //  GALGALIM (Celestial Spheres) — Rambam's cosmological model
@@ -124,7 +134,9 @@ export const CONSTANTS = {
   SUN: {
     // [R] 0° 59' 8 1/3" per day — KH 12:1
     MEAN_MOTION_PER_DAY: { degrees: 0, minutes: 59, seconds: 8.333 },
-    START_POSITION: { degrees: 0, minutes: 0, seconds: 0 },
+    // [R] KH 12:2 — "7 degrees, 3 minutes, 32 seconds in the constellation
+    // of Aries" at the epoch (beginning of Thursday night, 3 Nisan 4938).
+    START_POSITION: { degrees: 7, minutes: 3, seconds: 32 },
     START_CONSTELLATION: 0, // Aries
 
     // [R] Apogee (govah) at epoch — KH 12:2

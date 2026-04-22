@@ -10,7 +10,9 @@ export const HEBREW_MONTHS_LEAP = [
 ];
 
 export const CONSTANTS = {
-  BASE_DATE: new Date(1177, 3, 3), // April 3, 1177 CE
+  // Rambam's epoch: 3 Nisan 4938 AM. Day-count is Hebrew-native via
+  // hebcal HDate.abs() — see src/engine/epochDays.js. No Gregorian
+  // anchor needed in this file anymore.
   BASE_YEAR_HEBREW: 4938,
   
   // Galgalim (celestial spheres) based on Rambam's description
@@ -78,7 +80,8 @@ export const CONSTANTS = {
   SUN: {
     // 0° 59′ 8⅓″  – Rambam KH 11:6
     MEAN_MOTION_PER_DAY: { degrees: 0, minutes: 59, seconds: 8.333 },
-    START_POSITION: { degrees: 0, minutes: 0, seconds: 0 },
+    // KH 12:2 — mean longitude at the epoch is 7°3'32" in Aries.
+    START_POSITION: { degrees: 7, minutes: 3, seconds: 32 },
     START_CONSTELLATION: 0, // Aries
     APOGEE_START: { degrees: 26, minutes: 45, seconds: 8 },
     APOGEE_CONSTELLATION: 2, // Gemini
@@ -100,7 +103,8 @@ export const CONSTANTS = {
   MOON: {
     // 13° 10′ 35 4⁄30″  – Rambam KH 11:7
     MEAN_MOTION_PER_DAY: { degrees: 13, minutes: 10, seconds: 35.133 },
-    START_POSITION: { degrees: 0, minutes: 0, seconds: 0 },
+    // KH 14:4 — mean longitude at the epoch is 1°14'43" in Taurus.
+    START_POSITION: { degrees: 1, minutes: 14, seconds: 43 },
     START_CONSTELLATION: 1, // Taurus
     // 13° 3′ 53⅓″
     MASLUL_MEAN_MOTION: { degrees: 13, minutes: 3, seconds: 53.333 },
@@ -140,9 +144,11 @@ export const CONSTANTS = {
       LATITUDE_CYCLE: 27.21222, // Draconic month in days
     },
     
-    // Rambam: Sun and Moon are in conjunction at the epoch.
-    // Put the Moon at 0° so day-zero is NEW moon, not FULL moon.
-    MEAN_LONGITUDE_AT_EPOCH: 0,     // deg
+    // KH 14:4 — moon mean longitude at the epoch is 1°14'43" in Taurus
+    // (= 31°14'43" absolute). The sun and moon were NOT conjunct at the
+    // epoch: moon at ~31.25°, sun at ~7.06°, so ~24° elongation (roughly
+    // 3 days past molad, consistent with 3 Nisan).
+    MEAN_LONGITUDE_AT_EPOCH: 1 + 14 / 60 + 43 / 3600,  // deg, in Taurus (add START_CONSTELLATION*30)
   },
   
   CONSTELLATIONS: [

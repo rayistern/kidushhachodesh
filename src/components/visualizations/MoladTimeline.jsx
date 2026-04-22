@@ -37,11 +37,12 @@ export default function MoladTimeline() {
 
   const xFor = (days) => ((days - minDays) / range) * 100;
 
-  // Convert days-from-epoch to a JS Date
-  const epoch = new Date(1177, 3, 3); // 3 April 1177
+  // Convert days-from-epoch to a JS Date. The epoch is 3 Nisan 4938 AM =
+  // Thursday, 30 March 1178 CE (proleptic Gregorian) — see engine constants.
+  const epoch = new Date(Date.UTC(1178, 2, 30));
   const dateFor = (days) => {
     const d = new Date(epoch);
-    d.setDate(d.getDate() + days);
+    d.setUTCDate(d.getUTCDate() + days);
     return d;
   };
 

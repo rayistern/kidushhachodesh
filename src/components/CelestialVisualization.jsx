@@ -4,6 +4,7 @@ import { CONSTANTS, GALGALIM_INFO, GALGAL_NOTEH_INCLINATION_DEG, MAZALOT_LABELS,
 import { getHebrewDate, getMoladInfo, getHebrewDateDisplay, getMoladDisplay } from '../utils/dateUtils';
 import { getAstronomicalData } from '../utils/astronomyCalc';
 import { getAscendingNodeLongitude } from '../utils/astronomy';
+import { daysFromEpoch } from '../engine/epochDays.js';
 
 const CelestialVisualization = ({ date, onDateChange, onTooltipChange }) => {
   const canvasRef = useRef(null);
@@ -412,8 +413,7 @@ const CelestialVisualization = ({ date, onDateChange, onTooltipChange }) => {
   // Calculate positions based on date
   const calculatePositions = (currentDate, width, height) => {
     const sunEpicycleRatio = CONSTANTS.SUN.GALGALIM?.EPICYCLE?.RADIUS_RATIO ?? 0;
-    const baseDate = CONSTANTS.BASE_DATE;
-    const daysFromBase = Math.floor((currentDate - baseDate) / (1000 * 60 * 60 * 24));
+    const daysFromBase = daysFromEpoch(currentDate);
     
     // Setup dimensions and scale constants
     const centerX = width / 2;
