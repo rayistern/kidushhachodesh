@@ -16,24 +16,32 @@ import { liveAll } from './liveLongitudes.js';
 const MOLAD_INTERVAL_DAYS = 29 + 12 / 24 + 793 / (24 * 1080); // ~29.530594
 
 /**
- * Days-from-epoch of a molad close to the Rambam's epoch.
+ * Days-from-epoch of the mean molad of Nisan 4938 (the molad nearest the
+ * Rambam's epoch). Derived from BaHaRaD (KH 6:8) by counting mean moladot.
  *
- * In principle this should be derived from BaHaRaD (KH 6:8) — the
- * Rambam's first molad (Tishrei year 1 AM at day 2, hour 5, parts 204) —
- * by adding the mean synodic month × (number of months from year 1 AM
- * Tishrei to the nearest molad to 3 Nisan 4938). We have NOT yet pinned
- * that derivation to a single absolute-time anchor that matches hebcal's
- * year-1-AM convention (different traditions place Rosh Hashanah of
- * year 1 AM on either Monday or Friday, changing the arithmetic by 4
- * days), so for now this keeps the empirical fiducial that pre-existed
- * the 2026 epoch fix. It is used ONLY to phase the timeline tick marks;
- * calendrical molad calculations should use hebcal's own molad functions.
+ * Derivation:
+ *   - BaHaRaD = molad Tishrei year 1 AM, day 2 (Monday), 5h 204p past
+ *     start-of-Hebrew-day (6 PM civil). That's 5h + 204/1080 h = 5.189h
+ *     past Sunday 6 PM = Sunday 11:11:20 PM civil = Monday abs − 49/1440.
+ *   - hebcal's HDate(1,'Tishrei',1).abs() returns the abs-day of BaHaRaD's
+ *     Monday (verified via abs mod 7 = 1 under Rata Die). hebcal's greg()
+ *     reports Friday for this abs, but the JS-Date conversion is unreliable
+ *     at year −4264; abs mod 7 is authoritative.
+ *   - BaHaRaD abs ≈ −1373427.034.
+ *   - Months from BaHaRaD to molad Nisan 4938: 61069 (counting 13 months
+ *     for leap cycle positions 3,6,8,11,14,17,19 and 12 otherwise, plus
+ *     Tishrei..Adar II inside leap year 4938 itself).
+ *   - molad Nisan 4938 abs = −1373427.034 + 61069 × MOLAD_INTERVAL_DAYS.
+ *   - Epoch (start of Rambam's day 0 = 6 PM before 3 Nisan 4938) abs
+ *     = HDate(3,'Nisan',4938).abs() − 0.25 = 429978.75.
+ *   - Offset = molad_abs − epoch_abs ≈ −1.93.
  *
- * TODO: pin against a modern molad from Rambam KH 6:15 text (molad of
- * Nisan 4938) once we've fetched it, then verify against the empirical
- * value below.
+ * Cross-check: the same formula gives molad Nisan 5786 within ~2 hours of
+ * the published contemporary value (Jerusalem mean time conversion aside),
+ * and within expected mean-vs-true-conjunction drift (up to ±14h) of the
+ * actual astronomical new moon on 19 March 2026.
  */
-const EPOCH_OFFSET_TO_FIRST_MOLAD = -2.36; // days, empirical; see comment
+const EPOCH_OFFSET_TO_FIRST_MOLAD = -1.9307; // days, derived from BaHaRaD
 
 /**
  * Returns an array of moladot in [anchorDays - count*interval, anchorDays + count*interval].
