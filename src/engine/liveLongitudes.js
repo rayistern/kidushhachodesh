@@ -2,6 +2,14 @@
  * Live longitude helpers — compute celestial positions every animation
  * frame WITHOUT routing through the full calculation pipeline.
  *
+ * ═══════════════════════════════════════════════════════════════════
+ *  REGIME TAG: **astronomical** (KH 11-17 fast path)
+ *  SURFACE CATEGORY: internal utility
+ * ═══════════════════════════════════════════════════════════════════
+ * Mirrors the mean-motion arithmetic of the full pipeline, for
+ * animation-frame performance. No fixed-calendar dependency.
+ * See docs/OPEN_QUESTIONS.md Q2.
+ *
  * The pipeline is for the calendar-date snapshot shown in the sidebar.
  * For animated overlays (ecliptic ribbon, ghost bodies, trails) we need
  * to compute positions every frame with the animation offset applied,
