@@ -28,6 +28,7 @@
 import { CONSTANTS } from './constants.js';
 import { dmsToDecimal, normalizeDegrees, formatDms } from './dmsUtils.js';
 import { daysFromEpoch, HDate } from './epochDays.js';
+import { MOLAD_INTERVAL_DAYS } from './moladTimeline.js';
 
 /**
  * Calculate Hebrew-calendar days from the Rambam's epoch (3 Nisan 4938 AM).
@@ -38,6 +39,18 @@ import { daysFromEpoch, HDate } from './epochDays.js';
 export function calculateDaysFromEpoch(date) {
   const hd = date instanceof HDate ? date : new HDate(date);
   const daysFromBase = daysFromEpoch(hd);
+
+  // Mean-synodic-time comparison — the trap the user on 2026-04-23 hit.
+  // ⌊N / MOLAD_INTERVAL⌋ = the integer count of complete mean-synodic
+  // months elapsed. Multiplying back gives the mean-molad-clock reading
+  // at the last whole molad before the target date. This drifts from
+  // the fixed-calendar integer day count by ~0.13d over 848 years
+  // because the fixed calendar's dehiyot (KH 7) don't reset the mean-
+  // molad clock. See docs/OPEN_QUESTIONS.md Q1.
+  const wholeMoladot = Math.floor(daysFromBase / MOLAD_INTERVAL_DAYS);
+  const meanSynodicDays = wholeMoladot * MOLAD_INTERVAL_DAYS;
+  const driftDays = daysFromBase - meanSynodicDays;
+
   return {
     id: 'daysFromEpoch',
     regime: 'crossing',
@@ -61,6 +74,16 @@ export function calculateDaysFromEpoch(date) {
     formula: 'HDate(date).abs() − HDate(3 Nisan 4938).abs()',
     result: daysFromBase,
     unit: 'days',
+    // Crossing-point UI data — consumed by StepDetail's <CrossingCallout/>
+    // when step.regime === 'crossing'. The comparison is the whole point
+    // of this step: makes the 309,716/309,717 trap visible.
+    crossingInfo: {
+      civilDays: daysFromBase,
+      wholeMoladot,
+      meanSynodicDays,
+      driftDays,
+      synodicInterval: MOLAD_INTERVAL_DAYS,
+    },
   };
 }
 

@@ -213,6 +213,73 @@ const REGIME_INFO = {
   },
 };
 
+// ─── Crossing Callout ──────────────────────────────────────────
+// Rendered only at the daysFromEpoch step. Shows the integer civil-day
+// count side-by-side with the mean-synodic-time equivalent — the exact
+// comparison that produced the user report on 2026-04-23 (they had
+// computed the mean-synodic number and fed it into KH 12:1, which
+// actually wants the civil-day count). See docs/OPEN_QUESTIONS.md Q1.
+
+function CrossingCallout({ info }) {
+  const { civilDays, wholeMoladot, meanSynodicDays, driftDays, synodicInterval } = info;
+  const crossing = REGIME_INFO.crossing;
+  return (
+    <div
+      className="mb-3 p-3 rounded-lg"
+      style={{
+        backgroundColor: crossing.color + '10',
+        border: `1px solid ${crossing.color}40`,
+      }}
+    >
+      <div
+        className="text-[10px] font-bold uppercase tracking-wider mb-2 flex items-center gap-1.5"
+        style={{ color: crossing.color }}
+      >
+        ⚠ Regime Crossing — {crossing.short}
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+        <div className="p-2 rounded bg-[var(--color-card)] border border-[var(--color-border)]">
+          <div className="text-[10px] text-[var(--color-text-secondary)] uppercase tracking-wide mb-0.5">
+            Civil days (KH 6-10)
+          </div>
+          <div className="font-mono text-sm font-bold text-[var(--color-text)]">
+            {civilDays.toLocaleString()}
+          </div>
+          <div className="text-[10px] text-[var(--color-text-secondary)] mt-0.5">
+            What KH 12:1 actually wants ✓
+          </div>
+        </div>
+        <div className="p-2 rounded bg-[var(--color-card)] border border-[var(--color-border)] opacity-80">
+          <div className="text-[10px] text-[var(--color-text-secondary)] uppercase tracking-wide mb-0.5">
+            Mean-synodic days (KH 6:3)
+          </div>
+          <div className="font-mono text-sm font-bold text-[var(--color-text-secondary)]">
+            {meanSynodicDays.toFixed(3).toLocaleString()}
+          </div>
+          <div className="text-[10px] text-[var(--color-text-secondary)] mt-0.5">
+            {wholeMoladot.toLocaleString()} × {synodicInterval.toFixed(4)}
+          </div>
+        </div>
+      </div>
+      <div className="text-[11px] text-[var(--color-text-secondary)] mt-2 leading-snug">
+        These are different quantities. The fixed calendar's dehiyot
+        (KH 7) accumulate ~{driftDays.toFixed(3)} days of drift from
+        the mean-molad clock over this interval. Don't feed the
+        mean-synodic number into KH 12:1 — that's the trap.{' '}
+        <a
+          href="https://github.com/rayistern/kidushhachodesh/blob/main/docs/OPEN_QUESTIONS.md#q1-what-day-count-does-the-rambams-astronomical-pipeline-actually-want"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline"
+          style={{ color: crossing.color }}
+        >
+          Full writeup ↗
+        </a>
+      </div>
+    </div>
+  );
+}
+
 function RegimeBadge({ regime }) {
   if (!regime || !REGIME_INFO[regime]) return null;
   const info = REGIME_INFO[regime];
@@ -301,6 +368,10 @@ function StepDetail({ step, onClickInput }) {
       className="rounded-lg bg-[var(--color-card)] border p-4"
       style={{ borderColor: `${sourceInfo.color}50` }}
     >
+      {/* Crossing callout — for the one step that bridges regimes.
+          See issue #8 and docs/OPEN_QUESTIONS.md Q1. */}
+      {step.crossingInfo && <CrossingCallout info={step.crossingInfo} />}
+
       {/* Header */}
       <div className="mb-3">
         <div className="flex items-center gap-2 mb-1">

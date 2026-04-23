@@ -101,4 +101,4 @@ export function findTrueConjunction(meanMoladDays) {
   return best.days;
 }
 
-export { MOLAD_INTERVAL_DAYS };
+export { MOLAD_INTERVAL_DAYS, EPOCH_OFFSET_TO_FIRST_MOLAD };
