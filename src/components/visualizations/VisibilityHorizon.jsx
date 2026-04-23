@@ -8,6 +8,14 @@ import MoladTimeline from './MoladTimeline';
  * the current calendar date. Used to evaluate whether the new crescent
  * moon can be sighted (Rambam KH 17).
  *
+ * ═══════════════════════════════════════════════════════════════════
+ *  REGIME TAG: **astronomical** (KH 17-19, downstream of KH 11-17)
+ *  SURFACE CATEGORY: internal visualization
+ * ═══════════════════════════════════════════════════════════════════
+ * All four visibility conditions are astronomical-pipeline outputs.
+ * (Note: the embedded `<MoladTimeline />` inside this component is
+ * itself mixed-regime; see MoladTimeline.jsx's header.)
+ *
  * The diagram shows:
  *   • Horizon line
  *   • Sun below the horizon (sunset has occurred)

@@ -4,6 +4,17 @@ import { formatDms } from '../../engine/dmsUtils';
 /**
  * MaslulGraph — SVG chart of the Rambam's maslul correction table.
  *
+ * ═══════════════════════════════════════════════════════════════════
+ *  REGIME TAG: **astronomical** (KH 11-17)
+ *  SURFACE CATEGORY: **Rambam-surface** — renders the Rambam's own
+ *                    published correction tables (KH 13:4, 15:4-6)
+ * ═══════════════════════════════════════════════════════════════════
+ * These tables belong to the Rambam himself. Per docs/OPEN_QUESTIONS.md
+ * Q4 ("stay true to the source"), we present them as-is — mirroring
+ * across the 180° axis per his explicit instruction (KH 13:7-8, 15:7),
+ * not deriving correction values from any other formula. The live dot
+ * shows WHERE in the Rambam's table the current maslul lands.
+ *
  * The Rambam gives the table for maslul 0-180° in 10° steps. For maslul
  * 180-360° we mirror it (KH 13:7-8 and 15:7) so the curve is the full
  * sinusoidal shape across one complete anomalistic cycle. A live dot

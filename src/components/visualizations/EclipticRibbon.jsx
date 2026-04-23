@@ -10,6 +10,13 @@ import { formatDms } from '../../engine/dmsUtils';
  * EclipticRibbon — a 360° unwound view of the zodiac with live markers
  * for the sun, moon, sun apogee (govah), and lunar ascending node (rosh).
  *
+ * ═══════════════════════════════════════════════════════════════════
+ *  REGIME TAG: **astronomical** (KH 11-17)
+ *  SURFACE CATEGORY: internal visualization
+ * ═══════════════════════════════════════════════════════════════════
+ * All four markers come from `liveAll()` → the astronomical pipeline.
+ * No fixed-calendar dependency. See docs/OPEN_QUESTIONS.md Q2.
+ *
  * Bridges the abstract 3D positions with the actual longitude *number*.
  * Click any marker to drill down into the calculation chain for it.
  *

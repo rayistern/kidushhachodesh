@@ -8,6 +8,15 @@ import { useUIStore } from '../../stores/uiStore';
  * GuidedWalkthrough (D4) — runs a scripted layman tour. Each step
  * declaratively drives the 3D scene (camera, time, ghosts, trails,
  * solo) and the calculation chain. Optional Rambam cross-link button.
+ *
+ * ═══════════════════════════════════════════════════════════════════
+ *  REGIME TAG: **astronomical** (content routes to astronomical steps)
+ *  SURFACE CATEGORY: internal UI (pedagogical overlay)
+ * ═══════════════════════════════════════════════════════════════════
+ * Walkthrough steps reference calculation-step IDs from the
+ * astronomical pipeline (sunMeanLongitude, moonTrueLongitude, etc.).
+ * Per roadmap R3: if/when a fixed-calendar walkthrough is added, its
+ * step IDs must reference fixed-calendar steps, never cross regimes.
  */
 export default function GuidedWalkthrough({ initialId }) {
   const [walkId, setWalkId] = useState(initialId || 'moon-tonight');

@@ -3,6 +3,16 @@
  * the 3D scene, the calculation chain, and (optionally) jump the
  * Rambam reader to the source halacha.
  *
+ * ═══════════════════════════════════════════════════════════════════
+ *  REGIME TAG: **astronomical** content
+ *  SURFACE CATEGORY: pedagogical script (not Rambam-published)
+ * ═══════════════════════════════════════════════════════════════════
+ * Every `stepId` in this file refers to an astronomical-pipeline step.
+ * Per roadmap R3: if a fixed-calendar tour is added (e.g. "How does
+ * Rosh Chodesh get set by the fixed calendar?"), its stepId references
+ * must target fixed-calendar steps exclusively — never mix regimes
+ * within one tour. Scope each tour to one regime.
+ *
  * Each step shape:
  *   text         — plain-language explanation (2-4 sentences)
  *   stepId       — calculation step to select + pulse

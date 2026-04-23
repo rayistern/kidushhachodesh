@@ -4,6 +4,18 @@
  * click handler delegated on the container can route to the right
  * calculation step (D3 — Halacha ↔ value cross-links).
  *
+ * ═══════════════════════════════════════════════════════════════════
+ *  REGIME TAG: **astronomical** (chips route to astronomical steps)
+ *  SURFACE CATEGORY: internal UI
+ * ═══════════════════════════════════════════════════════════════════
+ * The KEYWORD_STEPS map currently wires Rambam-text phrases to step
+ * IDs in the astronomical pipeline (sunMeanLongitude, moonTrueLongitude,
+ * doubleElongation, nodePosition, etc.). Per roadmap R3: if/when we
+ * add chips for fixed-calendar concepts (BaHaRaD, dehiyot, molad
+ * tishrei), those must route to fixed-calendar steps — never cross
+ * regimes. Keep the map grouped by regime once we add R3's fixed-
+ * calendar primitives.
+ *
  * We operate on a DOMParser document fragment so we never mangle
  * attribute values; regex rewriting happens only on text nodes.
  *

@@ -7,6 +7,17 @@ import { moladsAround, findTrueConjunction } from '../../engine/moladTimeline';
  * MoladTimeline — horizontal strip showing mean moladot before & after
  * the current calendar date, plus the corresponding TRUE conjunctions.
  *
+ * ═══════════════════════════════════════════════════════════════════
+ *  REGIME TAG: **mixed** — fixed-calendar ticks + astronomical overlays
+ *  SURFACE CATEGORY: internal visualization (labeling layer per Q3)
+ * ═══════════════════════════════════════════════════════════════════
+ * Mean molad ticks are fixed-calendar output (KH 6:3, BaHaRaD-anchored
+ * via `moladsAround`). True conjunction markers are astronomical output
+ * (from the KH 11-17 pipeline). The *comparison* between them is the
+ * pedagogical payload — a visible demonstration of the ~14h mean-vs-
+ * true gap. See docs/OPEN_QUESTIONS.md Q3 (labeling layer scope) and
+ * Q6 (timezone anchoring caveat on BaHaRaD).
+ *
  * The mean molad (from the fixed 29d 12h 793p interval) and the true
  * conjunction (when sun and moon actually share a longitude) can differ
  * by up to ~14 hours. The strip makes that gap visible: each mean

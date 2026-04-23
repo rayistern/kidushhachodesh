@@ -1,3 +1,19 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════
+ *  REGIME TAG: **mixed** — astronomical visualization + fixed-calendar labels
+ *  SURFACE CATEGORY: legacy 2D visualization (pre-R3F)
+ * ═══════════════════════════════════════════════════════════════════
+ * AUDIT 2026-04-23: legacy 2D canvas visualization — the R3F-based
+ * `src/components/3d/` suite is the current active surface (see
+ * closed PRs #1, #2 where the repo took that direction). This
+ * component imports both astronomical pipeline output (astronomy.js,
+ * astronomyCalc.js, engine/epochDays) and fixed-calendar labels
+ * (getHebrewDateDisplay, getMoladDisplay). If it's still wired in,
+ * the fixed-calendar labels must not route to astronomical steps;
+ * per roadmap R4, such clicks should go to fixed-calendar primitives.
+ * Candidate for retirement once the legacy `AstronomicalCalculations`
+ * table is also retired. See roadmap Phase R5.
+ */
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import './CelestialVisualization.css';
 import { CONSTANTS, GALGALIM_INFO, GALGAL_NOTEH_INCLINATION_DEG, MAZALOT_LABELS, MOON_PHASES } from '../constants';

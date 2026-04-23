@@ -263,21 +263,57 @@ the astronomical engine is unaffected.
 ## Inline Audit Summary (Q5 follow-up)
 
 Audit proceeds file-by-file, with regime and surface-category tags
-added inline. This table is the roll-up.
+added inline. This table is the roll-up. Last updated: 2026-04-23.
+
+### Engine (`src/engine/`)
 
 | File | Regime | Surface Category | Notes |
 |---|---|---|---|
-| `src/engine/epochDays.js` | **crossing** | Internal | Single boundary point between fixed-calendar and astronomical. Must stay labeled as such. |
-| `src/engine/sunCalculations.js` | astronomical | Internal (currently); Rambam-surface target for Q4 rework | Currently uses daily-motion × days. Rambam publishes period-block tables (KH 12:3) as the end-user surface. |
-| `src/engine/moonCalculations.js` | astronomical | Internal (currently); Rambam-surface target for Q4 rework | Same as sun. Also hosts the node calculation. |
-| `src/engine/visibilityCalculations.js` | astronomical | Internal | Riding on top of KH 11-17 outputs. Safe for drill-down retrofit. |
-| `src/engine/moladTimeline.js` | fixed-calendar | Internal (labeling layer) | Per Q3 Option B: labeled, visible, but not cross-linked into astronomical drill-down. |
-| `src/engine/constants.js` | mixed | Mostly Rambam-surface | The correction tables (SUN_MASLUL_CORRECTIONS, MOON_MASLUL_CORRECTIONS, MOON_LATITUDE_TABLE, DOUBLE_ELONGATION_ADJUSTMENTS, SEASON_CORRECTIONS) are **Rambam's published tables, verbatim**. They belong to the Rambam's surface — our drill-down should present them as such, not "deduce" values from them without showing the table. |
-| `src/components/AstronomicalCalculations.jsx` | astronomical | Internal (flat table) | Legacy. Low priority for drill-down retrofit; cleanup tracked in roadmap. |
-| `src/components/layout/Sidebar.jsx` | astronomical (+ fixed-calendar labeling) | Both | Mixes Hebrew date / molad display (fixed-calendar labels) with astronomical value rows. Acceptable per Q3, but drill-down click from molad must NOT land on astronomical steps. |
-| `src/components/visualizations/MoladTimeline.jsx` | fixed-calendar | Internal (labeling layer) | Per Q3. |
-| `src/components/visualizations/VisibilityHorizon.jsx` | astronomical | Internal | Downstream of KH 11-17. |
-| `src/components/dashboard/CalculationChain.jsx` | astronomical (+ boundary display at daysFromEpoch) | Internal UI | Drill-down renderer. Must enforce regime-labeling per Q2. |
+| `epochDays.js` | **crossing** | Internal | Single boundary point between fixed-calendar and astronomical. Must stay labeled as such. |
+| `sunCalculations.js` | astronomical | Internal (currently); Rambam-surface target for Q4 rework | Currently uses daily-motion × days. Rambam publishes period-block tables (KH 12:3) as the end-user surface. |
+| `moonCalculations.js` | astronomical | Internal (currently); Rambam-surface target for Q4 rework | Same as sun. Also hosts the node calculation. |
+| `visibilityCalculations.js` | astronomical | Internal | Riding on top of KH 11-17 outputs. Safe for drill-down retrofit. |
+| `moladTimeline.js` | fixed-calendar | Internal (labeling layer) | Per Q3 Option B: labeled, visible, but not cross-linked into astronomical drill-down. |
+| `constants.js` | mixed | Mostly Rambam-surface | The correction tables (SUN_MASLUL_CORRECTIONS, MOON_MASLUL_CORRECTIONS, MOON_LATITUDE_TABLE, DOUBLE_ELONGATION_ADJUSTMENTS, SEASON_CORRECTIONS) are **Rambam's published tables, verbatim**. They belong to the Rambam's surface — our drill-down should present them as such, not "deduce" values from them without showing the table. |
+| `pipeline.js` | astronomical | Internal | Orchestrates the KH 11-17 chain. Day-count entry is the single crossing point (via `daysFromEpoch` step). |
+| `liveLongitudes.js` | astronomical | Internal | Fast path for animation-frame updates. Feeds EclipticRibbon and 3D markers. |
+| `dmsUtils.js` | regime-agnostic | Utility | Degree/minute/second formatting. No regime. |
+
+### Components — visualizations
+
+| File | Regime | Surface Category | Notes |
+|---|---|---|---|
+| `visualizations/EclipticRibbon.jsx` | astronomical | Internal viz | Uses `liveAll()` only. No fixed-calendar dependency. |
+| `visualizations/MaslulGraph.jsx` | astronomical | **Rambam-surface** | Renders the Rambam's correction tables (KH 13:4, 15:4-6) verbatim, mirrored at 180° per his instruction. **Must not** be replaced with a computed sinusoid — the piecewise-linear table IS the Rambam's publication. |
+| `visualizations/MoladTimeline.jsx` | mixed (fixed-cal ticks + astronomical true-conj overlay) | Internal viz (labeling layer) | Fixed-cal ticks from `moladsAround`; true-conj from astronomical pipeline. The comparison between them is the pedagogical payload. |
+| `visualizations/VisibilityHorizon.jsx` | astronomical | Internal viz | Downstream of KH 11-17, implements KH 17's four conditions. Embeds MoladTimeline which is mixed-regime. |
+
+### Components — dashboard & content
+
+| File | Regime | Surface Category | Notes |
+|---|---|---|---|
+| `dashboard/CalculationChain.jsx` | astronomical (drill-down renderer) | Internal UI | Links to OPEN_QUESTIONS.md via "Methodology notes". Per R3 must enforce regime-staying for future input-chain clicks (issue #12). |
+| `compare/CompareView.jsx` | astronomical | Internal UI | Runs `getFullCalculation` per date; diff table on astronomical outputs. Date pickers are civil; `daysFromEpoch` crossing happens inside the pipeline. |
+| `content/RambamReader.jsx` | astronomical (chapters 11-19 only) | Internal UI | CHAPTERS = [11..19]. Consistent with Q3 Option B (fixed calendar not a first-class focus). Extending to KH 6-10 would need a separate "section" grouping. |
+| `content/GuidedWalkthrough.jsx` | astronomical | Internal UI | Step IDs all astronomical. Future fixed-cal tour must be scoped to its own regime. |
+| `content/walkthroughs.js` | astronomical | Pedagogical script | All stepId references are astronomical. |
+
+### Components — layout & legacy
+
+| File | Regime | Surface Category | Notes |
+|---|---|---|---|
+| `layout/Sidebar.jsx` | mixed (fixed-cal labeling + astronomical) | Both | Hebrew date / molad from fixed calendar (labeling); Sun/Moon/Visibility rows from astronomical. Acceptable per Q3. R4 will move the molad click to fixed-calendar primitives. |
+| `layout/DateScrubber.jsx` | fixed-calendar | Internal UI (labeling layer) | Snap-to-molad uses KH 6:3 interval. |
+| `layout/AppShell.jsx` | regime-agnostic | Layout shell | Doesn't display regime-sensitive values. |
+| `layout/InfoPanel.jsx` | regime-agnostic | Layout shell | Panel selector only. |
+| `AstronomicalCalculations.jsx` | astronomical | **Legacy** flat table | Pre-StepDetail-era view. Retrofit tracked in roadmap. |
+| `CelestialVisualization.jsx` | mixed | **Legacy** 2D canvas | Pre-R3F. Candidate for retirement; mixes astronomy output with fixed-calendar labels. |
+
+### Library
+
+| File | Regime | Surface Category | Notes |
+|---|---|---|---|
+| `lib/rambamChips.js` | astronomical | Internal UI | All KEYWORD_STEPS entries target astronomical step IDs. Future fixed-calendar chips must be grouped by regime. |
 
 ---
 

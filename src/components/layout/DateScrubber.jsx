@@ -9,6 +9,13 @@ import { moladsAround, MOLAD_INTERVAL_DAYS } from '../../engine/moladTimeline';
  * (the visualization offset from the calendar date). When "snap to molad"
  * is on, the slider quantizes to the nearest mean molad.
  *
+ * ═══════════════════════════════════════════════════════════════════
+ *  REGIME TAG: **fixed-calendar** (snap-to-molad uses KH 6:3 interval)
+ *  SURFACE CATEGORY: internal UI (labeling layer)
+ * ═══════════════════════════════════════════════════════════════════
+ * The "snap to molad" quantization uses MOLAD_INTERVAL_DAYS (the fixed
+ * 29d 12h 793p from KH 6:3) — fixed-calendar territory per Q3.
+ *
  * The slider does NOT mutate the calendar date; it only moves the live
  * scene forward and backward so the user can see how the sky changes.
  * Clicking "Reset" zeros the offset.

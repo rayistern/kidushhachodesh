@@ -1,3 +1,18 @@
+/**
+ * RambamReader — Sefaria-sourced halacha viewer for Hilchot Kidush HaChodesh.
+ *
+ * ═══════════════════════════════════════════════════════════════════
+ *  REGIME TAG: **astronomical** (chapters 11-19 only)
+ *  SURFACE CATEGORY: internal UI (Rambam text display)
+ * ═══════════════════════════════════════════════════════════════════
+ * Per `CHAPTERS = [11..19]`, this reader currently only loads the
+ * astronomical half (KH 11-19). Chapters 6-10 (the fixed calendar)
+ * are NOT loaded here — consistent with Q3's Option B scope decision
+ * (fixed calendar is a labeling layer, not a first-class focus area
+ * in this app). If the scope changes, extend CHAPTERS and add a
+ * separate "section" grouping so the regime boundary remains visible
+ * to the reader. See docs/OPEN_QUESTIONS.md Q3.
+ */
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useUIStore } from '../../stores/uiStore';
 import { useCalculationStore } from '../../stores/calculationStore';

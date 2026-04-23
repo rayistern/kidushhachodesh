@@ -8,6 +8,15 @@ import { formatDms } from '../../engine/dmsUtils';
  * pipeline for each date and shows a diff table. We skip the twin 3D
  * scenes (perf risk) and instead give a rich side-by-side table plus
  * a link back to the main dashboard to explore each date individually.
+ *
+ * ═══════════════════════════════════════════════════════════════════
+ *  REGIME TAG: **astronomical** (consumer of `getFullCalculation`)
+ *  SURFACE CATEGORY: internal UI
+ * ═══════════════════════════════════════════════════════════════════
+ * The date pickers are native HTML `<input type=date>` (civil dates).
+ * Each date flows through `getFullCalculation` → the astronomical
+ * pipeline → the diff table. The `daysFromEpoch` crossing for each
+ * date happens inside the pipeline, not here.
  */
 export default function CompareView() {
   const today = useMemo(() => new Date(), []);
