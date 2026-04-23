@@ -1,6 +1,14 @@
 /**
  * Moon visibility calculations per Rambam KH chapter 17.
  * Determines whether the new crescent moon can be sighted.
+ *
+ * ═══════════════════════════════════════════════════════════════════
+ *  REGIME TAG: **astronomical** (KH 17-19, downstream of KH 11-17)
+ *  SURFACE CATEGORY: internal intermediate
+ * ═══════════════════════════════════════════════════════════════════
+ * See docs/OPEN_QUESTIONS.md. All inputs here come from the
+ * astronomical pipeline (true longitudes, latitude). No fixed-calendar
+ * dependency. Safe for drill-down retrofit.
  */
 import { normalizeDegrees, formatDms } from './dmsUtils.js';
 

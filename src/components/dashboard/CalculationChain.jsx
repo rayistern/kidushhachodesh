@@ -6,6 +6,22 @@ import MaslulGraph from '../visualizations/MaslulGraph';
 
 /**
  * Displays the full calculation derivation chain.
+ *
+ * ═══════════════════════════════════════════════════════════════════
+ *  REGIME TAG: **astronomical** drill-down renderer
+ * ═══════════════════════════════════════════════════════════════════
+ * Currently renders only astronomical steps (KH 11-17 pipeline). The
+ * `daysFromEpoch` step is the one crossing step — it has upstream
+ * inputs from the fixed calendar (KH 6-10) and should be rendered as
+ * a labeled crossing point, not an ordinary internal step.
+ * See docs/OPEN_QUESTIONS.md Q1 and Q2.
+ *
+ * TODO (ROADMAP Phase 3 / D2): when input-click chaining is wired up,
+ * each chain must stay within one regime. A fixed-calendar step must
+ * not link to an astronomical step or vice versa — except at the
+ * `daysFromEpoch` crossing, which is allowed BY DESIGN and should be
+ * visually distinct.
+ *
  * Each step shows:
  *   - Source badge (color-coded: blue=Rambam, amber=interpolated, purple=deduced, green=Losh)
  *   - Hebrew + English name
@@ -109,12 +125,26 @@ function SourceLegend() {
   const [expanded, setExpanded] = useState(false);
   return (
     <div className="mb-3">
-      <button
-        onClick={() => setExpanded(!expanded)}
-        className="text-[10px] text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors"
-      >
-        {expanded ? '▾' : '▸'} Source Color Key
-      </button>
+      <div className="flex items-center justify-between gap-2">
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="text-[10px] text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors"
+        >
+          {expanded ? '▾' : '▸'} Source Color Key
+        </button>
+        {/* Q6 / roadmap R6: link to the open-questions doc. Surfaces
+            the regime separation (KH 6-10 vs 11-17) and the 309,716 /
+            309,717 crossing-point trap. */}
+        <a
+          href="https://github.com/rayistern/kidushhachodesh/blob/main/docs/OPEN_QUESTIONS.md"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[10px] text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors"
+          title="Open questions, unresolved methodology, and known traps"
+        >
+          Methodology notes ↗
+        </a>
+      </div>
       {expanded && (
         <div className="mt-1 p-2 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] grid grid-cols-2 gap-1">
           {Object.entries(SOURCE_TYPES).map(([key, info]) => (

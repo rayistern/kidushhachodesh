@@ -1,3 +1,20 @@
+/**
+ * Sidebar — mixed-regime display.
+ *
+ * ═══════════════════════════════════════════════════════════════════
+ *  REGIME TAG: mixed (fixed-calendar labeling + astronomical)
+ * ═══════════════════════════════════════════════════════════════════
+ * Per docs/OPEN_QUESTIONS.md Q3 (Option B, 2026-04-23):
+ *   - Hebrew date display, Rosh Chodesh indicator, and molad readout
+ *     come from the FIXED CALENDAR (KH 6-10) — they are labeling
+ *     layer only.
+ *   - Sun / Moon / Visibility value rows come from the ASTRONOMICAL
+ *     pipeline (KH 11-17).
+ * When drill-down click handling is added (Phase 3 / D2 roadmap), the
+ * fixed-calendar rows must NOT route to astronomical steps. A molad
+ * click should open a fixed-calendar explanation (BaHaRaD + month-
+ * count × synodic), never "mean sun longitude."
+ */
 import React from 'react';
 import { useCalendarStore } from '../../stores/calendarStore';
 import { useCalculationStore } from '../../stores/calculationStore';

@@ -1,6 +1,15 @@
 /**
  * Sun position calculations per the Rambam's Hilchot Kiddush HaChodesh, chapters 12-13.
  *
+ * ═══════════════════════════════════════════════════════════════════
+ *  REGIME TAG: **astronomical** (KH 11-17)
+ *  SURFACE CATEGORY: internal (currently) / Rambam-surface (target per Q4)
+ * ═══════════════════════════════════════════════════════════════════
+ * See docs/OPEN_QUESTIONS.md Q2 (regime separation) and Q4 (engine
+ * purism — the Rambam publishes period-block tables at KH 12:3 that
+ * we currently bypass by computing `dailyMotion × days`. Mathematical
+ * equivalence, pedagogical non-equivalence. Rework deferred.)
+ *
  * The Rambam's procedure for the sun:
  *   1. Find emtza hashemesh (mean longitude) — KH 12:1
  *   2. Find govah hashemesh (apogee position) — KH 12:2
@@ -35,7 +44,15 @@ export function calculateDaysFromEpoch(date) {
     hebrewName: 'ימים מתחילת המניין',
     rambamRef: 'KH 11:16',
     source: 'rambam',
-    sourceNote: 'Epoch date (3 Nisan 4938 AM, ליל חמישי) directly from the Rambam. Day count uses Hebrew-calendar absolute days, not Gregorian.',
+    // AUDIT 2026-04-23: this is the ONE step in the pipeline that crosses
+    // regimes — its value is a fixed-calendar output (Hillel II's integer
+    // day count, KH 6-10) that the astronomical pipeline (KH 11-17)
+    // consumes. Common trap: users compute "mean synodic time" instead
+    // (10,488 × 29d 12h 793p ≈ 309,716.87 days for 3 Nisan 5786) and
+    // feed THAT into KH 12:1. Wrong input — KH 12:1 asks for integer
+    // civil days, which drift from mean-synodic time by ~0.13 day over
+    // 848 years due to dehiyot. See docs/OPEN_QUESTIONS.md Q1.
+    sourceNote: 'Epoch date (3 Nisan 4938 AM, ליל חמישי) directly from the Rambam. This is an INTEGER civil-day count from the fixed calendar (KH 6-10) — NOT mean-synodic time. The two drift apart by ~0.13 day over 848 years. See "Methodology notes" link for the full writeup.',
     inputs: {
       date: { value: hd.toString(), label: 'Selected Date (Hebrew)' },
       epoch: { value: '3 Nisan 4938', label: 'Epoch' },
@@ -69,6 +86,11 @@ export function getSunDailyMotion() {
 }
 
 /** Sun's mean longitude at a given date */
+// AUDIT 2026-04-23: currently computes `dailyMotion × days`. The
+// Rambam's KH 12:3 publishes motion-per-period blocks (10d, 100d, 1000d,
+// 10000d, 29d, 354d, 19-year cycle) that the student is meant to sum.
+// Mathematically identical, pedagogically different. See Q4 in
+// docs/OPEN_QUESTIONS.md. Deferred rework.
 export function calculateSunMeanLongitude(daysFromBase) {
   const dailyMotion = dmsToDecimal(CONSTANTS.SUN.MEAN_MOTION_PER_DAY);
   const startPos = dmsToDecimal(CONSTANTS.SUN.START_POSITION);
@@ -94,6 +116,8 @@ export function calculateSunMeanLongitude(daysFromBase) {
 }
 
 /** Sun's apogee (govah) position */
+// AUDIT 2026-04-23: same `dailyMotion × days` shortcut as mean
+// longitude. Rambam's period-block approach not yet exposed. Q4.
 export function calculateSunApogee(daysFromBase) {
   const apogeeStartDeg = dmsToDecimal(CONSTANTS.SUN.APOGEE_START);
   const constellationOffset = CONSTANTS.SUN.APOGEE_CONSTELLATION * 30;

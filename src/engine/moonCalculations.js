@@ -1,6 +1,15 @@
 /**
  * Moon position calculations per the Rambam's Hilchot Kiddush HaChodesh, chapters 14-16.
  *
+ * ═══════════════════════════════════════════════════════════════════
+ *  REGIME TAG: **astronomical** (KH 11-17)
+ *  SURFACE CATEGORY: internal (currently) / Rambam-surface (target per Q4)
+ * ═══════════════════════════════════════════════════════════════════
+ * See docs/OPEN_QUESTIONS.md Q2 (regime separation) and Q4 (engine
+ * purism — the Rambam publishes period-block tables at KH 14:1, 14:2,
+ * 16:2 that we currently bypass by computing `dailyMotion × days`.
+ * Rework deferred.)
+ *
  * The Rambam's procedure for finding the moon's true position:
  *   1. Find emtza hayareach (mean longitude) — KH 14:1-4
  *   2. Apply season correction to emtza hayareach — KH 14:5
@@ -20,6 +29,8 @@ import { dmsToDecimal, normalizeDegrees, formatDms } from './dmsUtils.js';
 // ─── STEP 1: Moon Mean Longitude ────────────────────────────────
 
 /** Moon's mean longitude (emtza hayareach) — KH 14:1 */
+// AUDIT 2026-04-23: `dailyMotion × days` shortcut; Rambam's KH 14:1
+// period-block tables not yet exposed. Q4.
 export function calculateMoonMeanLongitude(daysFromBase) {
   const dailyMotion = dmsToDecimal(CONSTANTS.MOON.MEAN_MOTION_PER_DAY);
   const startPos = CONSTANTS.MOON.MEAN_LONGITUDE_AT_EPOCH + (CONSTANTS.MOON.START_CONSTELLATION * 30);
@@ -87,6 +98,8 @@ export function calculateSeasonCorrection(sunTrueLongitude) {
 // ─── STEP 3: Moon Maslul (Anomaly) ────────────────────────────
 
 /** Moon's maslul / emtza hamaslul (mean anomaly on galgal katan) — KH 14:2 */
+// AUDIT 2026-04-23: `dailyMotion × days` shortcut; Rambam's KH 14:2
+// period-block tables not yet exposed. Q4.
 export function calculateMoonMaslul(daysFromBase) {
   const maslulStart = dmsToDecimal(CONSTANTS.MOON.MASLUL_START);
   const maslulMotion = dmsToDecimal(CONSTANTS.MOON.MASLUL_MEAN_MOTION);
@@ -269,6 +282,8 @@ export function calculateMoonTrueLongitude(adjustedMeanLon, maslulHanachon, corr
 // ─── STEP 8: Ascending Node (Rosh) ──────────────────────────────
 
 /** Position of the ascending node (rosh) — KH 16:2-3 */
+// AUDIT 2026-04-23: `dailyMotion × days` shortcut; Rambam's KH 16:2
+// period-block tables not yet exposed. Q4.
 export function calculateNodePosition(daysFromBase) {
   const startPos = dmsToDecimal(CONSTANTS.NODE.START_POSITION);
   const dailyMotion = dmsToDecimal(CONSTANTS.NODE.DAILY_MOTION);

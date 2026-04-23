@@ -178,3 +178,93 @@ Thin line at the modern-astronomy position of each body.
 - [ ] Accessibility pass (keyboard nav, ARIA, screen reader)
 - [ ] Print stylesheet for sharing calculation chains
 - [ ] i18n scaffolding (Hebrew interface option, not just Hebrew content)
+
+---
+
+## Phase R — Regime discipline (added 2026-04-23)
+
+Prompted by a user report where 309,716 (mean-synodic time) was
+confused with 309,717 (integer civil-day count) as input to KH 12:1.
+Rubber-ducking that incident surfaced a deeper issue: the app wasn't
+being explicit about the boundary between fixed-calendar (KH 6-10) and
+astronomical (KH 11-17) computation. Full writeup in
+[docs/OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md).
+
+### R1. Engine purism — present Rambam's period-block decomposition
+
+Currently every mean-motion step computes `dailyMotion × daysFromEpoch`
+as a shortcut. The Rambam publishes period-block tables (KH 12:3,
+14:1, 14:2, 16:2) that the student is meant to sum — 309,717 days =
+30×10000 + 9×1000 + 7×100 + 1×10 + 7 days, each with a pre-computed
+motion. Mathematically identical, pedagogically different.
+
+- [ ] Expose KH 12:3 sun motion-per-period table in `constants.js`
+- [ ] Expose KH 14:1 moon motion-per-period table
+- [ ] Expose KH 14:2 moon-maslul motion-per-period table
+- [ ] Expose KH 16:2 node motion-per-period table
+- [ ] Rework `calculateSunMeanLongitude`, `calculateSunApogee`,
+      `calculateMoonMeanLongitude`, `calculateMoonMaslul`,
+      `calculateNodePosition` to expose the period-block decomposition
+      as the `formula` field and the summed blocks as the `inputs`
+- [ ] Drill-down shows: N days decomposed into period blocks, each
+      block's pre-computed motion from the table, sum mod 360
+- **Why it matters:** "Stay true to the source" rule (Q4). The
+  drill-down is worthless as pedagogy if the formula it shows isn't
+  the formula the Rambam teaches.
+
+### R2. `daysFromEpoch` crossing-point display
+
+The one step in our pipeline where fixed-calendar output becomes
+astronomical input. Must be rendered distinctly.
+
+- [ ] Add explicit "crossing step" visual treatment in StepDetail
+- [ ] Show both "309,717 civil days (from Hillel II arithmetic)" AND
+      "309,716.87 mean-synodic days (from KH 6:3 molad × months)" as
+      a side-by-side callout — so the trap that produced this phase is
+      pedagogically visible
+- [ ] Link to Q1 of OPEN_QUESTIONS.md
+- **Why it matters:** this single crossing is where the 309,716 /
+  309,717 trap lives. Every student will benefit from seeing both
+  numbers explicitly distinguished once.
+
+### R3. Regime-labeled drill-down
+
+Per Q2 (regime separation), drill-down chains must stay within one
+regime.
+
+- [ ] Tag every `CalculationStep` with a `regime` field:
+      `'fixed-calendar' | 'astronomical' | 'crossing'`
+- [ ] Render a regime badge in StepDetail header
+- [ ] When input-click chaining is wired (D2 above), enforce:
+      a `fixed-calendar` step may only `refId` into another
+      `fixed-calendar` step (except via the `crossing` step)
+
+### R4. Fixed-calendar primitives for the labeling layer
+
+Per Q3 (Option B): keep KH 6-10 as labeling only, but do it properly.
+
+- [ ] Stand up fixed-calendar primitives (BaHaRaD, month-count,
+      year-length, dehiyot status) as their own step chain — separate
+      from the astronomical pipeline
+- [ ] Molad display in sidebar drills into this chain, not the
+      astronomical one
+- [ ] Rosh Chodesh indicator explains *why* via dehiyot when relevant
+
+### R5. "Stay true to the source" audit
+
+Classify every displayed value (Q5 in OPEN_QUESTIONS.md).
+
+- [ ] Finish the audit table in OPEN_QUESTIONS.md — every route in
+      the UI accounted for
+- [ ] Any "Rambam-surface" value must be presented as the Rambam's
+      own table / formula, not our internal computation
+- [ ] Internal intermediates are fair game for drill-down retrofit
+- [ ] Dual-view ("our computation vs Rambam's") is OUT OF SCOPE for
+      this phase — tracked as a future "astronomy comparison" phase
+      if we ever add VSOP87/ELP2000 overlays (see V8 in Phase 2)
+
+### R6. Frontend links to OPEN_QUESTIONS.md
+
+- [ ] "Methodology notes" link in sidebar footer
+- [ ] Contextual links from specific steps (molad, daysFromEpoch)
+- [ ] Maintain `docs/OPEN_QUESTIONS.md` as new uncertainties surface

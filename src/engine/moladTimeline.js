@@ -2,6 +2,24 @@
  * Molad timeline helper — computes a sequence of mean moladot (molados)
  * around a given anchor date.
  *
+ * ═══════════════════════════════════════════════════════════════════
+ *  REGIME TAG: **fixed-calendar** (KH 6-10 territory — *labeling layer*)
+ * ═══════════════════════════════════════════════════════════════════
+ * Per docs/OPEN_QUESTIONS.md Q3 (Option B scope decision, 2026-04-23):
+ * the fixed calendar appears in this app only as a labeling/translation
+ * layer, never as a participant in the astronomical drill-down graph.
+ *
+ * This file is FIXED-CALENDAR OUTPUT consumed visually:
+ *   - Inputs: MOLAD_INTERVAL_DAYS (KH 6:3) + BaHaRaD anchor (KH 6:8)
+ *   - Outputs: tick positions on the molad timeline (decorative)
+ *
+ * The output of this module **must not** be routed into astronomical
+ * step drill-downs. A user clicking a molad tick should land on
+ * fixed-calendar explanation (BaHaRaD + month-count × synodic month),
+ * NOT on "mean sun longitude" or any KH 12-17 step.
+ *
+ * See also Q6 (timezone anchoring ambiguity — known unresolved).
+ *
  * The mean molad interval is fixed at 29 days, 12 hours, 793 parts:
  * 29 + 12/24 + 793/(24*1080) ≈ 29.530594 days. This is the Rambam's
  * value (KH 6:3) and matches modern measurements to within ~0.5 seconds.

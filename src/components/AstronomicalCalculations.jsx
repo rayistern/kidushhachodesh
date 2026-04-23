@@ -2,6 +2,19 @@ import React from 'react';
 import './AstronomicalCalculations.css';
 import { getAstronomicalData } from '../utils/astronomyCalc';
 
+/**
+ * ═══════════════════════════════════════════════════════════════════
+ *  REGIME TAG: **astronomical** (KH 11-17)
+ *  SURFACE CATEGORY: internal (legacy flat table)
+ * ═══════════════════════════════════════════════════════════════════
+ * AUDIT 2026-04-23: legacy flat table. All rows are astronomical
+ * pipeline outputs. Retrofit to StepDetail-backed drill-downs is
+ * tracked in roadmap Phase 3 / D2.
+ *
+ * Note: this is "internal flat" — not a Rambam-published surface.
+ * Replacing it with drill-down doesn't violate the "stay true to
+ * source" rule (Q4 in docs/OPEN_QUESTIONS.md).
+ */
 const AstronomicalCalculations = ({ date }) => {
   const data = getAstronomicalData(date);
   

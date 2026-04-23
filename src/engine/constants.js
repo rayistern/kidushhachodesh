@@ -2,6 +2,21 @@
  * Astronomical constants from the Rambam's Hilchot Kiddush HaChodesh.
  * This is the single source of truth for all calculations and visualizations.
  *
+ * ═══════════════════════════════════════════════════════════════════
+ *  REGIME TAG: **astronomical** (KH 11-17)
+ *  SURFACE CATEGORY: mostly Rambam-surface
+ * ═══════════════════════════════════════════════════════════════════
+ * Per docs/OPEN_QUESTIONS.md Q5: the correction tables in this file —
+ *   - SUN_MASLUL_CORRECTIONS (KH 13:4)
+ *   - MOON_MASLUL_CORRECTIONS (KH 15:4-6)
+ *   - MOON_LATITUDE_TABLE (KH 16:9-10)
+ *   - DOUBLE_ELONGATION_ADJUSTMENTS (KH 15:3)
+ *   - SEASON_CORRECTIONS (KH 14:5)
+ * are Rambam-PUBLISHED tables, verbatim. They are the end-user surface,
+ * not internal intermediates. UI must present them as tables (which
+ * CalculationChain.jsx already does via CorrectionTable), not hide
+ * them inside a formula expression.
+ *
  * Source key:
  *   [R] = Directly from the Rambam's text (chapter:halacha cited)
  *   [A] = Approximated / interpolated between Rambam's table entries
