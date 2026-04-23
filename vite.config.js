@@ -26,5 +26,17 @@ export default defineConfig({
     // index.html resolve to real files on disk — no Netlify rewrites needed.
     outDir: 'dist/kh',
     emptyOutDir: true,
+    // Split heavy vendor libs into their own chunks so the main
+    // AppShell bundle doesn't balloon past the warn limit. three.js +
+    // r3f is the biggest offender.
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          three: ['three', '@react-three/fiber', '@react-three/drei'],
+          hebcal: ['hebcal'],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 1100,
   },
 });
