@@ -37,6 +37,7 @@ export function calculateMoonMeanLongitude(daysFromBase) {
   const result = normalizeDegrees(startPos + dailyMotion * daysFromBase);
   return {
     id: 'moonMeanLongitude',
+    regime: 'astronomical',
     name: 'Moon Mean Longitude',
     hebrewName: 'אמצע הירח',
     rambamRef: 'KH 14:1',
@@ -79,6 +80,7 @@ export function calculateSeasonCorrection(sunTrueLongitude) {
 
   return {
     id: 'moonSeasonCorrection',
+    regime: 'astronomical',
     name: 'Season Correction',
     hebrewName: 'תיקון עונתי',
     rambamRef: 'KH 14:5',
@@ -106,6 +108,7 @@ export function calculateMoonMaslul(daysFromBase) {
   const result = normalizeDegrees(maslulStart + maslulMotion * daysFromBase);
   return {
     id: 'moonMaslul',
+    regime: 'astronomical',
     name: 'Moon Maslul (Anomaly)',
     hebrewName: 'אמצע המסלול',
     rambamRef: 'KH 14:2-3',
@@ -132,6 +135,7 @@ export function calculateDoubleElongation(moonMeanLon, sunMeanLon) {
   const merchakKaful = normalizeDegrees(merchak * 2);
   return {
     id: 'doubleElongation',
+    regime: 'astronomical',
     name: 'Double Elongation',
     hebrewName: 'מרחק כפול',
     rambamRef: 'KH 15:1-2',
@@ -174,6 +178,7 @@ export function calculateMaslulHanachon(emtzaMaslul, merchakKaful) {
 
   return {
     id: 'maslulHanachon',
+    regime: 'astronomical',
     name: 'Corrected Course (Maslul Hanachon)',
     hebrewName: 'המסלול הנכון',
     rambamRef: 'KH 15:3',
@@ -227,6 +232,7 @@ export function lookupMoonMaslulCorrection(maslulHanachon) {
 
   return {
     id: 'moonMaslulCorrection',
+    regime: 'astronomical',
     name: 'Moon Maslul Correction',
     hebrewName: 'מנת המסלול של הירח',
     rambamRef: 'KH 15:4-6',
@@ -258,6 +264,7 @@ export function calculateMoonTrueLongitude(adjustedMeanLon, maslulHanachon, corr
     : normalizeDegrees(adjustedMeanLon + correction);
   return {
     id: 'moonTrueLongitude',
+    regime: 'astronomical',
     name: 'Moon True Longitude',
     hebrewName: 'מקום הירח האמיתי',
     rambamRef: 'KH 15:4',
@@ -293,6 +300,7 @@ export function calculateNodePosition(daysFromBase) {
   const makomRosh = normalizeDegrees(360 - emtzaRosh);
   return {
     id: 'nodePosition',
+    regime: 'astronomical',
     name: 'Ascending Node (Rosh)',
     hebrewName: 'ראש התלי',
     rambamRef: 'KH 16:2-4',
@@ -366,6 +374,7 @@ export function calculateMoonLatitude(moonTrueLon, nodePosition) {
 
   return {
     id: 'moonLatitude',
+    regime: 'astronomical',
     name: 'Moon Latitude',
     hebrewName: 'רוחב הירח',
     rambamRef: 'KH 16:9-10',
@@ -396,6 +405,7 @@ export function calculateMoonPhase(elongation) {
     if (elongation >= phase.min && elongation < phase.max) {
       return {
         id: 'moonPhase',
+        regime: 'astronomical',
         name: 'Moon Phase',
         hebrewName: 'מופע הירח',
         rambamRef: 'KH 17',
@@ -411,6 +421,7 @@ export function calculateMoonPhase(elongation) {
   }
   return {
     id: 'moonPhase',
+    regime: 'astronomical',
     name: 'Moon Phase',
     hebrewName: 'מופע הירח',
     source: 'deduced',

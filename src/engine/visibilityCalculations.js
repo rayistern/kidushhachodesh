@@ -17,6 +17,7 @@ export function calculateElongation(moonTrueLon, sunTrueLon) {
   const result = normalizeDegrees(moonTrueLon - sunTrueLon);
   return {
     id: 'elongation',
+    regime: 'astronomical',
     name: 'Elongation (Moon-Sun Distance)',
     hebrewName: 'אורך ראשון',
     rambamRef: 'KH 17:1',
@@ -36,6 +37,7 @@ export function calculateFirstVisibilityAngle(elongation, latitude) {
   const result = elongation + 0.3 * Math.abs(latitude);
   return {
     id: 'firstVisibilityAngle',
+    regime: 'astronomical',
     name: 'First Visibility Angle',
     hebrewName: 'זווית הראייה הראשונה',
     rambamRef: 'KH 17:3-5',
@@ -56,6 +58,7 @@ export function determineVisibility(firstVisAngle, elongation, latitude) {
   const visible = firstVisAngle > 12 && elongation > 12 && elongation < 348 && Math.abs(latitude) < 6;
   return {
     id: 'moonVisibility',
+    regime: 'astronomical',
     name: 'Moon Visibility',
     hebrewName: 'ראיית הירח',
     rambamRef: 'KH 17:3-22',
@@ -81,6 +84,7 @@ export function calculateSeasonalInfo(daysFromBase) {
   const seasonArr = ['Spring (אביב)', 'Summer (קיץ)', 'Fall (סתיו)', 'Winter (חורף)'];
   return {
     id: 'seasonalInfo',
+    regime: 'astronomical',
     name: 'Season',
     hebrewName: 'תקופה',
     rambamRef: 'KH 9:3',

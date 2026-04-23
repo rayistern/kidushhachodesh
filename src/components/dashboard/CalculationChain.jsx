@@ -184,6 +184,49 @@ function SourceBadge({ source }) {
   );
 }
 
+// ─── Regime Badge ──────────────────────────────────────────────
+// Per docs/OPEN_QUESTIONS.md Q2: the Rambam keeps two computational
+// systems separate (fixed calendar KH 6-10 vs astronomical KH 11-17).
+// This badge labels each step with its regime so the reader can see at
+// a glance which system they're looking at. The `crossing` tag is
+// reserved for the one step (daysFromEpoch) that bridges them — see
+// issue #8 for the dedicated crossing-point UI treatment.
+
+const REGIME_INFO = {
+  astronomical: {
+    label: 'Astronomical',
+    short: 'KH 11-17',
+    color: '#ddaa33',
+    description: 'Astronomical pipeline (KH 11-17). Independent of the fixed calendar.',
+  },
+  'fixed-calendar': {
+    label: 'Fixed Calendar',
+    short: 'KH 6-10',
+    color: '#8899bb',
+    description: 'Fixed calendar (KH 6-10). Hillel II arithmetic — BaHaRaD + dehiyot.',
+  },
+  crossing: {
+    label: 'Crossing',
+    short: 'KH 6-10 → KH 11-17',
+    color: '#b74ef7',
+    description: 'The one step where fixed-calendar output feeds the astronomical pipeline. See methodology notes Q1-Q2.',
+  },
+};
+
+function RegimeBadge({ regime }) {
+  if (!regime || !REGIME_INFO[regime]) return null;
+  const info = REGIME_INFO[regime];
+  return (
+    <span
+      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm text-[9px] font-medium flex-shrink-0"
+      style={{ backgroundColor: info.color + '20', color: info.color, border: `1px solid ${info.color}40` }}
+      title={info.description}
+    >
+      {info.short}
+    </span>
+  );
+}
+
 // ─── Step Group ───────────────────────────────────────────────
 
 function StepGroup({ label, hebrewLabel, steps, onSelect }) {
@@ -263,6 +306,7 @@ function StepDetail({ step, onClickInput }) {
         <div className="flex items-center gap-2 mb-1">
           <SourceBadge source={step.source} />
           <h3 className="text-sm font-bold text-[var(--color-text)]">{step.name}</h3>
+          <RegimeBadge regime={step.regime} />
         </div>
         <div className="hebrew-text text-base text-[var(--color-accent)]">{step.hebrewName}</div>
         {step.rambamRef && (

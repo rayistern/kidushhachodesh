@@ -40,6 +40,7 @@ export function calculateDaysFromEpoch(date) {
   const daysFromBase = daysFromEpoch(hd);
   return {
     id: 'daysFromEpoch',
+    regime: 'crossing',
     name: 'Days from Epoch',
     hebrewName: 'ימים מתחילת המניין',
     rambamRef: 'KH 11:16',
@@ -68,6 +69,7 @@ export function getSunDailyMotion() {
   const motion = dmsToDecimal(CONSTANTS.SUN.MEAN_MOTION_PER_DAY);
   return {
     id: 'sunDailyMotion',
+    regime: 'astronomical',
     name: 'Sun Daily Motion',
     hebrewName: 'מהלך אמצע השמש ליום',
     rambamRef: 'KH 12:1',
@@ -97,6 +99,7 @@ export function calculateSunMeanLongitude(daysFromBase) {
   const result = normalizeDegrees(startPos + dailyMotion * daysFromBase);
   return {
     id: 'sunMeanLongitude',
+    regime: 'astronomical',
     name: 'Sun Mean Longitude',
     hebrewName: 'אמצע השמש',
     rambamRef: 'KH 12:1-2',
@@ -126,6 +129,7 @@ export function calculateSunApogee(daysFromBase) {
   const result = normalizeDegrees(apogeeStart + dailyMotion * daysFromBase);
   return {
     id: 'sunApogee',
+    regime: 'astronomical',
     name: "Sun's Apogee (Govah)",
     hebrewName: 'גובה השמש',
     rambamRef: 'KH 12:2',
@@ -150,6 +154,7 @@ export function calculateSunMaslul(meanLongitude, apogee) {
   if (maslul < 0) maslul += 360;
   return {
     id: 'sunMaslul',
+    regime: 'astronomical',
     name: 'Sun Maslul (Course)',
     hebrewName: 'מסלול השמש',
     rambamRef: 'KH 13:1-3',
@@ -194,6 +199,7 @@ export function lookupMaslulCorrection(maslul) {
 
   return {
     id: 'sunMaslulCorrection',
+    regime: 'astronomical',
     name: 'Sun Maslul Correction',
     hebrewName: 'מנת המסלול של השמש',
     rambamRef: 'KH 13:4',
@@ -223,6 +229,7 @@ export function calculateSunTrueLongitude(meanLongitude, maslul, correction) {
     : normalizeDegrees(meanLongitude + correction);
   return {
     id: 'sunTrueLongitude',
+    regime: 'astronomical',
     name: 'Sun True Longitude',
     hebrewName: 'מקום השמש האמיתי',
     rambamRef: 'KH 13:2-6',
