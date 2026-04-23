@@ -47,7 +47,7 @@ export function calculateMoonMeanLongitude(daysFromBase) {
     inputs: {
       startPosition: { value: startPos, label: 'Position at Epoch (1°14\'43" in Taurus)', unit: '°' },
       dailyMotion: { value: dailyMotion, label: 'Daily Motion (13° 10\' 35")', unit: '°/day' },
-      daysFromBase: { value: daysFromBase, label: 'Days from Epoch' },
+      daysFromBase: { value: daysFromBase, label: 'Days from Epoch', refId: 'daysFromEpoch' },
     },
     formula: '(startPosition + dailyMotion * days) mod 360',
     result,
@@ -88,7 +88,7 @@ export function calculateSeasonCorrection(sunTrueLongitude) {
     sourceNote: 'The Rambam specifies this adjustment to account for the difference between 6:00 PM and actual sunset. The moon moves ~0.5° per hour.',
     teachingNote: 'We compute positions for 6 PM, but we can only SEE the moon after sunset. In summer, sunset is later, so the moon has moved further by then. In winter, sunset is earlier. This correction brings the mean longitude to the actual sunset moment.',
     inputs: {
-      sunTrueLongitude: { value: sunTrueLongitude, label: 'Sun True Longitude', unit: '°' },
+      sunTrueLongitude: { value: sunTrueLongitude, label: 'Sun True Longitude', unit: '°', refId: 'sunTrueLongitude' },
     },
     formula: 'Lookup from season table based on sun position in zodiac',
     result: adjustment,
@@ -118,7 +118,7 @@ export function calculateMoonMaslul(daysFromBase) {
     inputs: {
       maslulStart: { value: maslulStart, label: 'Maslul at Epoch (84° 28\' 42")', unit: '°' },
       maslulMotion: { value: maslulMotion, label: 'Daily Motion (13° 3\' 53 1/3")', unit: '°/day' },
-      daysFromBase: { value: daysFromBase, label: 'Days from Epoch' },
+      daysFromBase: { value: daysFromBase, label: 'Days from Epoch', refId: 'daysFromEpoch' },
     },
     formula: '(maslulStart + dailyMotion * days) mod 360',
     result,
@@ -143,8 +143,8 @@ export function calculateDoubleElongation(moonMeanLon, sunMeanLon) {
     sourceNote: 'The Rambam instructs: subtract emtza hashemesh from emtza hayareach, then double the result.',
     teachingNote: 'Why double? Because the moon\'s three outer galgalim move in OPPOSITE directions: the red+blue go 11°12\'/day mi\'mizrach l\'maarav, while the green goes 24°23\'/day mi\'maarav l\'mizrach. The sun also goes ~1°/day mi\'maarav l\'mizrach. So the effective separation has components in both directions — doubling captures the full angular effect. Rabbi Losh: "It\'s like money owed to the bank — you think you owe 12, before you blink you owe 24."',
     inputs: {
-      moonMeanLon: { value: moonMeanLon, label: 'Moon Mean Longitude', unit: '°' },
-      sunMeanLon: { value: sunMeanLon, label: 'Sun Mean Longitude', unit: '°' },
+      moonMeanLon: { value: moonMeanLon, label: 'Moon Mean Longitude', unit: '°', refId: 'moonMeanLongitude' },
+      sunMeanLon: { value: sunMeanLon, label: 'Sun Mean Longitude', unit: '°', refId: 'sunMeanLongitude' },
       merchak: { value: merchak, label: 'Simple Elongation', unit: '°' },
     },
     formula: '2 × (emtza hayareach − emtza hashemesh) mod 360',
@@ -188,8 +188,8 @@ export function calculateMaslulHanachon(emtzaMaslul, merchakKaful) {
       : 'Adjustment table directly from the Rambam.',
     teachingNote: 'The nekudah hanichaches (prosneusis point) shifts the effective center from which the galgal katan\'s motion is measured. Instead of measuring from the green\'s center, or from Earth\'s center, the reference point is on the OPPOSITE side of Earth from the green\'s center. This is why the moon appears to move faster than 13° 3\' after the molad — and this table corrects for that effect.',
     inputs: {
-      emtzaMaslul: { value: emtzaMaslul, label: 'Emtza Hamaslul', unit: '°' },
-      merchakKaful: { value: merchakKaful, label: 'Merchak Kaful', unit: '°' },
+      emtzaMaslul: { value: emtzaMaslul, label: 'Emtza Hamaslul', unit: '°', refId: 'moonMaslul' },
+      merchakKaful: { value: merchakKaful, label: 'Merchak Kaful', unit: '°', refId: 'doubleElongation' },
       effectiveMerchak: { value: effectiveMerchak, label: 'Effective (for table)', unit: '°' },
       adjustment: { value: adjustment, label: 'Adjustment', unit: '°' },
     },
@@ -242,7 +242,7 @@ export function lookupMoonMaslulCorrection(maslulHanachon) {
       : 'Value directly from the Rambam\'s moon correction table.',
     teachingNote: 'This table is DIFFERENT from the sun\'s table! The sun\'s max correction is ~2° at 90°. The moon\'s max is ~5° 8\' at 100°. This is because the galgal katan\'s diameter is 10° — the moon can be up to 5° away from the emtza hayareach on each side. The asymmetry (peak at 100° not 90°) comes from the nekudah hanichaches shifting the effective center.',
     inputs: {
-      maslulHanachon: { value: maslulHanachon, label: 'Maslul Hanachon', unit: '°' },
+      maslulHanachon: { value: maslulHanachon, label: 'Maslul Hanachon', unit: '°', refId: 'maslulHanachon' },
       effectiveMaslul: { value: effectiveMaslul, label: 'Effective Maslul (for table)', unit: '°' },
       direction: { value: subtractDirection ? 'subtract' : 'add', label: 'Apply Direction' },
     },
@@ -272,9 +272,12 @@ export function calculateMoonTrueLongitude(adjustedMeanLon, maslulHanachon, corr
     sourceNote: 'Direction rule from the Rambam: if maslul hanachon < 180° → subtract correction; if > 180° → add correction.',
     teachingNote: 'This is WHERE THE MOON ACTUALLY APPEARS in the mazalos from our perspective on Earth. Unlike the emtza hayareach (which is the galgal katan\'s center position), this accounts for the moon\'s actual position ON the galgal katan, adjusted for the off-center viewing angle (govah effect).',
     inputs: {
+      // adjustedMeanLon = moonMeanLongitude + moonSeasonCorrection — a
+      // hybrid; no single upstream step, so no refId. Drilling happens
+      // via the individual upstream steps listed below.
       adjustedMeanLon: { value: adjustedMeanLon, label: 'Adjusted Mean Longitude', unit: '°' },
-      maslulHanachon: { value: maslulHanachon, label: 'Maslul Hanachon', unit: '°' },
-      correction: { value: correction, label: 'Correction', unit: '°' },
+      maslulHanachon: { value: maslulHanachon, label: 'Maslul Hanachon', unit: '°', refId: 'maslulHanachon' },
+      correction: { value: correction, label: 'Correction', unit: '°', refId: 'moonMaslulCorrection' },
       direction: { value: correctionDirection, label: 'Direction' },
     },
     formula: correctionDirection === 'subtract'
@@ -310,7 +313,7 @@ export function calculateNodePosition(daysFromBase) {
     inputs: {
       startPos: { value: startPos, label: 'Rosh at Epoch (180° 57\' 28")', unit: '°' },
       dailyMotion: { value: dailyMotion, label: 'Daily Motion (3\' 11" backwards)', unit: '°/day' },
-      daysFromBase: { value: daysFromBase, label: 'Days from Epoch' },
+      daysFromBase: { value: daysFromBase, label: 'Days from Epoch', refId: 'daysFromEpoch' },
     },
     formula: '360 − (startPos + dailyMotion × days) mod 360',
     result: makomRosh,
@@ -384,8 +387,8 @@ export function calculateMoonLatitude(moonTrueLon, nodePosition) {
       : 'Value directly from the Rambam\'s latitude table.',
     teachingNote: 'The moon\'s orbit (galgal noteh / blue) is tilted 5° from the ecliptic. The maximum latitude of 5° is reached 90° from the rosh (ascending node). The rosh is where the moon crosses the ecliptic going north; the zanav (180° opposite) is where it crosses going south. This is called rochav — width or latitude.',
     inputs: {
-      moonTrueLon: { value: moonTrueLon, label: 'Moon True Longitude', unit: '°' },
-      nodePosition: { value: nodePosition, label: 'Rosh Position', unit: '°' },
+      moonTrueLon: { value: moonTrueLon, label: 'Moon True Longitude', unit: '°', refId: 'moonTrueLongitude' },
+      nodePosition: { value: nodePosition, label: 'Rosh Position', unit: '°', refId: 'nodePosition' },
       distFromNode: { value: distFromNode, label: 'Distance from Rosh', unit: '°' },
       lookupAngle: { value: lookupAngle, label: 'Lookup Angle (0-90°)', unit: '°' },
       direction: { value: directionStr, label: 'Direction' },
@@ -411,7 +414,7 @@ export function calculateMoonPhase(elongation) {
         rambamRef: 'KH 17',
         source: 'deduced',
         sourceNote: 'Phase names are modern terminology. The Rambam discusses visibility thresholds (9°-24°) but does not name phases.',
-        inputs: { elongation: { value: elongation, label: 'Elongation', unit: '°' } },
+        inputs: { elongation: { value: elongation, label: 'Elongation', unit: '°', refId: 'elongation' } },
         formula: 'Phase determined by elongation angle ranges',
         result: phase.name,
         hebrewResult: phase.hebrewName,

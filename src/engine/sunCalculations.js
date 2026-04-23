@@ -132,7 +132,7 @@ export function calculateSunMeanLongitude(daysFromBase) {
     inputs: {
       startPosition: { value: startPos, label: 'Position at Epoch', unit: '°' },
       dailyMotion: { value: dailyMotion, label: 'Daily Motion', unit: '°/day' },
-      daysFromBase: { value: daysFromBase, label: 'Days from Epoch' },
+      daysFromBase: { value: daysFromBase, label: 'Days from Epoch', refId: 'daysFromEpoch' },
     },
     formula: '(startPosition + dailyMotion * days) mod 360',
     result,
@@ -162,7 +162,7 @@ export function calculateSunApogee(daysFromBase) {
     inputs: {
       apogeeStart: { value: apogeeStart, label: `Apogee at Epoch (26° 45' 8" in Gemini)`, unit: '°' },
       dailyMotion: { value: dailyMotion, label: 'Apogee Daily Motion (~1.5"/day)', unit: '°/day' },
-      daysFromBase: { value: daysFromBase, label: 'Days from Epoch' },
+      daysFromBase: { value: daysFromBase, label: 'Days from Epoch', refId: 'daysFromEpoch' },
     },
     formula: '(apogeeStart + dailyMotion * days) mod 360',
     result,
@@ -185,8 +185,8 @@ export function calculateSunMaslul(meanLongitude, apogee) {
     sourceNote: 'Maslul = distance of the sun from the govah (apogee). Directly from the Rambam.',
     teachingNote: 'How far is the sun from the govah? This distance determines how much the emtzoi differs from the amiti. At 0° or 360° (sun at govah) there is NO difference. At 180° (sun opposite govah, closest to Earth) there is also no difference. The maximum difference (~2°) occurs around 90°, where the viewing angle between Earth and the red\'s center diverges most.',
     inputs: {
-      meanLongitude: { value: meanLongitude, label: 'Sun Mean Longitude', unit: '°' },
-      apogee: { value: apogee, label: 'Sun Apogee', unit: '°' },
+      meanLongitude: { value: meanLongitude, label: 'Sun Mean Longitude', unit: '°', refId: 'sunMeanLongitude' },
+      apogee: { value: apogee, label: 'Sun Apogee', unit: '°', refId: 'sunApogee' },
     },
     formula: '(meanLongitude − apogee + 360) mod 360',
     result: maslul,
@@ -232,7 +232,7 @@ export function lookupMaslulCorrection(maslul) {
       : 'Value directly from the Rambam\'s sun correction table.',
     teachingNote: 'The menaseh hamaslul: the portion we add or subtract to translate the emtzoi to the amiti. If maslul < 180° the correction is SUBTRACTED (sun appears behind where its emtzoi says). If > 180° it is ADDED. Maximum correction: ~2° near 90° maslul.',
     inputs: {
-      maslul: { value: maslul, label: 'Maslul', unit: '°' },
+      maslul: { value: maslul, label: 'Maslul', unit: '°', refId: 'sunMaslul' },
       effectiveMaslul: { value: effectiveMaslul, label: 'Effective Maslul (for table)', unit: '°' },
       direction: { value: maslul <= 180 ? 'subtract' : 'add', label: 'Apply Direction' },
     },
@@ -260,9 +260,9 @@ export function calculateSunTrueLongitude(meanLongitude, maslul, correction) {
     sourceNote: 'Direction rule (subtract if < 180°, add if > 180°) directly from the Rambam.',
     teachingNote: 'The amiti: where the sun ACTUALLY appears in the mazalos from our perspective on Earth. This is the "lashon kodesh" — the common language that both sun and moon must be translated into before we can compare them. This is what Beis Din needs to know for the molad calculation.',
     inputs: {
-      meanLongitude: { value: meanLongitude, label: 'Sun Mean Longitude', unit: '°' },
-      maslul: { value: maslul, label: 'Maslul', unit: '°' },
-      correction: { value: correction, label: 'Correction', unit: '°' },
+      meanLongitude: { value: meanLongitude, label: 'Sun Mean Longitude', unit: '°', refId: 'sunMeanLongitude' },
+      maslul: { value: maslul, label: 'Maslul', unit: '°', refId: 'sunMaslul' },
+      correction: { value: correction, label: 'Correction', unit: '°', refId: 'sunMaslulCorrection' },
       direction: { value: maslul <= 180 ? 'subtract' : 'add', label: 'Direction' },
     },
     formula: maslul <= 180

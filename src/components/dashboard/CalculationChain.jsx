@@ -42,6 +42,9 @@ export default function CalculationChain() {
   const calculation = useCalculationStore((s) => s.calculation);
   const selectedStepId = useCalculationStore((s) => s.selectedStepId);
   const selectStep = useCalculationStore((s) => s.selectStep);
+  const drillBreadcrumb = useCalculationStore((s) => s.drillBreadcrumb);
+  const drillIntoInput = useCalculationStore((s) => s.drillIntoInput);
+  const drillBack = useCalculationStore((s) => s.drillBack);
 
   if (!calculation) {
     return (
@@ -62,13 +65,17 @@ export default function CalculationChain() {
       {selectedStep ? (
         /* Focused view: show selected step in detail */
         <div>
-          <button
-            onClick={() => selectStep(null)}
-            className="text-xs text-[var(--color-accent)] hover:underline mb-3"
-          >
-            &larr; Show all steps
-          </button>
-          <StepDetail step={selectedStep} onClickInput={selectStep} />
+          <Breadcrumb
+            crumbs={drillBreadcrumb}
+            currentId={selectedStep.id}
+            stepMap={calculation.stepMap}
+            onJumpToRoot={() => selectStep(null)}
+            onBack={drillBack}
+          />
+          <StepDetail
+            step={selectedStep}
+            onClickInput={(refId) => drillIntoInput(selectedStep.id, refId)}
+          />
         </div>
       ) : (
         /* Overview: show all steps */
@@ -294,6 +301,48 @@ function RegimeBadge({ regime }) {
   );
 }
 
+// ─── Breadcrumb ────────────────────────────────────────────────
+// Shows the drill-down history. Empty breadcrumb = user selected
+// this step from outside (sidebar click); "← Show all steps"
+// returns to the chain overview. Non-empty breadcrumb = user drilled
+// in via input clicks; each crumb is clickable and jumps back.
+
+function Breadcrumb({ crumbs, currentId, stepMap, onJumpToRoot, onBack }) {
+  return (
+    <div className="flex items-center gap-1 mb-3 text-xs flex-wrap">
+      <button
+        onClick={onJumpToRoot}
+        className="text-[var(--color-accent)] hover:underline"
+      >
+        &larr; All steps
+      </button>
+      {crumbs.length > 0 && (
+        <>
+          <span className="text-[var(--color-text-secondary)]">/</span>
+          {crumbs.map((id, i) => {
+            const step = stepMap[id];
+            return (
+              <React.Fragment key={`${id}-${i}`}>
+                <button
+                  onClick={onBack}
+                  className="text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] hover:underline truncate max-w-[120px]"
+                  title={`Back to ${step?.name || id}`}
+                >
+                  {step?.name || id}
+                </button>
+                <span className="text-[var(--color-text-secondary)]">/</span>
+              </React.Fragment>
+            );
+          })}
+          <span className="text-[var(--color-text)] font-medium truncate max-w-[140px]">
+            {stepMap[currentId]?.name || currentId}
+          </span>
+        </>
+      )}
+    </div>
+  );
+}
+
 // ─── Step Group ───────────────────────────────────────────────
 
 function StepGroup({ label, hebrewLabel, steps, onSelect }) {
@@ -451,17 +500,28 @@ function StepDetail({ step, onClickInput }) {
             Inputs
           </div>
           {Object.entries(step.inputs).map(([key, input]) => {
-            const isClickable = typeof input.value === 'number';
+            // Clickable only when the input links to an upstream step
+            // via refId. Plain numeric inputs (constants, lookups) are
+            // not drillable. The click routes through `drillIntoInput`
+            // in the store, which enforces regime discipline (R3).
+            const isClickable = !!input.refId;
+            const handleClick = isClickable && onClickInput ? () => onClickInput(input.refId) : undefined;
             return (
               <div
                 key={key}
+                onClick={handleClick}
+                role={isClickable ? 'button' : undefined}
+                tabIndex={isClickable ? 0 : undefined}
+                onKeyDown={isClickable && handleClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleClick(); } } : undefined}
                 className={`flex justify-between py-1 border-b border-[var(--color-border)] border-opacity-30 text-xs ${
-                  isClickable ? 'cursor-pointer hover:text-[var(--color-accent)]' : ''
+                  isClickable ? 'cursor-pointer hover:text-[var(--color-accent)] hover:bg-[var(--color-surface)] -mx-1 px-1 rounded' : ''
                 }`}
+                title={isClickable ? 'Drill into this input' : undefined}
               >
-                <span className="text-[var(--color-text-secondary)]">
+                <span className="text-[var(--color-text-secondary)] flex items-center gap-1">
                   {input.label || key}
                   {input.unit && <span className="opacity-50 ml-1">({input.unit})</span>}
+                  {isClickable && <span className="opacity-50 text-[9px]">→</span>}
                 </span>
                 <span className="font-mono text-[var(--color-text)]">
                   {typeof input.value === 'number' ? input.value.toFixed(4) : String(input.value)}
