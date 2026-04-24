@@ -90,12 +90,24 @@ export default function Sidebar() {
           )}
         </div>
 
-        {/* Molad */}
-        {molad.calculated && (
+        {/* Molad — routes into the FIXED-CALENDAR step chain (KH 6-10),
+            not astronomical. Per roadmap R4 / issue #10. */}
+        {calculation?.fixedCalendar ? (
+          <button
+            type="button"
+            onClick={() => handleClick('meanMoladOfMonth', null)}
+            className="mt-2 text-xs text-left text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] cursor-pointer transition-colors w-full"
+            title="Drill into the mean-molad chain (KH 6)"
+          >
+            <span className="font-medium">Molad:</span>{' '}
+            {calculation.fixedCalendar.formatted}
+            <span className="opacity-40 ml-1 text-[10px]">→</span>
+          </button>
+        ) : molad.calculated ? (
           <div className="mt-2 text-xs text-[var(--color-text-secondary)]">
             <span className="font-medium">Molad:</span> {molad.formatted}
           </div>
-        )}
+        ) : null}
       </div>
 
       {/* D5 — date scrubber lives right below the date header so it's
@@ -202,6 +214,33 @@ export default function Sidebar() {
           <ValueRow
             label="Days to next" value={`${calculation.season.daysUntilNextSeason} days`}
           />
+
+          {/* ── FIXED CALENDAR (KH 6-10) ── separate regime, labeling
+              layer only per OPEN_QUESTIONS Q3. Clicks route into the
+              fixed-calendar step chain (issue #10). */}
+          {calculation.fixedCalendar && (
+            <>
+              <SectionHeader title="Fixed Calendar" hebrewTitle="לוח קבוע" color="#8899bb" />
+              <ValueRow
+                label="BaHaRaD Anchor" hebrewLabel="בהר״ד"
+                value="Mon 5h 204p"
+                onClick={() => handleClick('baharadAnchor', null)}
+                tooltip="KH 6:8 — the spine of the fixed calendar"
+              />
+              <ValueRow
+                label="Months since BaHaRaD" hebrewLabel="חדשים"
+                value={(calculation.stepMap['monthsSinceBaharad']?.result ?? 0).toLocaleString()}
+                onClick={() => handleClick('monthsSinceBaharad', null)}
+                tooltip="Integer count of mean moladot from BaHaRaD to this month"
+              />
+              <ValueRow
+                label="Mean Molad" hebrewLabel="מולד אמצעי"
+                value={calculation.fixedCalendar.formatted}
+                onClick={() => handleClick('meanMoladOfMonth', null)}
+                tooltip="BaHaRaD + N × (29d 12h 793p)"
+              />
+            </>
+          )}
         </>
       )}
     </aside>

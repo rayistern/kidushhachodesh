@@ -36,6 +36,8 @@ import {
   determineVisibility,
   calculateSeasonalInfo,
 } from './visibilityCalculations.js';
+import { runFixedCalendarChain } from './fixedCalendar/index.js';
+import { HDate } from './epochDays.js';
 import { CONSTANTS } from './constants.js';
 import { normalizeDegrees } from './dmsUtils.js';
 
@@ -49,6 +51,13 @@ export function getFullCalculation(date) {
   // ── Step 1: Days from epoch ──
   const epochStep = calculateDaysFromEpoch(date);
   const days = epochStep.result;
+
+  // ── Fixed-calendar chain (KH 6-10) — parallel regime ──
+  // Regime-tagged 'fixed-calendar'; drill-down from the sidebar's
+  // molad display routes here, NOT into the astronomical pipeline.
+  // See docs/OPEN_QUESTIONS.md Q2 and issue #10.
+  const hd = date instanceof HDate ? date : new HDate(date);
+  const fixedCal = runFixedCalendarChain(hd);
 
   // ── Step 2: Sun calculations (needed before moon's double elongation) ──
   const sunDailyMotion = getSunDailyMotion();
@@ -138,6 +147,8 @@ export function getFullCalculation(date) {
     firstVisAngle,
     visibility,
     season,
+    // --- Fixed calendar (KH 6-10 — separate regime) ---
+    ...fixedCal.steps,
   ];
 
   // Build a lookup map by step ID
@@ -180,6 +191,9 @@ export function getFullCalculation(date) {
     },
 
     season: season.result,
+
+    // Fixed-calendar summary — labeling layer per Q3 Option B.
+    fixedCalendar: fixedCal.meanMolad,
   };
 }
 
