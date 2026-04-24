@@ -31,27 +31,25 @@ export default function Sidebar() {
   const selectStep = useCalculationStore((s) => s.selectStep);
   const setHighlightedGalgal = useVisualizationStore((s) => s.setHighlightedGalgal);
   const pulseStep = useVisualizationStore((s) => s.pulseStep);
-  const setRightPanel = useUIStore((s) => s.setRightPanel);
   const isWideViewport = useUIStore((s) => s.isWideViewport);
   const setLeftPanelOpen = useUIStore((s) => s.setLeftPanelOpen);
-  const setRightPanelOpen = useUIStore((s) => s.setRightPanelOpen);
+  const showDrilldown = useUIStore((s) => s.showDrilldown);
 
   const hebrew = getHebrewDateDisplay(currentDate);
   const molad = getMoladDisplay(currentDate);
 
   // Clicking a value: select the step, highlight the relevant mechanism,
-  // pulse every galgal that contributes to that step (D2), and (on mobile)
-  // swap the left drawer for the right drilldown drawer so the user
-  // immediately sees the result of their tap.
+  // pulse every galgal that contributes to that step (D2), and OPEN the
+  // right panel to the drill-down view. Without opening the panel,
+  // desktop users saw no visible response to their click — the state
+  // updated but the panel was collapsed.
   const handleClick = (stepId, galgalId) => {
     selectStep(stepId);
-    setRightPanel('drilldown');
     if (galgalId) setHighlightedGalgal(galgalId);
     pulseStep(stepId);
-    if (!isWideViewport) {
-      setLeftPanelOpen(false);
-      setRightPanelOpen(true);
-    }
+    showDrilldown();
+    // Close the left drawer on mobile so the drilldown isn't hidden behind it.
+    if (!isWideViewport) setLeftPanelOpen(false);
   };
 
   return (
