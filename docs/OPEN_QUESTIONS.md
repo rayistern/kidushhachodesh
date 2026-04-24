@@ -170,7 +170,9 @@ the fixed calendar sits relative to true astronomy.
 ## Q4. Should the engine compute via the Rambam's period-block tables
 instead of `dailyMotion × days`?
 
-**Status: open. Deferred to a future phase (see ROADMAP Phase 2+).**
+**Status: decision made 2026-04-24 — yes, switch to the Rambam's
+tables. Implementation in progress. See also Q7 for the drift finding
+that surfaced during investigation.**
 
 ### The issue
 
@@ -211,6 +213,77 @@ shown to the user is not.
 
 This is tracked in the roadmap and as a GitHub issue. Not a bug — a
 known tech-debt item against the "stay true to the source" rule.
+
+---
+
+## Q7. Undocumented deviation: our moon daily rate vs the Rambam's tables
+
+**Status: finding. 2026-04-24. Being addressed as part of Q4's
+engine-purism rework.**
+
+### What surfaced
+
+While starting the engine-purism work (Q4), I pulled the Rambam's
+period-block tables from Sefaria and compared the values they produce
+to what the current engine produces. For moon mean longitude at
+3 Nisan 5786:
+
+| Source | Value |
+|---|---|
+| Rambam's tables (KH 14:1–2) | 25° 27' 49" |
+| Our engine (as of 07531d6) | 34° 19' 30" |
+| **Difference** | **~8.86°** |
+
+That's too big to be rounding.
+
+### Root cause
+
+Our `CONSTANTS.MOON.MEAN_MOTION_PER_DAY` is stored as `13° 10' 35.133"`.
+The Rambam's text in KH 14:1 states the rate as `13° 10' 35"` flat,
+with no fractional seconds, and his 10-day table in KH 14:2
+(`131° 45' 50"`) implies *exactly* `13° 10' 35"/day` — his tables are
+internally consistent with the whole-second daily rate.
+
+The `.133"` in our code has no source citation in the codebase. It
+appears to be an undocumented precision "refinement" from an earlier
+developer, plausibly back-solved from the synodic month constant to
+force internal consistency with our sun rate and molad interval.
+Whatever the intent, it drifts from the Rambam's published daily
+rate by `0.133"/day`, which over 309,717 days (the interval from the
+epoch to today) accumulates to ~11° of raw drift — the observed ~9°
+after the period-block arithmetic's own rounding absorbs part of it.
+
+### Why the fix is obvious in this project
+
+Per Q4's "stay true to the source" rule, the Rambam's published
+values are authoritative. The Rambam's rounded numbers are
+intentional and his tables self-correct for rounding across scales
+by construction — that is his system. Our `.133"` is an undocumented
+deviation that has been quietly displacing moon positions on this
+dashboard by ~9° since the beginning.
+
+This is not "we're introducing a shift" — it's "we're removing an
+undocumented shift that was already there." The commit that ships
+Q4's rework should state this plainly so any future reader
+understands the direction of the change.
+
+### What ships with the fix
+
+Moon mean (and therefore everything downstream — moon true longitude,
+elongation, crescent visibility, moon latitude) will move by up to
+~9° for dates far from the epoch. Dates near the epoch (early years
+5000s onward) will see smaller shifts.
+
+This is the correct behavior per the Rambam's own system. Sun
+positions shift by ~17' at the same date — negligible in comparison.
+
+### What does NOT change
+
+- The epoch date (3 Nisan 4938) and epoch positions stay identical.
+- The `daysFromEpoch` crossing step is unaffected; the fix is in the
+  mean-motion multipliers, not the day count.
+- The correction tables (KH 13:4, 15:4-6) are unaffected — those
+  values were never in question.
 
 ---
 
