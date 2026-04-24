@@ -25,31 +25,41 @@
  */
 import { CONSTANTS, MOON_PHASES } from './constants.js';
 import { dmsToDecimal, normalizeDegrees, formatDms } from './dmsUtils.js';
+import { meanLongitudeByPeriodBlocks } from './periodBlocks.js';
 
 // ─── STEP 1: Moon Mean Longitude ────────────────────────────────
 
-/** Moon's mean longitude (emtza hayareach) — KH 14:1 */
-// AUDIT 2026-04-23: `dailyMotion × days` shortcut; Rambam's KH 14:1
-// period-block tables not yet exposed. Q4.
+/** Moon's mean longitude (emtza hayareach) — computed via Rambam's
+ *  period-block decomposition (KH 14:2). See OPEN_QUESTIONS.md Q4/Q7. */
 export function calculateMoonMeanLongitude(daysFromBase) {
   const dailyMotion = dmsToDecimal(CONSTANTS.MOON.MEAN_MOTION_PER_DAY);
   const startPos = CONSTANTS.MOON.MEAN_LONGITUDE_AT_EPOCH + (CONSTANTS.MOON.START_CONSTELLATION * 30);
-  const result = normalizeDegrees(startPos + dailyMotion * daysFromBase);
+  const { result, decomposition, contributions } = meanLongitudeByPeriodBlocks(
+    daysFromBase,
+    CONSTANTS.MOON_MEAN_PERIOD_BLOCKS,
+    dailyMotion,
+    startPos,
+  );
+  const { k, j, i, h, d } = decomposition;
   return {
     id: 'moonMeanLongitude',
     regime: 'astronomical',
     name: 'Moon Mean Longitude',
     hebrewName: 'אמצע הירח',
-    rambamRef: 'KH 14:1',
+    rambamRef: 'KH 14:1-2',
     source: 'rambam',
-    sourceNote: 'Daily motion of 13° 10\' 35" and starting position directly from the Rambam.',
+    sourceNote: 'Daily motion of 13°10\'35" (KH 14:1) and starting position (1°14\'43" in Taurus, KH 14:4) from the Rambam. Computed via his period-block tables (KH 14:2).',
     teachingNote: 'The emtza hayareach is the center point of the galgal katan — where the small epicycle\'s center is, NOT where the moon actually is. The moon sits on the edge of the galgal katan.',
     inputs: {
-      startPosition: { value: startPos, label: 'Position at Epoch (1°14\'43" in Taurus)', unit: '°' },
-      dailyMotion: { value: dailyMotion, label: 'Daily Motion (13° 10\' 35")', unit: '°/day' },
       daysFromBase: { value: daysFromBase, label: 'Days from Epoch', refId: 'daysFromEpoch' },
+      startPosition: { value: startPos, label: 'Position at Epoch (1°14\'43" in Taurus)', unit: '°' },
+      k: { value: k, label: `× 10,000-day block (${formatDms(contributions.block10000)})` },
+      j: { value: j, label: `× 1,000-day block (${formatDms(contributions.block1000)})` },
+      i: { value: i, label: `× 100-day block (${formatDms(contributions.block100)})` },
+      h: { value: h, label: `× 10-day block (${formatDms(contributions.block10)})` },
+      d: { value: d, label: `× remainder days @ ${formatDms(dailyMotion)}/day` },
     },
-    formula: '(startPosition + dailyMotion * days) mod 360',
+    formula: `startPos + ${k}×10000d + ${j}×1000d + ${i}×100d + ${h}×10d + ${d}×1d  (mod 360)`,
     result,
     formatted: formatDms(result),
     unit: 'degrees',
@@ -99,28 +109,37 @@ export function calculateSeasonCorrection(sunTrueLongitude) {
 
 // ─── STEP 3: Moon Maslul (Anomaly) ────────────────────────────
 
-/** Moon's maslul / emtza hamaslul (mean anomaly on galgal katan) — KH 14:2 */
-// AUDIT 2026-04-23: `dailyMotion × days` shortcut; Rambam's KH 14:2
-// period-block tables not yet exposed. Q4.
+/** Moon's maslul / emtza hamaslul (mean anomaly on galgal katan) —
+ *  computed via Rambam's period-block decomposition (KH 14:3). */
 export function calculateMoonMaslul(daysFromBase) {
   const maslulStart = dmsToDecimal(CONSTANTS.MOON.MASLUL_START);
   const maslulMotion = dmsToDecimal(CONSTANTS.MOON.MASLUL_MEAN_MOTION);
-  const result = normalizeDegrees(maslulStart + maslulMotion * daysFromBase);
+  const { result, decomposition, contributions } = meanLongitudeByPeriodBlocks(
+    daysFromBase,
+    CONSTANTS.MOON_MASLUL_PERIOD_BLOCKS,
+    maslulMotion,
+    maslulStart,
+  );
+  const { k, j, i, h, d } = decomposition;
   return {
     id: 'moonMaslul',
     regime: 'astronomical',
     name: 'Moon Maslul (Anomaly)',
     hebrewName: 'אמצע המסלול',
-    rambamRef: 'KH 14:2-3',
+    rambamRef: 'KH 14:3',
     source: 'rambam',
-    sourceNote: 'Daily motion of 13° 3\' 53 1/3" and starting position (84° 28\' 42") directly from the Rambam.',
+    sourceNote: 'Daily motion of 13°3\'54" (KH 14:3, Sefaria reading) and starting position (84°28\'42", KH 14:4). Computed via the Rambam\'s period-block tables (KH 14:3).',
     teachingNote: 'The emtza hamaslul tells us where the moon is on the galgal katan (small epicycle). At 0°/360° the moon is at the top (furthest from Earth = govah). At 180° it is closest to Earth. The galgal katan moves at 13° 3\' but appears to move faster due to the nekudah hanichaches (prosneusis point).',
     inputs: {
-      maslulStart: { value: maslulStart, label: 'Maslul at Epoch (84° 28\' 42")', unit: '°' },
-      maslulMotion: { value: maslulMotion, label: 'Daily Motion (13° 3\' 53 1/3")', unit: '°/day' },
       daysFromBase: { value: daysFromBase, label: 'Days from Epoch', refId: 'daysFromEpoch' },
+      maslulStart: { value: maslulStart, label: 'Maslul at Epoch (84°28\'42")', unit: '°' },
+      k: { value: k, label: `× 10,000-day block (${formatDms(contributions.block10000)})` },
+      j: { value: j, label: `× 1,000-day block (${formatDms(contributions.block1000)})` },
+      i: { value: i, label: `× 100-day block (${formatDms(contributions.block100)})` },
+      h: { value: h, label: `× 10-day block (${formatDms(contributions.block10)})` },
+      d: { value: d, label: `× remainder days @ ${formatDms(maslulMotion)}/day` },
     },
-    formula: '(maslulStart + dailyMotion * days) mod 360',
+    formula: `maslulStart + ${k}×10000d + ${j}×1000d + ${i}×100d + ${h}×10d + ${d}×1d  (mod 360)`,
     result,
     formatted: formatDms(result),
     unit: 'degrees',
@@ -291,16 +310,23 @@ export function calculateMoonTrueLongitude(adjustedMeanLon, maslulHanachon, corr
 
 // ─── STEP 8: Ascending Node (Rosh) ──────────────────────────────
 
-/** Position of the ascending node (rosh) — KH 16:2-3 */
-// AUDIT 2026-04-23: `dailyMotion × days` shortcut; Rambam's KH 16:2
-// period-block tables not yet exposed. Q4.
+/** Position of the ascending node (rosh) — computed via Rambam's
+ *  period-block decomposition (KH 16:2). */
 export function calculateNodePosition(daysFromBase) {
   const startPos = dmsToDecimal(CONSTANTS.NODE.START_POSITION);
   const dailyMotion = dmsToDecimal(CONSTANTS.NODE.DAILY_MOTION);
   // The node regresses (moves backwards through the zodiac)
   // The Rambam counts forward from Aries, then subtracts from 360
-  const emtzaRosh = normalizeDegrees(startPos + dailyMotion * daysFromBase);
+  const emtzaBlock = meanLongitudeByPeriodBlocks(
+    daysFromBase,
+    CONSTANTS.NODE_PERIOD_BLOCKS,
+    dailyMotion,
+    startPos,
+  );
+  const emtzaRosh = emtzaBlock.result;
   const makomRosh = normalizeDegrees(360 - emtzaRosh);
+  const { k, j, i, h, d } = emtzaBlock.decomposition;
+  const contributions = emtzaBlock.contributions;
   return {
     id: 'nodePosition',
     regime: 'astronomical',
@@ -308,14 +334,19 @@ export function calculateNodePosition(daysFromBase) {
     hebrewName: 'ראש התלי',
     rambamRef: 'KH 16:2-4',
     source: 'rambam',
-    sourceNote: 'Starting position (180° 57\' 28") and daily motion (3\' 11") directly from the Rambam. Moves achoranim (backwards) through the zodiac.',
+    sourceNote: 'Starting position (180°57\'28", KH 16:3) and daily motion (3\'11", KH 16:2) directly from the Rambam. Moves achoranim (backwards) through the zodiac. Computed via his period-block tables (KH 16:2), then reflected (360 − result) for makom rosh.',
     teachingNote: 'The rosh is where the moon\'s tilted orbital plane (galgal noteh / blue) crosses the ecliptic going north. The zanav (tail) is exactly 180° opposite — where the moon crosses going south. The rosh/zanav move backwards through the zodiac, completing a full cycle in ~18.6 years. This is caused by the red galgal (domeh) slowly rotating. When the moon is at the rosh or zanav, a solar or lunar eclipse is possible.',
     inputs: {
-      startPos: { value: startPos, label: 'Rosh at Epoch (180° 57\' 28")', unit: '°' },
-      dailyMotion: { value: dailyMotion, label: 'Daily Motion (3\' 11" backwards)', unit: '°/day' },
       daysFromBase: { value: daysFromBase, label: 'Days from Epoch', refId: 'daysFromEpoch' },
+      startPos: { value: startPos, label: 'Rosh at Epoch (180°57\'28")', unit: '°' },
+      k: { value: k, label: `× 10,000-day block (${formatDms(contributions.block10000)})` },
+      j: { value: j, label: `× 1,000-day block (${formatDms(contributions.block1000)})` },
+      i: { value: i, label: `× 100-day block (${formatDms(contributions.block100)})` },
+      h: { value: h, label: `× 10-day block (${formatDms(contributions.block10)})` },
+      d: { value: d, label: `× remainder days @ ${formatDms(dailyMotion)}/day` },
+      emtzaRosh: { value: emtzaRosh, label: 'Emtza Rosh (before reflection)', unit: '°' },
     },
-    formula: '360 − (startPos + dailyMotion × days) mod 360',
+    formula: `(360 − (startPos + ${k}×10000d + ${j}×1000d + ${i}×100d + ${h}×10d + ${d}×1d)) mod 360`,
     result: makomRosh,
     formatted: formatDms(makomRosh),
     unit: 'degrees',

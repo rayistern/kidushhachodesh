@@ -223,35 +223,46 @@ engine-purism rework.**
 
 ### What surfaced
 
-While starting the engine-purism work (Q4), I pulled the Rambam's
-period-block tables from Sefaria and compared the values they produce
-to what the current engine produces. For moon mean longitude at
-3 Nisan 5786:
+While starting the engine-purism work (Q4), three separate
+undocumented-rate errors turned up, all of which were disputes with
+the Rambam's own tables. For 3 Nisan 5786:
 
-| Source | Value |
-|---|---|
-| Rambam's tables (KH 14:1–2) | 25° 27' 49" |
-| Our engine (as of 07531d6) | 34° 19' 30" |
-| **Difference** | **~8.86°** |
+| Rate | Old code | Corrected (Rambam) | Impact at 309,717 days |
+|---|---|---|---|
+| Sun apogee daily | 1.5"/day | **0.15"/day** (1.5" per **10 days**, KH 12:2) | **116° drift** — engine was 10× too fast |
+| Moon mean daily | 13°10'35.133" | **13°10'35"** (KH 14:1, tables 14:2) | ~9° drift |
+| Moon maslul daily | 13°3'53.333" | **13°3'54"** (KH 14:3 Sefaria reading) | ~1° drift |
 
-That's too big to be rounding.
+The sun apogee one is the biggest — and the same value the user
+reported in the original WhatsApp report that started Phase R
+(they calculated 99°39'27", our old engine gave 215°48'4"; our new
+engine gives 99°39'26"). **Their report was correct; our engine was
+wrong**. Phase R's whole regime-discipline arc was real work but
+partly masked this more fundamental numerical error underneath.
 
-### Root cause
+### Root causes
 
-Our `CONSTANTS.MOON.MEAN_MOTION_PER_DAY` is stored as `13° 10' 35.133"`.
-The Rambam's text in KH 14:1 states the rate as `13° 10' 35"` flat,
-with no fractional seconds, and his 10-day table in KH 14:2
-(`131° 45' 50"`) implies *exactly* `13° 10' 35"/day` — his tables are
-internally consistent with the whole-second daily rate.
+**Sun apogee.** Our `CONSTANTS.SUN.APOGEE_MOTION_PER_DAY` was
+`1.5 / 3600` = 1.5 arc-seconds/day. The Rambam (KH 12:2) says "1.5
+arc-seconds per **ten days**" = 0.15"/day. His tables 15"/100d,
+2'30"/1000d, 25'/10000d are all consistent with 0.15"/day. Our
+constant was 10× too fast, drifting the apogee by 116° over 848
+years from the Rambam's value.
 
-The `.133"` in our code has no source citation in the codebase. It
-appears to be an undocumented precision "refinement" from an earlier
-developer, plausibly back-solved from the synodic month constant to
-force internal consistency with our sun rate and molad interval.
-Whatever the intent, it drifts from the Rambam's published daily
-rate by `0.133"/day`, which over 309,717 days (the interval from the
-epoch to today) accumulates to ~11° of raw drift — the observed ~9°
-after the period-block arithmetic's own rounding absorbs part of it.
+**Moon mean.** Our `CONSTANTS.MOON.MEAN_MOTION_PER_DAY.seconds` was
+`35.133`. The Rambam (KH 14:1) states 35 flat, and his 10-day table
+(131°45'50" at KH 14:2) implies 35" exactly. The .133 fraction has
+no source citation.
+
+**Moon maslul.** Our `CONSTANTS.MOON.MASLUL_MEAN_MOTION.seconds` was
+`53.333`. The Sefaria reading of KH 14:3 gives 54 ("נ"ד שְׁנִיּוֹת"),
+and the 10-day table (130°39'0") is `13°3'54" × 10` exactly.
+
+None of these `.xxx` fractions have documentation in the codebase.
+They appear to have been "precision refinements" by earlier
+developers that quietly diverged from the Rambam's own consistent
+tables. The Rambam's rounded numbers are intentional and his tables
+are internally self-correcting by design.
 
 ### Why the fix is obvious in this project
 

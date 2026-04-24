@@ -29,6 +29,7 @@ import { CONSTANTS } from './constants.js';
 import { dmsToDecimal, normalizeDegrees, formatDms } from './dmsUtils.js';
 import { daysFromEpoch, HDate } from './epochDays.js';
 import { MOLAD_INTERVAL_DAYS } from './moladTimeline.js';
+import { meanLongitudeByPeriodBlocks } from './periodBlocks.js';
 
 /**
  * Calculate Hebrew-calendar days from the Rambam's epoch (3 Nisan 4938 AM).
@@ -110,31 +111,37 @@ export function getSunDailyMotion() {
   };
 }
 
-/** Sun's mean longitude at a given date */
-// AUDIT 2026-04-23: currently computes `dailyMotion × days`. The
-// Rambam's KH 12:3 publishes motion-per-period blocks (10d, 100d, 1000d,
-// 10000d, 29d, 354d, 19-year cycle) that the student is meant to sum.
-// Mathematically identical, pedagogically different. See Q4 in
-// docs/OPEN_QUESTIONS.md. Deferred rework.
+/** Sun's mean longitude at a given date — computed via Rambam's
+ *  period-block decomposition (KH 12:1). See docs/OPEN_QUESTIONS.md Q4. */
 export function calculateSunMeanLongitude(daysFromBase) {
   const dailyMotion = dmsToDecimal(CONSTANTS.SUN.MEAN_MOTION_PER_DAY);
   const startPos = dmsToDecimal(CONSTANTS.SUN.START_POSITION);
-  const result = normalizeDegrees(startPos + dailyMotion * daysFromBase);
+  const { result, decomposition, contributions } = meanLongitudeByPeriodBlocks(
+    daysFromBase,
+    CONSTANTS.SUN_MEAN_PERIOD_BLOCKS,
+    dailyMotion,
+    startPos,
+  );
+  const { k, j, i, h, d } = decomposition;
   return {
     id: 'sunMeanLongitude',
     regime: 'astronomical',
     name: 'Sun Mean Longitude',
     hebrewName: 'אמצע השמש',
-    rambamRef: 'KH 12:1-2',
+    rambamRef: 'KH 12:1',
     source: 'rambam',
-    sourceNote: 'Position at epoch = 7°3\'32" in Aries (KH 12:2). Daily motion per the Rambam.',
+    sourceNote: 'Position at epoch = 7°3\'32" in Aries (KH 12:2). Computed via the Rambam\'s period-block method (KH 12:1) — decompose N days into 10,000 / 1,000 / 100 / 10 / remainder blocks and sum their motions from the published tables.',
     teachingNote: 'The emtzoi: where the sun appears in the mazalos if you were standing at the CENTER OF THE RED GALGAL. Since the red\'s center is not at Earth, this is NOT where we see the sun. But it is the essential first step — "first know the sun\'s own language, then translate to ours." (Rabbi Losh)',
     inputs: {
-      startPosition: { value: startPos, label: 'Position at Epoch', unit: '°' },
-      dailyMotion: { value: dailyMotion, label: 'Daily Motion', unit: '°/day' },
       daysFromBase: { value: daysFromBase, label: 'Days from Epoch', refId: 'daysFromEpoch' },
+      startPosition: { value: startPos, label: 'Position at Epoch (7°3\'32")', unit: '°' },
+      k: { value: k, label: `× 10,000-day block (${formatDms(contributions.block10000)})` },
+      j: { value: j, label: `× 1,000-day block (${formatDms(contributions.block1000)})` },
+      i: { value: i, label: `× 100-day block (${formatDms(contributions.block100)})` },
+      h: { value: h, label: `× 10-day block (${formatDms(contributions.block10)})` },
+      d: { value: d, label: `× remainder days @ ${formatDms(dailyMotion)}/day` },
     },
-    formula: '(startPosition + dailyMotion * days) mod 360',
+    formula: `startPos + ${k}×10000d + ${j}×1000d + ${i}×100d + ${h}×10d + ${d}×1d  (mod 360)`,
     result,
     formatted: formatDms(result),
     unit: 'degrees',
@@ -149,7 +156,13 @@ export function calculateSunApogee(daysFromBase) {
   const constellationOffset = CONSTANTS.SUN.APOGEE_CONSTELLATION * 30;
   const apogeeStart = apogeeStartDeg + constellationOffset;
   const dailyMotion = CONSTANTS.SUN.APOGEE_MOTION_PER_DAY;
-  const result = normalizeDegrees(apogeeStart + dailyMotion * daysFromBase);
+  const { result, decomposition, contributions } = meanLongitudeByPeriodBlocks(
+    daysFromBase,
+    CONSTANTS.SUN_APOGEE_PERIOD_BLOCKS,
+    dailyMotion,
+    apogeeStart,
+  );
+  const { k, j, i, h, d } = decomposition;
   return {
     id: 'sunApogee',
     regime: 'astronomical',
@@ -157,14 +170,18 @@ export function calculateSunApogee(daysFromBase) {
     hebrewName: 'גובה השמש',
     rambamRef: 'KH 12:2',
     source: 'rambam',
-    sourceNote: 'Starting position at epoch (26° 45\' 8" in Gemini) and daily motion (~1.5"/day) from the Rambam.',
+    sourceNote: 'Starting position at epoch (26° 45\' 8" in Gemini). Motion per the Rambam\'s period-block tables (KH 12:2): 1.5" per 10 days, 15" per 100 days, 2\'30" per 1000 days, 25\' per 10000 days.',
     teachingNote: 'The govah is the point on the red galgal that is FURTHEST from Earth (because the red is off-center in the blue). It moves very slowly — about 1° every 70 years. This is the motion of the BLUE galgal. When the sun is at the govah, it appears to us to move slower (covering fewer degrees per day) because it is further away. Rabbi Losh\'s airplane mashal: a plane at high altitude seems to crawl, but at low altitude the same speed looks blazing fast.',
     inputs: {
-      apogeeStart: { value: apogeeStart, label: `Apogee at Epoch (26° 45' 8" in Gemini)`, unit: '°' },
-      dailyMotion: { value: dailyMotion, label: 'Apogee Daily Motion (~1.5"/day)', unit: '°/day' },
       daysFromBase: { value: daysFromBase, label: 'Days from Epoch', refId: 'daysFromEpoch' },
+      apogeeStart: { value: apogeeStart, label: `Apogee at Epoch (26°45'8" in Gemini)`, unit: '°' },
+      k: { value: k, label: `× 10,000-day block (${formatDms(contributions.block10000)})` },
+      j: { value: j, label: `× 1,000-day block (${formatDms(contributions.block1000)})` },
+      i: { value: i, label: `× 100-day block (${formatDms(contributions.block100)})` },
+      h: { value: h, label: `× 10-day block (${formatDms(contributions.block10)})` },
+      d: { value: d, label: `× remainder days @ ~1.5"/day × 10` },
     },
-    formula: '(apogeeStart + dailyMotion * days) mod 360',
+    formula: `apogeeStart + ${k}×10000d + ${j}×1000d + ${i}×100d + ${h}×10d + ${d}×1d  (mod 360)`,
     result,
     formatted: formatDms(result),
     unit: 'degrees',

@@ -157,8 +157,14 @@ export const CONSTANTS = {
     // [R] Apogee (govah) at epoch — KH 12:2
     APOGEE_START: { degrees: 26, minutes: 45, seconds: 8 },
     APOGEE_CONSTELLATION: 2, // Gemini (= +60°)
-    // [R] ~1.5" per day — KH 12:2
-    APOGEE_MOTION_PER_DAY: 1.5 / 3600,
+    // [R] KH 12:2 — "1.5 sheniot PER 10 DAYS" = 0.15"/day.
+    // Prior code was 1.5"/day, 10× too fast. This matches the
+    // Rambam's 100-day (15"), 1000-day (2'30"), 10000-day (25')
+    // tables. Cross-check: 1°/~70 years (his "approximately")
+    // = 1°/(70 × 365.25 days) ≈ 0.14"/day. Fix surfaced by user
+    // report 2026-04-23 (their govah calc matched 0.15"/day rate).
+    // See docs/OPEN_QUESTIONS.md Q7.
+    APOGEE_MOTION_PER_DAY: 0.15 / 3600,
 
     // [D] 3D visualization parameters — deduced from the Rambam's correction table magnitudes
     ECCENTRICITY: 0.0167,
@@ -169,14 +175,20 @@ export const CONSTANTS = {
   //  MOON — Rambam KH chapters 14-17
   // ═══════════════════════════════════════════════════════════════
   MOON: {
-    // [R] 13° 10' 35.133" per day — KH 14:1
-    MEAN_MOTION_PER_DAY: { degrees: 13, minutes: 10, seconds: 35.133 },
+    // [R] 13° 10' 35" per day — KH 14:1 (Rambam states this as 35 flat;
+    // his 10-day table in KH 14:2 of 131°45'50" implies exactly this rate).
+    // Prior code had 35.133", an undocumented deviation — see
+    // docs/OPEN_QUESTIONS.md Q7 (2026-04-24 finding).
+    MEAN_MOTION_PER_DAY: { degrees: 13, minutes: 10, seconds: 35 },
     START_POSITION: { degrees: 1, minutes: 14, seconds: 43 }, // [R] KH 14:4 — 1°14'43" in Taurus
     START_CONSTELLATION: 1, // Taurus
 
-    // [R] Moon's maslul (anomaly) — KH 14:2-3
-    // 13° 3' 53 1/3" per day
-    MASLUL_MEAN_MOTION: { degrees: 13, minutes: 3, seconds: 53.333 },
+    // [R] Moon's maslul (anomaly) — KH 14:3
+    // 13° 3' 54" per day (Sefaria text: "י"ג מַעֲלוֹת וּשְׁלֹשָׁה חֲלָקִים
+    // וְנ"ד שְׁנִיּוֹת"). His 10-day table of 130°39'0" (KH 14:3) is
+    // 13°3'54" × 10 exactly. Prior code had 53.333", an undocumented
+    // deviation — see docs/OPEN_QUESTIONS.md Q7.
+    MASLUL_MEAN_MOTION: { degrees: 13, minutes: 3, seconds: 54 },
     // [R] Maslul at epoch — KH 14:4: 84° 28' 42"
     MASLUL_START: { degrees: 84, minutes: 28, seconds: 42 },
 
@@ -224,6 +236,79 @@ export const CONSTANTS = {
     DAILY_MOTION: { degrees: 0, minutes: 3, seconds: 11 },
     // [R] KH 16:3 — position at epoch: 180° 57' 28" from Aries
     START_POSITION: { degrees: 180, minutes: 57, seconds: 28 },
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  //  PERIOD-BLOCK TABLES — [R] KH 12:1, 12:2, 14:2, 14:3, 16:2
+  // ═══════════════════════════════════════════════════════════════
+  // The Rambam publishes per-period motion for 10, 100, 1000, 10000,
+  // 29, and 354 days. Per docs/OPEN_QUESTIONS.md Q4, these are the
+  // AUTHORITATIVE end-user surface — the student decomposes N days
+  // into these blocks and sums, not `dailyMotion × N`.
+  //
+  // Each block is [degrees, minutes, seconds] as given in the text,
+  // already reduced mod 360 where the Rambam gives "she'erit" (the
+  // remainder after subtracting whole revolutions). Values are
+  // verbatim from Sefaria Mishneh_Torah,_Sanctification_of_the_New_Month.
+  //
+  // Per Q7 (2026-04-24): some of these tables imply slightly different
+  // daily rates (e.g. 1000-day / 1000 differs from 10-day / 10 by
+  // sub-arcsecond). That is the Rambam's own rounding and we preserve
+  // it. The student's arithmetic with these tables reproduces his
+  // published examples exactly.
+
+  // [R] KH 12:1 — Sun mean motion
+  SUN_MEAN_PERIOD_BLOCKS: {
+    p10:    { degrees: 9,   minutes: 51, seconds: 23 },
+    p100:   { degrees: 98,  minutes: 33, seconds: 53 },
+    p1000:  { degrees: 265, minutes: 38, seconds: 50 },
+    p10000: { degrees: 136, minutes: 28, seconds: 20 },
+    p29:    { degrees: 28,  minutes: 35, seconds: 1  },
+    p354:   { degrees: 348, minutes: 55, seconds: 15 },
+  },
+
+  // [R] KH 12:2 — Sun apogee (govah) motion
+  // Rambam gives "1.5 sheniot per 10 days" = 0°0'1.5".
+  // Note his text says 4 sheniot "ve'od" ("and a bit more") for 29 days,
+  // indicating fractional values are implicit. We preserve stated values.
+  SUN_APOGEE_PERIOD_BLOCKS: {
+    p10:    { degrees: 0, minutes: 0,  seconds: 1.5 },
+    p100:   { degrees: 0, minutes: 0,  seconds: 15  },
+    p1000:  { degrees: 0, minutes: 2,  seconds: 30  },
+    p10000: { degrees: 0, minutes: 25, seconds: 0   },
+    p29:    { degrees: 0, minutes: 0,  seconds: 4   },  // "4 sheniot ve'od"
+    p354:   { degrees: 0, minutes: 0,  seconds: 53  },
+  },
+
+  // [R] KH 14:2 — Moon mean motion (emtza hayareach)
+  MOON_MEAN_PERIOD_BLOCKS: {
+    p10:    { degrees: 131, minutes: 45, seconds: 50 },
+    p100:   { degrees: 237, minutes: 38, seconds: 23 },
+    p1000:  { degrees: 216, minutes: 23, seconds: 50 },
+    p10000: { degrees: 3,   minutes: 58, seconds: 20 },
+    p29:    { degrees: 22,  minutes: 6,  seconds: 56 },
+    p354:   { degrees: 344, minutes: 26, seconds: 43 },
+  },
+
+  // [R] KH 14:3 — Moon maslul (anomaly) motion
+  // Note 14:3 omits the 354-day value; it's given in KH 14:4 as 305°0'13".
+  MOON_MASLUL_PERIOD_BLOCKS: {
+    p10:    { degrees: 130, minutes: 39, seconds: 0  },
+    p100:   { degrees: 226, minutes: 29, seconds: 53 },
+    p1000:  { degrees: 104, minutes: 58, seconds: 50 },
+    p10000: { degrees: 329, minutes: 48, seconds: 20 },
+    p29:    { degrees: 18,  minutes: 53, seconds: 4  },
+    p354:   { degrees: 305, minutes: 0,  seconds: 13 },
+  },
+
+  // [R] KH 16:2 — Node (rosh) motion
+  NODE_PERIOD_BLOCKS: {
+    p10:    { degrees: 0,   minutes: 31, seconds: 47 },
+    p100:   { degrees: 5,   minutes: 17, seconds: 43 },
+    p1000:  { degrees: 52,  minutes: 57, seconds: 10 },
+    p10000: { degrees: 169, minutes: 31, seconds: 40 },
+    p29:    { degrees: 1,   minutes: 32, seconds: 9  },
+    p354:   { degrees: 18,  minutes: 44, seconds: 42 },
   },
 
   // ═══════════════════════════════════════════════════════════════
