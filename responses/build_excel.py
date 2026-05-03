@@ -122,24 +122,23 @@ row(r, 'הירח האמיתי', dms(moon['trueLon']), '69:29:21', 'mismatch',
 row(r, 'הראש (node)', dms(moon['node']), '335:35:37', 'match'); r += 1
 
 header(r, 'שלבי הראייה (KH 17)'); r += 1
-row(r, 'אורך ראשון (= elongation, KH 17:6)', dms(moon['elongation']), '12:13:34', 'mismatch',
-    'הפרש 0:15 נגרר מהתיקון העונתי'); r += 1
-row(r, 'שינוי המראה לאורך (parallax, KH 17:7-9)', '— לא מחושב', '0:59:00', 'gap',
-    'מנוע שלנו אינו מבצע שלב זה'); r += 1
-row(r, 'אורך שני', '— לא מחושב', '11:14:34', 'gap', 'מנוע שלנו אינו מבצע שלב זה'); r += 1
-row(r, 'מעגל הירח (KH 17:10-11)', '— לא מחושב', '00:47:01', 'gap', 'מנוע שלנו אינו מבצע שלב זה'); r += 1
-row(r, 'אורך שלישי', '— לא מחושב', '10:27:33', 'gap', 'מנוע שלנו אינו מבצע שלב זה'); r += 1
-row(r, 'תיקון ארוכי וקצרי שקיעה (KH 17:12)', '— לא מחושב', '1:44:36', 'gap', 'מנוע שלנו אינו מבצע שלב זה'); r += 1
-row(r, 'אורך רביעי', '— לא מחושב', '12:12:09', 'gap', 'מנוע שלנו אינו מבצע שלב זה'); r += 1
-row(r, 'מנת גובה המדינה (KH 17:13-14)', '— לא מחושב', '03:18:42', 'gap',
-    'תיקון ע"פ קו רוחב גיאוגרפי - לא מחושב'); r += 1
-row(r, 'קשת הראיה (KH 17:15)',
-    f"≈ {dms(moon['firstVisAngle'])} (קירוב heuristic)",
-    '15:30:51', 'mismatch',
-    'אצלנו: elongation + 0.3·|רוחב|. אינו לפי הרמב"ם'); r += 1
-row(r, 'קיצי הראיה (KH 17:22)', '— לא מחושב', '27:44:25', 'gap', 'לא מחושב'); r += 1
-row(r, 'מסקנה: האם ייראה?', 'לא (לפי המנוע הנוכחי)', 'כן — ודאי יראה', 'mismatch',
-    'הפער נובע מאי-יישום שלבי KH 17:7-22'); r += 1
+row(r, 'אורך ראשון (= elongation, KH 17:1)', dms(moon['elongation']), '12:13:34', 'mismatch',
+    'הפרש 0:15 נגרר מהתיקון העונתי (סוגיה #19)'); r += 1
+row(r, 'אורך שני (KH 17:5)', dms(moon['orechSheni']), '11:14:34', 'mismatch',
+    'אצלנו פוחתים 58\' (Gemini); משתמש פוחת 59\' — בגדר רמב"ם "אֵין מְדַקְדְּקִין בִּשְׁנִיּוֹת"'); r += 1
+row(r, 'רוחב שני (KH 17:7-9)', dms(abs(moon['rochavSheni'])) + (' צפוני' if moon['rochavSheni']>=0 else ' דרומי'),
+    '4:42:03', 'match', 'תואם בקנה מידה של דקות'); r += 1
+row(r, 'אורך שלישי (KH 17:10-11)', dms(moon['orechShlishi']), '10:27:33', 'mismatch',
+    'הפער נגרר מתיקון העונתי (#19)'); r += 1
+row(r, 'אורך רביעי (KH 17:12a)', dms(moon['orechRevii']), '12:12:09', 'mismatch',
+    'הפער נגרר מהפערים שלמעלה'); r += 1
+row(r, 'מנת גובה המדינה (KH 17:12b)', dms(moon['mnatGovah']), '03:18:42', 'match',
+    '⅔ × |רוחב ראשון| לא"י — תואם'); r += 1
+row(r, 'קשת הראיה (KH 17:12c)', dms(moon['keshet']), '15:30:51', 'match',
+    'בקנה מידה של דקות; שניהם > 14° = ודאי יראה'); r += 1
+row(r, 'מסקנה: האם ייראה?', 'כן — ודאי יראה ' + ('✓' if moon['isVisible'] else ''),
+    'כן — ודאי יראה', 'match',
+    'KH 17:15: קשת > 14°'); r += 1
 
 # Literal mirror sheet — column A label, column B our value, in the
 # exact row order of the user's worksheet for ב' סיון ה'תשפו.
@@ -185,29 +184,32 @@ mirror_rows = [
     ('', ''),
     ('רוחב ראשון', dms(abs(moon['latitude']))),
     ('', ''),
-    ('שינוי המראה', '— לא מחושב במנוע'),
+    ('שינוי המראה (לרוחב, KH 17:7-9)',
+        f"≈ {dms(abs(abs(moon['rochavSheni']) - abs(moon['latitude'])))}"),
     ('', ''),
-    ('רוחב שני', '— לא מחושב במנוע'),
+    ('רוחב שני', f"{dms(abs(moon['rochavSheni']))} {'צפוני' if moon['rochavSheni']>=0 else 'דרומי'}"),
     ('', ''),
     ('אורך ראשון', dms(moon['elongation'])),
     ('', ''),
-    ('שינוי המראה', '— לא מחושב במנוע'),
+    ('שינוי המראה (לאורך, KH 17:5)',
+        f"≈ {dms(abs(moon['elongation'] - moon['orechSheni']))}"),
     ('', ''),
-    ('אורך שני', '— לא מחושב במנוע'),
+    ('אורך שני', dms(moon['orechSheni'])),
     ('', ''),
-    ('מעגל הירח', '— לא מחושב במנוע'),
+    ('מעגל הירח (KH 17:10)', f"≈ {dms(abs(moon['orechShlishi'] - moon['orechSheni']))}"),
     ('', ''),
-    ('אורך שלישי', '— לא מחושב במנוע'),
+    ('אורך שלישי', dms(moon['orechShlishi'])),
     ('', ''),
-    ('תיקון ארוכי וקצרי שקיעה', '— לא מחושב במנוע'),
+    ('תיקון ארוכי וקצרי שקיעה (KH 17:12a)',
+        f"≈ {dms(abs(moon['orechRevii'] - moon['orechShlishi']))}"),
     ('', ''),
-    ('אורך רביעי', '— לא מחושב במנוע'),
+    ('אורך רביעי', dms(moon['orechRevii'])),
     ('', ''),
-    ('מנת גובה המדינה', '— לא מחושב במנוע'),
+    ('מנת גובה המדינה (⅔ × |רוחב ראשון|)', dms(moon['mnatGovah'])),
     ('', ''),
-    ('קשת הראיה', f"קירוב heuristic ≈ {dms(moon['firstVisAngle'])}"),
+    ('קשת הראיה', dms(moon['keshet'])),
     ('', ''),
-    ('קיצי הראיה', '— לא מחושב במנוע'),
+    ('פסק (KH 17:3-4, 17:15-21)', f"{moon['verdict']} — {moon['path']}"),
 ]
 for ri, (lbl, val) in enumerate(mirror_rows, 1):
     a = ws_mirror.cell(row=ri, column=1, value=lbl)
@@ -224,8 +226,8 @@ ws2 = wb.create_sheet('כל החודשים')
 ws2.sheet_view.rightToLeft = True
 hdrs = ['תאריך עברי', 'גרגוריאני', 'ימים מהעיקר', 'אמצע השמש',
         'השמש האמיתי', 'אמצע הירח', 'הירח האמיתי', 'הראש',
-        'אורך ראשון (elongation)', 'רוחב הירח', 'קשת ראיה (heuristic)',
-        'נראה? (מנוע נוכחי)']
+        'אורך ראשון', 'אורך שני', 'אורך שלישי', 'אורך רביעי',
+        'מנת גובה המדינה', 'קשת הראיה', 'נראה?']
 for i, h in enumerate(hdrs, 1):
     c = ws2.cell(row=1, column=i, value=h)
     c.font = bold; c.fill = hdr_fill; c.alignment = center; c.border = border
@@ -239,8 +241,12 @@ for i, rec in enumerate(OUR, 2):
     vals = [label, rec['gregorian'], rec['daysFromEpoch'],
             dms(s['meanLon']), dms(s['trueLon']),
             dms(m['meanLon']), dms(m['trueLon']), dms(m['node']),
-            dms(m['elongation']), dms(m['latitude']),
-            dms(m['firstVisAngle']),
+            dms(m['elongation']),
+            dms(m['orechSheni']),
+            dms(m['orechShlishi']),
+            dms(m['orechRevii']),
+            dms(m['mnatGovah']),
+            dms(m['keshet']),
             'כן' if m['isVisible'] else 'לא']
     for ci, v in enumerate(vals, 1):
         c = ws2.cell(row=i, column=ci, value=v)

@@ -1,6 +1,10 @@
 # Response to user — ב' סיון ה'תשפו visibility report
 
-## Bottom line
+> **UPDATE 2026-05-03 (after fix):** the engine now runs the full Rambam KH 17 chain (commits [4b7fa4b](https://github.com/rayistern/kidushhachodesh/commit/4b7fa4b), [99e3965](https://github.com/rayistern/kidushhachodesh/commit/99e3965); issue [#18](https://github.com/rayistern/kidushhachodesh/issues/18) closed). The verdict for ב' סיון ה'תשפו correctly returns **ודאי יראה** — קשת הראיה ≈ 15°15' (above the 14° certainly-visible cutoff per KH 17:15). All seven intermediate values now appear in the engine output and in the UI's drill-down. The remaining ~15-20' delta versus the user's worksheet traces to issue [#19](https://github.com/rayistern/kidushhachodesh/issues/19) (KH 14:5 season-correction boundary placement); the verdict is unaffected. Original diagnosis below.
+
+---
+
+## Bottom line (original)
 
 **The user is right.** Our website does **not** run the full Rambam visibility chain (KH 17:5–22). It computes only **אורך ראשון** (the raw moon‑sun elongation, KH 17:6) and applies a heuristic threshold; it never produces **אורך שני / שלישי / רביעי**, **מעגל הירח**, **תיקון ארוכי וקצרי שקיעה**, **מנת גובה המדינה**, or **קשת הראיה**.
 
