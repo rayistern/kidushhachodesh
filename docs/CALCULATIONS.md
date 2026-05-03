@@ -227,26 +227,26 @@ Epoch date: Wednesday night (beginning of Thursday), 3 Nisan 4938 = April 3, 117
 
 | Sun Position               | Adjustment |
 |----------------------------|-----------|
-| Mid-Aquarius to mid-Aries  | 0'        |
-| Mid-Aries to start Gemini  | +15'      |
-| Start Gemini to mid-Cancer | +30'      |
-| Mid-Cancer to start Leo    | +15'      |
-| Start Leo to mid-Virgo     | -15'      |
-| Mid-Virgo to mid-Libra     | 0'        |
-| Mid-Libra to start Sagittarius | -15'  |
-| Start Sagittarius to start Capricorn | -30' |
-| Start Capricorn to mid-Aquarius | -15' |
+| מחצי דגים → חצי טלה (mid-Pisces 345° → mid-Aries 15°) | 0' |
+| מחצי טלה → תחילת תאומים (mid-Aries 15° → start Gemini 60°) | +15' |
+| מתחילת תאומים → תחילת אריה (60° → 120°) | +15' |
+| מתחילת אריה → חצי בתולה (120° → mid-Virgo 165°) | +15' |
+| מחצי בתולה → חצי מאזנים (165° → mid-Libra 195°) | 0' |
+| מחצי מאזנים → תחילת קשת (195° → 240°) | -15' |
+| מתחילת קשת → תחילת דלי (240° → 300°) | -30' |
+| מתחילת דלי → חצי דגים (300° → 345°) | -15' |
 
 This accounts for the difference between 6:00 PM (when we calculate) and
 actual sunset (when we observe). The moon moves ~0.5° per hour.
 
-> **Open question** (issue #19): Sefaria's KH 14:5 reads `+15'` continuously
-> from mid-Aries (15°) through mid-Virgo (165°), with no `+30'` band on the
-> additive side. The table above (Rabbi Losh's tradition) places `+30'` at
-> 60°-105°. A user worksheet uses `+30'` starting earlier still. Three
-> distinct readings, three different answers. Tracked in issue #19; until
-> resolved, the engine ships with the table above and flags the deviation
-> in `src/engine/constants.js`.
+> **Resolved 2026-05-03 (issue #19)**: the table above is Sefaria's verbatim
+> reading. Verbatim Hebrew text at `docs/sources/KH_14_verbatim.md`. The
+> prior shipping table placed `+30'` at 60°-90° on the additive side; that
+> value did not appear in the primary text and was switched out per the
+> user's "true to source text" directive. The reporting user's worksheet
+> uses a third reading (`+30'` for late Taurus); see Q8 in
+> `docs/OPEN_QUESTIONS.md` for the audit trail and the option to expose a
+> per-tradition selector if that's what he wants.
 
 ---
 

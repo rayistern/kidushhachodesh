@@ -331,7 +331,21 @@ See `Inline Audit Summary` section at the bottom of this document.
 
 ## Q8. KH 14:5 season-correction boundary readings (issue #19)
 
-**Status: open.**
+**Status: resolved 2026-05-03 — switched to Sefaria's verbatim reading. See update below; original investigation preserved.**
+
+> **Update 2026-05-03 (autonomous resolution per user's "true to source text" directive):**
+>
+> Switched our `SEASON_CORRECTIONS` table to Sefaria's verbatim reading of KH 14:5. The prior table (which placed `+30'` at 60°-90° on the additive side) was shipped from the original 2026 rebuild without source verification — its `[R]` tag was asserted, not derived. Sefaria's primary text shows `+15'` continuously from mid-Aries (15°) through mid-Virgo (165°), with NO `+30'` band on the additive side. The asymmetric `-30'` band exists only on the subtractive side at 240°-300° (start-Sagittarius → start-Aquarius).
+>
+> Verbatim Hebrew text now lives at `docs/sources/KH_14_verbatim.md`. Regression tests pinned in `src/engine/__tests__/visibilityChain.test.js`. The 2 Sivan ה'תשפו verdict is unchanged (sun at 57° is in the +15' zone under both readings); affected dates are those where the sun sits in 60°-105°, which now produce the smaller +15' instead of the larger +30'.
+>
+> **The user's worksheet still uses a different reading** (his row 18 shows `0:30:00` for sun in late Taurus, ~57° — Sefaria's reading is +15' for that range). That's a third tradition — possibly Frankel, possibly Yemenite, possibly a custom worksheet. Not a transcription error on his part since the value is internally consistent with his cascade. If the user prefers his tradition, we can either flip back or expose a per-tradition selector. Until that input arrives, Sefaria is the load-bearing primary source.
+>
+> Original investigation below (preserves the audit trail per the "preserve the log" rule).
+
+---
+
+
 
 Three different readings of the KH 14:5 table are in active use:
 

@@ -571,31 +571,41 @@ export const CONSTANTS = {
   },
 
   // ═══════════════════════════════════════════════════════════════
-  //  SEASON CORRECTION — [R] KH 14:5
+  //  SEASON CORRECTION — [R] KH 14:5 (verbatim Sefaria text)
   //  Adjusts the moon's mean longitude for the time difference between
-  //  6:00 PM and actual sunset. The moon moves ~½° per hour, so if
-  //  sunset is later (summer), the moon has moved further.
+  //  6:00 PM and actual sunset (the actual reference time of the
+  //  Rambam's calculation, per KH 14:6: "כשליש שעה אחר שקיעת החמה").
   //
-  //  ⚠ KH 14:5 has multiple variant readings across editions —
-  //  Sefaria, Frankel, Vilna, Yemenite mss, Rabbi Losh's tradition all
-  //  differ on the +30' band placement. Tracked separately as issue #19.
-  //  Current table reflects Rabbi Losh's reading; do not edit without
-  //  resolving #19 against primary sources.
+  //  Source text quoted verbatim in docs/sources/KH_14_verbatim.md.
+  //  Boundaries are stated in the Rambam by mazal halves (חצי X /
+  //  תחילת X); their absolute-degree mappings:
+  //    מחצי דגים = 345°   חצי טלה = 15°
+  //    תחילת תאומים = 60° תחילת אריה = 120°
+  //    חצי בתולה = 165°   חצי מאזנים = 195°
+  //    תחילת קשת = 240°   תחילת דלי = 300°
+  //    חצי דגים = 345°
+  //
+  //  HISTORY (2026-05-03): the prior table placed +30' at 60°-90°.
+  //  That value was shipped from the original rebuild without source
+  //  verification, despite its [R] tag (per feedback_r_tags memory:
+  //  "[R] tags can hide undocumented drift; verify verbatim"). The
+  //  Sefaria text shows +15' uniformly from 15° → 165° on the
+  //  additive side, with NO +30' band. The asymmetric -30' band
+  //  exists only on the subtractive side at 240°-300°. Switched to
+  //  Sefaria's reading per the user's "true to source text" directive
+  //  on 2026-05-03; resolves issue #19.
   // ═══════════════════════════════════════════════════════════════
   SEASON_CORRECTIONS: [
-    // { sunFrom: degrees, sunTo: degrees, adjustment: chalakim }
-    // Each range is defined by the sun's true longitude
-    { sunFrom: 315, sunTo: 345, adjustment: 0 },       // Mid-Aquarius to mid-Aries: no adjustment
-    { sunFrom: 345, sunTo: 360, adjustment: 15 / 60 }, // Mid-Aries to Aries end: +15'
-    { sunFrom: 0,   sunTo: 30,  adjustment: 15 / 60 }, // Aries to Taurus: +15'
-    { sunFrom: 30,  sunTo: 60,  adjustment: 15 / 60 }, // Taurus to start of Gemini: +15'
-    { sunFrom: 60,  sunTo: 90,  adjustment: 30 / 60 }, // Start of Gemini to mid-Cancer: +30'
-    { sunFrom: 90,  sunTo: 120, adjustment: 15 / 60 }, // Mid-Cancer to start of Leo: +15'
-    { sunFrom: 120, sunTo: 150, adjustment: -15 / 60 }, // Start of Leo to mid-Virgo: -15'
-    { sunFrom: 150, sunTo: 195, adjustment: 0 },        // Mid-Virgo to mid-Libra: no adjustment
-    { sunFrom: 195, sunTo: 240, adjustment: -15 / 60 }, // Mid-Libra to start of Sagittarius: -15'
-    { sunFrom: 240, sunTo: 270, adjustment: -30 / 60 }, // Start of Sagittarius to start of Capricorn: -30'
-    { sunFrom: 270, sunTo: 315, adjustment: -15 / 60 }, // Start of Capricorn to mid-Aquarius: -15'
+    // { sunFrom°, sunTo°, adjustment in degrees, sourcePhrase }
+    { sunFrom: 345, sunTo: 360, adjustment: 0,      sourcePhrase: 'מחצי דגים עד חצי טלה (no change)' },
+    { sunFrom: 0,   sunTo: 15,  adjustment: 0,      sourcePhrase: 'מחצי דגים עד חצי טלה (no change)' },
+    { sunFrom: 15,  sunTo: 60,  adjustment: 15/60,  sourcePhrase: 'מחצי טלה עד תחילת תאומים (+15ʹ)' },
+    { sunFrom: 60,  sunTo: 120, adjustment: 15/60,  sourcePhrase: 'מתחילת תאומים עד תחילת אריה (+15ʹ)' },
+    { sunFrom: 120, sunTo: 165, adjustment: 15/60,  sourcePhrase: 'מתחילת אריה עד חצי בתולה (+15ʹ)' },
+    { sunFrom: 165, sunTo: 195, adjustment: 0,      sourcePhrase: 'מחצי בתולה עד חצי מאזנים (no change)' },
+    { sunFrom: 195, sunTo: 240, adjustment: -15/60, sourcePhrase: 'מחצי מאזנים עד תחילת קשת (-15ʹ)' },
+    { sunFrom: 240, sunTo: 300, adjustment: -30/60, sourcePhrase: 'מתחילת קשת עד תחילת דלי (-30ʹ)' },
+    { sunFrom: 300, sunTo: 345, adjustment: -15/60, sourcePhrase: 'מתחילת דלי עד חצי דגים (-15ʹ)' },
   ],
 };
 

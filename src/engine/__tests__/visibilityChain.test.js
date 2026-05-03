@@ -199,6 +199,47 @@ describe('KH 17:14 interpretive choice — SETTING_TIME keys on moon\'s mazal, N
   });
 });
 
+describe('KH 14:5 season-correction table — verbatim Sefaria reading (issue #19)', () => {
+  // Source text in `docs/sources/KH_14_verbatim.md`. Tests pin the
+  // boundary of every band to verbatim-stated values and guard against
+  // accidental reversion to the prior unverified table (which had +30'
+  // at 60°-90° on the additive side).
+  it('has +15ʹ uniformly from 15° through 165° (no +30ʹ band on the additive side)', async () => {
+    const mod = await import('../moonCalculations.js');
+    for (const lon of [16, 30, 59, 60, 89, 90, 119, 120, 164]) {
+      const s = mod.calculateSeasonCorrection(lon);
+      const arcmin = Math.round(s.result * 60);
+      expect(arcmin, `sun=${lon}° expected +15ʹ got ${arcmin}ʹ`).toBe(15);
+    }
+  });
+
+  it('has the asymmetric -30ʹ band only at 240°-300° (start קשת → start דלי)', async () => {
+    const mod = await import('../moonCalculations.js');
+    for (const lon of [241, 270, 299]) {
+      const s = mod.calculateSeasonCorrection(lon);
+      const arcmin = Math.round(s.result * 60);
+      expect(arcmin, `sun=${lon}° expected -30ʹ got ${arcmin}ʹ`).toBe(-30);
+    }
+    // -15ʹ flanking on both sides; bands are closed-open so the boundary
+    // longitude itself belongs to the next band.
+    expect(Math.round((await mod.calculateSeasonCorrection(239)).result * 60)).toBe(-15);
+    expect(Math.round((await mod.calculateSeasonCorrection(300)).result * 60)).toBe(-15); // 300° is start-Aquarius, opens the -15' band
+    expect(Math.round((await mod.calculateSeasonCorrection(301)).result * 60)).toBe(-15);
+  });
+
+  it('has zero-correction bands at the equinoxes', async () => {
+    const mod = await import('../moonCalculations.js');
+    for (const lon of [0, 14, 346, 359]) {  // mid-Pisces → mid-Aries
+      const s = mod.calculateSeasonCorrection(lon);
+      expect(Math.round(s.result * 60), `sun=${lon}° expected 0`).toBe(0);
+    }
+    for (const lon of [166, 180, 194]) {  // mid-Virgo → mid-Libra
+      const s = mod.calculateSeasonCorrection(lon);
+      expect(Math.round(s.result * 60), `sun=${lon}° expected 0`).toBe(0);
+    }
+  });
+});
+
 describe('KH 17 verdict gates — early-exit cuts (KH 17:3-4)', () => {
   it('Capricorn-Gemini half: אורך ראשון ≤ 9° → not-visible (KH 17:3)', () => {
     const verdict = determineVisibility({
