@@ -2,9 +2,9 @@
 
 > **STATUS 2026-05-03**
 >
-> **Code on `main`:** all changes shipped (5 commits, 4b7fa4b → 4d62cee). Tests 70/70 green. Issues #18 and #19 closed.
+> **Code on `main`:** all changes shipped (6 commits, 4b7fa4b → 1ca8e66). Tests 70/70 green. Issues #18 and #19 closed.
 >
-> **Live deploy at https://www.shluchimexchange.ai/kh/:** ⚠ **NOT YET REFLECTING THE FIX as of 16:27 UTC.** The live bundle hash is `index-DLLFCNmC.js` and grepping it for `orechSheni` / `keshetHaReiyah` returns 0. Either Netlify's auto-deploy hasn't run for the recent commits, the build failed silently, or Vercel is serving a stale cache. **Check the Netlify dashboard before forwarding the reply.** A manual deploy trigger or a cache purge on the Vercel proxy may be needed.
+> **Live deploy at https://www.shluchimexchange.ai/kh/:** ✓ **LIVE.** Verified 2026-05-03 ~16:35 UTC — Netlify pushed the new build (`pipeline-CitC3-w8.js` chunk contains the new chain symbols, served correctly through both the Netlify direct URL and the Vercel proxy). My earlier "not live" check was misleading: the new code lives in a dynamically-imported pipeline chunk, not in the statically-referenced `index-*.js`, so a grep of the index bundle gave 0 matches even though the deploy was current. To verify in a browser: load the URL, scrub to 18 May 2026, and you should see the seven-step KH 17 chain in the Visibility panel and a "ודאי יראה" verdict.
 >
 > **What was changed (summary):**
 > - Engine: full KH 17:5-22 chain — six new functions, five new constants tables, all keyed to verbatim Sefaria source (`docs/sources/KH_17_verbatim.md`).
