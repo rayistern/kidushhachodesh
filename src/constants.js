@@ -85,8 +85,10 @@ export const CONSTANTS = {
     START_CONSTELLATION: 0, // Aries
     APOGEE_START: { degrees: 26, minutes: 45, seconds: 8 },
     APOGEE_CONSTELLATION: 2, // Gemini
-    APOGEE_MOTION_PER_DAY: 1.5 / 3600, // 1.5 seconds per day
-    APOGEE_MOTION_PER_DAY_ARCSEC: 1.5,
+    // KH 12:2 — "1.5 sheniot PER 10 DAYS" = 0.15"/day. Synced with
+    // src/engine/constants.js per issue #15 (was 1.5"/day, 10× too fast).
+    APOGEE_MOTION_PER_DAY: 0.15 / 3600,
+    APOGEE_MOTION_PER_DAY_ARCSEC: 0.15,
     
     // Epicycle data (galgal katan)
     EPICYCLE: {
@@ -101,13 +103,15 @@ export const CONSTANTS = {
   },
   
   MOON: {
-    // 13° 10′ 35 4⁄30″  – Rambam KH 11:7
-    MEAN_MOTION_PER_DAY: { degrees: 13, minutes: 10, seconds: 35.133 },
+    // 13° 10′ 35″ – Rambam KH 14:1 (his 10-day table of 131°45'50" implies this rate).
+    // Synced with src/engine/constants.js per issue #15 (was 35.133, undocumented deviation).
+    MEAN_MOTION_PER_DAY: { degrees: 13, minutes: 10, seconds: 35 },
     // KH 14:4 — mean longitude at the epoch is 1°14'43" in Taurus.
     START_POSITION: { degrees: 1, minutes: 14, seconds: 43 },
     START_CONSTELLATION: 1, // Taurus
-    // 13° 3′ 53⅓″
-    MASLUL_MEAN_MOTION: { degrees: 13, minutes: 3, seconds: 53.333 },
+    // 13° 3′ 54″ – Rambam KH 14:3 ("י"ג מַעֲלוֹת וּשְׁלֹשָׁה חֲלָקִים וְנ"ד שְׁנִיּוֹת").
+    // Synced with src/engine/constants.js per issue #15 (was 53.333, undocumented deviation).
+    MASLUL_MEAN_MOTION: { degrees: 13, minutes: 3, seconds: 54 },
     MASLUL_START: { degrees: 84, minutes: 28, seconds: 42 },
     
     // Moon's galgalim (celestial spheres) parameters

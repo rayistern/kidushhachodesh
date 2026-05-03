@@ -220,8 +220,8 @@ export const CONSTANTS = {
       },
       GALGAL_KATAN: {
         description: "The small epicycle — moon sits on its edge, 5° radius",
-        // [R] KH 14:2 — moves 13° 3' 53.33" per day
-        DAILY_MOTION: 13 + 3 / 60 + 53.333 / 3600,
+        // [R] KH 14:3 — moves 13° 3' 54" per day (matches MOON.MASLUL_MEAN_MOTION)
+        DAILY_MOTION: 13 + 3 / 60 + 54 / 3600,
         // [R] KH 15:9 — diameter is 10°, so radius is 5° (the Rambam writes 5°5' from our perspective)
         RADIUS_DEGREES: 5,
         color: '#dddd44',
