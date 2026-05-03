@@ -9,6 +9,7 @@
 
 # claude code
 .a5c/
+.claude/
 
 # env files
 .env

@@ -32,8 +32,14 @@ import {
 } from './moonCalculations.js';
 import {
   calculateElongation,
-  calculateFirstVisibilityAngle,
+  calculateOrechSheni,
+  calculateRochavSheni,
+  calculateOrechShlishi,
+  calculateOrechRevii,
+  calculateMnatGovahHaMedinah,
+  calculateKeshetHaReiyah,
   determineVisibility,
+  calculateFirstVisibilityAngle,
   calculateSeasonalInfo,
 } from './visibilityCalculations.js';
 import { runFixedCalendarChain } from './fixedCalendar/index.js';
@@ -102,11 +108,25 @@ export function getFullCalculation(date) {
   // ── Step 11: Moon latitude — KH 16:9-10 ──
   const moonLat = calculateMoonLatitude(moonTrueLon.result, nodePos.result);
 
-  // ── Step 12: Visibility calculations ──
-  const elongation = calculateElongation(moonTrueLon.result, sunTrueLon.result);
-  const moonPhase = calculateMoonPhase(elongation.result);
-  const firstVisAngle = calculateFirstVisibilityAngle(elongation.result, moonLat.result);
-  const visibility = determineVisibility(firstVisAngle.result, elongation.result, moonLat.result);
+  // ── Step 12: Visibility chain — full Rambam KH 17 procedure ──
+  // Source text: docs/sources/KH_17_verbatim.md
+  // Test fixture: Rambam's own worked example for 2 Iyar (KH 17:13-14, 17:22).
+  const elongation     = calculateElongation(moonTrueLon.result, sunTrueLon.result);          // KH 17:1
+  const moonPhase      = calculateMoonPhase(elongation.result);
+  const orechSheni     = calculateOrechSheni(elongation.result, moonTrueLon.result);          // KH 17:5
+  const rochavSheni    = calculateRochavSheni(moonLat.result, moonTrueLon.result);            // KH 17:7-9
+  const orechShlishi   = calculateOrechShlishi(orechSheni.result, rochavSheni.result, moonTrueLon.result); // KH 17:10-11
+  const orechRevii     = calculateOrechRevii(orechShlishi.result, moonTrueLon.result);        // KH 17:12a
+  const mnatGovah      = calculateMnatGovahHaMedinah(moonLat.result);                         // KH 17:12b
+  const keshet         = calculateKeshetHaReiyah(orechRevii.result, mnatGovah.result, moonLat.result); // KH 17:12c
+  const visibility     = determineVisibility({                                                 // KH 17:3-4, 17:15-21
+    orechRishon: elongation.result,
+    keshetHaReiyah: keshet.result,
+    moonTrueLon: moonTrueLon.result,
+  });
+  // Heuristic firstVisAngle kept for one release as backward-compat;
+  // not used for the verdict.
+  const firstVisAngle  = calculateFirstVisibilityAngle(elongation.result, moonLat.result);
 
   // ── Step 13: Season info ──
   const season = calculateSeasonalInfo(days);
@@ -141,11 +161,17 @@ export function getFullCalculation(date) {
     moonTrueLon,
     nodePos,
     moonLat,
-    // --- Visibility ---
-    elongation,
+    // --- Visibility chain (KH 17 — full Rambam procedure) ---
+    elongation,        // KH 17:1
     moonPhase,
-    firstVisAngle,
-    visibility,
+    orechSheni,        // KH 17:5
+    rochavSheni,       // KH 17:7-9
+    orechShlishi,      // KH 17:10-11
+    orechRevii,        // KH 17:12a
+    mnatGovah,         // KH 17:12b
+    keshet,            // KH 17:12c
+    visibility,        // KH 17:3-4, 17:15-21
+    firstVisAngle,     // (deprecated heuristic, retained for compat)
     season,
     // --- Fixed calendar (KH 6-10 — separate regime) ---
     ...fixedCal.steps,
@@ -184,9 +210,17 @@ export function getFullCalculation(date) {
       constellation: getConstellation(moonTrueLon.result),
       phase: moonPhase.result,
       phaseHebrew: moonPhase.hebrewResult,
-      elongation: elongation.result,
-      firstVisibilityAngle: firstVisAngle.result,
-      isVisible: visibility.result,
+      elongation: elongation.result,                  // אורך ראשון (KH 17:1)
+      orechSheni: orechSheni.result,                  // KH 17:5
+      rochavSheni: rochavSheni.result,                // KH 17:7-9 (signed: + north / − south)
+      orechShlishi: orechShlishi.result,              // KH 17:10-11
+      orechRevii: orechRevii.result,                  // KH 17:12a
+      mnatGovahHaMedinah: mnatGovah.result,           // KH 17:12b (always positive)
+      keshetHaReiyah: keshet.result,                  // KH 17:12c — final arc
+      firstVisibilityAngle: firstVisAngle.result,     // deprecated heuristic
+      isVisible: visibility.result,                   // KH 17:3-4, 17:15-21 verdict
+      visibilityVerdict: visibility.verdict,          // 'visible' | 'not-visible'
+      visibilityPath: visibility.path,                // human-readable derivation
       illumination: (1 - Math.cos(elongation.result * Math.PI / 180)) / 2,
     },
 

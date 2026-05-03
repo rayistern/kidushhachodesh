@@ -433,10 +433,154 @@ export const CONSTANTS = {
   ],
 
   // ═══════════════════════════════════════════════════════════════
+  //  VISIBILITY CHAIN — KH 17 — full Rambam procedure
+  //  Source text quoted verbatim in docs/sources/KH_17_verbatim.md
+  //  (Sefaria pull, 2026-05-03). Each table is keyed by the mazal
+  //  (zodiacal sign / 30° band) of the relevant longitude as the
+  //  Rambam states it. Tables are reproduced cell-for-cell — no
+  //  smoothing, no closed-form fits — per docs/OPEN_QUESTIONS.md
+  //  and the project's primary-source-fidelity discipline.
+  // ═══════════════════════════════════════════════════════════════
+
+  // ─── KH 17:5 — שינוי המראה לאורך (parallax in longitude) ───
+  // Always SUBTRACTED from אורך ראשון. Keyed on the mazal (Aries=0,
+  // Taurus=1, …, Pisces=11) containing the moon's true longitude.
+  // Values in arc-minutes (חלקים).
+  // Bracketed alternative readings in Sefaria preserved here as comments;
+  // primary value uses the bracketed (corrected) reading where it appears.
+  PARALLAX_LON_BY_MAZAL: [
+    { mazalIdx: 0,  hebrew: 'טלה',     chalakim: 59 },         // Aries
+    { mazalIdx: 1,  hebrew: 'שור',     chalakim: 60 },         // Taurus — "מַעֲלָה אַחַת" = 60'
+    { mazalIdx: 2,  hebrew: 'תאומים',  chalakim: 58 },         // Gemini
+    { mazalIdx: 3,  hebrew: 'סרטן',    chalakim: 52, variant: 43 }, // Cancer (Sefaria bracketed [נ"ב]; mss מ"ג)
+    { mazalIdx: 4,  hebrew: 'אריה',    chalakim: 43 },         // Leo
+    { mazalIdx: 5,  hebrew: 'בתולה',   chalakim: 37 },         // Virgo
+    { mazalIdx: 6,  hebrew: 'מאזנים',  chalakim: 34 },         // Libra
+    { mazalIdx: 7,  hebrew: 'עקרב',    chalakim: 34 },         // Scorpio
+    { mazalIdx: 8,  hebrew: 'קשת',     chalakim: 36 },         // Sagittarius
+    { mazalIdx: 9,  hebrew: 'גדי',     chalakim: 44 },         // Capricorn
+    { mazalIdx: 10, hebrew: 'דלי',     chalakim: 53 },         // Aquarius
+    { mazalIdx: 11, hebrew: 'דגים',    chalakim: 58 },         // Pisces
+  ],
+
+  // ─── KH 17:8 — שינוי המראה לרוחב (parallax in latitude) ───
+  // Sign rule (KH 17:7): רוחב צפוני → SUBTRACT chalakim from רוחב ראשון;
+  //                      רוחב דרומי → ADD chalakim to רוחב ראשון.
+  // Result = רוחב שני. Values in arc-minutes (חלקים).
+  PARALLAX_LAT_BY_MAZAL: [
+    { mazalIdx: 0,  hebrew: 'טלה',     chalakim: 9  },
+    { mazalIdx: 1,  hebrew: 'שור',     chalakim: 10 },
+    { mazalIdx: 2,  hebrew: 'תאומים',  chalakim: 16 },
+    { mazalIdx: 3,  hebrew: 'סרטן',    chalakim: 27 },
+    { mazalIdx: 4,  hebrew: 'אריה',    chalakim: 38 },
+    { mazalIdx: 5,  hebrew: 'בתולה',   chalakim: 44 },
+    { mazalIdx: 6,  hebrew: 'מאזנים',  chalakim: 46 },
+    { mazalIdx: 7,  hebrew: 'עקרב',    chalakim: 45 },
+    { mazalIdx: 8,  hebrew: 'קשת',     chalakim: 44 },
+    { mazalIdx: 9,  hebrew: 'גדי',     chalakim: 36 },
+    { mazalIdx: 10, hebrew: 'דלי',     chalakim: 27, variant: 24 }, // Sefaria bracketed [כ"ז]; mss כ"ד
+    { mazalIdx: 11, hebrew: 'דגים',    chalakim: 12 },
+  ],
+
+  // ─── KH 17:10 — מעגל הירח (galgal correction) ───
+  // Take this fraction of רוחב שני. Keyed by absolute longitude bands;
+  // the Rambam pairs symmetric ranges (Aries↔Libra, etc.). Bands are
+  // closed-open: lon ∈ [from, to). Sign of result is determined by KH 17:11.
+  // The "no נליזת מעגל" zero band straddles the solstices — if hit, the
+  // chain skips the מעגל step (אורך שלישי = אורך שני).
+  MOON_CIRCLE_FRACTIONS: [
+    // [from°, to°)              fraction          source-phrase
+    { from: 0,   to: 20,  fraction: 2/5,  phrase: 'שני חמישיותיו' }, // 0° טלה – 20°
+    { from: 20,  to: 40,  fraction: 1/3,  phrase: 'שלישיתו' },     // 20° טלה – 10° שור
+    { from: 40,  to: 50,  fraction: 1/4,  phrase: 'רביעיתו' },     // 10°-20° שור
+    { from: 50,  to: 60,  fraction: 1/5,  phrase: 'חמישיתו' },     // 20°-30° שור
+    { from: 60,  to: 70,  fraction: 1/6,  phrase: 'שתותו' },       // 0°-10° תאומים
+    { from: 70,  to: 80,  fraction: 1/12, phrase: 'חצי שתותו' },   // 10°-20° תאומים
+    { from: 80,  to: 85,  fraction: 1/24, phrase: 'רבע שתותו' },   // 20°-25° תאומים
+    { from: 85,  to: 95,  fraction: 0,    phrase: 'אין נליזת מעגל' }, // 25° תאומים – 5° סרטן
+    { from: 95,  to: 100, fraction: 1/24, phrase: 'רבע שתותו' },   // 5°-10° סרטן
+    { from: 100, to: 110, fraction: 1/12, phrase: 'חצי שתותו' },   // 10°-20° סרטן
+    { from: 110, to: 120, fraction: 1/6,  phrase: 'שתותו' },       // 20°-30° סרטן
+    { from: 120, to: 130, fraction: 1/5,  phrase: 'חמישיתו' },     // 0°-10° אריה
+    { from: 130, to: 140, fraction: 1/4,  phrase: 'רביעיתו' },     // 10°-20° אריה
+    { from: 140, to: 160, fraction: 1/3,  phrase: 'שלישיתו' },     // 20° אריה – 10° בתולה
+    { from: 160, to: 180, fraction: 2/5,  phrase: 'שני חמישיותיו' }, // 10°-30° בתולה
+    // ─ symmetric Libra-half (180°-360°) repeats the pattern ─
+    { from: 180, to: 200, fraction: 2/5,  phrase: 'שני חמישיותיו' }, // 0°-20° מאזנים
+    { from: 200, to: 220, fraction: 1/3,  phrase: 'שלישיתו' },     // 20° מאזנים – 10° עקרב
+    { from: 220, to: 230, fraction: 1/4,  phrase: 'רביעיתו' },     // 10°-20° עקרב
+    { from: 230, to: 240, fraction: 1/5,  phrase: 'חמישיתו' },     // 20°-30° עקרב
+    { from: 240, to: 250, fraction: 1/6,  phrase: 'שתותו' },       // 0°-10° קשת
+    { from: 250, to: 260, fraction: 1/12, phrase: 'חצי שתותו' },   // 10°-20° קשת
+    { from: 260, to: 265, fraction: 1/24, phrase: 'רבע שתותו' },   // 20°-25° קשת
+    { from: 265, to: 275, fraction: 0,    phrase: 'אין נליזת מעגל' }, // 25° קשת – 5° גדי
+    { from: 275, to: 280, fraction: 1/24, phrase: 'רבע שתותו' },   // 5°-10° גדי
+    { from: 280, to: 290, fraction: 1/12, phrase: 'חצי שתותו' },   // 10°-20° גדי
+    { from: 290, to: 300, fraction: 1/6,  phrase: 'שתותו' },       // 20°-30° גדי
+    { from: 300, to: 310, fraction: 1/5,  phrase: 'חמישיתו' },     // 0°-10° דלי
+    { from: 310, to: 320, fraction: 1/4,  phrase: 'רביעיתו' },     // 10°-20° דלי
+    { from: 320, to: 340, fraction: 1/3,  phrase: 'שלישיתו' },     // 20° דלי – 10° דגים
+    { from: 340, to: 360, fraction: 2/5,  phrase: 'שני חמישיותיו' }, // 10°-30° דגים
+  ],
+
+  // ─── KH 17:12 — מנת ארוכי וקצרי שקיעה (long/short setting correction) ───
+  // Applied to אורך שלישי. Keyed by the mazal of אורך שלישי itself.
+  // operation ∈ {'add','subtract','none'}; fraction is what to add/subtract.
+  SETTING_TIME_BY_MAZAL: [
+    { mazalIdx: 0,  hebrew: 'טלה',    operation: 'add',      fraction: 1/6, phrase: 'שתותו' },     // Aries
+    { mazalIdx: 1,  hebrew: 'שור',    operation: 'add',      fraction: 1/5, phrase: 'חמישיתו' },   // Taurus
+    { mazalIdx: 2,  hebrew: 'תאומים', operation: 'add',      fraction: 1/6, phrase: 'שתותו' },     // Gemini
+    { mazalIdx: 3,  hebrew: 'סרטן',   operation: 'none',     fraction: 0,   phrase: 'תניח כמות שהוא' }, // Cancer
+    { mazalIdx: 4,  hebrew: 'אריה',   operation: 'subtract', fraction: 1/5, phrase: 'חמישיתו' },   // Leo
+    { mazalIdx: 5,  hebrew: 'בתולה',  operation: 'subtract', fraction: 1/3, phrase: 'שלישיתו' },   // Virgo
+    { mazalIdx: 6,  hebrew: 'מאזנים', operation: 'subtract', fraction: 1/3, phrase: 'שלישיתו' },   // Libra
+    { mazalIdx: 7,  hebrew: 'עקרב',   operation: 'subtract', fraction: 1/5, phrase: 'חמישיתו' },   // Scorpio
+    { mazalIdx: 8,  hebrew: 'קשת',    operation: 'none',     fraction: 0,   phrase: 'תניח כמות שהוא' }, // Sagittarius
+    { mazalIdx: 9,  hebrew: 'גדי',    operation: 'add',      fraction: 1/6, phrase: 'שתותו' },     // Capricorn
+    { mazalIdx: 10, hebrew: 'דלי',    operation: 'add',      fraction: 1/5, phrase: 'חמישיתו' },   // Aquarius
+    { mazalIdx: 11, hebrew: 'דגים',   operation: 'add',      fraction: 1/6, phrase: 'שתותו' },     // Pisces
+  ],
+
+  // ─── KH 17:13 — מנת גובה המדינה ───
+  // Always 2/3 of רוחב ראשון. The Rambam fixes this for ארץ ישראל;
+  // a future generalization could parameterize by latitude. Kept as a
+  // single constant to match the source text.
+  GEOGRAPHIC_HEIGHT_FRACTION_OF_ROCHAV_RISHON: 2 / 3,
+
+  // ─── KH 17:15-21 — קיצי הראיה (visibility outcome thresholds) ───
+  // After קשת הראיה is computed:
+  //   ≤ 9°  → not visible (KH 17:15 — variant readings; we use "not visible")
+  //   > 14° → certainly visible (KH 17:15)
+  //   9° < קשת ≤ 14° → look up in KITZEI_HAREIYAH_TABLE below.
+  // Each row: kashtUpTo = upper end (inclusive) of the קשת band;
+  //           orechMin = the minimum אורך ראשון required for "ודאי יראה".
+  KITZEI_HAREIYAH_TABLE: [
+    { kashtFromExclusive: 9,  kashtUpTo: 10, orechMin: 13 }, // KH 17:17
+    { kashtFromExclusive: 10, kashtUpTo: 11, orechMin: 12 }, // KH 17:18
+    { kashtFromExclusive: 11, kashtUpTo: 12, orechMin: 11 }, // KH 17:19
+    { kashtFromExclusive: 12, kashtUpTo: 13, orechMin: 10 }, // KH 17:20
+    { kashtFromExclusive: 13, kashtUpTo: 14, orechMin:  9 }, // KH 17:21
+  ],
+
+  // ─── KH 17:3-4 — early-exit thresholds based on אורך ראשון alone ───
+  // capricornGemini: moon true longitude ∈ [270, 360) ∪ [0, 90)  (Capricorn–Gemini half)
+  // cancerSagittarius: moon true longitude ∈ [90, 270)            (Cancer–Sagittarius half)
+  EARLY_EXIT_THRESHOLDS: {
+    capricornGemini:   { invisibleMax: 9,  visibleMin: 15, source: 'KH 17:3' },
+    cancerSagittarius: { invisibleMax: 10, visibleMin: 24, source: 'KH 17:4' },
+  },
+
+  // ═══════════════════════════════════════════════════════════════
   //  SEASON CORRECTION — [R] KH 14:5
   //  Adjusts the moon's mean longitude for the time difference between
   //  6:00 PM and actual sunset. The moon moves ~½° per hour, so if
   //  sunset is later (summer), the moon has moved further.
+  //
+  //  ⚠ KH 14:5 has multiple variant readings across editions —
+  //  Sefaria, Frankel, Vilna, Yemenite mss, Rabbi Losh's tradition all
+  //  differ on the +30' band placement. Tracked separately as issue #19.
+  //  Current table reflects Rabbi Losh's reading; do not edit without
+  //  resolving #19 against primary sources.
   // ═══════════════════════════════════════════════════════════════
   SEASON_CORRECTIONS: [
     // { sunFrom: degrees, sunTo: degrees, adjustment: chalakim }
