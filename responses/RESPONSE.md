@@ -1,6 +1,24 @@
 # Response to user — ב' סיון ה'תשפו visibility report
 
-> **UPDATE 2026-05-03 (after fix):** the engine now runs the full Rambam KH 17 chain (issue [#18](https://github.com/rayistern/kidushhachodesh/issues/18) closed). The verdict for ב' סיון ה'תשפו correctly returns **ודאי יראה** — קשת הראיה ≈ 15°15' (above the 14° cutoff per KH 17:15). All seven intermediate values appear in the engine output and the UI drill-down. The KH 14:5 season-correction table was also switched to Sefaria's verbatim reading (issue [#19](https://github.com/rayistern/kidushhachodesh/issues/19) resolved); for the user's 2 Sivan date this doesn't change the verdict (sun at 57° lands in the +15' zone under both readings) but it does clean up an unverified `[R]` tag from the original codebase. The user's worksheet uses a third reading (+30' for late Taurus) — flagged for him; if he prefers his tradition we can flip back or expose a selector. Original diagnosis below.
+> **STATUS 2026-05-03**
+>
+> **Code on `main`:** all changes shipped (5 commits, 4b7fa4b → 4d62cee). Tests 70/70 green. Issues #18 and #19 closed.
+>
+> **Live deploy at https://www.shluchimexchange.ai/kh/:** ⚠ **NOT YET REFLECTING THE FIX as of 16:27 UTC.** The live bundle hash is `index-DLLFCNmC.js` and grepping it for `orechSheni` / `keshetHaReiyah` returns 0. Either Netlify's auto-deploy hasn't run for the recent commits, the build failed silently, or Vercel is serving a stale cache. **Check the Netlify dashboard before forwarding the reply.** A manual deploy trigger or a cache purge on the Vercel proxy may be needed.
+>
+> **What was changed (summary):**
+> - Engine: full KH 17:5-22 chain — six new functions, five new constants tables, all keyed to verbatim Sefaria source (`docs/sources/KH_17_verbatim.md`).
+> - Engine: KH 14:5 season-correction table switched from the unverified prior reading to Sefaria's verbatim text (`docs/sources/KH_14_verbatim.md`). User's worksheet uses a third reading — flagged for him in the reply.
+> - UI: `VisibilityHorizon.jsx` now shows the seven-step chain with rambam citations.
+> - Tests: 17 new tests in `src/engine/__tests__/visibilityChain.test.js`. Two anchored on the Rambam's own KH 17:13-14 worked example, three on the user's 2 Sivan worksheet, three pinning the KH 14:5 boundaries, two isolating the KH 17:14 mazal-of-moon interpretive call, four on the KH 17:3-4 early-exit gates.
+> - Docs: `docs/CALCULATIONS.md` gains a new "Visibility Chain (KH 17)" section; `docs/OPEN_QUESTIONS.md` gains Q8 (KH 14:5 — resolved) and Q9 (KH 17:15 textual variant — annotated).
+>
+> **What's NOT done:**
+> - Live deploy hasn't propagated. **Action needed: check Netlify dashboard.**
+> - User input still wanted: which KH 14:5 tradition does the reporting user follow? The reply asks him.
+> - The published `templates/node-cli.mjs` references `https://kidushhachodesh.netlify.app/engine/pipeline.js`, which returns 404. That URL was never live (the Netlify subdomain doesn't serve content; the public URL is `shluchimexchange.ai/kh/`). Separate small bug — not blocking.
+>
+> Original diagnosis below (preserved for the audit trail).
 
 ---
 
@@ -75,40 +93,44 @@ So for any month where the raw elongation lands between roughly 9° and 14° —
 
 ---
 
-## Suggested reply (Hebrew) — UPDATED 2026-05-03 after the fix shipped
+## Suggested reply (Hebrew) — UPDATED 2026-05-03
 
 > תודה רבה על הדיווח המפורט והגיליון — צדקת לחלוטין, ותיקנו את זה.
 >
-> המנוע אכן עצר ב‑**אורך ראשון** והחיל סף heuristic של "> 12°", במקום להריץ את השרשרת המלאה של פרק י"ז. תיקנו זאת באתר היום: כעת הוא מריץ את כל שבעת השלבים של הרמב"ם — אורך שני (KH 17:5), רוחב שני (17:7-9), מעגל הירח (17:10-11), אורך שלישי, אורך רביעי (17:12), מנת גובה המדינה, וקשת הראיה — ואז משווה לקיצי הראיה (KH 17:16-21).
+> המנוע אכן עצר ב‑**אורך ראשון** והחיל סף heuristic של "> 12°", במקום להריץ את השרשרת המלאה של פרק י"ז. תיקנו זאת: כעת המנוע מריץ את כל שבעת השלבים של הרמב"ם — אורך שני (KH 17:5), רוחב שני (17:7-9), מעגל הירח (17:10-11), אורך שלישי, אורך רביעי (17:12), מנת גובה המדינה, וקשת הראיה — ואז משווה לקיצי הראיה (KH 17:16-21).
 >
-> עבור ב' סיון ה'תשפו, התוצאה החדשה: **קשת הראיה ≈ 15°15' → ודאי יראה** (KH 17:15: > 14°). גמרנו עם המסקנה השגויה.
+> עבור ב' סיון ה'תשפו, התוצאה החדשה: **קשת הראיה ≈ 15°15' → ודאי יראה** (KH 17:15: > 14°). המסקנה השגויה כבר לא קיימת.
 >
-> הקוד מאומת מול שני fixtures: (א) הדוגמא הסדורה של הרמב"ם בעצמו ב‑KH 17:13-14 (ב' אייר של "שנה זו") — תואם ספרה‑אחר‑ספרה לתוך ±1' (תוך כיבוד "אֵין מְדַקְדְּקִין בִּשְׁנִיּוֹת"); (ב) הגיליון שלך עצמך, שמראה כעת ודאי יראה. הפער שנשאר ביננו (~15') בערכי הביניים נובע מסוגיית KH 14:5 — קרי המקום המדויק שמתחיל לפיו ה‑+30' של התיקון לשעת הראיה. סוגיה זו עדיין פתוחה (#19), ויש בה לפחות שלוש קריאות מסורתיות שונות; היא לא משפיעה על הפסק לב' סיון, אבל היא חשובה לחודשי גבול אחרים.
+> הקוד מאומת מול שני fixtures: (א) הדוגמא הסדורה של הרמב"ם בעצמו ב‑KH 17:13-14 (ב' אייר של "שנה זו") — תואם ספרה‑אחר‑ספרה לתוך ±1' (תוך כיבוד "אֵין מְדַקְדְּקִין בִּשְׁנִיּוֹת"); (ב) הגיליון שלך עצמך, שמראה כעת ודאי יראה.
+>
+> בנוסף — מצאנו שטבלת KH 14:5 (התיקון לשעת הראיה) ששימשה את המנוע הייתה לא מאומתת מול המקור. עברנו לקריאה הוורבטים של ספריא — שמראה +15' רציף ממחצי טלה (15°) עד חצי בתולה (165°), ללא רצועת +30' בצד החיובי. אצלך ראינו +30' לשמש בסוף שור (~57°) — שזו קריאה שלישית, שונה משלנו ומספריא. אם יש לך מסורת ספציפית (פרנקל? תימני? מסורת אחרת?) שתרצה שנעבור אליה, ספר לנו ונחזור או נחשוף בורר. כיום ספריא היא המקור הקובע במנוע. (לב' סיון התוצאה זהה בשני הקריאות.)
 >
 > קבצים בגיט (פתוח לכל):
 > • הקובץ הוורבטים של פרק י"ז: [`docs/sources/KH_17_verbatim.md`](https://github.com/rayistern/kidushhachodesh/blob/main/docs/sources/KH_17_verbatim.md)
-> • התיעוד של השרשרת: [`docs/CALCULATIONS.md`](https://github.com/rayistern/kidushhachodesh/blob/main/docs/CALCULATIONS.md) ("Visibility Chain (KH 17)")
-> • Issue #18 שנסגר: https://github.com/rayistern/kidushhachodesh/issues/18
-> • Issue #19 הפתוח על KH 14:5: https://github.com/rayistern/kidushhachodesh/issues/19
+> • הקובץ הוורבטים של פרק י"ד: [`docs/sources/KH_14_verbatim.md`](https://github.com/rayistern/kidushhachodesh/blob/main/docs/sources/KH_14_verbatim.md)
+> • התיעוד של השרשרת: [`docs/CALCULATIONS.md`](https://github.com/rayistern/kidushhachodesh/blob/main/docs/CALCULATIONS.md)
+> • Issues שנסגרו: [#18](https://github.com/rayistern/kidushhachodesh/issues/18) (פרק י"ז), [#19](https://github.com/rayistern/kidushhachodesh/issues/19) (פרק י"ד:ה')
 > • הקובץ אקסל המעודכן: [`responses/our_numbers_2_sivan_5786.xlsx`](https://github.com/rayistern/kidushhachodesh/raw/main/responses/our_numbers_2_sivan_5786.xlsx)
 >
-> אם יש לך עוד הערות, או אם יש לך קריאה מועדפת ל‑KH 14:5 (Frankel? תימני? מסורת אחרת?) שתרצה שנכלול — נשמח לדעת. הגיליון שלך הפך ל‑test fixture קבוע במאגר.
+> הגיליון שלך הפך ל‑test fixture קבוע במאגר. תודה רבה!
 
-## Suggested reply (English) — UPDATED 2026-05-03 after the fix shipped
+## Suggested reply (English) — UPDATED 2026-05-03
 
 > Thank you for the detailed report and worksheet — you were entirely right, and we've fixed it.
 >
-> The engine was indeed stopping at **אורך ראשון** with a heuristic `> 12°` cutoff instead of running the Rambam's full chapter-17 chain. We fixed that today: it now runs all seven steps the Rambam specifies — אורך שני (KH 17:5), רוחב שני (17:7-9), מעגל הירח (17:10-11), אורך שלישי, אורך רביעי (17:12), מנת גובה המדינה, and קשת הראיה — then compares against the קיצי הראיה table (KH 17:16-21).
+> The engine was indeed stopping at **אורך ראשון** with a heuristic `> 12°` cutoff instead of running the Rambam's full chapter-17 chain. It now runs all seven steps the Rambam specifies — אורך שני (KH 17:5), רוחב שני (17:7-9), מעגל הירח (17:10-11), אורך שלישי, אורך רביעי (17:12), מנת גובה המדינה, and קשת הראיה — then compares against the קיצי הראיה table (KH 17:16-21).
 >
 > For ב' סיון ה'תשפו the new verdict is: **קשת הראיה ≈ 15°15' → ודאי יראה** (KH 17:15: > 14°). The wrong call is gone.
 >
-> The code is anchored on two fixtures: (a) the Rambam's own worked example in KH 17:13-14 (2 Iyar of "this year") — every step matches the Rambam's stated values to within ±1' (honoring his own "אֵין מְדַקְדְּקִין בִּשְׁנִיּוֹת"); and (b) your own worksheet, which now also lands on ודאי יראה. The remaining ~15' delta in the intermediate values traces to the KH 14:5 boundary question (issue #19) — at least three traditional readings exist for where the +30' band of the season correction starts; we want a primary‑source review before flipping. It doesn't affect the 2 Sivan verdict but matters for borderline months.
+> The code is anchored on two fixtures: (a) the Rambam's own worked example in KH 17:13-14 (2 Iyar of "this year") — every step matches the Rambam's stated values to within ±1' (honoring his own "אֵין מְדַקְדְּקִין בִּשְׁנִיּוֹת"); and (b) your own worksheet, which now also lands on ודאי יראה.
+>
+> One more change worth flagging: while investigating, we noticed our KH 14:5 season-correction table had never been verified against primary source. We pulled the verbatim Sefaria text and switched to that reading — `+15'` continuously from mid-Aries (15°) through mid-Virgo (165°), with no `+30'` band on the additive side, and the asymmetric `-30'` band only at start-Sagittarius → start-Aquarius (240°-300°). Your worksheet uses a third reading (you have `+30'` for sun in late Taurus, ~57°) — neither matching ours nor Sefaria. If you're following a specific tradition (Frankel? Yemenite? something else?) we'd love to know; we can either switch to it or expose a per-tradition selector. For ב' סיון the verdict is the same under both readings.
 >
 > Public links:
 > • Verbatim source text of KH 17: [`docs/sources/KH_17_verbatim.md`](https://github.com/rayistern/kidushhachodesh/blob/main/docs/sources/KH_17_verbatim.md)
-> • Documentation of the chain: [`docs/CALCULATIONS.md`](https://github.com/rayistern/kidushhachodesh/blob/main/docs/CALCULATIONS.md) (section "Visibility Chain (KH 17)")
-> • Closed issue #18: https://github.com/rayistern/kidushhachodesh/issues/18
-> • Open issue #19 (KH 14:5): https://github.com/rayistern/kidushhachodesh/issues/19
+> • Verbatim source text of KH 14: [`docs/sources/KH_14_verbatim.md`](https://github.com/rayistern/kidushhachodesh/blob/main/docs/sources/KH_14_verbatim.md)
+> • Documentation of the chain: [`docs/CALCULATIONS.md`](https://github.com/rayistern/kidushhachodesh/blob/main/docs/CALCULATIONS.md)
+> • Closed issues: [#18](https://github.com/rayistern/kidushhachodesh/issues/18) (KH 17 chain) + [#19](https://github.com/rayistern/kidushhachodesh/issues/19) (KH 14:5)
 > • Updated Excel comparison: [`responses/our_numbers_2_sivan_5786.xlsx`](https://github.com/rayistern/kidushhachodesh/raw/main/responses/our_numbers_2_sivan_5786.xlsx)
 >
-> If you have a preferred KH 14:5 reading you'd like us to use (Frankel? Yemenite manuscript? a particular printed edition?), let us know — your worksheet has become a permanent test fixture in the repo.
+> Your worksheet is now a permanent test fixture in the repo. Much appreciated.
