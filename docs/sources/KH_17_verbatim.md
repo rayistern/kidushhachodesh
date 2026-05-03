@@ -155,7 +155,13 @@ Fraction by moon position (the symmetric pairs Aries↔Libra, Taurus↔Scorpio, 
 ### 17:15 — outcome thresholds
 > וְאַחַר שֶׁתֵּצֵא קֶשֶׁת זוֹ … אִם תִּהְיֶה קֶשֶׁת הָרְאִיָּה תֵּשַׁע מַעֲלוֹת אוֹ פָּחוֹת אָז אֶפְשָׁר שֶׁיֵּרָאֶה בְּכָל אֶרֶץ יִשְׂרָאֵל. וְאִם תִּהְיֶה קֶשֶׁת הָרְאִיָּה יֶתֶר עַל י"ד מַעֲלוֹת אִי אֶפְשָׁר שֶׁלֹּא יֵרָאֶה וְיִהְיֶה גָּלוּי לְכָל אֶרֶץ יִשְׂרָאֵל.
 
-> *Note:* The text says "ט' מעלות או פחות אז אֶפְשָׁר שֶׁיֵּרָאֶה" — "9° or less, then it is **possible** that it could be visible." This contrasts with the certain-not-visible early-exit at 17:3-4. Some manuscripts read "אי אפשר שייראה" (impossible) — Sefaria's reading goes with "אֶפְשָׁר" but in context (and consistent with 17:3) most halachic editions interpret as "impossible to see"; either way, the operative rule is: ≤9 is below the certain-visibility threshold, >14 is above the certain-non-visibility threshold; the 9–14 range is the indeterminate band where 17:16-21 (קיצי הראיה) decide.
+> *Textual issue.* Sefaria's printed text reads `אֶפְשָׁר שֶׁיֵּרָאֶה` ("it is possible that it will be seen") for the ≤ 9° case. This is **internally inconsistent** with the chapter's own logic:
+>
+> - 17:3 (Capricorn-Gemini half) and 17:4 (Cancer-Sagittarius half) both use the language `אִי אֶפְשָׁר לְעוֹלָם שֶׁיֵּרָאֶה` ("never possible to be seen") for low-elongation cases — the קשת case at 17:15 should mirror that structure.
+> - The קיצי הראיה table (17:17-21) only covers the (9°, 14°] range — leaving no procedure for ≤ 9° if it really were "possible." The text demands a definite verdict at ≤ 9° to make the chapter complete.
+> - The Lechem Mishneh and Kessef Mishneh commentaries both read this passage as "אי אפשר שייראה" (impossible to be seen).
+>
+> Standard halachic editions (Vilna, Frankel, etc.) preserve the "אִי אֶפְשָׁר" reading. The Sefaria text almost certainly suffered from a dropped אִי during transmission. Our implementation follows the standard halachic reading: **≤ 9° → not visible**. Documented as Q9 in `docs/OPEN_QUESTIONS.md`.
 
 ### 17:16 — קיצי הראיה procedure
 > וְאִם תִּהְיֶה קֶשֶׁת הָרְאִיָּה מִתְּחִלַּת מַעֲלָה עֲשִׂירִית עַד סוֹף מַעֲלַת י"ד. תַּעֲרֹךְ קֶשֶׁת הָרְאִיָּה אֶל הָאֹרֶךְ הָרִאשׁוֹן וְתֵדַע אִם יֵרָאֶה אוֹ לֹא יֵרָאֶה מִן הַקִּצִּין שֶׁיֵּשׁ לוֹ. וְהֵן הַנִּקְרָאִין קִצֵּי הָרְאִיָּה.

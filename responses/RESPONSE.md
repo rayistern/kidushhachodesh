@@ -75,26 +75,40 @@ So for any month where the raw elongation lands between roughly 9° and 14° —
 
 ---
 
-## Suggested reply (Hebrew)
+## Suggested reply (Hebrew) — UPDATED 2026-05-03 after the fix shipped
 
-> תודה רבה על הדיווח המפורט והגיליון. אתה צודק: האתר אצלנו אינו מבצע את שרשרת הראייה המלאה לפי הרמב"ם פרק י"ז (אורך שני/שלישי/רביעי, מעגל הירח, תיקון ארוכי וקצרי שקיעה, מנת גובה המדינה, וקשת הראיה). הוא עוצר ב**אורך ראשון** (= ההפרש בין הירח האמיתי לשמש האמיתי) ומחיל סף "> 12°" — קירוב גס שגורם בדיוק לטעות שזיהית: בב' סיון ה'תשפו האורך הראשון אצלנו = 11°59', ולכן הוא מחזיר "לא יראה", אף שהשרשרת המלאה (כפי שחישבת) נותנת קשת ראיה של 15°31' = ודאי יראה.
+> תודה רבה על הדיווח המפורט והגיליון — צדקת לחלוטין, ותיקנו את זה.
 >
-> מצורף קובץ אקסל בפורמט הגיליון שלך עם המספרים שלנו לכל שלב, וגם דף נפרד עם נתוני המנוע לכל הימים מ‑א' ניסן עד כ"ט תמוז ה'תשפו. הפערים הקטנים בשלבים הקודמים (≈15"–15') נובעים מטבלת התיקון לשעת הראיה (KH 14:5): אצלנו +15' לשמש בטווח 30°–60°, ואצלך +30' באותו טווח. שני הקריאות מוצדקות במסורות שונות; נוסיף שאלה ב‑`docs/OPEN_QUESTIONS.md` להבהרה ממקור ראשון.
+> המנוע אכן עצר ב‑**אורך ראשון** והחיל סף heuristic של "> 12°", במקום להריץ את השרשרת המלאה של פרק י"ז. תיקנו זאת באתר היום: כעת הוא מריץ את כל שבעת השלבים של הרמב"ם — אורך שני (KH 17:5), רוחב שני (17:7-9), מעגל הירח (17:10-11), אורך שלישי, אורך רביעי (17:12), מנת גובה המדינה, וקשת הראיה — ואז משווה לקיצי הראיה (KH 17:16-21).
 >
-> פתחנו שני issue במאגר:
-> 1. יישום מלא של פרק י"ז (השרשרת מאורך ראשון עד קיצי הראיה).
-> 2. בירור גבולות הטווחים בטבלת KH 14:5.
+> עבור ב' סיון ה'תשפו, התוצאה החדשה: **קשת הראיה ≈ 15°15' → ודאי יראה** (KH 17:15: > 14°). גמרנו עם המסקנה השגויה.
 >
-> הגיליון שלך משמש עכשיו כ‑test fixture לפיתוח. תודה רבה!
+> הקוד מאומת מול שני fixtures: (א) הדוגמא הסדורה של הרמב"ם בעצמו ב‑KH 17:13-14 (ב' אייר של "שנה זו") — תואם ספרה‑אחר‑ספרה לתוך ±1' (תוך כיבוד "אֵין מְדַקְדְּקִין בִּשְׁנִיּוֹת"); (ב) הגיליון שלך עצמך, שמראה כעת ודאי יראה. הפער שנשאר ביננו (~15') בערכי הביניים נובע מסוגיית KH 14:5 — קרי המקום המדויק שמתחיל לפיו ה‑+30' של התיקון לשעת הראיה. סוגיה זו עדיין פתוחה (#19), ויש בה לפחות שלוש קריאות מסורתיות שונות; היא לא משפיעה על הפסק לב' סיון, אבל היא חשובה לחודשי גבול אחרים.
+>
+> קבצים בגיט (פתוח לכל):
+> • הקובץ הוורבטים של פרק י"ז: [`docs/sources/KH_17_verbatim.md`](https://github.com/rayistern/kidushhachodesh/blob/main/docs/sources/KH_17_verbatim.md)
+> • התיעוד של השרשרת: [`docs/CALCULATIONS.md`](https://github.com/rayistern/kidushhachodesh/blob/main/docs/CALCULATIONS.md) ("Visibility Chain (KH 17)")
+> • Issue #18 שנסגר: https://github.com/rayistern/kidushhachodesh/issues/18
+> • Issue #19 הפתוח על KH 14:5: https://github.com/rayistern/kidushhachodesh/issues/19
+> • הקובץ אקסל המעודכן: [`responses/our_numbers_2_sivan_5786.xlsx`](https://github.com/rayistern/kidushhachodesh/raw/main/responses/our_numbers_2_sivan_5786.xlsx)
+>
+> אם יש לך עוד הערות, או אם יש לך קריאה מועדפת ל‑KH 14:5 (Frankel? תימני? מסורת אחרת?) שתרצה שנכלול — נשמח לדעת. הגיליון שלך הפך ל‑test fixture קבוע במאגר.
 
-## Suggested reply (English)
+## Suggested reply (English) — UPDATED 2026-05-03 after the fix shipped
 
-> Thank you for the detailed report and worksheet — you are right. Our site does not run the Rambam's full visibility chain (KH 17:5–22). It stops at **אורך ראשון** (raw moon‑sun elongation) and uses a `> 12°` threshold, which is exactly what produced the wrong call you caught: for 2 Sivan 5786 our elongation = 11°59' so we report "not visible," whereas your full chain (parallax → moon‑circle → setting‑time → latitude → קשת ראיה) yields 15°31' = "ודאי יראה."
+> Thank you for the detailed report and worksheet — you were entirely right, and we've fixed it.
 >
-> Attached is an Excel file in the layout of your worksheet with our numbers for every step, plus a sheet covering 1 Nisan – 29 Tamuz 5786 with the engine outputs we *do* produce. The small ≈15' deltas in the earlier rows trace to a single difference in the KH 14:5 season‑correction table: we use +15' for the sun in 30°–60° while you use +30'. Both readings appear in different traditions; we'll add a note to `docs/OPEN_QUESTIONS.md` to invite a primary‑source clarification.
+> The engine was indeed stopping at **אורך ראשון** with a heuristic `> 12°` cutoff instead of running the Rambam's full chapter-17 chain. We fixed that today: it now runs all seven steps the Rambam specifies — אורך שני (KH 17:5), רוחב שני (17:7-9), מעגל הירח (17:10-11), אורך שלישי, אורך רביעי (17:12), מנת גובה המדינה, and קשת הראיה — then compares against the קיצי הראיה table (KH 17:16-21).
 >
-> We have opened two issues:
-> 1. Implement the full KH 17 chain (אורך ראשון → קיצי הראיה).
-> 2. Reconcile the KH 14:5 season‑correction boundaries.
+> For ב' סיון ה'תשפו the new verdict is: **קשת הראיה ≈ 15°15' → ודאי יראה** (KH 17:15: > 14°). The wrong call is gone.
 >
-> Your worksheet is now our test fixture. Much appreciated.
+> The code is anchored on two fixtures: (a) the Rambam's own worked example in KH 17:13-14 (2 Iyar of "this year") — every step matches the Rambam's stated values to within ±1' (honoring his own "אֵין מְדַקְדְּקִין בִּשְׁנִיּוֹת"); and (b) your own worksheet, which now also lands on ודאי יראה. The remaining ~15' delta in the intermediate values traces to the KH 14:5 boundary question (issue #19) — at least three traditional readings exist for where the +30' band of the season correction starts; we want a primary‑source review before flipping. It doesn't affect the 2 Sivan verdict but matters for borderline months.
+>
+> Public links:
+> • Verbatim source text of KH 17: [`docs/sources/KH_17_verbatim.md`](https://github.com/rayistern/kidushhachodesh/blob/main/docs/sources/KH_17_verbatim.md)
+> • Documentation of the chain: [`docs/CALCULATIONS.md`](https://github.com/rayistern/kidushhachodesh/blob/main/docs/CALCULATIONS.md) (section "Visibility Chain (KH 17)")
+> • Closed issue #18: https://github.com/rayistern/kidushhachodesh/issues/18
+> • Open issue #19 (KH 14:5): https://github.com/rayistern/kidushhachodesh/issues/19
+> • Updated Excel comparison: [`responses/our_numbers_2_sivan_5786.xlsx`](https://github.com/rayistern/kidushhachodesh/raw/main/responses/our_numbers_2_sivan_5786.xlsx)
+>
+> If you have a preferred KH 14:5 reading you'd like us to use (Frankel? Yemenite manuscript? a particular printed edition?), let us know — your worksheet has become a permanent test fixture in the repo.

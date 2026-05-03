@@ -374,6 +374,28 @@ option 2 and the constants file flags the variant explicitly.
 
 ---
 
+## Q9. KH 17:15 — "אֶפְשָׁר" vs "אִי אֶפְשָׁר" textual variant
+
+**Status: resolved (we follow the standard halachic reading); flagged for transparency.**
+
+Sefaria's printed text of KH 17:15 reads:
+
+> וְדַע שֶׁאִם תִּהְיֶה קֶשֶׁת הָרְאִיָּה תֵּשַׁע מַעֲלוֹת אוֹ פָּחוֹת אָז **אֶפְשָׁר** שֶׁיֵּרָאֶה בְּכָל אֶרֶץ יִשְׂרָאֵל
+
+Read literally: "if קשת ≤ 9°, it is possible that it will be seen." This is internally inconsistent with the chapter:
+
+- 17:3 (Capricorn-Gemini half) and 17:4 (Cancer-Sagittarius half) both use the language `אִי אֶפְשָׁר לְעוֹלָם שֶׁיֵּרָאֶה` ("never possible to be seen") for the analogous low-elongation cases. The קשת case should mirror that structure.
+- The קיצי הראיה table (17:17-21) covers only the (9°, 14°] range. If ≤ 9° really were "possible," the chapter would have no procedure for that band — but the chapter is clearly meant to be complete.
+- Lechem Mishneh and Kessef Mishneh both read this as "אי אפשר שייראה" (impossible to be seen). Standard printed editions (Vilna, Frankel) follow that reading.
+
+The Sefaria text almost certainly suffered a dropped `אִי` in manuscript transmission. The cleaner, internally-consistent reading is "אִי אֶפְשָׁר שֶׁיֵּרָאֶה" → ≤ 9° = not visible.
+
+Our implementation (`src/engine/visibilityCalculations.js#determineVisibility`) follows the standard halachic reading: **≤ 9° → not visible**. The verdict on 2 Sivan ה'תשפו is unaffected (קשת > 14°), but for borderline months ≤ 9° this matters: under the literal Sefaria reading we'd return "possibly visible" instead of "not visible."
+
+This is documented here for transparency. Unlike Q8 (genuine multi-tradition disagreement), this is a clear textual error in one source — no further reconciliation needed.
+
+---
+
 ## Q6. Should mean-molad timeline anchoring use Jerusalem mean solar
 time instead of UT?
 

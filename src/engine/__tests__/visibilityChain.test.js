@@ -161,6 +161,44 @@ describe('KH 17 visibility chain — user\'s 2 Sivan ה\'תשפו worksheet (iss
   });
 });
 
+describe('KH 17:14 interpretive choice — SETTING_TIME keys on moon\'s mazal, NOT אורך שלישי\'s mazal', () => {
+  // Targeted regression guard. The Rambam's worked example (KH 17:14)
+  // says "האורך הזה במזל שור" of אורך שלישי = 11°28'. Read literally as
+  // an absolute-longitude position, 11°28' is in Aries (idx 0), which
+  // would give +1/6 → אורך רביעי = 13°22'. The Rambam's stated answer
+  // is 13°46', which only matches if the table is keyed on the moon's
+  // actual position (18°36' Taurus → +1/5). This test isolates that
+  // interpretive call so a future "fix" gets a meaningful failure
+  // message rather than "13°22' vs 13°46'".
+  it('moon in Taurus + אורך שלישי = 11°28\' → +1/5 (not +1/6)', () => {
+    const orechShlishi = dms(11, 28);
+    const moonInTaurus = dms(48, 36); // Rambam's worked-example moon position
+
+    const stepCorrect = calculateOrechRevii(orechShlishi, moonInTaurus);
+    expectMinutesClose(stepCorrect.result, dms(13, 46), 1, 'with moon-mazal reading');
+
+    // Sanity: if you accidentally key on orechShlishi's mazal (Aries),
+    // you'd add 1/6 = 1°54.7' giving 13°22.7' — verify that's NOT what
+    // we produce.
+    const wrongAnswer = orechShlishi + orechShlishi / 6;
+    expect(Math.abs(stepCorrect.result - wrongAnswer) * 60).toBeGreaterThan(20);
+  });
+
+  it('moon in Gemini + אורך שלישי = 10°27\' → +1/6 (Gemini is also a +1/6 sign)', () => {
+    // User's 2 Sivan ה'תשפו case. Both mazal-of-moon (Gemini → +1/6)
+    // and mazal-of-orech (Aries → +1/6) happen to give the same
+    // fraction here, so this case alone CAN'T distinguish the two
+    // readings — but it's worth pinning the value the user observed
+    // so a future change away from the moon-mazal reading would still
+    // need to demonstrate it produces the right answer here too.
+    const orechShlishi = dms(10, 27, 33);
+    const moonInGemini = dms(69, 29); // user's 2 Sivan moon
+    const step = calculateOrechRevii(orechShlishi, moonInGemini);
+    // +1/6 of 10°27'33" ≈ 1°44'36" → 12°12'09"
+    expectMinutesClose(step.result, dms(12, 12, 9), 1, '2 Sivan setting correction');
+  });
+});
+
 describe('KH 17 verdict gates — early-exit cuts (KH 17:3-4)', () => {
   it('Capricorn-Gemini half: אורך ראשון ≤ 9° → not-visible (KH 17:3)', () => {
     const verdict = determineVisibility({
