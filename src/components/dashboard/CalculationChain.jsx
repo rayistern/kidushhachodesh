@@ -90,7 +90,7 @@ export default function CalculationChain() {
           {/* Group steps by category */}
           <StepGroup label="Sun" hebrewLabel="השמש" steps={steps.filter(s => s.id.startsWith('sun') || s.id === 'daysFromEpoch')} onSelect={selectStep} />
           <StepGroup label="Moon" hebrewLabel="הירח" steps={steps.filter(s => s.id.startsWith('moon') || s.id === 'doubleElongation' || s.id === 'maslulHanachon' || s.id === 'nodePosition')} onSelect={selectStep} />
-          <StepGroup label="Visibility" hebrewLabel="ראייה" steps={steps.filter(s => ['elongation', 'firstVisibilityAngle', 'moonVisibility', 'seasonalInfo'].includes(s.id))} onSelect={selectStep} />
+          <StepGroup label="Visibility (KH 17 chain)" hebrewLabel="חשבונות הראייה" steps={steps.filter(s => ['elongation', 'orechSheni', 'rochavSheni', 'orechShlishi', 'orechRevii', 'mnatGovahHaMedinah', 'keshetHaReiyah', 'moonVisibility', 'seasonalInfo'].includes(s.id))} onSelect={selectStep} />
         </div>
       )}
 

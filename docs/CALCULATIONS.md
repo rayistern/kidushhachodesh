@@ -239,3 +239,98 @@ Epoch date: Wednesday night (beginning of Thursday), 3 Nisan 4938 = April 3, 117
 
 This accounts for the difference between 6:00 PM (when we calculate) and
 actual sunset (when we observe). The moon moves ~0.5° per hour.
+
+> **Open question** (issue #19): Sefaria's KH 14:5 reads `+15'` continuously
+> from mid-Aries (15°) through mid-Virgo (165°), with no `+30'` band on the
+> additive side. The table above (Rabbi Losh's tradition) places `+30'` at
+> 60°-105°. A user worksheet uses `+30'` starting earlier still. Three
+> distinct readings, three different answers. Tracked in issue #19; until
+> resolved, the engine ships with the table above and flags the deviation
+> in `src/engine/constants.js`.
+
+---
+
+## Visibility Chain (KH 17) — Full Rambam Procedure
+
+Implemented in `src/engine/visibilityCalculations.js`; verbatim source
+text at `docs/sources/KH_17_verbatim.md`.
+
+The Rambam's procedure has seven named steps; the previous engine version
+ran only step 1 plus a heuristic. The current implementation runs all
+seven and arrives at the verdict via the `קיצי הראיה` table (KH 17:16-21)
+when the קשת lands in the 9°-14° indeterminate band.
+
+### Step-by-step
+
+| Step | Hebrew name | Source | Computation |
+|------|-------------|--------|-------------|
+| 1 | אורך ראשון | KH 17:1 | `(moonTrueLon − sunTrueLon) mod 360` |
+| 2 | אורך שני | KH 17:5 | subtract `PARALLAX_LON_BY_MAZAL[moonMazal]` from אורך ראשון |
+| 3 | רוחב שני | KH 17:7-9 | apply `PARALLAX_LAT_BY_MAZAL[moonMazal]` to רוחב ראשון; north→subtract, south→add |
+| 4 | מעגל הירח | KH 17:10 | take fraction of `|רוחב שני|` per `MOON_CIRCLE_FRACTIONS` (29-band table) |
+| 5 | אורך שלישי | KH 17:11 | apply מעגל with sign per ecliptic-half × north/south rule |
+| 6 | אורך רביעי | KH 17:12a | apply `SETTING_TIME_BY_MAZAL[moonMazal]` to אורך שלישי |
+| 7 | מנת גובה המדינה | KH 17:12b | always `2/3 × |רוחב ראשון|` (fixed for ארץ ישראל) |
+| 8 | קשת הראיה | KH 17:12c | אורך רביעי ± מנת גובה המדינה (north→add, south→subtract) |
+
+### Verdict gates
+
+1. **Early exits (KH 17:3-4)** — based on אורך ראשון alone, with thresholds
+   that depend on which half of the ecliptic the moon sits in:
+
+   | Moon position | אורך ראשון invisible if | אורך ראשון visible if |
+   |---|---|---|
+   | Capricorn–Gemini half | ≤ 9° | > 15° |
+   | Cancer–Sagittarius half | ≤ 10° | > 24° |
+
+2. **קשת gates (KH 17:15)** — if 17:3-4 didn't decide:
+   - קשת ≤ 9° → not visible
+   - קשת > 14° → visible
+
+3. **קיצי הראיה (KH 17:16-21)** — if 9° < קשת ≤ 14°: lookup against אורך ראשון:
+
+   | קשת band | required אורך ראשון | source |
+   |---|---|---|
+   | (9°, 10°] | ≥ 13° | 17:17 |
+   | (10°, 11°] | ≥ 12° | 17:18 |
+   | (11°, 12°] | ≥ 11° | 17:19 |
+   | (12°, 13°] | ≥ 10° | 17:20 |
+   | (13°, 14°] | ≥ 9° | 17:21 |
+
+### Implementation notes
+
+* **Reading of "האורך הזה במזל X"** (17:14): the Rambam's worked example
+  places אורך שלישי = 11°28' "in Taurus." But 11°28' as an absolute
+  longitude is in Aries, and as an arc-elongation has no zodiacal
+  position at all. The worked example's stated answer (אורך רביעי = 13°46',
+  computed as +1/5) only matches if the SETTING_TIME table is keyed on
+  the moon's actual mazal (= Taurus). The setting-time function reads
+  the moon's mazal accordingly. Without this fix the worked example
+  produces 13°22' instead of 13°46'.
+
+* **Tolerance**: KH 17:13 explicitly tells the reader "אֵין מְדַקְדְּקִין
+  בִּשְׁנִיּוֹת" (we don't fuss over arc-seconds). The Rambam himself rounds
+  intermediate values to whole arc-minutes in the worked example
+  (e.g. 1/4 × 4°03' = 1.0125° → "1°01'"). Our implementation keeps full
+  precision internally and reports formatted DMS at the surface; tests
+  compare to the Rambam's rounded values within ±1' (one חלק).
+
+* **Variant readings**: Sefaria preserves alternative manuscript readings
+  for two parallax-table cells: PARALLAX_LON Cancer (52' bracketed; mss
+  43') and PARALLAX_LAT Aquarius (27' bracketed; mss 24'). Primary value
+  uses the bracketed (corrected) reading; the alternative is preserved
+  on the constant entry as `variant`.
+
+### Test fixtures
+
+Two anchors, both in `src/engine/__tests__/visibilityChain.test.js`:
+
+1. **The Rambam's own worked example** (KH 17:13-14, 17:22) — 2 Iyar of
+   "this year" with sun = 7°09' Taurus, moon = 18°36' Taurus,
+   רוחב ראשון = 3°53' South. Every step asserted to within ±1' of the
+   Rambam's stated values. Verdict: ודאי יראה via the (11°, 12°] קצין band.
+
+2. **The user's 2 Sivan ה'תשפו worksheet** (issue #18 source report) —
+   the report that surfaced the missing chain. The verdict must flip
+   from the prior heuristic's "not visible" to "visible," with קשת
+   computed at ~15.25° (well above the 14° certainly-visible cutoff).

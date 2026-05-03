@@ -40,10 +40,16 @@ export default function VisibilityHorizon() {
   }
 
   const { moon } = calculation;
-  const elongation = moon.elongation || 0;
-  const firstVisAngle = moon.firstVisibilityAngle || 0;
-  const latitude = moon.latitude || 0;
+  const elongation = moon.elongation || 0;        // אורך ראשון (KH 17:1)
+  const orechSheni = moon.orechSheni;             // KH 17:5
+  const rochavSheni = moon.rochavSheni;           // KH 17:7-9 (signed)
+  const orechShlishi = moon.orechShlishi;         // KH 17:10-11
+  const orechRevii = moon.orechRevii;             // KH 17:12a
+  const mnatGovah = moon.mnatGovahHaMedinah;      // KH 17:12b
+  const keshetHaReiyah = moon.keshetHaReiyah;     // KH 17:12c
+  const latitude = moon.latitude || 0;            // רוחב ראשון (signed: + north / − south)
   const isVisible = moon.isVisible;
+  const verdictPath = moon.visibilityPath || '';
 
   // Diagram dimensions
   const width = 320;
@@ -59,29 +65,26 @@ export default function VisibilityHorizon() {
   const moonY = horizonY - elongationPx + latPx;
   const sunY = horizonY + 25; // sun has set 5° below horizon
 
-  // Conditions per KH 17 — shown as a checklist below the diagram
-  const conditions = [
-    {
-      label: 'Elongation',
-      hebrew: 'אורך ראשון',
-      value: formatDms(elongation),
-      threshold: '> 9° (KH 17:3)',
-      ok: elongation > 9,
-    },
-    {
-      label: 'First visibility angle',
-      hebrew: 'זווית הראיה',
-      value: formatDms(firstVisAngle),
-      threshold: '> 12° (KH 17:3-5)',
-      ok: firstVisAngle > 12,
-    },
-    {
-      label: 'Moon latitude',
-      hebrew: 'רוחב הירח',
-      value: formatDms(Math.abs(latitude)),
-      threshold: '< 6° (KH 17:7)',
-      ok: Math.abs(latitude) < 6,
-    },
+  // The seven steps of the Rambam's KH 17 chain, in order.
+  // Each row shows the Rambam's name in Hebrew, the chapter:halacha
+  // citation, the value our engine produces, and a short note.
+  const direction = latitude >= 0 ? 'צפוני' : 'דרומי';
+  const rochavSheniDir = (rochavSheni ?? 0) >= 0 ? 'צפוני' : 'דרומי';
+  const chainSteps = [
+    { he: 'אורך ראשון',         en: 'First longitude (elongation)',
+      ref: 'KH 17:1',  value: elongation },
+    { he: 'אורך שני',           en: 'Second longitude (after parallax in lon.)',
+      ref: 'KH 17:5',  value: orechSheni },
+    { he: 'רוחב שני',           en: `Second latitude (${rochavSheniDir})`,
+      ref: 'KH 17:7-9', value: rochavSheni != null ? Math.abs(rochavSheni) : null },
+    { he: 'אורך שלישי',         en: 'Third longitude (after מעגל הירח)',
+      ref: 'KH 17:10-11', value: orechShlishi },
+    { he: 'אורך רביעי',         en: 'Fourth longitude (after long/short setting)',
+      ref: 'KH 17:12',  value: orechRevii },
+    { he: 'מנת גובה המדינה',    en: '⅔ × |רוחב ראשון| (ארץ ישראל)',
+      ref: 'KH 17:12-14', value: mnatGovah },
+    { he: 'קשת הראיה',          en: `Arc of vision (${direction === 'צפוני' ? '+' : '−'} מנת גובה)`,
+      ref: 'KH 17:12,15', value: keshetHaReiyah, isFinal: true },
   ];
 
   return (
@@ -275,56 +278,46 @@ export default function VisibilityHorizon() {
           className="text-sm font-bold"
           style={{ color: isVisible ? '#4ef7a1' : '#f74e4e' }}
         >
-          {isVisible ? '✓ Visible — Rosh Chodesh tonight' : '✗ Not visible'}
+          {isVisible ? '✓ ודאי יראה — Rosh Chodesh tonight' : '✗ אינו נראה'}
         </div>
-        <div className="text-[10px] text-[var(--color-text-secondary)] mt-1">
-          {isVisible
-            ? 'The bet din could in principle accept witness testimony tonight.'
-            : 'The four conditions of KH 17 are not all satisfied.'}
-        </div>
+        {verdictPath && (
+          <div className="text-[10px] text-[var(--color-text-secondary)] mt-1 hebrew-text leading-snug">
+            {verdictPath}
+          </div>
+        )}
       </div>
 
       {/* Molad timeline */}
       <MoladTimeline />
 
-      {/* Conditions checklist */}
+      {/* KH 17 chain — seven steps from אורך ראשון to קשת הראיה */}
       <div className="mt-4 space-y-1.5">
         <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-secondary)] mb-1">
-          Conditions (KH 17)
+          חשבונות הראייה — KH 17 chain
         </div>
-        {conditions.map((c) => (
+        {chainSteps.map((s) => (
           <div
-            key={c.label}
+            key={s.he}
             className="flex items-center justify-between p-2 rounded bg-[var(--color-card)] border"
             style={{
-              borderColor: c.ok ? '#4ef7a155' : '#f74e4e55',
+              borderColor: s.isFinal ? (isVisible ? '#4ef7a1aa' : '#f74e4eaa') : 'var(--color-border)',
+              borderWidth: s.isFinal ? 2 : 1,
             }}
           >
-            <div className="flex items-center gap-2 min-w-0 flex-1">
-              <span
-                className="inline-flex items-center justify-center w-4 h-4 rounded-full text-[9px] font-bold flex-shrink-0"
-                style={{
-                  backgroundColor: c.ok ? '#4ef7a1' : '#f74e4e',
-                  color: '#000',
-                }}
-              >
-                {c.ok ? '✓' : '✗'}
-              </span>
-              <div className="min-w-0">
-                <div className="text-xs text-[var(--color-text)] truncate">
-                  {c.label}
-                </div>
-                <div className="text-[9px] text-[var(--color-text-secondary)] hebrew-text">
-                  {c.hebrew}
-                </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-xs text-[var(--color-text)] hebrew-text" style={{ direction: 'rtl' }}>
+                {s.he}
+              </div>
+              <div className="text-[9px] text-[var(--color-text-secondary)] truncate">
+                {s.en}
               </div>
             </div>
             <div className="text-right flex-shrink-0 ml-2">
               <div className="text-xs font-mono text-[var(--color-text)]">
-                {c.value}
+                {s.value != null ? formatDms(s.value) : '—'}
               </div>
               <div className="text-[9px] text-[var(--color-text-secondary)] opacity-60">
-                {c.threshold}
+                {s.ref}
               </div>
             </div>
           </div>

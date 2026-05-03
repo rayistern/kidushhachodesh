@@ -329,6 +329,51 @@ See `Inline Audit Summary` section at the bottom of this document.
 
 ---
 
+## Q8. KH 14:5 season-correction boundary readings (issue #19)
+
+**Status: open.**
+
+Three different readings of the KH 14:5 table are in active use:
+
+1. **Sefaria (Frankel-style?)** text pulled 2026-05-03: `+15'` continuously
+   from mid-Pisces (345°) through mid-Virgo (165°), with no `+30'` band on
+   the additive side. The `-30'` band exists on the subtractive side
+   (start-Sagittarius 240° to start-Aquarius 300°).
+
+2. **Our current `SEASON_CORRECTIONS` table** (Rabbi Losh's tradition,
+   documented in `docs/CALCULATIONS.md`): `+30'` band at 60°-90° (start
+   Gemini through mid-Cancer), `+15'` flanking it.
+
+3. **A user's worksheet** (the WhatsApp report that surfaced both this
+   question and issue #18): `+30'` for sun in late Taurus (~57°), implying
+   the boundary lies even earlier than option 2.
+
+For the user's 2 Sivan ה'תשפו example, option 1 gives our same +15' as
+option 2 (sun at 57° is in mid-Aries→mid-Virgo on Sefaria's reading),
+but option 3 gives +30'. The 15' delta propagates through every downstream
+moon value (אמצע הירח לשעת הראיה, מרחק הכפול, ירח האמיתי, אורך ראשון, …).
+
+**Why this matters:** for borderline visibility months, a 15' shift in
+the season correction can flip the קשת הראיה verdict by changing אורך
+ראשון by the same amount. With the new KH 17 chain in place (issue #18),
+this is the only remaining source of disagreement with the user's
+worksheet.
+
+**Resolution path:**
+1. Pull the KH 14:5 text from at least two more sources (Frankel
+   printed edition, Yemenite mss, Touger English with footnotes).
+2. Tabulate the boundary placements verbatim from each.
+3. If a single Hebrew text reading wins on weight of manuscript
+   tradition, switch our table. If three or more defensible readings
+   exist, document all three here, expose a per-tradition selector in
+   the UI, default to one with reasoning, and mark the constants entry
+   `[D]` (deduced — not univocal).
+
+Tracked at GitHub issue #19. Until resolved, the engine ships with
+option 2 and the constants file flags the variant explicitly.
+
+---
+
 ## Q6. Should mean-molad timeline anchoring use Jerusalem mean solar
 time instead of UT?
 
