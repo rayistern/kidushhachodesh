@@ -29,11 +29,27 @@ export default defineConfig({
     // Split heavy vendor libs into their own chunks so the main
     // AppShell bundle doesn't balloon past the warn limit. three.js +
     // r3f is the biggest offender.
+    //
+    // Vite 8's default bundler (Rolldown) only accepts a function form for
+    // manualChunks — the old object-map shorthand (id -> module list) that
+    // Rollup supported was rejected with "manualChunks is not a function"
+    // (found during the React 19 / Vite 8 / R3F 9 / drei 10 compat bump,
+    // 2026-07-01). Rewritten as an equivalent function: same three grouping
+    // as before, keyed off whether the resolved module id contains the
+    // package name.
     rollupOptions: {
       output: {
-        manualChunks: {
-          three: ['three', '@react-three/fiber', '@react-three/drei'],
-          hebcal: ['hebcal'],
+        manualChunks(id) {
+          if (
+            id.includes('node_modules/three') ||
+            id.includes('node_modules/@react-three/fiber') ||
+            id.includes('node_modules/@react-three/drei')
+          ) {
+            return 'three';
+          }
+          if (id.includes('node_modules/hebcal')) {
+            return 'hebcal';
+          }
         },
       },
     },
