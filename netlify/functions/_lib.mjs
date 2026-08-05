@@ -10,6 +10,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { getFullCalculation } from '../../src/engine/pipeline.js';
 import { loadCorpus, corpusStats } from './_corpus.mjs';
+import { listEngineFiles } from './_engineFiles.mjs';
 
 const ROOT = process.cwd();
 const ENGINE_DIR = path.resolve(ROOT, 'src/engine');
@@ -126,6 +127,7 @@ export function runCalculation(dateStr) {
       rambamRef: s.rambamRef,
       formula: s.formula,
       result: s.result,
+      formatted: s.formatted,
       unit: s.unit,
       sourceNote: s.sourceNote,
       teachingNote: s.teachingNote,
@@ -140,20 +142,29 @@ export function runCalculation(dateStr) {
 const SOURCE_WHITELIST = {
   engine: {
     dir: ENGINE_DIR,
-    files: [
-      'pipeline.js',
-      'sunCalculations.js',
-      'moonCalculations.js',
-      'visibilityCalculations.js',
-      'constants.js',
-      'dmsUtils.js',
-    ],
+    // Computed from the filesystem (see _engineFiles.mjs) so new engine
+    // modules are readable the moment they exist — the old hardcoded
+    // 6-file list silently hid everything added after April 2026.
+    files: listEngineFiles(),
   },
   docs: {
     dir: DOCS_DIR,
-    files: null, // null = list whatever is there
+    files: null, // null = list whatever is there (recursively, .md/.txt)
   },
 };
+
+/** Recursively list doc files as relative paths (subdirs like sources/
+ *  and audits/ included; directories themselves are not listed). */
+function walkDocFiles(dir, rel = '') {
+  const out = [];
+  for (const ent of readdirSync(path.join(dir, rel), { withFileTypes: true })) {
+    if (ent.name.startsWith('.')) continue;
+    const relPath = rel ? `${rel}/${ent.name}` : ent.name;
+    if (ent.isDirectory()) out.push(...walkDocFiles(dir, relPath));
+    else if (/\.(md|txt)$/.test(ent.name)) out.push(relPath);
+  }
+  return out.sort();
+}
 
 export function listSource(area) {
   if (!area) {
@@ -166,7 +177,7 @@ export function listSource(area) {
   }
   const w = SOURCE_WHITELIST[area];
   if (!w) return null;
-  const files = w.files || readdirSync(w.dir);
+  const files = w.files || walkDocFiles(w.dir);
   return {
     area,
     files: files.map((f) => ({
@@ -184,9 +195,13 @@ export function getSource(area, file) {
   const w = SOURCE_WHITELIST[area];
   if (!w) return null;
   if (w.files && !w.files.includes(file)) return null;
-  if (file.includes('..') || file.includes('/')) return null;
+  // Subpaths (fixedCalendar/index.js, sources/KH_15_verbatim.md) are
+  // legitimate; traversal is not. Resolve and confirm we stay inside.
+  if (file.includes('..') || file.includes('\\') || path.isAbsolute(file)) return null;
+  const resolved = path.resolve(w.dir, file);
+  if (!resolved.startsWith(w.dir + path.sep)) return null;
   try {
-    const body = readFileSync(path.join(w.dir, file), 'utf8');
+    const body = readFileSync(resolved, 'utf8');
     return { area, file, content: body };
   } catch {
     return null;

@@ -12,7 +12,7 @@ developer-mode connectors, Cursor, etc.):** add this URL as an MCP server:
 
     https://<this-site>/mcp
 
-It exposes three tools: `search`, `fetch`, and `calculate`.
+It exposes nine tools: `search`, `fetch`, `calculate`, `list_templates`, `get_template`, `list_source`, `get_source`, `get_daily_rambam`, and `stats`.
 
 **If your AI just browses the web (consumer ChatGPT with search, Claude with web
 search, Perplexity, Gemini, …):** tell it:

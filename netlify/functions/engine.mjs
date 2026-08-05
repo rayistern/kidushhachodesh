@@ -10,16 +10,9 @@
 
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
+import { ENGINE_DIR, listEngineFiles, BROWSER_IMPORT_MAP } from './_engineFiles.mjs';
 
-const ENGINE_DIR = path.resolve(process.cwd(), 'src/engine');
-const ALLOWED = new Set([
-  'pipeline.js',
-  'sunCalculations.js',
-  'moonCalculations.js',
-  'visibilityCalculations.js',
-  'constants.js',
-  'dmsUtils.js',
-]);
+const ALLOWED = new Set(listEngineFiles());
 
 const BANNER = (file) => `/*
  * Kiddush HaChodesh — live engine module: ${file}
@@ -39,7 +32,9 @@ const BANNER = (file) => `/*
 
 export default async (req) => {
   const url = new URL(req.url);
-  const name = url.pathname.replace(/^\/engine\//, '');
+  // Optional trailing slash so bare `/engine` (and the `/kh/engine`
+  // alias, which rewrites to it) serve the index instead of 404ing.
+  const name = url.pathname.replace(/^\/engine\/?/, '');
 
   // Index listing
   if (!name || name === '' || name === 'index.json') {
@@ -51,6 +46,12 @@ export default async (req) => {
           license: 'MIT',
           import_example:
             'import { getFullCalculation } from "/engine/pipeline.js"',
+          note:
+            'The engine has one bare dependency: the `hebcal` npm package ' +
+            '(imported by epochDays.js and fixedCalendar/). Browsers need ' +
+            'the import map below; Node consumers should vendor the files ' +
+            'and `npm install hebcal`.',
+          browser_import_map: BROWSER_IMPORT_MAP,
           files: [...ALLOWED].map((f) => ({
             name: f,
             url: `/engine/${f}`,

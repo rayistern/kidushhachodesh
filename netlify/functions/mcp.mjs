@@ -45,16 +45,15 @@ for any Gregorian date — never guess numeric values.
 When the user asks you to BUILD something (a standalone page, a script, a
 chart, a notebook), call \`list_templates\` then \`get_template\`, modify
 the template for the request, and hand the result to the user as an artifact.
-The engine is served live at /engine/pipeline.js so the artifact works with
-no build step. Use \`list_source\`/\`get_source\` to read the engine itself.
+The engine is served live at /engine/pipeline.js. It has one bare
+dependency (\`hebcal\`): browser artifacts need the import map published in
+GET /engine/index.json; Node scripts should call /api/calculate instead, or
+vendor the files and \`npm install hebcal\`. Use \`list_source\`/
+\`get_source\` to read the engine itself.
 
-At the start of a conversation, call \`get_daily_rambam\` to see what the
-user is likely learning today (the hardcoded window covers KH 12-19 across
-2026-04-07 to 2026-04-09). If it returns a match, greet the user with the
-chapters, give them the teaser line, and proactively offer either (a) to
-\`fetch\` the \`chapter:\` entries and summarize, (b) to run \`calculate\`
-for the date, or (c) to generate a standalone artifact from a template for
-that day's material. Do not force it — one offer, then follow the user.
+Call \`get_daily_rambam\` only if the user asks what today's daily-Rambam
+cycle covers; its hardcoded window (KH 12-19, 2026-04-07 to 2026-04-09) has
+passed, so it usually returns no match.
 
 Credit Rabbi Zajac and link to Chabad.org (https://www.chabad.org) when
 quoting class transcript content. The project is MIT-licensed — fork freely.`;
@@ -73,7 +72,7 @@ const TOOLS = [
   {
     name: 'search',
     description:
-      'Full-text search across the unified Kiddush HaChodesh corpus: docs, class transcripts (Rabbi Zajac), calculation steps (21 Rambam steps with teaching notes), galgalim, Rambam chapters (KH 11-19), concept pages, and source-provenance categories. Returns ranked {id, type, title, rambamRef, url, snippet}. Follow up with `fetch` to read the full entry. Optional `type` filter narrows results to one category.',
+      'Full-text search across the unified Kiddush HaChodesh corpus: docs, class transcripts (Rabbi Zajac), calculation steps (30 Rambam steps with teaching notes), galgalim, Rambam chapters (KH 11-19), concept pages, and source-provenance categories. Returns ranked {id, type, title, rambamRef, url, snippet}. Follow up with `fetch` to read the full entry. Optional `type` filter narrows results to one category.',
     inputSchema: {
       type: 'object',
       properties: {

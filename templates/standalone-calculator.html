@@ -5,14 +5,19 @@
   A single HTML file that computes the Rambam's full astronomical pipeline
   for any Gregorian date, by importing the live engine from the project site.
 
-  No build step, no dependencies. Drop this file anywhere (or paste it into
-  a Claude Artifact / ChatGPT canvas) and it will work.
+  No build step. Drop this file anywhere (or paste it into a Claude
+  Artifact / ChatGPT canvas) and it will work. The import map below
+  satisfies the engine's one bare dependency (`hebcal`) from esm.sh —
+  keep it above the module script.
 
   Replace ENGINE_BASE with your deployment URL if you're self-hosting.
 -->
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    <script type="importmap">
+      { "imports": { "hebcal": "https://esm.sh/hebcal@2.3.2" } }
+    </script>
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Kiddush HaChodesh — Standalone Calculator</title>
     <style>
@@ -48,8 +53,10 @@
     </footer>
 
     <script type="module">
-      // Change this to your deployment if self-hosting.
-      const ENGINE_BASE = new URL('.', location.href).origin;
+      // Change this to your deployment if self-hosting. (The canonical
+      // host is used as the default because artifacts and file:// pages
+      // have no usable origin of their own.)
+      const ENGINE_BASE = 'https://www.shluchimexchange.ai/kh';
       document.getElementById('src').href = ENGINE_BASE + '/engine/pipeline.js';
 
       const { getFullCalculation } = await import(ENGINE_BASE + '/engine/pipeline.js');
@@ -82,7 +89,7 @@
               <tr>
                 <td>${s.name}<div class="ref">${s.hebrewName || ''}</div></td>
                 <td class="ref">${s.rambamRef || ''}</td>
-                <td class="num">${fmt(s.result)} ${s.unit || ''}</td>
+                <td class="num">${typeof s.result === 'number' ? fmt(s.result) : (s.formatted || '')} ${s.unit || ''}</td>
               </tr>`).join('')}
           </table>
         `;

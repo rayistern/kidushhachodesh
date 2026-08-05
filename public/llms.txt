@@ -40,12 +40,10 @@ Both doors talk to the same corpus and the same engine. Pick whichever works.
   (standalone HTML calculators, Node CLIs, …) that import the live engine.
 - `list_source({area?})` / `get_source({area, file})` — browse the engine
   and docs source code. Area is `engine` or `docs`. MIT-licensed.
-- `get_daily_rambam({date?})` — hardcoded Rambam daily-learning entry for
-  the current Kiddush HaChodesh week (2026-04-07 through 2026-04-09, KH
-  12-19). Returns the day's chapters, a teaser, related `chapter:` ids to
-  `fetch`, and artifact ideas. **Call this at the start of a session** to
-  greet the user with what they're learning today and offer one concrete
-  follow-up (fetch a chapter, run `calculate`, or generate an artifact).
+- `get_daily_rambam({date?})` — hardcoded Rambam daily-learning entries for
+  the 2026-04-07 → 2026-04-09 Kiddush HaChodesh window (KH 12-19). That
+  window has passed, so with no `date` argument it usually returns no
+  match. Call it only when the user asks about the daily-Rambam schedule.
 - `stats()` — corpus counts by type.
 
 ## HTTP endpoints (for browsing or non-MCP use)
@@ -75,10 +73,11 @@ Both doors talk to the same corpus and the same engine. Pick whichever works.
      correction, double elongation, nekudah hanichaches, rosh/zanav, latitude).
    Credit Rabbi Zajac via Chabad.org when quoting.
 
-3. **step** — 21 calculation steps from the Rambam pipeline. Each carries
-   Hebrew name, `rambamRef`, formula, source note, and (for 15 of them) a
+3. **step** — 30 calculation steps from the Rambam pipeline. Each carries
+   Hebrew name, `rambamRef`, formula, source note, and (for many) a
    rich teaching note in the Rabbi Losh tradition. Covers the full chain
-   from `daysFromEpoch` through `moonVisibility`.
+   from `daysFromEpoch` through the KH 17 visibility verdict, plus the
+   parallel fixed-calendar (KH 6-10) chain.
 
 4. **galgal** — 9 galgalim (celestial spheres) from
    `src/engine/constants.js`: the daily sphere, sphere of constellations,
@@ -93,10 +92,10 @@ Both doors talk to the same corpus and the same engine. Pick whichever works.
    nekudah hanichaches. Built from prose originally in the dashboard's
    KnowledgeBase component.
 
-7. **schedule** — hardcoded daily Rambam learning entries. The current
-   window is 2026-04-07 (KH 12, 13, 14) → 2026-04-08 (KH 15, 16, 17) →
+7. **schedule** — hardcoded daily Rambam learning entries for a past
+   window: 2026-04-07 (KH 12, 13, 14) → 2026-04-08 (KH 15, 16, 17) →
    2026-04-09 (KH 18, 19). Each entry links back to the matching `chapter:`
-   ids. Prefer `get_daily_rambam` over searching for these directly.
+   ids. The next KH window in the daily cycle is ~early 2027.
 
 8. **source_type** — the provenance legend: Rambam [R], Interpolated [~],
    Deduced [D], Rabbi Losh [L]. Use this to honestly label claims.
@@ -110,7 +109,11 @@ notebook) can `import` it directly:
     import { getFullCalculation } from "/engine/pipeline.js";
     const calc = getFullCalculation(new Date("2026-04-07"));
 
-No build step, no install, no copy-paste. Start from a template:
+One caveat: the engine imports the `hebcal` npm package (bare specifier).
+Browser pages need the import map published at `GET /engine/index.json`
+(maps `hebcal` to esm.sh). Node cannot import https: URLs at all — call
+`/api/calculate` from Node, or vendor the files and `npm install hebcal`.
+Start from a template:
 
 - `/templates/standalone-calculator.html` — one-file browser calculator.
 - `/templates/node-cli.mjs` — Node 18+ command-line tool.
@@ -127,7 +130,7 @@ clone https://github.com/rayistern/kidushhachodesh and see the repo README.
   (narrowing with `type: "concept"` or `type: "step"` often helps), then
   `fetch` the best match and cite its `rambamRef`.
 - Hebrew dates: convert to Gregorian before calling `calculate`. The epoch
-  is 3 Nisan 4938 = 1177-04-03.
+  is 3 Nisan 4938 = 1178-03-30 (verified against hebcal).
 - When a user asks for a visual or interactive artifact, use
   `list_templates` + `get_template` and modify for their request. Keep
   the `/engine/pipeline.js` import URL pointed at the live site so the
@@ -139,9 +142,9 @@ clone https://github.com/rayistern/kidushhachodesh and see the repo README.
 
 | Type | Count (approx) | Id prefix | Typical source |
 |---|---|---|---|
-| doc | 5 | `doc:` | `docs/*.md` |
+| doc | 10 | `doc:` | `docs/*.md` |
 | class | 2 | `class:` | `docs/class*.txt` (Zajac) |
-| step | 21 | `step:` | `src/engine/*.js` |
+| step | 30 | `step:` | `src/engine/*.js` |
 | galgal | 9 | `galgal:` | `src/engine/constants.js` |
 | chapter | 9 | `chapter:` | Sefaria (live) |
 | concept | 4+ | `concept:` | KnowledgeBase.jsx + curated |

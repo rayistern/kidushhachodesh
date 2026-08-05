@@ -13,21 +13,32 @@ behalf. If you are an AI, read this file, then fetch a template from
 **In the browser or a Claude Artifact / ChatGPT canvas:**
 
 ```html
+<script type="importmap">
+  { "imports": { "hebcal": "https://esm.sh/hebcal@2.3.2" } }
+</script>
 <script type="module">
-  import { getFullCalculation } from "https://kidushhachodesh.netlify.app/engine/pipeline.js";
+  import { getFullCalculation } from "https://www.shluchimexchange.ai/kh/engine/pipeline.js";
   const calc = getFullCalculation(new Date());
   console.log(calc.moon.isVisible, calc.moon.phaseHebrew);
 </script>
 ```
 
-**In Node 18+:**
+The import map satisfies the engine's one bare dependency (`hebcal`).
+`GET /engine/index.json` publishes the same map plus the full module list.
+
+**In Node 18+:** Node cannot `import` https: URLs, so call the JSON API:
 
 ```js
-const { getFullCalculation } = await import(
-  "https://kidushhachodesh.netlify.app/engine/pipeline.js"
+const res = await fetch(
+  "https://www.shluchimexchange.ai/kh/api/calculate?date=2026-04-07"
 );
-console.log(getFullCalculation(new Date()).sun.trueLongitude);
+const calc = await res.json();
+console.log(calc.sun.trueLongitude);
 ```
+
+To run the engine itself in Node, clone the repo (or fetch every file
+listed at `/engine/index.json`), `npm install hebcal`, and import
+`src/engine/pipeline.js` from disk.
 
 **As a JSON API (no JS required):**
 
@@ -53,7 +64,7 @@ GET /api/calculate?date=2026-04-07
     phase, phaseHebrew,
     elongation, firstVisibilityAngle, isVisible, illumination
   },
-  season: string,            // 'winter' | 'spring' | 'summer' | 'fall'
+  season: { currentSeason: string, daysUntilNextSeason: number },
   steps: CalculationStep[],  // ordered array of every intermediate step
   stepMap: { [id]: CalculationStep }
 }
