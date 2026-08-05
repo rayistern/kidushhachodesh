@@ -64,8 +64,12 @@ function interpolateCorrection(maslul, table) {
  */
 function doubleElongationAdjustment(merchakKaful) {
   const effective = merchakKaful <= 180 ? merchakKaful : 360 - merchakKaful;
+  // Round to the nearest whole degree per KH 15:3 ("או קרוב לחמש") — the
+  // bands are stated in whole degrees and a fractional value between two
+  // bands must not fall through. Mirrors calculateMaslulHanachon.
+  const rounded = Math.round(effective);
   for (const entry of CONSTANTS.DOUBLE_ELONGATION_ADJUSTMENTS) {
-    if (effective >= entry.minElongation && effective <= entry.maxElongation) {
+    if (rounded >= entry.minElongation && rounded <= entry.maxElongation) {
       return entry.adjustment;
     }
   }

@@ -185,8 +185,15 @@ export function calculateMaslulHanachon(emtzaMaslul, merchakKaful) {
   // adjustments. We only adjust in the 0-180 range (visibility range).
   const effectiveMerchak = merchakKaful <= 180 ? merchakKaful : 360 - merchakKaful;
 
+  // KH 15:3 states its bands in whole degrees ("משש מעלות עד אחת עשרה…")
+  // and opens with "חמש מעלות או קרוב לחמש" — five *or close to five*. A
+  // fractional merchak belongs to the band of its nearest whole degree;
+  // without this rounding, values between bands (e.g. 11°31′) match no
+  // row and silently get no adjustment at all.
+  const tableMerchak = Math.round(effectiveMerchak);
+
   for (const entry of table) {
-    if (effectiveMerchak >= entry.minElongation && effectiveMerchak <= entry.maxElongation) {
+    if (tableMerchak >= entry.minElongation && tableMerchak <= entry.maxElongation) {
       adjustment = entry.adjustment;
       if (entry.source === 'approximated') isApproximated = true;
       break;
@@ -210,6 +217,7 @@ export function calculateMaslulHanachon(emtzaMaslul, merchakKaful) {
       emtzaMaslul: { value: emtzaMaslul, label: 'Emtza Hamaslul', unit: '°', refId: 'moonMaslul' },
       merchakKaful: { value: merchakKaful, label: 'Merchak Kaful', unit: '°', refId: 'doubleElongation' },
       effectiveMerchak: { value: effectiveMerchak, label: 'Effective (for table)', unit: '°' },
+      tableMerchak: { value: tableMerchak, label: 'Rounded to nearest degree (קרוב — KH 15:3)', unit: '°' },
       adjustment: { value: adjustment, label: 'Adjustment', unit: '°' },
     },
     formula: 'emtza hamaslul + adjustment(merchak kaful)',
