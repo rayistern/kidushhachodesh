@@ -147,7 +147,16 @@ export const CONSTANTS = {
   //  SUN — Rambam KH chapters 12-13
   // ═══════════════════════════════════════════════════════════════
   SUN: {
-    // [R] 0° 59' 8 1/3" per day — KH 12:1
+    // [R] 0° 59' 8 1/3" per day — KH 12:1.
+    // RULING 2026-08-05 ("Rambam wins", audit finding #5): KH 12:1's
+    // printed daily value is 59'8" flat, but the Rambam's own worked
+    // example (KH 15:8, N=29) states sun mean 35°38'33" — which needs
+    // 8 1/3" for the 9 remainder days (8" flat gives 35°38'30"). His
+    // 10-day table (9°51'23") is likewise built on 8 1/3". The printed
+    // 8" is his display rounding; 8 1/3" is his operative rate. Unlike
+    // the moon's 35.133" case (Q7), where his statement AND tables
+    // agreed on the flat value. Pinned by rambamWorkedExamples.test.js
+    // and maslulHanachon.test.js.
     MEAN_MOTION_PER_DAY: { degrees: 0, minutes: 59, seconds: 8.333 },
     // [R] KH 12:2 — "7 degrees, 3 minutes, 32 seconds in the constellation
     // of Aries" at the epoch (beginning of Thursday night, 3 Nisan 4938).

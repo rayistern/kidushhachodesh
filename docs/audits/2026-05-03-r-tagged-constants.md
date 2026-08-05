@@ -12,8 +12,12 @@
 > KH 16:12 and 17:13) and corrected. See `docs/OPEN_QUESTIONS.md` Q10,
 > `docs/sources/KH_15_verbatim.md` / `KH_16_verbatim.md`, and the row pins in
 > `src/engine/__tests__/constantsProvenance.test.js`. Finding #4
-> (GALGAL_KATAN stale 53.333) was fixed in issue #15 phase B. Findings #5/#6
-> (sun 8.333"-vs-8" stance, citation hygiene) remain open.
+> (GALGAL_KATAN stale 53.333) was fixed in issue #15 phase B. Finding #5
+> (sun 8.333"-vs-8") was ruled 2026-08-05 per the maintainer's "Rambam
+> wins" directive: keep 8 1/3" — the Rambam's own worked example (KH 15:8,
+> N=29) and his 10-day table both require it; the printed 8" is display
+> rounding. Documented at `SUN.MEAN_MOTION_PER_DAY` in engine/constants.js.
+> Finding #6 (citation hygiene) remains open.
 
 ## Authorities consulted
 
