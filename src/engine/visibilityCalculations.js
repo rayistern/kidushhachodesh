@@ -136,17 +136,19 @@ export function calculateRochavSheni(rochavRishon, moonTrueLon) {
   const idx = mazalIndex(moonTrueLon);
   const entry = CONSTANTS.PARALLAX_LAT_BY_MAZAL[idx];
   const correctionDeg = entry.chalakim / 60;
-  // KH 17:7: north → subtract, south → add.
-  const result = rochavRishon >= 0
-    ? rochavRishon - correctionDeg
-    : rochavRishon - correctionDeg; // for south: |rochav| + correction, then re-sign as south
-  // Express in signed form: north positive, south negative — both reduce magnitude
-  // when correction goes the same way; but Rambam: north reduces magnitude,
-  // south INCREASES magnitude. Compute by magnitude + sign:
-  const magnitude = rochavRishon >= 0
-    ? Math.max(0, rochavRishon - correctionDeg)
-    : -(Math.abs(rochavRishon) + correctionDeg);
-  const direction = magnitude >= 0 ? 'צפוני' : 'דרומי';
+  // KH 17:7: north → subtract the chalakim; south → add them. In the
+  // signed convention (north +, south −) both cases are the SAME
+  // arithmetic — parallax always pushes the apparent moon southward:
+  //   north:  +rochav − corr  (magnitude shrinks)
+  //   south:  −|rochav| − corr (magnitude grows)
+  // When a small northern rochav is exceeded by the correction, the
+  // result crosses to southern. The Rambam doesn't address that edge
+  // explicitly; the arithmetic continuation is both the physical
+  // meaning of the parallax and the only reading that keeps KH 17:11's
+  // north/south direction rule coherent downstream. (Until 2026-08-05
+  // this clamped at 0-north instead — see OPEN_QUESTIONS.md Q11.)
+  const result = rochavRishon - correctionDeg;
+  const direction = result >= 0 ? 'צפוני' : 'דרומי';
   return {
     id: 'rochavSheni',
     regime: 'astronomical',
@@ -161,11 +163,9 @@ export function calculateRochavSheni(rochavRishon, moonTrueLon) {
       parallaxLatChalakim: { value: entry.chalakim, label: 'שינוי המראה לרוחב', unit: 'חלקים' },
       direction: { value: rochavRishon >= 0 ? 'צפוני' : 'דרומי', label: 'Latitude direction' },
     },
-    formula: rochavRishon >= 0
-      ? '|rochavRishon| − (chalakim/60), sign preserved'
-      : '−(|rochavRishon| + chalakim/60)',
-    result: magnitude,
-    formatted: `${formatDms(Math.abs(magnitude))} ${direction}`,
+    formula: 'rochavRishon − (chalakim/60)  [signed: north +, south −]',
+    result,
+    formatted: `${formatDms(Math.abs(result))} ${direction}`,
     unit: 'degrees',
     direction,
   };

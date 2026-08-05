@@ -455,6 +455,35 @@ Rambam's 2 Iyar fixtures.
 
 ---
 
+## Q11. רוחב שני when the parallax exceeds a small northern רוחב ראשון
+
+**Status: resolved 2026-08-05 (interpretive call, documented for
+transparency).**
+
+KH 17:7 rules: northern latitude → *subtract* the parallax chalakim;
+southern → *add* them. In the engine's signed convention (north +,
+south −) both cases are the single formula `rochav − correction` —
+the parallax always pushes the apparent moon southward. The Rambam
+never addresses the edge where a small northern רוחב ראשון is smaller
+than the correction (possible only near the node, correction 9'-46' by
+mazal).
+
+The KH 17 chain as first built (2026-05-03) silently clamped that case
+to 0-north (`Math.max(0, …)`), wrapped in a dead ternary whose branches
+were identical — the clamp was never a ratified decision. Clamping is
+wrong twice over: physically (the apparent moon really does sit south
+of the ecliptic then) and halachically downstream (KH 17:11's מעגל
+direction rule keys on רוחב שני's north/south, so a "northern 0"
+flips the add/subtract direction for the מעגל relative to the true
+small-southern value).
+
+Resolution: arithmetic continuation — the result crosses to southern.
+The Rambam's own 2 Iyar case (southern, magnitude grows to 4°3') is
+unaffected; regression tests pin all three regimes (north-stays-north,
+north-crosses-to-south, south-grows) in `visibilityChain.test.js`.
+
+---
+
 ## Q6. Should mean-molad timeline anchoring use Jerusalem mean solar
 time instead of UT?
 

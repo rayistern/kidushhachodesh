@@ -281,3 +281,34 @@ describe('KH 17 verdict gates — early-exit cuts (KH 17:3-4)', () => {
     expect(verdict.path).toMatch(/17:4/);
   });
 });
+
+describe('KH 17:7-9 — רוחב שני signed arithmetic (crossover fix, 2026-08-05)', () => {
+  // KH 17:7: north → subtract the parallax chalakim, south → add. In the
+  // signed convention both are `rochav − correction` (parallax always
+  // pushes the apparent moon south). The pre-2026-08-05 code clamped a
+  // small northern rochav at 0 instead of letting it cross to southern,
+  // flipping the KH 17:11 direction rule downstream. See
+  // OPEN_QUESTIONS.md Q11.
+
+  it('north larger than the correction: stays north, magnitude shrinks', () => {
+    // Moon in Taurus → 10'. +1°00' north − 10' = +0°50' north.
+    const step = calculateRochavSheni(dms(1, 0), dms(48, 36));
+    expectMinutesClose(step.result, dms(0, 50), 0.5, 'רוחב שני');
+    expect(step.direction).toBe('צפוני');
+  });
+
+  it('small north crossed by the correction: flips to south (no 0-clamp)', () => {
+    // Moon in Libra → 46'. +0°05' north − 46' = −0°41' → southern.
+    const step = calculateRochavSheni(dms(0, 5), 185);
+    expectMinutesClose(Math.abs(step.result), dms(0, 41), 0.5, 'רוחב שני magnitude');
+    expect(step.result).toBeLessThan(0);
+    expect(step.direction).toBe('דרומי');
+  });
+
+  it('south: magnitude grows (the Rambam’s own 2 Iyar case, re-pinned)', () => {
+    // Moon in Taurus → 10'. −3°53' south → −4°03'.
+    const step = calculateRochavSheni(-dms(3, 53), dms(48, 36));
+    expectMinutesClose(Math.abs(step.result), dms(4, 3), 0.5, 'רוחב שני magnitude');
+    expect(step.direction).toBe('דרומי');
+  });
+});
