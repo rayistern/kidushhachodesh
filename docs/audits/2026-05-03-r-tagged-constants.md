@@ -4,6 +4,16 @@
 >
 > Read-only audit. **Per the issue, no constant values were modified.** Mismatches surfaced
 > here are deliverables for follow-up work, not pre-approved changes.
+>
+> **Resolution 2026-08-05:** findings #1 (`MOON_MASLUL_CORRECTIONS`) and #3
+> (`MOON_LATITUDE_TABLE`) — the hybrid-transcription diagnosis below — were
+> adjudicated with the second-witness cross-check this audit demanded
+> (Touger/Moznaim authentic-mss footnotes + the Rambam's own worked examples
+> KH 16:12 and 17:13) and corrected. See `docs/OPEN_QUESTIONS.md` Q10,
+> `docs/sources/KH_15_verbatim.md` / `KH_16_verbatim.md`, and the row pins in
+> `src/engine/__tests__/constantsProvenance.test.js`. Finding #4
+> (GALGAL_KATAN stale 53.333) was fixed in issue #15 phase B. Findings #5/#6
+> (sun 8.333"-vs-8" stance, citation hygiene) remain open.
 
 ## Authorities consulted
 

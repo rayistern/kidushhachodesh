@@ -362,17 +362,24 @@ export const CONSTANTS = {
   get MASLUL_CORRECTIONS() { return this.SUN_MASLUL_CORRECTIONS; },
 
   // ═══════════════════════════════════════════════════════════════
-  //  MOON MASLUL CORRECTION TABLE — [R] KH 15:4-6
+  //  MOON MASLUL CORRECTION TABLE — [R] KH 15:6
   //  This is the menaseh for the maslul hanachon (corrected course).
-  //  DIFFERENT from the sun's table — peaks at ~5°5' near 90-100°.
+  //  DIFFERENT from the sun's table — peaks at 5°8' at 100°.
   //  For maslul hanachon > 180°, subtract from 360° and ADD correction.
+  //  Verbatim source: docs/sources/KH_15_verbatim.md (Sefaria Torat Emet
+  //  363 + Touger/Moznaim, pulled 2026-08-05). Rows 10°-40° were fixed
+  //  2026-08-05 — the prior values were the KH 16:11 LATITUDE rows,
+  //  a hybrid transcription event diagnosed by the 2026-05-03 audit.
+  //  Rows 120°/150° follow the authentic manuscripts (4°40'/2°48');
+  //  standard prints read 4°20'/3°48' there (Touger fns. 12-13) and
+  //  Sefaria's 170° reading (1°59') is a known corruption of 0°59'.
   // ═══════════════════════════════════════════════════════════════
   MOON_MASLUL_CORRECTIONS: [
     { maslul: 0,   correction: 0 },
-    { maslul: 10,  correction: 52 / 60 },          // 0° 52'
-    { maslul: 20,  correction: 1 + 43 / 60 },     // 1° 43'
-    { maslul: 30,  correction: 2 + 30 / 60 },     // 2° 30'
-    { maslul: 40,  correction: 3 + 13 / 60 },     // 3° 13'
+    { maslul: 10,  correction: 50 / 60 },          // 0° 50'
+    { maslul: 20,  correction: 1 + 38 / 60 },     // 1° 38'
+    { maslul: 30,  correction: 2 + 24 / 60 },     // 2° 24'
+    { maslul: 40,  correction: 3 + 6 / 60 },      // 3° 06'
     { maslul: 50,  correction: 3 + 44 / 60 },     // 3° 44'
     { maslul: 60,  correction: 4 + 16 / 60 },     // 4° 16'
     { maslul: 70,  correction: 4 + 41 / 60 },     // 4° 41'
@@ -384,7 +391,7 @@ export const CONSTANTS = {
     { maslul: 130, correction: 4 + 11 / 60 },     // 4° 11'
     { maslul: 140, correction: 3 + 33 / 60 },     // 3° 33'
     { maslul: 150, correction: 2 + 48 / 60 },     // 2° 48'
-    { maslul: 160, correction: 2 + 5 / 60 },      // 2° 05'
+    { maslul: 160, correction: 1 + 56 / 60 },     // 1° 56' (fixed 2026-08-05; prior 2°05' appears in no witness)
     { maslul: 170, correction: 59 / 60 },          // 0° 59'
     { maslul: 180, correction: 0 },
   ],
@@ -414,10 +421,18 @@ export const CONSTANTS = {
   ],
 
   // ═══════════════════════════════════════════════════════════════
-  //  MOON LATITUDE TABLE — [R] KH 16:9-10
+  //  MOON LATITUDE TABLE — [R] KH 16:11
   //  Given the moon's angular distance from the ascending node (rosh),
   //  this table gives the latitude (rochav) north or south of the ecliptic.
   //  0-90° from rosh = northward; 90-180° = returning; 180-270° = southward; 270-360° = returning north.
+  //  Verbatim source: docs/sources/KH_16_verbatim.md (Sefaria Torat Emet
+  //  363 + Touger/Moznaim, pulled 2026-08-05). Rows 50°-80° were fixed
+  //  2026-08-05 — the prior values were the KH 15:6 MASLUL rows (the
+  //  other half of the same hybrid transcription event). The Rambam's
+  //  own interpolation example (KH 16:12: maslul 53° → 3°59') and his
+  //  KH 17:13 worked example (רוחב ראשון 3°53' at ~51°) both require
+  //  these values; latitude grows continuously to its 5° max at 90°
+  //  (KH 16:9), so the old 5°00' plateau at 80° was impossible.
   // ═══════════════════════════════════════════════════════════════
   MOON_LATITUDE_TABLE: [
     { distance: 0,   latitude: 0 },
@@ -425,10 +440,10 @@ export const CONSTANTS = {
     { distance: 20,  latitude: 1 + 43 / 60 },     // 1° 43'
     { distance: 30,  latitude: 2 + 30 / 60 },     // 2° 30'
     { distance: 40,  latitude: 3 + 13 / 60 },     // 3° 13'
-    { distance: 50,  latitude: 3 + 44 / 60 },     // 3° 44'
-    { distance: 60,  latitude: 4 + 16 / 60 },     // 4° 16'
-    { distance: 70,  latitude: 4 + 41 / 60 },     // 4° 41'
-    { distance: 80,  latitude: 5 + 0 / 60 },      // 5° 00'
+    { distance: 50,  latitude: 3 + 50 / 60 },     // 3° 50'
+    { distance: 60,  latitude: 4 + 20 / 60 },     // 4° 20'
+    { distance: 70,  latitude: 4 + 42 / 60 },     // 4° 42'
+    { distance: 80,  latitude: 4 + 55 / 60 },     // 4° 55'
     { distance: 90,  latitude: 5 + 0 / 60 },      // 5° 00'
   ],
 

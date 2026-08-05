@@ -410,6 +410,51 @@ This is documented here for transparency. Unlike Q8 (genuine multi-tradition dis
 
 ---
 
+## Q10. The two moon tables were a single hybrid transcription (issue #13 follow-up)
+
+**Status: resolved 2026-08-05 — both tables corrected to the adjudicated
+verbatim reading. Sources: `docs/sources/KH_15_verbatim.md`,
+`docs/sources/KH_16_verbatim.md`; row pins in
+`src/engine/__tests__/constantsProvenance.test.js`.**
+
+The 2026-05-03 audit (issue #13) found 8/18 rows of
+`MOON_MASLUL_CORRECTIONS` and 4/9 rows of `MOON_LATITUDE_TABLE`
+mismatching Sefaria, and diagnosed the shape: the codebase carried **one
+hybrid table** — rows 10°-40° from KH 16:11 (latitude), rows 50°-90°
+from KH 15:6 (maslul) — used for *both* constants. A single transcription
+event, not twelve independent errors. The audit demanded a second
+print-family witness before any code change.
+
+That cross-check was performed 2026-08-05 with three independent
+authorities, all agreeing against the hybrid:
+
+1. **Sefaria Torat Emet 363** (Hebrew, fresh pull).
+2. **Touger/Moznaim** English, whose footnotes are based on "the
+   authentic manuscripts and early printings" and explicitly mark where
+   standard prints err (15:6 rows 120° and 150° — where the codebase
+   already carried the authentic reading).
+3. **The Rambam's own worked examples**: KH 16:12 (maslul harochav 53° →
+   3°59', which *requires* latitude rows 50°→3°50'/60°→4°20') and
+   KH 17:13 (רוחב ראשון 3°53' South at 2 Iyar, which the old latitude
+   rows could only render as 3°48'). KH 16:9's narrative (latitude grows
+   continuously to its 5° max at the quarter-point) independently rules
+   out the old 5°00'-at-80° plateau.
+
+Where Torat Emet 363 is itself corrupt (15:6 rows 120°/150°/170° — the
+sequence rises where it must fall), the engine follows the authentic
+manuscripts, corroborated at 170° by the 2 Sivan worksheet's מנת מסלול
+of 0°42' at maslul 172°49'. The engine's old 160° value (2°05') appears
+in **no** witness and was replaced by 1°56'.
+
+**Changed rows:** maslul 10°/20°/30°/40°/160°; latitude 50°/60°/70°/80°.
+**Impact:** moon true longitude ±up-to-7' when maslul hanachon is in
+0-49° or 311-360°; moon latitude ±up-to-6' in the 45°-85° lookup range.
+2 Sivan ה'תשפו: latitude 5°00'→4°58' N, keshet ≈15°15' (unchanged to the
+minute), verdict unchanged. All 84 regression tests green, including the
+Rambam's 2 Iyar fixtures.
+
+---
+
 ## Q6. Should mean-molad timeline anchoring use Jerusalem mean solar
 time instead of UT?
 
