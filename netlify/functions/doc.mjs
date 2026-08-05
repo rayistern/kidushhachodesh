@@ -6,13 +6,20 @@ const DOCS_DIR = path.resolve(process.cwd(), 'docs');
 
 export default async (req) => {
   const url = new URL(req.url);
-  const name = url.pathname.replace(/^\/docs\//, '');
-  if (!name || name.includes('..') || name.includes('/')) {
+  // Strip the optional /kh proxy prefix — Netlify rewrites keep the
+  // original URL, so the proxied path arrives un-rewritten. Subpaths
+  // (sources/, audits/) are legitimate; traversal is not.
+  const name = url.pathname.replace(/^(?:\/kh)?\/docs\/?/, '');
+  if (!name || name.includes('..') || name.includes('\\') || path.isAbsolute(name)) {
+    return new Response('Not found', { status: 404 });
+  }
+  const resolved = path.resolve(DOCS_DIR, name);
+  if (!resolved.startsWith(DOCS_DIR + path.sep)) {
     return new Response('Not found', { status: 404 });
   }
   let body;
   try {
-    body = readFileSync(path.join(DOCS_DIR, name), 'utf8');
+    body = readFileSync(resolved, 'utf8');
   } catch {
     return new Response(`Not found: ${name}`, { status: 404 });
   }

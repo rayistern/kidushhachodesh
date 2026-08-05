@@ -32,9 +32,11 @@ const BANNER = (file) => `/*
 
 export default async (req) => {
   const url = new URL(req.url);
-  // Optional trailing slash so bare `/engine` (and the `/kh/engine`
-  // alias, which rewrites to it) serve the index instead of 404ing.
-  const name = url.pathname.replace(/^\/engine\/?/, '');
+  // Netlify's status-200 rewrites keep the ORIGINAL url, so through the
+  // /kh proxy this function sees /kh/engine/... — strip the optional
+  // prefix (and optional trailing slash, so bare `/engine` serves the
+  // index). This is why /kh/engine/* 404'd since launch.
+  const name = url.pathname.replace(/^(?:\/kh)?\/engine\/?/, '');
 
   // Index listing
   if (!name || name === '' || name === 'index.json') {

@@ -29,7 +29,9 @@ function listTemplates() {
 
 export default async (req) => {
   const url = new URL(req.url);
-  const name = url.pathname.replace(/^\/templates\/?/, '');
+  // Strip the optional /kh proxy prefix — Netlify rewrites keep the
+  // original URL, so the proxied path arrives un-rewritten.
+  const name = url.pathname.replace(/^(?:\/kh)?\/templates\/?/, '');
 
   // Index listing
   if (!name || name === '') {
