@@ -48,6 +48,9 @@ Both doors talk to the same corpus and the same engine. Pick whichever works.
 
 ## HTTP endpoints (for browsing or non-MCP use)
 
+- `GET /api/index.json` — machine-readable endpoint discovery. **Pin this
+  one URL** in anything you publish; discover the rest from it
+  (stability promise: /docs/API_CONTRACT.md).
 - `GET /api/search?q=…[&type=…]` — JSON search results.
 - `GET /api/calculate?date=YYYY-MM-DD` — JSON pipeline output.
 - `GET /api/source?area=engine` / `…&file=pipeline.js` — source browsing.
