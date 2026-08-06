@@ -10,6 +10,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useCalculationStore } from '../../stores/calculationStore';
+import { useCalendarStore } from '../../stores/calendarStore';
 import { useVisualizationStore } from '../../stores/visualizationStore';
 import {
   parseEmbedParams,
@@ -33,7 +34,11 @@ const post = (msg) => {
 export default function EmbedView() {
   const location = useLocation();
   const [{ view }, setParams] = useState(() => parseEmbedParams(location.search));
-  const setDateFromISO = useCalculationStore((s) => s.setDateFromISO);
+  // Date lives in calendarStore; the computation lives in
+  // calculationStore (the original blank-page bug imported the date
+  // setter from the wrong store, which threw on mount).
+  const setDateFromISO = useCalendarStore((s) => s.setDateFromISO);
+  const compute = useCalculationStore((s) => s.compute);
   const selectStep = useCalculationStore((s) => s.selectStep);
   const resetAnimation = useVisualizationStore((s) => s.resetAnimation);
   const setCameraPreset = useVisualizationStore((s) => s.setCameraPreset);
@@ -43,6 +48,10 @@ export default function EmbedView() {
     const p = parseEmbedParams(location.search);
     resetAnimation();
     if (p.date) setDateFromISO(p.date);
+    // The store only holds the date — nothing computes until compute()
+    // runs (AppShell does this for the main site; the embed must too,
+    // or every view waits forever on a null calculation).
+    compute(useCalendarStore.getState().currentDate);
     if (p.step) selectStep(p.step);
     post(embedEvents.ready());
     post(embedEvents.state(p.date, p.view));
@@ -54,14 +63,17 @@ export default function EmbedView() {
     const onMessage = (event) => {
       const cmd = parseHostCommand(event.data);
       if (!cmd) return;
-      if (cmd.type === 'set-date') setDateFromISO(cmd.date);
+      if (cmd.type === 'set-date') {
+        setDateFromISO(cmd.date);
+        compute(useCalendarStore.getState().currentDate);
+      }
       if (cmd.type === 'set-view') setParams((prev) => ({ ...prev, view: cmd.view }));
       if (cmd.type === 'select-step') selectStep(cmd.stepId);
       if (cmd.type === 'camera') setCameraPreset(cmd.preset);
     };
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);
-  }, [setDateFromISO, selectStep, setCameraPreset]);
+  }, [setDateFromISO, compute, selectStep, setCameraPreset]);
 
   // Report step selections back to the host (drill-down clicks inside
   // the steps/visibility views).
