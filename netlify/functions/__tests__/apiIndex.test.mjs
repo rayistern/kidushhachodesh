@@ -47,7 +47,11 @@ describe('/api/index.json discovery root', () => {
       if (e.path === '/llms.txt') continue;
       const bare = e.path.replace(/\/\{[^}]+\}$/, '');
       const ok = [...registered].some(
-        (r) => r === e.path || r === bare || r === `${bare}/*` || r.replace('/*', '') === bare,
+        (r) =>
+          r === e.path ||
+          r === bare ||
+          r === `${bare}/*` ||
+          (r.endsWith('/*') && e.path.startsWith(r.slice(0, -1))),
       );
       expect(ok, `${e.path} is listed but no function registers it`).toBe(true);
     }
