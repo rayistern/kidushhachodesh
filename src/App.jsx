@@ -26,6 +26,7 @@ class ErrorBoundary extends React.Component {
 // Lazy load heavy views so route-based code splitting works.
 const AppShell = React.lazy(() => import('./components/layout/AppShell'));
 const CompareView = React.lazy(() => import('./components/compare/CompareView'));
+const EmbedView = React.lazy(() => import('./components/embed/EmbedView'));
 
 const Fallback = () => (
   <div style={{ padding: 40, color: '#4ea1f7', background: '#0a0e14', minHeight: '100vh', fontFamily: 'monospace' }}>
@@ -45,6 +46,7 @@ export default function App() {
           <Route path="/learn" element={<AppShell initialPreset="learn" />} />
           <Route path="/learn/:chapter" element={<AppShell initialPreset="learn" />} />
           <Route path="/compare" element={<CompareView />} />
+          <Route path="/embed" element={<EmbedView />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </React.Suspense>

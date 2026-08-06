@@ -20,7 +20,9 @@ hosting changes.
 
 3. **These paths are stable** (relative to the base):
    `/api/index.json`, `/api/calculate`, `/api/search`, `/api/source`,
-   `/docs/*`, `/templates/*`, `/engine/*`, `/mcp`, `/llms.txt`.
+   `/docs/*`, `/templates/*`, `/engine/*`, `/mcp`, `/llms.txt`, and
+   `/embed` (the observatory iframe surface — params + postMessage
+   shapes per `docs/EMBED_PROTOCOL.md`, added 2026-08-06).
 
 4. **Changes are additive.** New endpoints, new response fields, and new
    query parameters are fine. Removing or renaming a path, a required

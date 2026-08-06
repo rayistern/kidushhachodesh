@@ -72,6 +72,19 @@ const INDEX = {
         'engine and corpus.',
     },
     {
+      path: '/embed',
+      method: 'GET',
+      params: {
+        date: 'YYYY-MM-DD (optional)',
+        view: 'scene | ribbon | visibility | steps (optional)',
+        step: 'step id to pre-select (optional)',
+      },
+      description:
+        'Embeddable observatory (iframe surface, no chrome): the 3D ' +
+        'galgalim scene, 2D ecliptic ribbon, KH 17 visibility panel, or ' +
+        'step drill-down, postMessage-controlled. Protocol: /docs/EMBED_PROTOCOL.md.',
+    },
+    {
       path: '/llms.txt',
       method: 'GET',
       description: 'Human/AI-readable overview of the whole surface.',

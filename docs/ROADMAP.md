@@ -1,5 +1,13 @@
 # Kiddush HaChodesh Dashboard — Roadmap
 
+> **PIVOT 2026-08-06 (issue #41): one interface, and it is zajac.**
+> This project narrows to (1) the engine + public API contract, (2) the
+> embeddable observatory (`/embed`, docs/EMBED_PROTOCOL.md), and (3) the
+> agent layer. The UI phases below are historical record; the living-
+> sefer reader and all user-facing surface work move to the zajac repo
+> (merkos-302/zajac#134), generalized to all of Mishneh Torah. This
+> site's standalone navigation retires once zajac's adoption ships.
+
 Living document. Current focus: deepen pedagogical value before / during Rabbi Zajac's astronomical chapters (12-17).
 
 ## Status legend

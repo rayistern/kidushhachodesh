@@ -42,9 +42,12 @@ describe('/api/index.json discovery root', () => {
     const res = await indexFn(new Request('https://x.example/api/index.json'));
     const body = JSON.parse(await res.text());
     const registered = registeredPaths();
+    // Contract paths served by the SPA/static layer, not by a function:
+    // llms.txt is a static asset; /embed is a client route covered by the
+    // netlify.toml `/kh/*` SPA fallback (verified there, not here).
+    const NON_FUNCTION_PATHS = new Set(['/llms.txt', '/embed']);
     for (const e of body.endpoints) {
-      // Static assets aren't functions; wildcard entries match their prefix.
-      if (e.path === '/llms.txt') continue;
+      if (NON_FUNCTION_PATHS.has(e.path)) continue;
       const bare = e.path.replace(/\/\{[^}]+\}$/, '');
       const ok = [...registered].some(
         (r) =>
