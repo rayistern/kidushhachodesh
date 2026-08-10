@@ -79,8 +79,12 @@ describe('KH 11:10 — addition carries at sixty, degrees at 360', () => {
 });
 
 describe('KH 11:8-9 — locating a longitude in the constellations', () => {
-  it("places 70°30'40\" in Gemini, within the eleventh degree", () => {
+  it("places 70°30'40\" in Teomim, within the eleventh degree", () => {
     const pos = zodiacPosition(sexagesimalToDecimal({ degrees: 70, minutes: 30, seconds: 40 }));
+    expect(pos.translit).toBe('Teomim');
+    expect(pos.hebrew).toBe('תאומים');
+    // `english` still exists — `constellationEnglish` is a published
+    // field of the calculation API and must not quietly change.
     expect(pos.english).toBe('Gemini');
     // Two full signs (60°) removed leaves 10°30'40".
     expect(formatSexagesimal(decimalToSexagesimal(pos.degreesInto))).toBe(`10° 30' 40"`);
@@ -88,19 +92,36 @@ describe('KH 11:8-9 — locating a longitude in the constellations', () => {
     expect(pos.ordinalDegree).toBe(11);
   });
 
-  it('places 320° in Aquarius, in its twentieth degree', () => {
+  it("places 320° in D'li, in its twentieth degree", () => {
     const pos = zodiacPosition(320);
-    expect(pos.english).toBe('Aquarius');
+    expect(pos.translit).toBe("D'li");
+    expect(pos.hebrew).toBe('דלי');
     expect(pos.degreesInto).toBe(20);
     // Exactly on the boundary: 20° into the sign begins the 21st degree.
     expect(pos.ordinalDegree).toBe(21);
   });
 
-  it('counts from the start of Aries and wraps a full circle', () => {
-    expect(zodiacPosition(0).english).toBe('Aries');
-    expect(zodiacPosition(360).english).toBe('Aries');
-    expect(zodiacPosition(-1).english).toBe('Pisces');
+  it('counts from the start of Taleh and wraps a full circle', () => {
+    expect(zodiacPosition(0).translit).toBe('Taleh');
+    expect(zodiacPosition(360).translit).toBe('Taleh');
+    expect(zodiacPosition(-1).translit).toBe('Dagim');
     expect(zodiacPosition(359.99).index).toBe(11);
+  });
+
+  it('keeps the transliterated names aligned with the Hebrew, in order', () => {
+    // A mis-ordered or short list would silently mislabel every
+    // position, so the two lists are checked against each other rather
+    // than each being trusted on its own.
+    expect(CONSTANTS.CONSTELLATION_TRANSLIT).toHaveLength(12);
+    expect(CONSTANTS.CONSTELLATION_TRANSLIT).toEqual([
+      'Taleh', 'Shor', 'Teomim', 'Sartan', 'Aryeh', 'Betulah',
+      'Moznayim', 'Akrav', 'Keshet', "G'di", "D'li", 'Dagim',
+    ]);
+    for (let i = 0; i < 12; i++) {
+      const pos = zodiacPosition(i * 30 + 15);
+      expect(pos.hebrew).toBe(CONSTANTS.CONSTELLATIONS[i]);
+      expect(pos.translit).toBe(CONSTANTS.CONSTELLATION_TRANSLIT[i]);
+    }
   });
 });
 

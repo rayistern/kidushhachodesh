@@ -48,6 +48,10 @@ export function zodiacPosition(longitude) {
   return {
     index,
     hebrew: CONSTANTS.CONSTELLATIONS[index],
+    // The Rambam's own term, transliterated — what the reading surfaces
+    // display. `english` is retained because `constellationEnglish` is a
+    // published field of the calculation API (docs/API_CONTRACT.md).
+    translit: CONSTANTS.CONSTELLATION_TRANSLIT[index],
     english: CONSTANTS.CONSTELLATION_NAMES_EN[index],
     symbol: SIGN_SYMBOLS[index],
     positionInConstellation: degreesInto,

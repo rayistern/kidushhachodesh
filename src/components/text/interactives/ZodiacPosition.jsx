@@ -13,7 +13,7 @@
  */
 import React, { useState, useMemo } from 'react';
 import InteractiveCard, { DmsInput, PresetButton } from './InteractiveCard';
-import { zodiacPosition, ordinalSuffix, SIGN_ARC } from '../../../engine/zodiac';
+import { zodiacPosition, ordinalSuffix, SIGN_ARC, SIGN_SYMBOLS } from '../../../engine/zodiac';
 import {
   sexagesimalToDecimal,
   decimalToSexagesimal,
@@ -65,11 +65,12 @@ export default function ZodiacPosition() {
               <span className="text-2xl" aria-hidden="true">
                 {pos.symbol}
               </span>
-              <span className="text-lg font-bold">{pos.english}</span>
+              <span className="text-lg font-bold">{pos.translit}</span>
               <span className="hebrew-text text-lg text-[var(--color-accent)]">{pos.hebrew}</span>
+              <span className="text-xs text-[var(--color-text-secondary)]">{pos.english}</span>
             </div>
             <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
-              In {pos.english}, in the{' '}
+              In {pos.translit}, in the{' '}
               <strong className="text-[var(--color-gold)]">
                 {pos.ordinalDegree}
                 {ordinalSuffix(pos.ordinalDegree)} degree
@@ -84,14 +85,14 @@ export default function ZodiacPosition() {
               contained in {formatSexagesimal(dms)}:{' '}
               <strong>{signsRemoved}</strong>
               {signsRemoved > 0 && (
-                <> — {CONSTANTS.CONSTELLATION_NAMES_EN.slice(0, signsRemoved).join(', ')}</>
+                <> — {CONSTANTS.CONSTELLATION_TRANSLIT.slice(0, signsRemoved).join(', ')}</>
               )}
               .
             </li>
             <li>
               <span className="font-mono text-[var(--color-gold)]">2.</span> Remove{' '}
               {signsRemoved} × 30° = {signsRemoved * SIGN_ARC}°, leaving{' '}
-              <strong>{formatSexagesimal(intoDms)}</strong> into {pos.english}.
+              <strong>{formatSexagesimal(intoDms)}</strong> into {pos.translit}.
             </li>
             <li>
               <span className="font-mono text-[var(--color-gold)]">3.</span> An arc of{' '}
@@ -145,11 +146,12 @@ function ZodiacWheel({ longitude, activeIndex }) {
     <figure className="mx-auto w-full max-w-[260px]">
       <svg viewBox={`0 0 ${size} ${size}`} className="w-full" role="img"
         aria-label={`Zodiac wheel with a marker at ${longitude.toFixed(2)} degrees`}>
-        {CONSTANTS.CONSTELLATION_NAMES_EN.map((name, i) => {
+        {CONSTANTS.CONSTELLATION_TRANSLIT.map((name, i) => {
           const active = i === activeIndex;
           const [lx, ly] = point((rOuter + rInner) / 2, i * SIGN_ARC + SIGN_ARC / 2);
           return (
             <g key={name}>
+              <title>{`${name} — ${CONSTANTS.CONSTELLATIONS[i]}`}</title>
               <path
                 d={sectorPath(i)}
                 fill={active ? 'var(--color-accent)' : 'var(--color-card)'}
@@ -165,7 +167,7 @@ function ZodiacWheel({ longitude, activeIndex }) {
                 fontSize="15"
                 fill={active ? 'var(--color-text)' : 'var(--color-text-secondary)'}
               >
-                {['♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓'][i]}
+                {SIGN_SYMBOLS[i]}
               </text>
             </g>
           );

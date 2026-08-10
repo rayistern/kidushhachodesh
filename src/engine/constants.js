@@ -333,6 +333,21 @@ export const CONSTANTS = {
     "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"
   ],
 
+  // Transliterated Hebrew names — what the Rambam actually calls the
+  // mazalot (KH 11:9). Preferred over the Latin names in the reading
+  // surfaces: "Keshet" is the term in the text, "Sagittarius" is a
+  // translation of it into another tradition's vocabulary.
+  //
+  // Spellings match MAZALOT_LABELS in src/constants.js, which has
+  // labelled the 2D zodiac belt this way since before this list
+  // existed; that file now re-exports these so the two cannot drift.
+  // CONSTELLATION_NAMES_EN is kept because `constellationEnglish` is a
+  // published field of the calculation API — see docs/API_CONTRACT.md.
+  CONSTELLATION_TRANSLIT: [
+    "Taleh", "Shor", "Teomim", "Sartan", "Aryeh", "Betulah",
+    "Moznayim", "Akrav", "Keshet", "G'di", "D'li", "Dagim"
+  ],
+
   CONSTELLATION_MAP: {
     "טלה": "Aries", "שור": "Taurus", "תאומים": "Gemini",
     "סרטן": "Cancer", "אריה": "Leo", "בתולה": "Virgo",
