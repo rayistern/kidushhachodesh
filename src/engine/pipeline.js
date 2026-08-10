@@ -46,6 +46,7 @@ import { runFixedCalendarChain } from './fixedCalendar/index.js';
 import { HDate } from './epochDays.js';
 import { CONSTANTS } from './constants.js';
 import { normalizeDegrees } from './dmsUtils.js';
+import { zodiacPosition } from './zodiac.js';
 
 /**
  * Run all Rambam calculations for a given date.
@@ -131,15 +132,10 @@ export function getFullCalculation(date) {
   // ── Step 13: Season info ──
   const season = calculateSeasonalInfo(days);
 
-  // Helper: get constellation from longitude
-  const getConstellation = (lon) => {
-    const idx = Math.floor(lon / 30);
-    return {
-      hebrew: CONSTANTS.CONSTELLATIONS[idx],
-      english: CONSTANTS.CONSTELLATION_NAMES_EN[idx],
-      positionInConstellation: lon % 30,
-    };
-  };
+  // Helper: get constellation from longitude. Shares one definition
+  // with the KH 11:7-9 teaching surface (engine/zodiac.js) — the
+  // returned object is a superset of the three keys used below.
+  const getConstellation = (lon) => zodiacPosition(lon);
 
   // Ordered steps for drill-down display
   const steps = [

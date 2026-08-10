@@ -14,7 +14,7 @@
  */
 import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest';
 import React from 'react';
-import { render, screen, cleanup, waitFor } from '@testing-library/react';
+import { render, screen, cleanup, waitFor, fireEvent } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import TextIndex from './TextIndex';
 import TextChapter from './TextChapter';
@@ -88,6 +88,44 @@ describe('TextChapter', () => {
     renderChapter('/text/1');
     await waitFor(() => expect(screen.getByText(/Torat Emet 363/)).toBeTruthy());
     expect(screen.getByText(/Touger/)).toBeTruthy();
+  });
+
+  it('mounts the chapter-11 interactives, and only on chapter 11', async () => {
+    // Chapter 11 carries the KH 11:7-17 teaching cards.
+    const { unmount } = renderChapter('/text/11');
+    await waitFor(() =>
+      expect(screen.getByText(/Where in the zodiac is this longitude/)).toBeTruthy(),
+    );
+    expect(screen.getByText(/Add and subtract in degrees/)).toBeTruthy();
+    expect(screen.getByText(/Uniform motion, uneven appearance/)).toBeTruthy();
+    expect(screen.getByText(/How many days since the starting point/)).toBeTruthy();
+    expect(screen.getByText(/band of latitude/)).toBeTruthy();
+    unmount();
+
+    // Chapter 1 has none registered, so the reader stays plain text.
+    renderChapter('/text/1');
+    await waitFor(() => expect(screen.getByText('TOUGER ONE', { exact: false })).toBeTruthy());
+    expect(screen.queryByText(/Where in the zodiac is this longitude/)).toBeNull();
+  });
+
+  it('keeps a card whose halacha runs past the served text', async () => {
+    // The stub serves 2 halachot; every chapter-11 card is registered
+    // after halacha 9 or later. They must still render.
+    renderChapter('/text/11');
+    await waitFor(() =>
+      expect(screen.getByText(/Where in the zodiac is this longitude/)).toBeTruthy(),
+    );
+  });
+
+  it("shows the Rambam's own KH 11:12 answer once the calculator is opened", async () => {
+    // The card is collapsed by default, so this also proves the toggle
+    // works — and that the arithmetic in lib/sexagesimal reaches the DOM
+    // rather than only passing its own unit tests.
+    renderChapter('/text/11');
+    const heading = await screen.findByText(/Add and subtract in degrees/);
+    fireEvent.click(heading.closest('button'));
+    await waitFor(() => expect(screen.getByText(`259° 29' 50"`)).toBeTruthy());
+    expect(screen.getByText(/This is the answer stated in KH 11:12/)).toBeTruthy();
   });
 
   it('redirects an out-of-range chapter to the index', async () => {

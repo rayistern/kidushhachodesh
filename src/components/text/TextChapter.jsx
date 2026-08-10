@@ -26,6 +26,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useParams, Navigate } from 'react-router-dom';
 import { fetchChapter } from '../../lib/sefaria';
 import { CHAPTER_TITLES, isValidChapter, sectionForChapter } from '../../content/khChapters';
+import { interactivesForChapter } from './interactives';
 
 export default function TextChapter() {
   const { chapter: chapterParam } = useParams();
@@ -178,6 +179,22 @@ function Halachot({ text, chapter, showHebrew, showEnglish, showFootnotes }) {
 
   const indices = useMemo(() => Array.from({ length: count }, (_, i) => i), [count]);
 
+  // Group the chapter's interactives by the halacha they follow. An
+  // entry pointing past the end of the served text is pulled back to the
+  // last halacha rather than silently disappearing — a chapter that
+  // Sefaria serves shorter than expected should still show its cards.
+  const cardsByHalacha = useMemo(() => {
+    const map = new Map();
+    if (count === 0) return map;
+    for (const item of interactivesForChapter(chapter)) {
+      const slot = Math.min(item.after, count);
+      const list = map.get(slot) || [];
+      list.push(item);
+      map.set(slot, list);
+    }
+    return map;
+  }, [chapter, count]);
+
   if (count === 0) {
     return (
       <div className="text-sm text-[var(--color-text-secondary)]">
@@ -200,8 +217,10 @@ function Halachot({ text, chapter, showHebrew, showEnglish, showFootnotes }) {
         const he = text.hebrew[i];
         const en = text.english[i];
         const id = `halacha-${i + 1}`;
+        const cards = cardsByHalacha.get(i + 1);
         return (
-          <article key={i} id={id} className="scroll-mt-32">
+          <React.Fragment key={i}>
+          <article id={id} className="scroll-mt-32">
             <a
               href={`#${id}`}
               className="mb-2 inline-block font-mono text-xs font-bold text-[var(--color-gold)] hover:underline"
@@ -227,6 +246,19 @@ function Halachot({ text, chapter, showHebrew, showEnglish, showFootnotes }) {
               )}
             </div>
           </article>
+          {cards?.map(({ id: cardId, Component }) => (
+            <React.Suspense
+              key={cardId}
+              fallback={
+                <div className="my-6 rounded-xl border border-[var(--color-border)] px-4 py-3 text-xs text-[var(--color-text-secondary)]">
+                  Loading interactive…
+                </div>
+              }
+            >
+              <Component />
+            </React.Suspense>
+          ))}
+          </React.Fragment>
         );
       })}
     </div>
