@@ -27,6 +27,8 @@ class ErrorBoundary extends React.Component {
 const AppShell = React.lazy(() => import('./components/layout/AppShell'));
 const CompareView = React.lazy(() => import('./components/compare/CompareView'));
 const EmbedView = React.lazy(() => import('./components/embed/EmbedView'));
+const TextIndex = React.lazy(() => import('./components/text/TextIndex'));
+const TextChapter = React.lazy(() => import('./components/text/TextChapter'));
 
 const Fallback = () => (
   <div style={{ padding: 40, color: '#4ea1f7', background: '#0a0e14', minHeight: '100vh', fontFamily: 'monospace' }}>
@@ -45,6 +47,9 @@ export default function App() {
           <Route path="/calculate/:date" element={<AppShell initialPreset="calculate" />} />
           <Route path="/learn" element={<AppShell initialPreset="learn" />} />
           <Route path="/learn/:chapter" element={<AppShell initialPreset="learn" />} />
+          {/* Full Rambam text — one page per chapter, KH 1-19. */}
+          <Route path="/text" element={<TextIndex />} />
+          <Route path="/text/:chapter" element={<TextChapter />} />
           <Route path="/compare" element={<CompareView />} />
           <Route path="/embed" element={<EmbedView />} />
           <Route path="*" element={<Navigate to="/" replace />} />

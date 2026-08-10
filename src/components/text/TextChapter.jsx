@@ -1,0 +1,274 @@
+/**
+ * TextChapter — one chapter of Hilchot Kidush HaChodesh on its own page.
+ *
+ * ═══════════════════════════════════════════════════════════════════
+ *  REGIME TAG: **both** — serves all 19 chapters, across both regimes.
+ *  SURFACE CATEGORY: internal UI (Rambam text display)
+ * ═══════════════════════════════════════════════════════════════════
+ *
+ * Route: `/text/:chapter`. Distinct from the `RambamReader` panel in
+ * the dashboard, which is a narrow side-panel bound to the UI store's
+ * `activeChapter` and scoped to the astronomical chapters (11-19).
+ * This page is a standalone reading surface for the whole text, so it
+ * keeps its own local state and touches no store.
+ *
+ * Hebrew is the vocalized Torat Emet edition; English is Touger. Both
+ * are selected by version title in `lib/sefaria.js` — see the notes
+ * there on why position in the response is not trusted.
+ *
+ * The Touger text carries inline footnotes as
+ * `<sup class="footnote-marker">` + `<i class="footnote">` pairs. They
+ * are collapsed by default (CSS in index.css) because reading them
+ * inline breaks the sentence mid-clause; the "Footnotes" toggle adds
+ * `kh-show-footnotes` to reveal them as indented blocks.
+ */
+import React, { useEffect, useMemo, useState } from 'react';
+import { Link, useParams, Navigate } from 'react-router-dom';
+import { fetchChapter } from '../../lib/sefaria';
+import { CHAPTER_TITLES, isValidChapter, sectionForChapter } from '../../content/khChapters';
+
+export default function TextChapter() {
+  const { chapter: chapterParam } = useParams();
+  const chapter = Number(chapterParam);
+
+  const [text, setText] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [showHebrew, setShowHebrew] = useState(true);
+  const [showEnglish, setShowEnglish] = useState(true);
+  const [showFootnotes, setShowFootnotes] = useState(false);
+
+  const valid = isValidChapter(chapter);
+
+  useEffect(() => {
+    if (!valid) return undefined;
+    const controller = new AbortController();
+    setLoading(true);
+    setText(null);
+    fetchChapter(chapter, { signal: controller.signal })
+      .then((data) => {
+        setText(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        // Only an aborted fetch reaches here; a superseded chapter
+        // request must not clear the loading state of the new one.
+        if (err?.name !== 'AbortError') setLoading(false);
+      });
+    return () => controller.abort();
+  }, [chapter, valid]);
+
+  // Jumping between chapters should land at the top of the new chapter,
+  // not wherever the previous one was scrolled to.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [chapter]);
+
+  if (!valid) return <Navigate to="/text" replace />;
+
+  const title = CHAPTER_TITLES[chapter];
+  const section = sectionForChapter(chapter);
+  const prev = chapter > 1 ? chapter - 1 : null;
+  const next = chapter < 19 ? chapter + 1 : null;
+
+  return (
+    <div className="min-h-[100dvh] bg-[var(--color-bg)] text-[var(--color-text)]">
+      <header className="sticky top-0 z-20 border-b border-[var(--color-border)] bg-[var(--color-surface)] safe-top">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-3">
+          <div className="flex items-center justify-between gap-4">
+            <div className="min-w-0">
+              <Link to="/text" className="text-xs text-[var(--color-accent)] hover:underline">
+                ← All chapters
+              </Link>
+              <h1 className="truncate text-base sm:text-xl font-bold">
+                Chapter {chapter}: {title.en}
+              </h1>
+              <div className="hebrew-text truncate text-sm text-[var(--color-accent)]">
+                פרק {chapter}: {title.he}
+              </div>
+            </div>
+            <ChapterPager prev={prev} next={next} />
+          </div>
+
+          <div className="mt-2 flex flex-wrap items-center gap-1.5">
+            <Toggle active={showHebrew} onClick={() => setShowHebrew((v) => !v)}>
+              Hebrew
+            </Toggle>
+            <Toggle active={showEnglish} onClick={() => setShowEnglish((v) => !v)}>
+              English
+            </Toggle>
+            <Toggle active={showFootnotes} onClick={() => setShowFootnotes((v) => !v)}>
+              Footnotes
+            </Toggle>
+            {section && (
+              <span className="ml-auto hidden sm:inline text-xs text-[var(--color-text-secondary)]">
+                {section.en}
+              </span>
+            )}
+          </div>
+        </div>
+      </header>
+
+      <main className="mx-auto max-w-6xl px-4 sm:px-6 py-6">
+        {loading && (
+          <div className="animate-pulse text-sm text-[var(--color-text-secondary)]">
+            Loading chapter {chapter} from Sefaria…
+          </div>
+        )}
+
+        {text?.error && (
+          <div className="rounded-lg border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-300">
+            <div className="font-bold">Could not load chapter {chapter}.</div>
+            <div className="mt-1 opacity-80">{text.error}</div>
+            <div className="mt-2 opacity-80">
+              The text is fetched live from Sefaria — check your internet connection and
+              reload.
+            </div>
+          </div>
+        )}
+
+        {text && !text.error && (
+          <Halachot
+            text={text}
+            chapter={chapter}
+            showHebrew={showHebrew}
+            showEnglish={showEnglish}
+            showFootnotes={showFootnotes}
+          />
+        )}
+
+        {text && !text.error && (
+          <footer className="mt-8 border-t border-[var(--color-border)] pt-4">
+            <div className="text-xs text-[var(--color-text-secondary)] leading-relaxed">
+              {text.heVersionTitle && <div>Hebrew: {text.heVersionTitle}</div>}
+              {text.enVersionTitle && <div>English: {text.enVersionTitle}</div>}
+              <div className="mt-1">
+                Text courtesy of{' '}
+                <a
+                  href={`https://www.sefaria.org/Mishneh_Torah,_Sanctification_of_the_New_Month.${chapter}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-[var(--color-accent)] hover:underline"
+                >
+                  Sefaria
+                </a>
+                .
+              </div>
+            </div>
+            <div className="mt-4 flex justify-between">
+              <ChapterPager prev={prev} next={next} />
+            </div>
+          </footer>
+        )}
+      </main>
+    </div>
+  );
+}
+
+function Halachot({ text, chapter, showHebrew, showEnglish, showFootnotes }) {
+  // Hebrew and English are parallel arrays of the same halachot. They
+  // agree in length on every chapter of this text today, but a version
+  // that splits a halacha differently would make them diverge — so pair
+  // by index up to the longer of the two rather than assuming a match.
+  const count = Math.max(text.hebrew.length, text.english.length);
+
+  const bothColumns = showHebrew && showEnglish;
+  const rowClass = bothColumns
+    ? 'grid gap-x-8 gap-y-2 lg:grid-cols-2'
+    : 'grid gap-y-2';
+
+  const indices = useMemo(() => Array.from({ length: count }, (_, i) => i), [count]);
+
+  if (count === 0) {
+    return (
+      <div className="text-sm text-[var(--color-text-secondary)]">
+        No text available for this chapter.
+      </div>
+    );
+  }
+
+  if (!showHebrew && !showEnglish) {
+    return (
+      <div className="text-sm text-[var(--color-text-secondary)]">
+        Both languages are hidden — turn Hebrew or English back on above.
+      </div>
+    );
+  }
+
+  return (
+    <div className={showFootnotes ? 'kh-show-footnotes space-y-8' : 'space-y-8'}>
+      {indices.map((i) => {
+        const he = text.hebrew[i];
+        const en = text.english[i];
+        const id = `halacha-${i + 1}`;
+        return (
+          <article key={i} id={id} className="scroll-mt-32">
+            <a
+              href={`#${id}`}
+              className="mb-2 inline-block font-mono text-xs font-bold text-[var(--color-gold)] hover:underline"
+              title={`Link to ${chapter}:${i + 1}`}
+            >
+              {chapter}:{i + 1}
+            </a>
+            <div className={rowClass}>
+              {/* Hebrew first in DOM order so it reads first when a
+                  screen reader or a stacked mobile layout linearizes
+                  the row; on wide screens the RTL column sits right. */}
+              {showHebrew && he && (
+                <div
+                  className="hebrew-text kh-halacha text-[15px] leading-loose text-[var(--color-text)] lg:order-2"
+                  dangerouslySetInnerHTML={{ __html: he }}
+                />
+              )}
+              {showEnglish && en && (
+                <div
+                  className="kh-halacha text-sm leading-relaxed text-[var(--color-text-secondary)] lg:order-1"
+                  dangerouslySetInnerHTML={{ __html: en }}
+                />
+              )}
+            </div>
+          </article>
+        );
+      })}
+    </div>
+  );
+}
+
+function ChapterPager({ prev, next }) {
+  return (
+    <nav className="flex shrink-0 items-center gap-1.5" aria-label="Chapter navigation">
+      <PagerLink to={prev ? `/text/${prev}` : null}>← {prev ?? ''}</PagerLink>
+      <PagerLink to={next ? `/text/${next}` : null}>{next ?? ''} →</PagerLink>
+    </nav>
+  );
+}
+
+function PagerLink({ to, children }) {
+  const base = 'rounded px-2 py-1 font-mono text-xs';
+  if (!to) {
+    return <span className={`${base} text-[var(--color-text-secondary)] opacity-30`}>{children}</span>;
+  }
+  return (
+    <Link
+      to={to}
+      className={`${base} bg-[var(--color-card)] text-[var(--color-text-secondary)] hover:bg-[var(--color-border)] hover:text-[var(--color-text)] transition-colors`}
+    >
+      {children}
+    </Link>
+  );
+}
+
+function Toggle({ active, onClick, children }) {
+  return (
+    <button
+      onClick={onClick}
+      aria-pressed={active}
+      className={`rounded px-2 py-0.5 text-xs transition-colors ${
+        active
+          ? 'bg-[var(--color-accent)] text-white'
+          : 'bg-[var(--color-card)] text-[var(--color-text-secondary)] hover:bg-[var(--color-border)]'
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
