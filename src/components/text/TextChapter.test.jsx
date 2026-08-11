@@ -31,7 +31,10 @@ const VERSIONS = [
   {
     language: 'en',
     versionTitle: 'Mishneh Torah, trans. by Eliyahu Touger. Jerusalem, Moznaim Pub. c1986-c2007',
-    text: ['TOUGER ONE<sup class="footnote-marker">1</sup><i class="footnote">A note.</i>', 'TOUGER TWO'],
+    text: [
+      'TOUGER ONE<sup class="footnote-marker">1</sup><i class="footnote">A note.</i><br>SECOND PARA<br>THIRD PARA',
+      'TOUGER TWO',
+    ],
   },
   { language: 'he', versionTitle: 'Wikisource Mishneh Torah', text: ['ויקי אחד', 'ויקי שתיים'] },
   { language: 'he', versionTitle: 'Torat Emet 363', text: ['עִבְרִית אַחַת', 'עִבְרִית שְׁתַּיִם'] },
@@ -82,6 +85,20 @@ describe('TextChapter', () => {
     expect(screen.getByText('עִבְרִית אַחַת')).toBeTruthy();
     // The runner-up English translation must not leak into the page.
     expect(screen.queryByText('NATAF ONE')).toBeNull();
+  });
+
+  it("breaks a halacha at the translation's own paragraph divisions", async () => {
+    const { container } = renderChapter('/text/1');
+    await waitFor(() => expect(screen.getByText('SECOND PARA')).toBeTruthy());
+    expect(screen.getByText('THIRD PARA')).toBeTruthy();
+
+    // Halacha 1's English has two <br> marks, so three paragraphs; the
+    // Hebrew has none, so exactly one.
+    const halacha = container.querySelector('#halacha-1');
+    const columns = halacha.querySelectorAll('.kh-halacha');
+    expect(columns).toHaveLength(2);
+    const paragraphCounts = Array.from(columns).map((c) => c.querySelectorAll('p').length);
+    expect(paragraphCounts.sort()).toEqual([1, 3]);
   });
 
   it('names the versions it actually rendered', async () => {

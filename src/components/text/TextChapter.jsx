@@ -27,6 +27,7 @@ import { Link, useParams, Navigate } from 'react-router-dom';
 import { fetchChapter } from '../../lib/sefaria';
 import { CHAPTER_TITLES, isValidChapter, sectionForChapter } from '../../content/khChapters';
 import { interactivesForChapter } from './interactives';
+import { splitParagraphs } from '../../lib/rambamText';
 
 export default function TextChapter() {
   const { chapter: chapterParam } = useParams();
@@ -233,15 +234,15 @@ function Halachot({ text, chapter, showHebrew, showEnglish, showFootnotes }) {
                   screen reader or a stacked mobile layout linearizes
                   the row; on wide screens the RTL column sits right. */}
               {showHebrew && he && (
-                <div
-                  className="hebrew-text kh-halacha text-[15px] leading-loose text-[var(--color-text)] lg:order-2"
-                  dangerouslySetInnerHTML={{ __html: he }}
+                <Prose
+                  html={he}
+                  className="hebrew-text text-[15px] leading-loose text-[var(--color-text)] lg:order-2"
                 />
               )}
               {showEnglish && en && (
-                <div
-                  className="kh-halacha text-sm leading-relaxed text-[var(--color-text-secondary)] lg:order-1"
-                  dangerouslySetInnerHTML={{ __html: en }}
+                <Prose
+                  html={en}
+                  className="text-sm leading-relaxed text-[var(--color-text-secondary)] lg:order-1"
                 />
               )}
             </div>
@@ -261,6 +262,27 @@ function Halachot({ text, chapter, showHebrew, showEnglish, showFootnotes }) {
           </React.Fragment>
         );
       })}
+    </div>
+  );
+}
+
+/**
+ * One language's text for one halacha, broken at the paragraph
+ * divisions the source marks. Long halachot are otherwise an
+ * undivided block — KH 12:2 runs to eight thousand characters.
+ */
+function Prose({ html, className }) {
+  const paragraphs = useMemo(() => splitParagraphs(html), [html]);
+
+  return (
+    <div className={`kh-halacha ${className}`}>
+      {paragraphs.map((p, i) => (
+        <p
+          key={i}
+          className={i > 0 ? 'mt-3' : undefined}
+          dangerouslySetInnerHTML={{ __html: p }}
+        />
+      ))}
     </div>
   );
 }
