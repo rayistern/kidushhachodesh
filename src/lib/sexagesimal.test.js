@@ -16,6 +16,8 @@ import {
 } from './sexagesimal';
 import { zodiacPosition } from '../engine/zodiac';
 import { CONSTANTS } from '../engine/constants';
+import { dmsToDecimal } from '../engine/dmsUtils';
+import { apparentDailyMotion } from '../components/text/interactives/MeanVsTrueMotion';
 
 describe('KH 11:12 — the worked subtraction', () => {
   it("reproduces the Rambam's 100°20'30\" − 200°50'40\" = 259°29'50\"", () => {
@@ -148,6 +150,34 @@ describe('KH 11:13-15 — the eccentric really is the model behind KH 13:4', () 
   it('peaks at the table\'s own maximum of 1°59\' when the maslul is 90°', () => {
     const trueAngle = Math.atan2(Math.sin(90 * DEG), ECCENTRICITY + Math.cos(90 * DEG)) / DEG;
     expect(Math.abs(90 - trueAngle) * 60).toBeCloseTo(119, 0); // 1°59' = 119'
+  });
+
+  it('makes the sun appear to crawl at apogee and race at perigee', () => {
+    // The gauge on the card prints these as the ends of its range, so
+    // they are claims on screen. Cross-checked against the apparent
+    // motion implied by the Rambam's own KH 13:4 corrections: stepping
+    // his table one mean day gives 57' 10" at apogee and 61' 13" at
+    // perigee. Tolerance is 5" — the table is tabulated at 10° spacing
+    // and interpolated, so exact agreement is not expected.
+    expect(Math.abs(apparentDailyMotion(0) * 3600 - (57 * 60 + 10))).toBeLessThan(5);
+    expect(Math.abs(apparentDailyMotion(180) * 3600 - (61 * 60 + 13))).toBeLessThan(5);
+    // And the swing between them really is about four arcminutes.
+    expect((apparentDailyMotion(180) - apparentDailyMotion(0)) * 3600).toBeGreaterThan(230);
+    expect((apparentDailyMotion(180) - apparentDailyMotion(0)) * 3600).toBeLessThan(260);
+  });
+
+  it('passes through the uniform rate exactly where the correction peaks', () => {
+    // The inversion the gauge exists to show: speed is extremal at the
+    // apsides (where the correction is nil) and mean at the quarter
+    // points (where the correction maxes). A running total peaks where
+    // the quantity it accumulates crosses zero.
+    const mean = dmsToDecimal(CONSTANTS.SUN.MEAN_MOTION_PER_DAY);
+    for (const quarter of [90, 270]) {
+      expect(Math.abs(apparentDailyMotion(quarter) - mean) * 3600).toBeLessThan(15);
+    }
+    for (const apsis of [0, 180]) {
+      expect(Math.abs(apparentDailyMotion(apsis) - mean) * 3600).toBeGreaterThan(100);
+    }
   });
 
   it('vanishes at apogee and perigee, where the two rays coincide', () => {

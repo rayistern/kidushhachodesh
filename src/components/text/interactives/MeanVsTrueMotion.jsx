@@ -37,8 +37,14 @@
 import React, { useState, useMemo } from 'react';
 import InteractiveCard from './InteractiveCard';
 import { CONSTANTS } from '../../../engine/constants';
+import { dmsToDecimal } from '../../../engine/dmsUtils';
 
 const DEG = Math.PI / 180;
+
+// The sun's uniform daily motion (KH 12:1). Used to ask "how far does
+// the sun APPEAR to move in one day, from here?" — which is the thing
+// the eccentric actually changes.
+const DAILY_MEAN = dmsToDecimal(CONSTANTS.SUN.MEAN_MOTION_PER_DAY);
 
 // Peak of the Rambam's sun correction table (KH 13:4), in degrees.
 const PEAK_CORRECTION = 1 + 59 / 60;
@@ -65,6 +71,27 @@ function equationOfCentre(alpha, eccentricity) {
   return { trueAngle: ((trueAngle % 360) + 360) % 360, correction };
 }
 
+/**
+ * How far the sun appears to move in one day, seen from the earth, when
+ * its mean position is `alpha` degrees past apogee.
+ *
+ * This is the physical content of the eccentric. The sun covers the same
+ * real arc every day, but an arc seen from farther away subtends a
+ * smaller angle — so near apogee it appears to crawl and near perigee to
+ * race. Measured by advancing the mean position one uniform day and
+ * asking how much the *observed* direction changed.
+ */
+export function apparentDailyMotion(alpha, eccentricity = ECCENTRICITY) {
+  const a = equationOfCentre(alpha, eccentricity).trueAngle;
+  const b = equationOfCentre(alpha + DAILY_MEAN, eccentricity).trueAngle;
+  return ((b - a + 540) % 360) - 180;
+}
+
+// The extremes fall exactly at the apsides: slowest at apogee, fastest
+// at perigee. Computed rather than hardcoded so they track the constant.
+const SLOWEST = apparentDailyMotion(0);
+const FASTEST = apparentDailyMotion(180);
+
 /** The Rambam's tabulated correction (KH 13:4), linearly interpolated. */
 function rambamCorrection(alpha) {
   const table = CONSTANTS.SUN_MASLUL_CORRECTIONS;
@@ -79,6 +106,18 @@ function rambamCorrection(alpha) {
     }
   }
   return 0;
+}
+
+/**
+ * Arc under a degree, as minutes and seconds. The apparent daily motion
+ * swings across only about four arcminutes, so rounding to whole
+ * minutes would flatten the entire effect this gauge exists to show.
+ */
+function formatMinutesSeconds(deg) {
+  const totalSeconds = deg * 3600;
+  const m = Math.floor(totalSeconds / 60);
+  const s = Math.round(totalSeconds - m * 60);
+  return s === 60 ? `${m + 1}' 0"` : `${m}' ${s}"`;
 }
 
 function formatArc(deg) {
@@ -98,6 +137,7 @@ export default function MeanVsTrueMotion() {
     [alpha],
   );
   const tabulated = useMemo(() => rambamCorrection(alpha), [alpha]);
+  const apparent = useMemo(() => apparentDailyMotion(alpha), [alpha]);
   // The Rambam's table is unsigned — it states a magnitude and KH 13:5
   // tells you whether to add or subtract. Compare magnitudes.
   const discrepancy = Math.abs(Math.abs(correction) - tabulated);
@@ -158,6 +198,8 @@ export default function MeanVsTrueMotion() {
             />
           </dl>
 
+          <SpeedGauge alpha={alpha} apparent={apparent} />
+
           <div className="mt-4 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] p-3">
             <div className="text-xs font-bold text-[var(--color-text)]">
               Against the Rambam's own table
@@ -203,6 +245,66 @@ export default function MeanVsTrueMotion() {
         </div>
       </div>
     </InteractiveCard>
+  );
+}
+
+/**
+ * Apparent daily motion, as a position on the range it swings across.
+ *
+ * The point this makes is the inversion: the extremes of *speed* fall
+ * at the apsides, where the *position* correction is nil, and the
+ * correction peaks at the quarter points, where the speed is passing
+ * through its mean. A running total peaks exactly where the thing it
+ * accumulates crosses zero — so these two never max out together.
+ */
+function SpeedGauge({ alpha, apparent }) {
+  const span = FASTEST - SLOWEST;
+  const fraction = (apparent - SLOWEST) / span;
+  const meanFraction = (DAILY_MEAN - SLOWEST) / span;
+  const excess = (apparent - DAILY_MEAN) * 3600;
+
+  // Near the apsides the day's motion is furthest from the mean; near
+  // the quarter points it is closest. Naming which regime the reader is
+  // looking at is the whole lesson of the gauge.
+  const nearApsis = Math.min(alpha % 180, 180 - (alpha % 180)) < 30;
+
+  return (
+    <div className="mt-4 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] p-3">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-2">
+        <span className="text-xs font-bold text-[var(--color-text)]">
+          How far the sun appears to move today
+        </span>
+        <span className="font-mono text-sm text-[var(--color-gold)]">{formatMinutesSeconds(apparent)}</span>
+      </div>
+
+      <div className="relative mt-2 h-2 rounded-full bg-[var(--color-card)]">
+        {/* The uniform rate, for reference. */}
+        <div
+          className="absolute top-[-3px] h-[14px] w-px bg-[var(--color-silver)]"
+          style={{ left: `${meanFraction * 100}%` }}
+          aria-hidden="true"
+        />
+        <div
+          className="absolute top-[-2px] h-[12px] w-[3px] rounded-full bg-[var(--color-gold)]"
+          style={{ left: `calc(${Math.min(1, Math.max(0, fraction)) * 100}% - 1.5px)` }}
+          aria-hidden="true"
+        />
+      </div>
+
+      <div className="mt-1 flex justify-between font-mono text-[10px] text-[var(--color-text-secondary)]">
+        <span>{formatMinutesSeconds(SLOWEST)} at apogee</span>
+        <span>{formatMinutesSeconds(FASTEST)} at perigee</span>
+      </div>
+
+      <p className="mt-2 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
+        {Math.abs(excess) < 1
+          ? 'Today it moves at very nearly the uniform rate — yet this is where the position correction is at its largest.'
+          : `${excess > 0 ? 'Faster' : 'Slower'} than the uniform rate by ${Math.abs(excess).toFixed(0)}" today.`}{' '}
+        {nearApsis
+          ? 'Near an apsis: the speed is furthest from the mean, and the position correction is nil — the sun lies on the line joining earth to the orbit\'s centre, so both rays point the same way.'
+          : 'Away from the apsides the daily speed is close to uniform, but the lead or lag accumulated since apogee is near its peak.'}
+      </p>
+    </div>
   );
 }
 
