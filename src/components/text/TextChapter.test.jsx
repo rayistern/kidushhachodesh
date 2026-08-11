@@ -157,6 +157,24 @@ describe('TextChapter', () => {
     expect(screen.getByText(/KH 12:2 states this result/)).toBeTruthy();
   });
 
+  it("shows the monthly motion KH 12:1 states outright when N is 29", async () => {
+    renderChapter('/text/12');
+    const heading = await screen.findByText(/Where is the sun, on average/);
+    fireEvent.click(heading.closest('button'));
+
+    const input = await screen.findByDisplayValue('100');
+    fireEvent.change(input, { target: { value: '29' } });
+
+    // 28° 35' 1" is the figure the chapter states for one month; it must
+    // appear as the motion subtotal, next to his published block, and
+    // not only be folded silently into the final position.
+    await waitFor(() => expect(screen.getAllByText(`28° 35′ 1.0″`).length).toBe(2));
+    expect(screen.getByText(/KH 12:1 publishes one month \(29 days\) directly/)).toBeTruthy();
+    // And the result is the one KH 15:8 states.
+    expect(screen.getByText(`35° 38′ 33.0″`)).toBeTruthy();
+    expect(screen.getByText(/KH 15:8 states this result/)).toBeTruthy();
+  });
+
   it('redirects an out-of-range chapter to the index', async () => {
     renderChapter('/text/20');
     await waitFor(() =>
