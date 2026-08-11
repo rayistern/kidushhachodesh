@@ -128,6 +128,18 @@ describe('TextChapter', () => {
     expect(screen.getByText(/This is the answer stated in KH 11:12/)).toBeTruthy();
   });
 
+  it('mounts the chapter-12 cards and shows the KH 12:2 result', async () => {
+    renderChapter('/text/12');
+    const heading = await screen.findByText(/Where is the sun, on average/);
+    expect(screen.getByText(/Why the daily motion is/)).toBeTruthy();
+    expect(screen.getByText(/The apogee, and how slowly it moves/)).toBeTruthy();
+
+    fireEvent.click(heading.closest('button'));
+    // The card defaults to the Rambam's own 100-day example.
+    await waitFor(() => expect(screen.getByText(`105° 37′ 25.0″`)).toBeTruthy());
+    expect(screen.getByText(/KH 12:2 states this result/)).toBeTruthy();
+  });
+
   it('redirects an out-of-range chapter to the index', async () => {
     renderChapter('/text/20');
     await waitFor(() =>

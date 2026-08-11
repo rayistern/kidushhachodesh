@@ -26,6 +26,9 @@ const SexagesimalArithmetic = React.lazy(() => import('./SexagesimalArithmetic')
 const MeanVsTrueMotion = React.lazy(() => import('./MeanVsTrueMotion'));
 const EpochCounter = React.lazy(() => import('./EpochCounter'));
 const JerusalemCoordinates = React.lazy(() => import('./JerusalemCoordinates'));
+const SunMeanPosition = React.lazy(() => import('./SunMeanPosition'));
+const HiddenThird = React.lazy(() => import('./HiddenThird'));
+const SunApogee = React.lazy(() => import('./SunApogee'));
 
 export const INTERACTIVES = {
   11: [
@@ -34,6 +37,14 @@ export const INTERACTIVES = {
     { id: 'mean-vs-true', after: 15, Component: MeanVsTrueMotion },
     { id: 'epoch-counter', after: 16, Component: EpochCounter },
     { id: 'jerusalem', after: 17, Component: JerusalemCoordinates },
+  ],
+  // Chapter 12 is only two halachot, and the second carries most of the
+  // method — so the daily-rate card follows 12:1 and both the position
+  // calculator and the apogee follow 12:2.
+  12: [
+    { id: 'hidden-third', after: 1, Component: HiddenThird },
+    { id: 'sun-mean-position', after: 2, Component: SunMeanPosition },
+    { id: 'sun-apogee', after: 2, Component: SunApogee },
   ],
 };
 
