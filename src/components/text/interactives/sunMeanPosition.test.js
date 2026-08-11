@@ -59,6 +59,44 @@ describe("KH 12:2 — the Rambam's worked example", () => {
   });
 });
 
+describe('N = 29 — the strongest self-check in the chapter', () => {
+  // 29 days is the sighting-to-sighting interval, so the Rambam
+  // publishes a dedicated block for it (28° 35' 1", KH 12:1) *and*
+  // works a full example at N=29 elsewhere (KH 15:8, where he states
+  // the sun's mean position as 35° 38' 33"). The card does not use the
+  // 29-day block — it decomposes into 2 tens and 9 singles — so these
+  // assertions check that his own table and his own worked example
+  // agree with the route the card actually takes.
+  it("reproduces KH 15:8's stated sun mean position of 35° 38' 33\"", () => {
+    expect(formatDms(meanAfter(29).result)).toBe(`35° 38′ 33.0″`);
+  });
+
+  it('agrees with the dedicated 29-day block it does not use', () => {
+    const viaBlocks = meanAfter(29).result;
+    const viaP29 = normalizeDegrees(
+      EPOCH_MEAN + dmsToDecimal(CONSTANTS.SUN_MEAN_PERIOD_BLOCKS.p29),
+    );
+    // Floating-point only: the daily rate is stored as 8.333", not 25/3.
+    expect(Math.abs(viaBlocks - viaP29) * 3600).toBeLessThan(0.01);
+  });
+
+  it('decomposes 29 into two tens and nine singles', () => {
+    expect(decomposeDays(29)).toEqual({ k: 0, j: 0, i: 0, h: 2, d: 9 });
+  });
+
+  it("would miss KH 15:8 by three seconds on the flat daily rate", () => {
+    // This is the case that settled the 8 vs 8⅓ question — see the note
+    // on CONSTANTS.SUN.MEAN_MOTION_PER_DAY.
+    const flat = meanLongitudeByPeriodBlocks(
+      29,
+      CONSTANTS.SUN_MEAN_PERIOD_BLOCKS,
+      { degrees: 0, minutes: 59, seconds: 8 },
+      EPOCH_MEAN,
+    );
+    expect(formatDms(flat.result)).toBe(`35° 38′ 30.0″`);
+  });
+});
+
 describe("KH 12:1 — the daily rate the printed text rounds", () => {
   const FLAT = { degrees: 0, minutes: 59, seconds: 8 };
   const gap = (rate, days, key) =>
