@@ -187,12 +187,16 @@ describe('TextChapter', () => {
     await waitFor(() => expect(screen.getByText(`105° 37′ 25.0″`)).toBeTruthy());
     expect(screen.getByText(`86° 45′ 23.0″`)).toBeTruthy();
     expect(screen.getByText(`18° 52′ 2.0″`)).toBeTruthy();
-    // The result appears twice by design: as the last step of the chain
-    // and again in the summary box beneath it.
-    expect(screen.getAllByText(`104° 59′ 25.0″`)).toHaveLength(2);
+    // The result appears three times by design: the last step of the
+    // chain, the summary box, and the "where was it actually" panel.
+    expect(screen.getAllByText(`104° 59′ 25.0″`)).toHaveLength(3);
     expect(screen.getByText(/KH 13:10 states this result/)).toBeTruthy();
     // And it is located in the constellation the text names.
     expect(screen.getByText(/Sartan/)).toBeTruthy();
+    // The modern comparison is present and reports a real gap, so the
+    // reader is never left assuming the model is exact.
+    expect(screen.getByText(/And where was the sun actually/)).toBeTruthy();
+    expect(screen.getByText(/places his longitudes in the tropical frame/)).toBeTruthy();
   });
 
   it('redirects an out-of-range chapter to the index', async () => {

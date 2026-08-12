@@ -53,4 +53,20 @@ export function daysFromEpoch(date) {
   return hd.abs() - EPOCH_ABS;
 }
 
+/**
+ * Inverse of `daysFromEpoch`: the civil (proleptic Gregorian) date N
+ * days after the Rambam's starting point, as a UTC-midnight Date.
+ *
+ * Both sides count in Rata Die absolute days, so this round-trips
+ * exactly and never touches a calendar conversion. 719163 is the
+ * absolute-day number of 1970-01-01, the Unix epoch.
+ *
+ * Provided for display and for lining a day count up against an
+ * external reference; nothing in the pipeline consumes it.
+ */
+export function dateFromEpochDays(days) {
+  const UNIX_EPOCH_ABS = 719163;
+  return new Date((EPOCH_ABS + Math.round(days) - UNIX_EPOCH_ABS) * 86400000);
+}
+
 export { HDate, EPOCH_ABS };

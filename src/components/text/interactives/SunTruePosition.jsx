@@ -24,7 +24,12 @@ import { calculateSunMeanLongitude, calculateSunApogee, lookupMaslulCorrection }
 import { formatDms, normalizeDegrees } from '../../../engine/dmsUtils';
 import { zodiacPosition, ordinalSuffix } from '../../../engine/zodiac';
 import { trueFromMean } from '../../../lib/maslulTable';
-import { daysFromEpoch } from '../../../engine/epochDays';
+import { daysFromEpoch, dateFromEpochDays } from '../../../engine/epochDays';
+import {
+  modernSunLongitude,
+  nightfallUTC,
+  angularDifference,
+} from '../../../lib/modernAstronomy';
 
 const RAMBAM_EXAMPLE_DAYS = 100;
 
@@ -166,6 +171,8 @@ export default function SunTruePosition() {
         )}
       </div>
 
+      <ActualSun days={days} rambamLongitude={trueLongitude} />
+
       <label className="mt-3 flex flex-wrap items-center gap-2 text-xs text-[var(--color-text-secondary)]">
         <input
           type="checkbox"
@@ -193,6 +200,82 @@ export default function SunTruePosition() {
         )}
       </p>
     </InteractiveCard>
+  );
+}
+
+/**
+ * Where the sun actually was, beside where the Rambam's method puts it.
+ *
+ * This is a comparison, not a correction. His answer is not being
+ * marked wrong — the point is that a reader should be able to see the
+ * size of the gap rather than take the model's fidelity on trust.
+ *
+ * The reference is Meeus's low-accuracy solar position (~0.01°), which
+ * is roughly two percent of the difference being reported, so the
+ * measurement is comfortably finer than the thing measured. See
+ * lib/modernAstronomy.js for the frame and timing caveats.
+ */
+function ActualSun({ days, rambamLongitude }) {
+  const { modern, gap, civilDate } = useMemo(() => {
+    const d = dateFromEpochDays(days);
+    // The Rambam's positions are for the beginning of the night, so the
+    // reference is taken at nightfall in Jerusalem on the same day.
+    const instant = nightfallUTC(d.getUTCFullYear(), d.getUTCMonth() + 1, d.getUTCDate());
+    const lon = modernSunLongitude(instant);
+    return {
+      modern: lon,
+      gap: angularDifference(rambamLongitude, lon),
+      civilDate: d.toISOString().slice(0, 10),
+    };
+  }, [days, rambamLongitude]);
+
+  const arcmin = Math.abs(gap) * 60;
+
+  return (
+    <div className="mt-4 rounded-lg border border-[var(--color-silver)]/30 bg-[var(--color-bg)] p-3">
+      <div className="text-xs font-bold text-[var(--color-text)]">
+        And where was the sun actually?
+      </div>
+
+      <div className="mt-2 grid grid-cols-2 gap-2 text-xs sm:grid-cols-3">
+        <div>
+          <div className="text-[var(--color-text-secondary)]">Rambam's method</div>
+          <div className="font-mono text-sm text-[var(--color-gold)]">
+            {formatDms(rambamLongitude)}
+          </div>
+        </div>
+        <div>
+          <div className="text-[var(--color-text-secondary)]">Modern astronomy</div>
+          <div className="font-mono text-sm text-[var(--color-silver)]">{formatDms(modern)}</div>
+        </div>
+        <div>
+          <div className="text-[var(--color-text-secondary)]">Difference</div>
+          <div className="font-mono text-sm text-[var(--color-accent)]">
+            {gap < 0 ? '−' : '+'}
+            {arcmin.toFixed(0)}′
+          </div>
+        </div>
+      </div>
+
+      <p className="mt-2 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
+        On {civilDate}, his method places the sun about {arcmin.toFixed(0)} arcminutes{' '}
+        {gap < 0 ? 'behind' : 'ahead of'} where it actually was — a little over{' '}
+        {(Math.abs(gap) * 2).toFixed(1)} solar diameters. That gap stays inside about a degree
+        across the whole 848 years since his epoch, and does not accumulate.
+      </p>
+      <p className="mt-1.5 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
+        It not growing is the more telling fact. Precession carries the equinox some 11.8° over
+        that span, so a model anchored to the fixed stars would have drifted by that much. His
+        does not, which places his longitudes in the tropical frame — measured from the equinox
+        point, as modern longitudes are.
+      </p>
+      <p className="mt-1.5 text-[10px] leading-relaxed text-[var(--color-text-secondary)] opacity-70">
+        Reference: Meeus, <em>Astronomical Algorithms</em> ch. 25, accurate to about 0.01°.
+        Compared at an approximate Jerusalem nightfall, since he reckons positions from the
+        beginning of the night; the sun moves ~2.5′ an hour, so that convention is worth a few
+        arcminutes of the figure above.
+      </p>
+    </div>
   );
 }
 
