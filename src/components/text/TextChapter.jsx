@@ -28,6 +28,7 @@ import { fetchChapter } from '../../lib/sefaria';
 import { CHAPTER_TITLES, isValidChapter, sectionForChapter } from '../../content/khChapters';
 import { interactivesForChapter } from './interactives';
 import { splitParagraphs } from '../../lib/rambamText';
+import { explanationsForChapter, hasExplanations } from '../../content/plainExplanations';
 
 export default function TextChapter() {
   const { chapter: chapterParam } = useParams();
@@ -38,6 +39,7 @@ export default function TextChapter() {
   const [showHebrew, setShowHebrew] = useState(true);
   const [showEnglish, setShowEnglish] = useState(true);
   const [showFootnotes, setShowFootnotes] = useState(false);
+  const [showPlain, setShowPlain] = useState(true);
 
   const valid = isValidChapter(chapter);
 
@@ -101,6 +103,11 @@ export default function TextChapter() {
             <Toggle active={showFootnotes} onClick={() => setShowFootnotes((v) => !v)}>
               Footnotes
             </Toggle>
+            {hasExplanations(chapter) && (
+              <Toggle active={showPlain} onClick={() => setShowPlain((v) => !v)}>
+                In plain words
+              </Toggle>
+            )}
             {section && (
               <span className="ml-auto hidden sm:inline text-xs text-[var(--color-text-secondary)]">
                 {section.en}
@@ -135,6 +142,7 @@ export default function TextChapter() {
             showHebrew={showHebrew}
             showEnglish={showEnglish}
             showFootnotes={showFootnotes}
+            showPlain={showPlain}
           />
         )}
 
@@ -166,7 +174,8 @@ export default function TextChapter() {
   );
 }
 
-function Halachot({ text, chapter, showHebrew, showEnglish, showFootnotes }) {
+function Halachot({ text, chapter, showHebrew, showEnglish, showFootnotes, showPlain }) {
+  const explanations = explanationsForChapter(chapter);
   // Hebrew and English are parallel arrays of the same halachot. They
   // agree in length on every chapter of this text today, but a version
   // that splits a halacha differently would make them diverge — so pair
@@ -246,6 +255,9 @@ function Halachot({ text, chapter, showHebrew, showEnglish, showFootnotes }) {
                 />
               )}
             </div>
+            {showPlain && explanations[i + 1] && (
+              <PlainWords text={explanations[i + 1]} />
+            )}
           </article>
           {cards?.map(({ id: cardId, Component }) => (
             <React.Suspense
@@ -264,6 +276,49 @@ function Halachot({ text, chapter, showHebrew, showEnglish, showFootnotes }) {
       })}
     </div>
   );
+}
+
+/**
+ * A plain-language note under one halacha.
+ *
+ * Labelled on every instance rather than once at the top of the page,
+ * because a reader arriving at a deep link, or scrolling past the
+ * header, would otherwise meet unattributed plain English sitting
+ * directly beneath a halacha and reasonably take it for the Rambam's
+ * own words. The left rule and the heading are load-bearing, not
+ * decoration.
+ */
+function PlainWords({ text }) {
+  const paragraphs = text.split('\n\n');
+  return (
+    <aside className="mt-3 border-l-2 border-[var(--color-gold)]/40 pl-3">
+      <div className="mb-1 text-[10px] font-bold uppercase tracking-wide text-[var(--color-gold)]/80">
+        In plain words — editor's note, not the Rambam
+      </div>
+      {paragraphs.map((p, i) => (
+        <p
+          key={i}
+          className={`text-[13px] leading-relaxed text-[var(--color-text-secondary)] ${i > 0 ? 'mt-2' : ''}`}
+          dangerouslySetInnerHTML={{ __html: renderEmphasis(p) }}
+        />
+      ))}
+    </aside>
+  );
+}
+
+/**
+ * Minimal markdown for the explanations: **bold** and *italic* only.
+ * The source strings are authored in this repo, not fetched, but the
+ * text is still escaped first so the renderer can never be turned into
+ * an HTML injection point by a future edit.
+ */
+function renderEmphasis(source) {
+  return source
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong class="text-[var(--color-text)]">$1</strong>')
+    .replace(/\*([^*]+)\*/g, '<em>$1</em>');
 }
 
 /**

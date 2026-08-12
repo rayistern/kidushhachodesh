@@ -199,6 +199,42 @@ describe('TextChapter', () => {
     expect(screen.getByText(/places his longitudes in the tropical frame/)).toBeTruthy();
   });
 
+  it('labels every plain-language note as an editorial addition', async () => {
+    // Plain English sitting directly under a halacha, unlabelled, reads
+    // as though the Rambam wrote it. The attribution appears on each
+    // note rather than once per page, so a deep link or a scrolled
+    // viewport can never show one without it.
+    renderChapter('/text/13');
+    await waitFor(() => expect(screen.getAllByText(/In plain words/).length).toBeGreaterThan(0));
+
+    const notes = document.querySelectorAll('aside');
+    expect(notes.length).toBeGreaterThan(0);
+    for (const note of notes) {
+      expect(note.textContent).toMatch(/editor's note, not the Rambam/);
+    }
+  });
+
+  it('can turn the plain-language notes off', async () => {
+    renderChapter('/text/13');
+    const toggle = await screen.findByRole('button', { name: 'In plain words' });
+    expect(document.querySelectorAll('aside').length).toBeGreaterThan(0);
+
+    fireEvent.click(toggle);
+    await waitFor(() => expect(document.querySelectorAll('aside').length).toBe(0));
+  });
+
+  it('offers the plain-words toggle only where notes exist', async () => {
+    const { unmount } = renderChapter('/text/13');
+    await waitFor(() =>
+      expect(screen.queryByRole('button', { name: 'In plain words' })).toBeTruthy(),
+    );
+    unmount();
+
+    renderChapter('/text/1');
+    await waitFor(() => expect(screen.getByText('TOUGER ONE', { exact: false })).toBeTruthy());
+    expect(screen.queryByRole('button', { name: 'In plain words' })).toBeNull();
+  });
+
   it('redirects an out-of-range chapter to the index', async () => {
     renderChapter('/text/20');
     await waitFor(() =>
