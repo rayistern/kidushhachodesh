@@ -29,6 +29,8 @@ const JerusalemCoordinates = React.lazy(() => import('./JerusalemCoordinates'));
 const SunMeanPosition = React.lazy(() => import('./SunMeanPosition'));
 const HiddenThird = React.lazy(() => import('./HiddenThird'));
 const SunApogee = React.lazy(() => import('./SunApogee'));
+const CorrectionTable = React.lazy(() => import('./CorrectionTable'));
+const SunTruePosition = React.lazy(() => import('./SunTruePosition'));
 
 export const INTERACTIVES = {
   11: [
@@ -45,6 +47,13 @@ export const INTERACTIVES = {
     { id: 'hidden-third', after: 1, Component: HiddenThird },
     { id: 'sun-mean-position', after: 2, Component: SunMeanPosition },
     { id: 'sun-apogee', after: 2, Component: SunApogee },
+  ],
+  // Chapter 13 states the procedure (13:1-3), tabulates the correction
+  // (13:4-8), then works the whole thing through (13:9-10). The table
+  // card follows the table; the procedure card follows the example.
+  13: [
+    { id: 'correction-table', after: 8, Component: CorrectionTable },
+    { id: 'sun-true-position', after: 10, Component: SunTruePosition },
   ],
 };
 

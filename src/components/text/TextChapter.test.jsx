@@ -175,6 +175,26 @@ describe('TextChapter', () => {
     expect(screen.getByText(/KH 15:8 states this result/)).toBeTruthy();
   });
 
+  it('walks the KH 13:9-10 chain to the result the text states', async () => {
+    renderChapter('/text/13');
+    const heading = await screen.findByText(/The true position of the sun/);
+    expect(screen.getByText(/The correction table, drawn/)).toBeTruthy();
+
+    fireEvent.click(heading.closest('button'));
+
+    // Each intermediate the Rambam prints must appear, not just the
+    // answer — the chapter is teaching the procedure.
+    await waitFor(() => expect(screen.getByText(`105° 37′ 25.0″`)).toBeTruthy());
+    expect(screen.getByText(`86° 45′ 23.0″`)).toBeTruthy();
+    expect(screen.getByText(`18° 52′ 2.0″`)).toBeTruthy();
+    // The result appears twice by design: as the last step of the chain
+    // and again in the summary box beneath it.
+    expect(screen.getAllByText(`104° 59′ 25.0″`)).toHaveLength(2);
+    expect(screen.getByText(/KH 13:10 states this result/)).toBeTruthy();
+    // And it is located in the constellation the text names.
+    expect(screen.getByText(/Sartan/)).toBeTruthy();
+  });
+
   it('redirects an out-of-range chapter to the index', async () => {
     renderChapter('/text/20');
     await waitFor(() =>
