@@ -235,6 +235,29 @@ describe('TextChapter', () => {
     expect(screen.queryByRole('button', { name: 'In plain words' })).toBeNull();
   });
 
+  it('gives every halacha of chapter 13 its own tool', async () => {
+    renderChapter('/text/13');
+    await waitFor(() => expect(screen.getByText(/Take the apogee away from the mean/)).toBeTruthy());
+
+    // One card per halacha, each doing that halacha's own job.
+    const titles = [
+      /Take the apogee away from the mean/, // 13:1
+      /The diagram the footnote asks you to refer to/, // 13:2
+      /The two places where there is nothing to correct/, // 13:3
+      /The correction table, drawn/, // 13:4
+      /Folding a course past half a circle/, // 13:5
+      /Fold it yourself/, // 13:6
+      /Reading between the rows/, // 13:7
+      /Interpolate it yourself/, // 13:8
+      /How much precision he deliberately throws away/, // 13:9
+      /The true position of the sun/, // 13:10
+      /Finding the true equinox and solstice/, // 13:11
+    ];
+    for (const title of titles) {
+      expect(screen.getByText(title), String(title)).toBeTruthy();
+    }
+  });
+
   it('redirects an out-of-range chapter to the index', async () => {
     renderChapter('/text/20');
     await waitFor(() =>

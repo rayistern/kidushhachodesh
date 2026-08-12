@@ -29,9 +29,17 @@ const JerusalemCoordinates = React.lazy(() => import('./JerusalemCoordinates'));
 const SunMeanPosition = React.lazy(() => import('./SunMeanPosition'));
 const HiddenThird = React.lazy(() => import('./HiddenThird'));
 const SunApogee = React.lazy(() => import('./SunApogee'));
+const CourseFromApogee = React.lazy(() => import('./CourseFromApogee'));
 const CorrectionTriangle = React.lazy(() => import('./CorrectionTriangle'));
+const WhereCorrectionVanishes = React.lazy(() => import('./WhereCorrectionVanishes'));
 const CorrectionTable = React.lazy(() => import('./CorrectionTable'));
+const FoldPastHalfCircle = React.lazy(() => import('./FoldPastHalfCircle'));
+const FoldPractice = React.lazy(() => import('./FoldPractice'));
+const InterpolateRows = React.lazy(() => import('./InterpolateRows'));
+const InterpolatePractice = React.lazy(() => import('./InterpolatePractice'));
+const RoundingRule = React.lazy(() => import('./RoundingRule'));
 const SunTruePosition = React.lazy(() => import('./SunTruePosition'));
+const TekufahFinder = React.lazy(() => import('./TekufahFinder'));
 
 export const INTERACTIVES = {
   11: [
@@ -49,15 +57,26 @@ export const INTERACTIVES = {
     { id: 'sun-mean-position', after: 2, Component: SunMeanPosition },
     { id: 'sun-apogee', after: 2, Component: SunApogee },
   ],
-  // Chapter 13 states the procedure (13:1-3), tabulates the correction
-  // (13:4-8), then works the whole thing through (13:9-10). The table
-  // card follows the table; the procedure card follows the example.
+  // Chapter 13 gets a tool on every halacha, each doing the one thing
+  // its halacha does. 13:6 and 13:8 are the Rambam repeating 13:5 and
+  // 13:7 with fresh numbers and telling the student to carry on the
+  // same way — so those two practise rather than re-explain, which is
+  // what those halachot are for. A second widget demonstrating the fold
+  // would only repeat the one above it.
   13: [
+    { id: 'course-from-apogee', after: 1, Component: CourseFromApogee },
     // Restores the figure Touger's footnote on 13:2 refers to, which the
     // digitised text does not carry.
     { id: 'correction-triangle', after: 2, Component: CorrectionTriangle },
-    { id: 'correction-table', after: 8, Component: CorrectionTable },
+    { id: 'correction-vanishes', after: 3, Component: WhereCorrectionVanishes },
+    { id: 'correction-table', after: 4, Component: CorrectionTable },
+    { id: 'fold-past-half', after: 5, Component: FoldPastHalfCircle },
+    { id: 'fold-practice', after: 6, Component: FoldPractice },
+    { id: 'interpolate-rows', after: 7, Component: InterpolateRows },
+    { id: 'interpolate-practice', after: 8, Component: InterpolatePractice },
+    { id: 'rounding-rule', after: 9, Component: RoundingRule },
     { id: 'sun-true-position', after: 10, Component: SunTruePosition },
+    { id: 'tekufah-finder', after: 11, Component: TekufahFinder },
   ],
 };
 
