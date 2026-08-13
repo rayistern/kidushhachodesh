@@ -67,11 +67,27 @@ export default {
       nodeId: 'days',
       body: [
         'Everything from here on is an angle. Not a distance, not a height — an angle around a circle.',
-        'Imagine the band of sky the sun and moon travel along, bent round into a full circle. That circle is divided into **360 degrees**, and into **twelve signs of 30 degrees each**, starting from the first of them, Taleh (the Ram).',
+        'Imagine the band of sky the sun and moon travel along, bent round into a full circle. That circle is divided into **360 degrees**, and into **twelve signs of 30 degrees each**, starting from the first of them, Taleh.',
         'Each degree splits into 60 minutes, each minute into 60 seconds. Not minutes and seconds of *time* — of angle. They are small: a minute of angle is about the width of a coin seen across a room.',
         'So "104 degrees, 59 minutes, 25 seconds" is a place on that circle. Count 104 and a bit degrees round from the start of Taleh and you are there. Try it below — it will also tell you which sign you have landed in.',
       ],
       interactive: 'zodiac-position',
+    },
+
+    {
+      id: 'why-name-them',
+      heading: 'Why bother naming the twelve?',
+      source: 'KH 11:9',
+      nodeId: 'days',
+      body: [
+        'A fair question, since a position is already a number. Why say "Sartan, fifteen degrees in" when you could just say 105 degrees?',
+        'Notice first that he does **both**. When he finishes the worked calculation in chapter 13 he gives the answer as 104° 59\' 25" *and* as "fifteen degrees less 35 seconds in Sartan". The sign is not a replacement for the number. It is the number said a second way.',
+        'And there is a hard reason, which does not show up until chapter 17. Several of the corrections there are **looked up by sign** — not by degree. Each of the twelve carries its own value, running from about 34 minutes at the lowest to a full degree at the highest. So you cannot finish the calculation without knowing which sign the moon is in. It is an input, not a label.',
+        'Why would a correction care about the sign? Because the sign quietly carries something a bare number does not: **the angle at which that stretch of sky meets the horizon**. The signs do not set upright — some slant north, some south. A moon the same distance from the sun will sit at a different angle above the horizon depending which part of the belt is going down, and that changes whether a thin crescent clears the glow. The sign is shorthand for a fact about the local sky.',
+        'Three plainer reasons on top of that. A sign can be **checked against the sky** — nobody can eyeball "104 degrees", but you can go outside and look at Sartan. It **catches mistakes**: slip thirty degrees in your addition and you land in the wrong sign, which is glaring, where a wrong number looks like any other number. And it was **the language everyone already spoke** — witnesses and judges talked in constellations, so the arithmetic had to come back out in words the court used.',
+        'As for the names themselves — Taleh, Shor, Teomim — they are handles and not much more. What you actually need is the order, and that each one is thirty degrees wide. The Rambam all but says so: he notes that the stars have shifted since these were named, so the pictures no longer really fit. Do not spend effort on the imagery. Learn the order.',
+        'One small warning about the familiar English names, since they can mislead. They came into English through Greek and Latin, and they are not translations of the Hebrew. **Taleh is a lamb**; Aries is a ram — a different animal, and Hebrew has its own word for a ram (*ayil*). The Latin names sit alongside the Hebrew ones rather than rendering them, which is one more reason to hold the twelve as an ordered list of thirty-degree boxes and not as a menagerie.',
+      ],
     },
 
     {

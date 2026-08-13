@@ -18,6 +18,7 @@ import { isValidChapter, HALACHA_COUNTS } from '../khChapters';
 import { CONSTANTS } from '../../engine/constants';
 import { dmsToDecimal, formatDms } from '../../engine/dmsUtils';
 import { zodiacPosition } from '../../engine/zodiac';
+import { trueFromMean } from '../../lib/maslulTable';
 
 const chapters = writtenChapters();
 
@@ -140,7 +141,15 @@ describe('every figure in the prose is pinned to the engine', () => {
   // cannot be typed into a sentence and left unverified.
   const FLAT_DAILY = { degrees: 0, minutes: 59, seconds: 8 };
 
+  const dms = (d, m = 0, sec = 0) => d + m / 60 + sec / 3600;
+
   const PINNED = {
+    11: {
+      // Chapter 13's worked answer, quoted here to show he gives the
+      // position as a number AND as a place in the signs.
+      "104° 59' 25\"": () =>
+        formatDms(trueFromMean(dms(105, 37, 25), dms(86, 45, 23)).trueLongitude),
+    },
     12: {
       "9° 51' 23\"": () => formatDms(dmsToDecimal(CONSTANTS.SUN_MEAN_PERIOD_BLOCKS.p10)),
       // Deliberately the WRONG value — the chapter shows what the flat
@@ -186,6 +195,31 @@ describe('every figure in the prose is pinned to the engine', () => {
       0,
     );
     expect(total).toBeGreaterThan(5);
+  });
+
+  it('KH 11 — the claim that chapter 17 looks corrections up by sign holds', () => {
+    // The "why bother naming the twelve" section rests on this being
+    // true of the engine, and quotes the range. If the table were keyed
+    // on degrees rather than signs the whole argument would collapse.
+    const table = CONSTANTS.PARALLAX_LON_BY_MAZAL;
+    expect(table).toHaveLength(12);
+    for (let i = 0; i < 12; i++) expect(table[i].mazalIdx).toBe(i);
+
+    const values = table.map((row) => row.chalakim);
+    // "running from about 34 minutes at the lowest to a full degree at
+    // the highest"
+    expect(Math.min(...values)).toBe(34);
+    expect(Math.max(...values)).toBe(60);
+    expect(proseOf(11)).toContain('34 minutes');
+    expect(proseOf(11)).toContain('a full degree');
+  });
+
+  it("KH 11 — gets Taleh right, and does not call it a ram", () => {
+    // טלה is a lamb; אַיִל is a ram. "Aries" arrives via Latin and is not
+    // a translation of the Hebrew, which is the point the section makes.
+    const prose = proseOf(11);
+    expect(prose).toContain('Taleh is a lamb');
+    expect(prose).not.toMatch(/Taleh \(the Ram\)/);
   });
 
   it('every declared figure is still somewhere in its chapter', () => {
