@@ -29,6 +29,8 @@ const CompareView = React.lazy(() => import('./components/compare/CompareView'))
 const EmbedView = React.lazy(() => import('./components/embed/EmbedView'));
 const TextIndex = React.lazy(() => import('./components/text/TextIndex'));
 const TextChapter = React.lazy(() => import('./components/text/TextChapter'));
+const BookIndex = React.lazy(() => import('./components/book/BookIndex'));
+const BookChapter = React.lazy(() => import('./components/book/BookChapter'));
 
 const Fallback = () => (
   <div style={{ padding: 40, color: '#4ea1f7', background: '#0a0e14', minHeight: '100vh', fontFamily: 'monospace' }}>
@@ -50,6 +52,9 @@ export default function App() {
           {/* Full Rambam text — one page per chapter, KH 1-19. */}
           <Route path="/text" element={<TextIndex />} />
           <Route path="/text/:chapter" element={<TextChapter />} />
+          {/* Plain-language companion — one chapter at a time, KH 14 first. */}
+          <Route path="/book" element={<BookIndex />} />
+          <Route path="/book/:chapter" element={<BookChapter />} />
           <Route path="/compare" element={<CompareView />} />
           <Route path="/embed" element={<EmbedView />} />
           <Route path="*" element={<Navigate to="/" replace />} />

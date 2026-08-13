@@ -29,6 +29,8 @@ import { CHAPTER_TITLES, isValidChapter, sectionForChapter } from '../../content
 import { interactivesForChapter } from './interactives';
 import { splitParagraphs } from '../../lib/rambamText';
 import { explanationsForChapter, hasExplanations } from '../../content/plainExplanations';
+import { hasBookChapter } from '../../content/book';
+import { renderEmphasis } from '../../lib/markup';
 
 export default function TextChapter() {
   const { chapter: chapterParam } = useParams();
@@ -107,6 +109,15 @@ export default function TextChapter() {
               <Toggle active={showPlain} onClick={() => setShowPlain((v) => !v)}>
                 In plain words
               </Toggle>
+            )}
+            {hasBookChapter(chapter) && (
+              <Link
+                to={`/book/${chapter}`}
+                className="rounded px-2 py-0.5 text-xs text-[var(--color-gold)] hover:bg-[var(--color-card)]"
+                title="A plain-language walk through this chapter"
+              >
+                📗 Explain this chapter →
+              </Link>
             )}
             {section && (
               <span className="ml-auto hidden sm:inline text-xs text-[var(--color-text-secondary)]">
@@ -304,21 +315,6 @@ function PlainWords({ text }) {
       ))}
     </aside>
   );
-}
-
-/**
- * Minimal markdown for the explanations: **bold** and *italic* only.
- * The source strings are authored in this repo, not fetched, but the
- * text is still escaped first so the renderer can never be turned into
- * an HTML injection point by a future edit.
- */
-function renderEmphasis(source) {
-  return source
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/\*\*([^*]+)\*\*/g, '<strong class="text-[var(--color-text)]">$1</strong>')
-    .replace(/\*([^*]+)\*/g, '<em>$1</em>');
 }
 
 /**

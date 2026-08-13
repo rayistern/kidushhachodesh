@@ -96,6 +96,57 @@ export function angularDifference(a, b) {
   return ((a - b + 540) % 360) - 180;
 }
 
+/**
+ * Jerusalem's sunset for a day of the year, in hours of local solar
+ * time. Comparison only, like everything else in this file.
+ *
+ * Used to show *why* KH 14:5 exists. The Rambam wants the moon's
+ * position twenty minutes after sunset (14:6), sunset slides through
+ * the year, and so the position wanted slides with it. That reading is
+ * editorial — he gives no reason for the table — and any surface using
+ * this must say so.
+ *
+ * NOAA's low-accuracy sunset algorithm: good to about a minute, which
+ * is far finer than the effect being illustrated.
+ */
+export function jerusalemSunsetHours(dayOfYear) {
+  const LATITUDE = 31.78 * DEG;
+  const ZENITH = 90.833 * DEG; // sun's disc + refraction at the horizon
+
+  const g = ((2 * Math.PI) / 365) * (dayOfYear - 1);
+  const declination =
+    0.006918 -
+    0.399912 * Math.cos(g) +
+    0.070257 * Math.sin(g) -
+    0.006758 * Math.cos(2 * g) +
+    0.000907 * Math.sin(2 * g) -
+    0.002697 * Math.cos(3 * g) +
+    0.00148 * Math.sin(3 * g);
+  const equationOfTime =
+    229.18 *
+    (0.000075 +
+      0.001868 * Math.cos(g) -
+      0.032077 * Math.sin(g) -
+      0.014615 * Math.cos(2 * g) -
+      0.040849 * Math.sin(2 * g)); // minutes
+
+  const cosHourAngle =
+    (Math.cos(ZENITH) - Math.sin(LATITUDE) * Math.sin(declination)) /
+    (Math.cos(LATITUDE) * Math.cos(declination));
+  // Jerusalem never sees a polar day or night, so the argument stays in
+  // range; clamp anyway rather than return NaN if this is ever reused.
+  const hourAngle = Math.acos(Math.min(1, Math.max(-1, cosHourAngle))) / DEG;
+
+  return 12 + hourAngle / 15 - equationOfTime / 60;
+}
+
+/** Mean of `jerusalemSunsetHours` across the year — the "average sunset". */
+export function meanJerusalemSunsetHours() {
+  let total = 0;
+  for (let d = 1; d <= 365; d++) total += jerusalemSunsetHours(d);
+  return total / 365;
+}
+
 function normalize(deg) {
   return ((deg % 360) + 360) % 360;
 }

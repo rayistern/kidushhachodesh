@@ -4,7 +4,14 @@
  * before being used to characterise anyone else's error.
  */
 import { describe, it, expect } from 'vitest';
-import { modernSunLongitude, toJulianDay, angularDifference } from './modernAstronomy';
+import {
+  modernSunLongitude,
+  toJulianDay,
+  angularDifference,
+  jerusalemSunsetHours,
+  meanJerusalemSunsetHours,
+} from './modernAstronomy';
+import { CONSTANTS } from '../engine/constants';
 import { calculateSunMeanLongitude, calculateSunApogee } from '../engine/sunCalculations';
 import { trueFromMean } from './maslulTable';
 import { daysFromEpoch } from '../engine/epochDays';
@@ -40,6 +47,65 @@ describe('sanity checks against the equinoxes', () => {
   it('reads near 180° at the September 2026 equinox', () => {
     const lon = modernSunLongitude(new Date(Date.UTC(2026, 8, 23, 0, 5, 0)));
     expect(Math.abs(lon - 180)).toBeLessThan(0.05);
+  });
+});
+
+describe('sunset in Jerusalem, and the KH 14:5 correction', () => {
+  // The book's chapter 14 argues that the season correction exists to
+  // land the moon's position at sunset, since sunset drifts through the
+  // year. That is an editorial reading — the Rambam gives no reason —
+  // and the chapter says so. These assertions corroborate it; they are
+  // not evidence about his method, and the tolerances are deliberately
+  // loose because the claim is qualitative.
+  const dayOfYear = (month, day) => Math.round((Date.UTC(2026, month - 1, day) - Date.UTC(2026, 0, 1)) / 86400000) + 1;
+
+  it('is latest near midsummer and earliest near midwinter', () => {
+    let latest = 1;
+    let earliest = 1;
+    for (let d = 1; d <= 365; d++) {
+      if (jerusalemSunsetHours(d) > jerusalemSunsetHours(latest)) latest = d;
+      if (jerusalemSunsetHours(d) < jerusalemSunsetHours(earliest)) earliest = d;
+    }
+    expect(Math.abs(latest - dayOfYear(6, 21))).toBeLessThan(20);
+    expect(Math.abs(earliest - dayOfYear(12, 21))).toBeLessThan(20);
+  });
+
+  it('swings by roughly two and a quarter hours across the year', () => {
+    let min = 99;
+    let max = 0;
+    for (let d = 1; d <= 365; d++) {
+      const s = jerusalemSunsetHours(d);
+      min = Math.min(min, s);
+      max = Math.max(max, s);
+    }
+    const swingMinutes = (max - min) * 60;
+    expect(swingMinutes).toBeGreaterThan(100);
+    expect(swingMinutes).toBeLessThan(160);
+  });
+
+  it("moves in the same direction as the Rambam's correction, band by band", () => {
+    // The substantive check: where sunset is later than average he adds,
+    // where it is earlier he subtracts. A band where the signs disagree
+    // would sink the explanation the chapter offers.
+    const mean = meanJerusalemSunsetHours();
+    const sunLongitudeForDay = (d) => (((d - 79) / 365.2422) * 360 + 360) % 360;
+
+    let agreeing = 0;
+    let opposing = 0;
+    for (let d = 1; d <= 365; d++) {
+      const longitude = sunLongitudeForDay(d);
+      const row = CONSTANTS.SEASON_CORRECTIONS.find(
+        (r) => longitude >= r.sunFrom && longitude < r.sunTo,
+      );
+      if (!row || row.adjustment === 0) continue;
+      const sunsetOffset = jerusalemSunsetHours(d) - mean;
+      if (Math.sign(sunsetOffset) === Math.sign(row.adjustment)) agreeing++;
+      else opposing++;
+    }
+    // Not every day agrees — the bands are coarse steps against a smooth
+    // curve, and they disagree near the crossings. The claim is that the
+    // pattern holds, not that every day does.
+    expect(agreeing / (agreeing + opposing)).toBeGreaterThan(0.85);
   });
 });
 

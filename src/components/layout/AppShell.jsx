@@ -90,6 +90,7 @@ export default function AppShell({ initialPreset = 'home' }) {
           <NavButton to="/calculate" icon="🧮" label={t('calculate')} />
           <NavButton to="/learn" icon="📖" label={t('learn')} />
           <NavButton to="/text" icon="📜" label={t('text')} />
+          <NavButton to="/book" icon="📗" label={t('book')} />
           <NavButton to="/compare" icon="⚖️" label={t('compare')} />
           <button
             onClick={() => setLocale(locale === 'en' ? 'he' : 'en')}
