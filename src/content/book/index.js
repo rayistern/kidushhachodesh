@@ -15,9 +15,15 @@
  * map keeps showing the whole arc, and the reader is sent to the source
  * text for anything still unwritten.
  */
+import ch11 from './ch11';
+import ch12 from './ch12';
+import ch13 from './ch13';
 import ch14 from './ch14';
 
 export const BOOK_CHAPTERS = {
+  11: ch11,
+  12: ch12,
+  13: ch13,
   14: ch14,
 };
 

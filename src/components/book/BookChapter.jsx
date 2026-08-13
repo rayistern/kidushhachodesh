@@ -30,6 +30,12 @@ import { CHAPTER_TITLES, isValidChapter } from '../../content/khChapters';
 import { renderEmphasis } from '../../lib/markup';
 import ChainMap from './ChainMap';
 import { figureById } from './interactives';
+import { FigureDefaults } from '../text/interactives/InteractiveCard';
+
+// In the book the figure IS the explanation, and the prose above it
+// says "watch this" — so the calculators open by default here, while
+// the same components stay collapsed under a halacha in /text.
+const BOOK_FIGURE_DEFAULTS = { defaultOpen: true };
 
 export default function BookChapter() {
   const { chapter: chapterParam } = useParams();
@@ -51,6 +57,7 @@ export default function BookChapter() {
   }
 
   return (
+    <FigureDefaults.Provider value={BOOK_FIGURE_DEFAULTS}>
     <div className="min-h-[100dvh] bg-[var(--color-bg)] text-[var(--color-text)]">
       <header className="border-b border-[var(--color-border)] bg-[var(--color-surface)]">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 py-4">
@@ -112,6 +119,7 @@ export default function BookChapter() {
         </main>
       </div>
     </div>
+    </FigureDefaults.Provider>
   );
 }
 

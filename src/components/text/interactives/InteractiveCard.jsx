@@ -14,8 +14,21 @@
  */
 import React, { useState } from 'react';
 
-export default function InteractiveCard({ title, source, blurb, defaultOpen = false, children }) {
-  const [open, setOpen] = useState(defaultOpen);
+/**
+ * Lets a whole surface change how these cards open, without every card
+ * having to be edited or every call site passing a prop.
+ *
+ * In `/text` a card interrupts the halacha it sits under, so it starts
+ * collapsed — a reader going straight through the Rambam should not
+ * have to step over widgets. In `/book` the figure *is* the
+ * explanation, and the prose above it says "watch this", so it starts
+ * open. Same components, opposite defaults, one provider.
+ */
+export const FigureDefaults = React.createContext({ defaultOpen: false });
+
+export default function InteractiveCard({ title, source, blurb, defaultOpen, children }) {
+  const fromContext = React.useContext(FigureDefaults);
+  const [open, setOpen] = useState(defaultOpen ?? fromContext.defaultOpen);
 
   return (
     <section className="my-6 overflow-hidden rounded-xl border border-[var(--color-accent)]/30 bg-[var(--color-surface)]">

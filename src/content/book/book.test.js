@@ -133,45 +133,80 @@ describe('the chain', () => {
   });
 });
 
-describe('KH 14 — every figure in the prose is pinned to the engine', () => {
-  // Declared numbers, each with what it must equal. A DMS figure in the
-  // prose that is not in this map fails the sweep below.
+describe('every figure in the prose is pinned to the engine', () => {
+  // Declared numbers, per chapter, each with what it must equal. Any
+  // degree-minute-second figure in any chapter's prose that is not
+  // declared here fails the sweep below — so a plausible-looking number
+  // cannot be typed into a sentence and left unverified.
+  const FLAT_DAILY = { degrees: 0, minutes: 59, seconds: 8 };
+
   const PINNED = {
-    "13° 10' 35\"": () => formatDms(dmsToDecimal(CONSTANTS.MOON.MEAN_MOTION_PER_DAY)),
-    "13° 3' 54\"": () => formatDms(dmsToDecimal(CONSTANTS.MOON.MASLUL_MEAN_MOTION)),
-    "1° 14' 43\"": () => formatDms(dmsToDecimal(CONSTANTS.MOON.START_POSITION)),
-    "84° 28' 42\"": () => formatDms(dmsToDecimal(CONSTANTS.MOON.MASLUL_START)),
+    12: {
+      "9° 51' 23\"": () => formatDms(dmsToDecimal(CONSTANTS.SUN_MEAN_PERIOD_BLOCKS.p10)),
+      // Deliberately the WRONG value — the chapter shows what the flat
+      // printed rate would give, to expose the missing third of a second.
+      "9° 51' 20\"": () => formatDms(dmsToDecimal(FLAT_DAILY) * 10),
+      "7° 3' 32\"": () => formatDms(dmsToDecimal(CONSTANTS.SUN.START_POSITION)),
+      "26° 45' 8\"": () => formatDms(dmsToDecimal(CONSTANTS.SUN.APOGEE_START)),
+    },
+    14: {
+      "13° 10' 35\"": () => formatDms(dmsToDecimal(CONSTANTS.MOON.MEAN_MOTION_PER_DAY)),
+      "13° 3' 54\"": () => formatDms(dmsToDecimal(CONSTANTS.MOON.MASLUL_MEAN_MOTION)),
+      "1° 14' 43\"": () => formatDms(dmsToDecimal(CONSTANTS.MOON.START_POSITION)),
+      "84° 28' 42\"": () => formatDms(dmsToDecimal(CONSTANTS.MOON.MASLUL_START)),
+    },
   };
 
-  const prose = bookChapter(14)
-    .sections.flatMap((s) => s.body)
-    .join('\n');
+  const proseOf = (n) =>
+    bookChapter(n)
+      .sections.flatMap((s) => s.body)
+      .join('\n');
 
-  it('matches the engine for every declared figure', () => {
-    for (const [written, expected] of Object.entries(PINNED)) {
+  it.each(chapters)('chapter %i — declared figures match the engine', (n) => {
+    for (const [written, expected] of Object.entries(PINNED[n] || {})) {
       // The prose writes 13° 10' 35"; formatDms writes 13° 10′ 35.0″.
       const normalised = written.replace(/'/g, '′').replace(/"/g, '″').replace(/(\d)″/, '$1.0″');
-      expect(expected(), `prose says ${written}`).toBe(normalised);
+      expect(expected(), `chapter ${n} prose says ${written}`).toBe(normalised);
     }
   });
 
-  it('contains no degree-minute-second figure that has not been declared', () => {
-    const found = prose.match(/\d+°\s?\d+'\s?\d+"/g) || [];
+  it.each(chapters)('chapter %i — no undeclared degree-minute-second figure', (n) => {
+    const found = proseOf(n).match(/\d+°\s?\d+'\s?\d+"/g) || [];
     for (const figure of found) {
       expect(
-        Object.keys(PINNED),
-        `"${figure}" appears in the prose but is not pinned in PINNED`,
+        Object.keys(PINNED[n] || {}),
+        `chapter ${n}: "${figure}" appears in the prose but is not pinned`,
       ).toContain(figure);
     }
-    // And the sweep must actually be finding things, or it proves nothing.
-    expect(found.length).toBeGreaterThan(2);
+  });
+
+  it('the sweep actually finds figures, or it proves nothing', () => {
+    const total = chapters.reduce(
+      (sum, n) => sum + (proseOf(n).match(/\d+°\s?\d+'\s?\d+"/g) || []).length,
+      0,
+    );
+    expect(total).toBeGreaterThan(5);
+  });
+
+  it('every declared figure is still somewhere in its chapter', () => {
+    // Guards the other direction: a PINNED entry left behind after the
+    // sentence quoting it was rewritten would otherwise sit there
+    // passing forever while checking nothing.
+    for (const [chapter, figures] of Object.entries(PINNED)) {
+      const prose = proseOf(Number(chapter));
+      for (const written of Object.keys(figures)) {
+        expect(prose, `chapter ${chapter} pins "${written}" but no longer quotes it`).toContain(
+          written,
+        );
+      }
+    }
   });
 
   it("places the moon's epoch position in the sign the prose names", () => {
     const longitude =
       dmsToDecimal(CONSTANTS.MOON.START_POSITION) + CONSTANTS.MOON.START_CONSTELLATION * 30;
     expect(zodiacPosition(longitude).translit).toBe('Shor');
-    expect(prose).toContain('Shor');
+    expect(proseOf(14)).toContain('Shor');
   });
 
   it('quotes the gap between the two rates correctly', () => {
@@ -182,7 +217,7 @@ describe('KH 14 — every figure in the prose is pinned to the engine', () => {
     // The prose says "about 6 and a half minutes of arc a day".
     expect(gapArcmin).toBeGreaterThan(6);
     expect(gapArcmin).toBeLessThan(7);
-    expect(prose).toMatch(/6 and a half minutes of arc/);
+    expect(proseOf(14)).toMatch(/6 and a half minutes of arc/);
   });
 
   it('quotes the two circuit lengths correctly', () => {
@@ -194,7 +229,7 @@ describe('KH 14 — every figure in the prose is pinned to the engine', () => {
     expect(Math.round((sidereal % 1) * 24)).toBe(8);
     expect(Math.floor(anomalistic)).toBe(27);
     expect(Math.round((anomalistic % 1) * 24)).toBe(13);
-    expect(prose).toContain('27 days and 8 hours');
-    expect(prose).toContain('27 days and 13 hours');
+    expect(proseOf(14)).toContain('27 days and 8 hours');
+    expect(proseOf(14)).toContain('27 days and 13 hours');
   });
 });

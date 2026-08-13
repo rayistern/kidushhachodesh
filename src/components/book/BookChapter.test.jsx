@@ -19,6 +19,7 @@ import BookChapter from './BookChapter';
 import BookIndex from './BookIndex';
 import ChainMap from './ChainMap';
 import { CHAIN_NODES } from '../../content/book/chain';
+import { writtenChapters } from '../../content/book';
 
 afterEach(cleanup);
 
@@ -106,11 +107,23 @@ describe('the chain map', () => {
   });
 
   it('routes written chapters to the book and unwritten ones to the source', () => {
+    // Derived from the registry rather than hardcoded, so writing a new
+    // chapter does not break this test — it just widens what it checks.
     const { container } = renderMap(14);
-    const hrefs = Array.from(container.querySelectorAll('a')).map((a) => a.getAttribute('href'));
-    expect(hrefs).toContain('/book/14');
-    expect(hrefs).toContain('/text/15');
-    expect(hrefs).toContain('/text/13');
+    const hrefs = new Set(
+      Array.from(container.querySelectorAll('a')).map((a) => a.getAttribute('href')),
+    );
+    const written = new Set(writtenChapters());
+
+    for (const node of CHAIN_NODES) {
+      const expected = written.has(node.chapter)
+        ? `/book/${node.chapter}`
+        : `/text/${node.chapter}`;
+      expect(hrefs, `chapter ${node.chapter}`).toContain(expected);
+    }
+    // And the two kinds must both be represented, or the test is vacuous.
+    expect(written.size).toBeGreaterThan(0);
+    expect(CHAIN_NODES.some((n) => !written.has(n.chapter))).toBe(true);
   });
 });
 

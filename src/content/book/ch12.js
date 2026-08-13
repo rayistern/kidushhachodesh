@@ -1,0 +1,108 @@
+/**
+ * Chapter 12 of the plain-language book — the sun's average position.
+ *
+ * ═══════════════════════════════════════════════════════════════════
+ *  REGIME TAG: **editorial** — NOT the Rambam, NOT a translation.
+ *  SURFACE CATEGORY: teaching commentary
+ * ═══════════════════════════════════════════════════════════════════
+ *
+ * Two halachot, and between them a complete computational method: the
+ * pre-computed blocks and the instruction to decompose a day count into
+ * them. This is also the chapter that establishes the pattern chapters
+ * 14 and 16 repeat, so it is worth naming the pattern out loud here.
+ *
+ * The daily-rate discrepancy (printed 59'8", operative 59'8⅓") is not
+ * an aside — it is the clearest evidence in the book that his printed
+ * figures are rounded displays of finer working values, which is
+ * exactly what KH 11:5-6 warned about. It gets its own section.
+ */
+
+export default {
+  chapter: 12,
+  sourceChapter: 12,
+  title: "Where the sun would be, if it behaved",
+  hebrewTitle: 'אמצע השמש',
+  subtitle:
+    'The first real calculation. Two halachot, one method — and a small puzzle in the numbers that tells you a lot about how he works.',
+
+  recap: {
+    settled: [
+      'How to read and write a position in the sky, in degrees, minutes and seconds.',
+      'How to add and subtract them, including the borrow-a-circle rule.',
+      'That **average** and **true** are two different things, because we watch from off-centre.',
+      'A date to count days from: the eve of Thursday, 3 Nisan 4938.',
+    ],
+    thisChapter:
+      "Now the tools get used. This chapter answers one question — where would the sun be on a given evening *if* it moved at a perfectly steady speed? That is the **average** position, and it is deliberately not yet the real one.",
+    byTheEnd:
+      "You'll be able to work out the sun's average position for any date, using nothing harder than addition — and you'll know where its slowly-drifting reference point sits, which chapter 13 needs.",
+  },
+
+  sections: [
+    {
+      id: 'what-average',
+      heading: 'Why start with a position you know is wrong',
+      source: 'KH 12:1',
+      nodeId: 'sun-mean',
+      body: [
+        'It might seem odd to spend a chapter finding a number you already know is not the answer. But it is the only sensible way in.',
+        'The sun\'s real motion is steady motion seen from off-centre. Those are two separate facts, and they are much easier to handle one at a time. So: work out where steady motion alone would put it — that is this chapter — and then correct for the off-centre viewing — that is the next one.',
+        'The average position has a name worth knowing, because it comes up constantly: **emtza** (אמצע), literally "middle". You will meet the moon\'s emtza in chapter 14 and it means exactly the same thing there.',
+      ],
+    },
+
+    {
+      id: 'the-rate',
+      heading: "The sun's daily speed, and a small puzzle",
+      source: 'KH 12:1',
+      nodeId: 'sun-mean',
+      body: [
+        'The sun moves about one degree a day. Precisely, the Rambam says, **59 minutes and 8 seconds** of angle per day — just under a degree, which is why a year is a bit more than 360 days.',
+        'Now the puzzle. In the very same halacha he says the sun travels 9° 51\' 23" in ten days. But ten times 59\' 8" is **9° 51\' 20"**. Three seconds adrift, in a single sentence.',
+        'Neither number is a slip. The real rate he works with is 59 minutes and 8 **and a third** seconds; the "8" is a rounded display. His ten-day figure gives the missing third away.',
+        'This is worth dwelling on for a moment, because it tells you how to read everything that follows. The numbers printed in the text are often tidied versions of finer ones — exactly as he warned in chapter 11. The calculator below tests both candidate rates against every figure he publishes; watch how badly the flat version drifts once the day counts get large.',
+      ],
+      interactive: 'hidden-third',
+    },
+
+    {
+      id: 'the-method',
+      heading: 'Adding your way to an answer',
+      source: 'KH 12:2',
+      nodeId: 'sun-mean',
+      body: [
+        'Here is the method, and it is genuinely clever — it lets someone with no more than addition work out a position centuries into the future.',
+        'Rather than multiplying a daily rate by a large number of days, the Rambam pre-computes how far the sun travels in **ten days, a hundred days, a thousand, and ten thousand**, and publishes those four figures. To handle any date you break the day count into those chunks, look each one up, and add.',
+        'So 1,234 days is one thousand, two hundreds, three tens, and four single days. Five look-ups and a sum. No multiplication, no long division — which matters enormously when your reader has no calculator and possibly no paper to spare.',
+        'Then add where the sun started at the epoch: **7° 3\' 32"**, in Taleh. Throw away any whole circles. That is your answer.',
+        'He works one example himself: a hundred days after the starting point. Try it below — it is loaded and ready.',
+      ],
+      interactive: 'sun-mean',
+    },
+
+    {
+      id: 'apogee',
+      heading: 'The far point, and why it has to be tracked',
+      source: 'KH 12:2',
+      nodeId: 'sun-mean',
+      body: [
+        'One more thing before the chapter is done, and it will not make full sense until the next one — but it belongs here, because this is where he puts it.',
+        'The sun\'s circle is off-centre from us, so there is one point on it where the sun is **furthest away**. That point has a name, the **govah** (גובה), and its position at the epoch was 26° 45\' 8" in Teomim.',
+        'Why does it matter? Because chapter 13\'s correction depends entirely on how far the sun has travelled *from that point*. It is the origin the correction is measured from — so before you can correct anything, you have to know where it is.',
+        'And it moves. Very slowly: about one degree in seventy years, which is the slowest thing in the entire book. Over the eight and a half centuries since he wrote it has crept about thirteen degrees, out of Teomim and into Sartan — a drift he himself anticipated.',
+      ],
+      interactive: 'sun-apogee',
+    },
+  ],
+
+  closing: {
+    have: [
+      "The sun's average position on any date you like, from a day count and four published figures.",
+      'The position of the far point (govah) on that same date.',
+      'A working sense of why his printed numbers are sometimes rounded versions of the ones he calculates with.',
+    ],
+    missing: [
+      "Where the sun actually is. Everything here is the steady-speed pretence — useful, and not yet true. Chapter 13 takes these two numbers, works out how far apart they are, and looks up the correction that turns one into the other.",
+    ],
+  },
+};
