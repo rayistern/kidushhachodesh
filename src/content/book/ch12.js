@@ -27,9 +27,9 @@ export default {
 
   recap: {
     settled: [
-      'How to read and write a position in the sky, in degrees, minutes and seconds.',
-      'How to add and subtract them, including the borrow-a-circle rule.',
-      'That **average** and **true** are two different things, because we watch from off-centre.',
+      'A way to write down any position in the sky — degrees, minutes, seconds.',
+      'The arithmetic to add and subtract them, including the borrow-a-circle rule.',
+      'The difference between **average** and **true**, and why watching from off-centre creates it.',
       'A date to count days from: the eve of Thursday, 3 Nisan 4938.',
     ],
     thisChapter:

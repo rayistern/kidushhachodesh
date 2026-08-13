@@ -33,7 +33,7 @@ export default {
     settled: [
       "The sun's **average** position on any date, worked out by adding published chunks.",
       'The position of the **far point** (govah) on that same date.',
-      'That the average is not what you see, because we watch from off-centre.',
+      'The reason those are not yet the answer: we watch from off-centre.',
     ],
     thisChapter:
       'This chapter closes the gap. It takes the two numbers chapter 12 produced, measures the distance between them, and uses that distance to look up exactly how wrong the average is — and in which direction.',

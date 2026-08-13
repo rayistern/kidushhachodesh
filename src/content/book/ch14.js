@@ -34,9 +34,9 @@ export default {
 
   recap: {
     settled: [
-      'How to count the days from the Rambam\'s starting point.',
-      'Where the sun would be if it moved at a perfectly steady speed — its **average** place.',
-      'How to correct that to where the sun **really** is, using the table in chapter 13.',
+      "A day count from the Rambam's starting point to any evening you like.",
+      "The sun's **average** place — where it would be at a perfectly steady speed.",
+      "The sun's **true** place, corrected with the table in chapter 13.",
     ],
     thisChapter:
       'The sun was the easy half. This chapter starts the moon, and it starts the same way chapter 12 did: with the *average* position, before any corrections.',

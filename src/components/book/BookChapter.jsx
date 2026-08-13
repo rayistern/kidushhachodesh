@@ -130,12 +130,13 @@ function Recap({ recap }) {
       <h2 className="text-xs font-bold uppercase tracking-wide text-[var(--color-accent)]">
         Where we've got to
       </h2>
+      {/* No lead-in sentence. The heading and the ticks already say
+          these are behind you, and any single lead-in would have to fit
+          both chapter 11's background facts and chapter 13's list of
+          things you can now do — no phrasing fits both. */}
       {recap.settled?.length > 0 && (
         <>
-          <p className="mt-2 text-xs text-[var(--color-text-secondary)]">
-            By now you can:
-          </p>
-          <ul className="mt-1 space-y-1">
+          <ul className="mt-2 space-y-1">
             {recap.settled.map((item, i) => (
               <li key={i} className="flex gap-2 text-sm">
                 <span className="text-[var(--color-gold)]" aria-hidden="true">

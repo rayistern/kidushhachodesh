@@ -28,7 +28,7 @@ export default {
   recap: {
     settled: [
       'The month began when two witnesses saw the new moon and the court accepted them.',
-      'The court needed to know **in advance** whether the moon could be seen that night — so they could tell an honest mistake from a false witness.',
+      'The court needed to know **in advance** whether the moon could be seen that night, so it could tell an honest mistake from a false witness.',
     ],
     thisChapter:
       "Everything up to here has been about people: witnesses, judges, testimony. From this chapter on it is about the sky. The Rambam is about to hand over a method for working out, months ahead, whether the moon will be visible on a given evening — and this chapter lays out the tools before any of it starts.",
