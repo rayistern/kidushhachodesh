@@ -172,18 +172,23 @@ describe('the four longitudes really are one number', () => {
   });
 });
 
-describe('KH 17:22 — the figure that does not support its own conclusion', () => {
-  // The chapter tells the reader about this rather than letting them
-  // trip over it, so the tests have to establish that the reading given
-  // is the correct one.
-  it('prints 10° 27′, which is the SECOND longitude, not the first', () => {
-    expect(arcsec(at('orechSheni'), dms(10, 27))).toBeLessThan(30);
+describe('KH 17:22 — the two figures the English transposes', () => {
+  // A first draft of this section claimed the printed 10° 27' was a
+  // corruption and that "something has slipped between the numeral and
+  // the label". Checking the Torat Emet Hebrew showed otherwise: it
+  // reads י"א מעלות וכ"ז חלקים — 11° 27' — and cites the threshold as
+  // "more than TEN". The English has both figures the other way round.
+  // The Hebrew is sound; the transposition is in the translation.
+  it('confirms both numbers are real, differing only in the tens digit', () => {
+    // 11°27' is the gap; 10°27' is the gap after its first adjustment.
+    // That near-identity is what makes the swap easy and hard to catch.
     expect(arcsec(at('elongation'), dms(11, 27))).toBeLessThan(30);
+    expect(arcsec(at('orechSheni'), dms(10, 27))).toBeLessThan(30);
+    const minutes = (v) => Math.round((v % 1) * 60);
+    expect(minutes(at('elongation'))).toBe(minutes(at('orechSheni')));
   });
 
-  it("only the first longitude clears the threshold his conclusion invokes", () => {
-    // Arc 11°11' falls in the 11-12 band, which demands a first
-    // longitude of at least 11°. 11°27' clears it; 10°27' does not.
+  it("the Hebrew's figure is the one the rule needs", () => {
     const row = CONSTANTS.KITZEI_HAREIYAH_TABLE.find(
       (r) => at('keshetHaReiyah') > r.kashtFromExclusive && at('keshetHaReiyah') <= r.kashtUpTo,
     );
@@ -192,15 +197,23 @@ describe('KH 17:22 — the figure that does not support its own conclusion', () 
     expect(at('orechSheni')).toBeLessThan(row.orechMin);
   });
 
+  it("and both of the Hebrew's statements about it are true", () => {
+    // "the longitude was 11°27'" and "the first longitude was more than
+    // ten" — the second is weaker than the rule requires but not wrong.
+    expect(at('elongation')).toBeGreaterThan(10);
+    expect(at('elongation')).toBeGreaterThan(11);
+  });
+
   it('the engine uses the first longitude, so it reaches his answer', () => {
     expect(steps.moonVisibility.inputs.orechRishon.value).toBeCloseTo(at('elongation'), 9);
     expect(steps.moonVisibility.result).toBe(true);
   });
 
-  it('and the chapter says all of this to the reader', () => {
-    expect(prose).toMatch(/ten\* degrees and 27 minutes|\*ten\*/);
-    expect(prose).toMatch(/second\*\* longitude|second longitude/);
-    expect(prose).toMatch(/slipped in transmission/);
+  it('and the chapter attributes the slip to the translation, not the source', () => {
+    expect(prose).toMatch(/The Hebrew has the two figures the other way round/);
+    expect(prose).toMatch(/transposed somewhere between the Hebrew and the English/);
+    // The retracted claim must not survive anywhere.
+    expect(prose).not.toMatch(/slipped in transmission/);
   });
 });
 
