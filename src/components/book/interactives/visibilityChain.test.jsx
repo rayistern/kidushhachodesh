@@ -57,3 +57,16 @@ describe('the recipes are true of the engine', () => {
     expect(s.keshetHaReiyah.result).toBeCloseTo(expected, 6);
   });
 });
+
+describe('the running-number family is marked', () => {
+  it('rings exactly steps 4, 5, 7, 8 and 10', async () => {
+    // The gap in its successive states — first through fourth longitude,
+    // then the arc, which is the same number wearing its final name.
+    const { container } = render(<VisibilityChain />);
+    await screen.findByText('= step 2 − step 1');
+    const ringed = [...container.querySelectorAll('li')]
+      .filter((li) => li.querySelector('[class*="ring-2"]'))
+      .map((li) => Number(li.querySelector('span').textContent));
+    expect(ringed).toEqual([4, 5, 7, 8, 10]);
+  });
+});

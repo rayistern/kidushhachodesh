@@ -65,6 +65,7 @@ const CHAIN = [
   },
   {
     id: 'elongation',
+    gapFamily: true,
     label: 'THE GAP between them (first longitude)',
     ref: 'KH 17:1',
     key: true,
@@ -72,6 +73,7 @@ const CHAIN = [
   },
   {
     id: 'orechSheni',
+    gapFamily: true,
     label: 'the gap, shifted for standing on the ground (second longitude)',
     ref: 'KH 17:5',
     how: () => "= step 4 − the by-sign minutes (always taken off)",
@@ -90,12 +92,14 @@ const CHAIN = [
   },
   {
     id: 'orechShlishi',
+    gapFamily: true,
     label: 'the gap, moved by the slice of the height (third longitude)',
     ref: 'KH 17:11',
     how: () => '= step 5, moved by the slice of step 6',
   },
   {
     id: 'orechRevii',
+    gapFamily: true,
     label: 'the gap, stretched for how steeply this part sets (fourth longitude)',
     ref: 'KH 17:12',
     how: () => "= step 7 ± a fraction picked by the moon's sign (or left alone)",
@@ -108,6 +112,7 @@ const CHAIN = [
   },
   {
     id: 'keshetHaReiyah',
+    gapFamily: true,
     label: 'THE FINAL FIGURE — the arc of sighting',
     ref: 'KH 17:14',
     key: true,
@@ -179,7 +184,17 @@ export default function VisibilityChain() {
           const unused = earlyExit && i > 3;
           return (
             <li key={row.id} className={`flex gap-2.5 ${unused ? 'opacity-40' : ''}`}>
-              <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--color-card)] font-mono text-[10px] text-[var(--color-text-secondary)]">
+              {/* The gold ring marks the one running number — the gap in
+                  its successive states. A reader asked for the family to
+                  be visible at a glance rather than only asserted in the
+                  footer. */}
+              <span
+                className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--color-card)] font-mono text-[10px] ${
+                  row.gapFamily
+                    ? 'text-[var(--color-gold)] ring-2 ring-[var(--color-gold)]'
+                    : 'text-[var(--color-text-secondary)]'
+                }`}
+              >
                 {i + 1}
               </span>
               <span className="min-w-0 flex-1">
@@ -255,9 +270,11 @@ export default function VisibilityChain() {
       )}
 
       <p className="mt-3 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
-        Notice that steps 4, 5, 7 and 8 are all <strong>the same number</strong>. The gap is
-        worked out once and then adjusted three times, and the text calls it by the next number
-        along each time. There are not four longitudes; there is one gap, corrected.
+        The <strong>gold-ringed steps — 4, 5, 7, 8 and 10 —</strong> are all{' '}
+        <strong>the same number</strong>. The gap is worked out once and then adjusted, and the
+        text calls it by the next name along after each touch; the last touch gives it a name of
+        its own instead of a fifth number. There are not four longitudes and an arc; there is one
+        gap, corrected four times.
       </p>
       <p className="mt-2 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
         Every step comes from this project's engine running its ordinary pipeline — the same code
