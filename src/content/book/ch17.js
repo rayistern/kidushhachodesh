@@ -52,11 +52,11 @@ export default {
         "How far off the sun's path the moon sits, north or south — chapter 16's answer, brought in unchanged.",
     },
     {
-      plain: 'the standing-on-the-ground shift',
-      formal: 'parallax, the sighting adjustment',
-      hebrew: null,
+      plain: 'the change in what you see',
+      formal: 'the sighting adjustment',
+      hebrew: 'שינוי המראה',
       gloss:
-        'Every position so far has been the moon as seen from the **centre** of the earth. Nobody stands there. Correcting for standing on the surface instead moves the moon by up to a degree.',
+        "His own term, and it says exactly what it is: the moon's true place is not the place you see it in, and this is the difference. Every position so far has been the moon as seen from the **centre** of the earth; nobody stands there. Modern astronomy calls the same thing *parallax*.",
     },
     {
       plain: 'the slice',
@@ -147,7 +147,8 @@ export default {
       body: [
         'For the nights that do not resolve early, six adjustments follow, and taken one at a time they look arbitrary. They are not. Almost all of them come from a single fact, which the Rambam states plainly at 17:6.',
         'Every position computed so far has been the moon\'s place **as seen from the centre of the earth**. That is where the geometry of circles naturally puts you. But nobody observes from there. An observer stands on the surface, some four thousand miles off-centre, and from there the moon — which is close, as celestial things go — appears shifted against the background stars.',
-        'The shift is called **parallax** — or in plainer words, the **standing-on-the-ground shift**. It is not small: it moves the moon by up to about a degree, which is twice the moon\'s own width and easily enough to change the answer on a marginal night.',
+        'He has a name for the difference, and it is a better one than the modern word: **שינוי המראה**, *shinui hamar\'eh* — "the change in appearance". The moon\'s true place is not the place you see it in, and that is the change. Translations render it *the sighting adjustment*; modern astronomy calls the same thing *parallax*.',
+        'It is not small. It moves the moon by up to about a degree — twice the moon\'s own width, or a finger held at arm\'s length — and easily enough to change the answer on a marginal night.',
         'So the true position has to be nudged into an *apparent* position. That takes two corrections, one for the sideways shift and one for the up-and-down, and they are the next two steps.',
       ],
     },

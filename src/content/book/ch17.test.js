@@ -56,6 +56,40 @@ describe('KH 17:13-14, 17:22 — the whole chain on his evening', () => {
   });
 });
 
+describe("KH 17:6 — his own name for the change in appearance", () => {
+  // I first put "parallax" in the glossary's formal column, which reads
+  // as though it were the Rambam's word. It is not: at 17:6 he names the
+  // thing himself — שינוי המראה, the change in appearance — and his term
+  // is both older and more transparent than the modern one.
+  const terms = bookChapter(17).terms;
+  const entry = terms.find((t) => /change in what you see/i.test(t.plain));
+
+  it('exists, and carries his Hebrew', () => {
+    expect(entry, 'the glossary lost the sighting-adjustment entry').toBeTruthy();
+    expect(entry.hebrew).toBe('שינוי המראה');
+  });
+
+  it('does not present "parallax" as his term', () => {
+    expect(entry.formal).not.toMatch(/parallax/i);
+    expect(entry.formal).toMatch(/sighting adjustment/i);
+    // It may be mentioned in the gloss as the modern name — that is the
+    // honest place for it.
+    expect(entry.gloss).toMatch(/modern astronomy calls/i);
+  });
+
+  it('the prose gives his term before the modern one', () => {
+    const shinui = prose.indexOf('שינוי המראה');
+    const parallax = prose.toLowerCase().indexOf('parallax');
+    expect(shinui, 'his term is not in the prose').toBeGreaterThan(-1);
+    expect(parallax, 'the modern term is not in the prose').toBeGreaterThan(-1);
+    expect(shinui).toBeLessThan(parallax);
+  });
+
+  it("says what it literally means", () => {
+    expect(prose).toMatch(/change in appearance/i);
+  });
+});
+
 describe('the four longitudes really are one number', () => {
   // The chapter now leads on this, and it is the whole reason the naming
   // is confusing. If the engine's steps were genuinely four independent

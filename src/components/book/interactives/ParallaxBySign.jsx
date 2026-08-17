@@ -21,6 +21,11 @@
  * is subtracted when the moon is north and added when south (KH 17:7) —
  * a sign rule that is easy to invert, so the card states which case is
  * in force rather than only the magnitude.
+ *
+ * The Rambam's own name for what these tables correct is שינוי המראה,
+ * "the change in appearance" — the gap between where the moon truly is
+ * and where it is seen. That is used in preference to "parallax", which
+ * is the modern term for the same thing and not his.
  */
 import React, { useState } from 'react';
 import InteractiveCard from '../../text/interactives/InteractiveCard';
@@ -43,7 +48,7 @@ export default function ParallaxBySign() {
     <InteractiveCard
       title="The two tables that are read by sign"
       source="KH 17:5, 17:8"
-      blurb="chapter 11 said these existed — here they are"
+      blurb="the change in appearance — שינוי המראה — split into sideways and vertical"
       defaultOpen
     >
       <div className="flex flex-wrap items-center gap-1">
@@ -104,9 +109,9 @@ export default function ParallaxBySign() {
       <p className="mt-3 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
         Look at the two curves rather than the two lists. Each rises and falls once around the
         circle, and they run in opposite phase — where one is largest the other is smallest. That
-        is what you would expect if they are the sideways and the vertical parts of one shift,
-        divided differently as the belt tilts against the horizon. They are not twelve unrelated
-        numbers apiece.
+        is what you would expect if they are the sideways and the vertical parts of one change in
+        appearance, divided differently as the belt tilts against the horizon. They are not twelve
+        unrelated numbers apiece.
       </p>
       <p className="mt-2 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
         On the evening the Rambam works, the moon is in <strong>Shor</strong> — a full degree off
