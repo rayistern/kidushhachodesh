@@ -181,57 +181,54 @@ describe('why the gap gets doubled (KH 15:1)', () => {
     .sections.find((s) => s.id === 'double-elongation')
     .body.join('\n');
 
-  const nudgeAt = (twoD) => {
-    const n = ((twoD % 360) + 360) % 360;
-    const row = CONSTANTS.DOUBLE_ELONGATION_ADJUSTMENTS.find(
-      (r) => n >= r.minElongation && n <= r.maxElongation,
-    );
-    return row ? row.adjustment : null;
-  };
-
-  it('gives the reason as a collapse of opposite configurations', () => {
-    // An earlier draft said only that the effect "repeats twice a lap" and
-    // so needs "an angle that goes round twice as fast" — true but
-    // useless, since it never said what doubling actually buys you.
-    expect(body).toMatch(/new moon and full moon alike/);
-    expect(body).toMatch(/Doubling collapses each pair onto one/);
+  it('gives the physical reason, not a table-economy one', () => {
+    // Two earlier drafts got this wrong in opposite directions: the first
+    // said only that the effect "repeats twice a lap" and so needs an
+    // angle "twice as fast" (true, uninformative); the second explained
+    // that doubling makes one table serve both halves of the month, which
+    // reads as convenience. The doubled gap is the quantity the effect
+    // depends on — 180°-symmetric, like the tides.
+    expect(body).toMatch(/Not to save table space/);
+    expect(body).toMatch(/the line it lies along, not which end/);
+    expect(body).toMatch(/two high tides a day/);
     expect(body).not.toMatch(/twice as fast/);
+    expect(body).not.toMatch(/one short table serves both halves/);
   });
 
-  it('is right that doubling lands the two lineups on one row', () => {
-    expect(nudgeAt(2 * 0)).toBe(nudgeAt(2 * 180));
-    expect(nudgeAt(2 * 90)).toBe(nudgeAt(2 * 270));
-    // And that the pairs really are distinct before doubling, which is
-    // the whole reason the step exists.
-    expect(0).not.toBe(180);
-    expect(90).not.toBe(270);
+  it('labels the explanation as the book\'s, since he gives none', () => {
+    expect(body).toMatch(/He gives no reason for any of this/);
   });
 
-  it('no longer claims the nudge peaks at new moon — it is zero there', () => {
-    // The old prose said the effect was "greatest at new moon and at full
-    // moon, and dies away at the two quarters", which is backwards
-    // against his own table.
-    expect(nudgeAt(0)).toBe(0);
-    expect(body).not.toMatch(/greatest at new moon/);
-    expect(body).toMatch(/at the moment of lineup it is zero/);
+  it('does not suggest full moon is ever computed', () => {
+    // It is not: the doubled gap never leaves the first sixth of the
+    // circle on a sighting night. An earlier draft leaned on new moon and
+    // full moon as if both were cases in play.
+    expect(body).not.toMatch(/full moon/i);
   });
 
-  it('quotes the growth correctly: nothing, up to nine by about 30° of gap', () => {
-    expect(nudgeAt(2 * 30)).toBe(9);
-    const tabulated = CONSTANTS.DOUBLE_ELONGATION_ADJUSTMENTS.filter(
-      (r) => r.maxElongation <= 63,
-    );
-    expect(Math.max(...tabulated.map((r) => r.adjustment))).toBe(9);
-    expect(body).toMatch(/maximum of nine/);
-  });
-
-  it('says he stops tabulating at 63°, and he does', () => {
-    expect(body).toMatch(/up to 63°/);
-    // Beyond that the file extrapolates and says so; the prose must not
-    // imply he covers the whole circle.
+  it('is right that the practical range fits inside his table', () => {
+    // Measured over the sighting nights of fifty years: the doubled gap
+    // runs about 3° to 59°, and he tabulates to 63°.
+    expect(body).toMatch(/up to about sixty/);
+    expect(body).toMatch(/stops at 63°/);
     const explicit = CONSTANTS.DOUBLE_ELONGATION_ADJUSTMENTS.filter(
-      (r) => !r.source || !/extrapolat/i.test(r.source ?? ''),
+      (r) => !/extrapolat/i.test(r.source ?? ''),
     );
-    expect(Math.max(...explicit.map((r) => r.maxElongation))).toBeGreaterThanOrEqual(63);
+    const covered = Math.max(...explicit.map((r) => r.maxElongation));
+    expect(covered).toBeGreaterThanOrEqual(63);
+  });
+
+  it('is right that the nudge starts at nothing and reaches nine', () => {
+    const at = (twoD) => {
+      const n = ((twoD % 360) + 360) % 360;
+      const row = CONSTANTS.DOUBLE_ELONGATION_ADJUSTMENTS.find(
+        (r) => n >= r.minElongation && n <= r.maxElongation,
+      );
+      return row ? row.adjustment : null;
+    };
+    expect(at(0)).toBe(0);
+    expect(at(60)).toBe(9);
+    expect(body).toMatch(/starts at nothing/);
+    expect(body).toMatch(/grows to nine degrees/);
   });
 });
