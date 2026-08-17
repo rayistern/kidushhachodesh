@@ -137,6 +137,46 @@ describe('every written chapter is structurally sound', () => {
     }
   });
 
+  it.each(chapters)('chapter %i does not address a reader who asked a question', (n) => {
+    // Several sections of this book were written in reply to a specific
+    // question, and the reply's register is easy to leave behind. A
+    // published chapter cannot say "your instinct is right" — no reader
+    // stated an instinct, so the sentence lands as though written for
+    // somebody else.
+    //
+    // Ordinary second person is fine and used throughout ("you will be
+    // able to", "you may notice"). What is banned is language presuming
+    // an earlier exchange.
+    const CHAT_REGISTER = [
+      /your instinct/i,
+      /you asked/i,
+      /your question/i,
+      /as you (noticed|mentioned|said|pointed out)/i,
+      /good question/i,
+      /to answer your/i,
+      /as (we|I) discussed/i,
+    ];
+    const content = bookChapter(n);
+    const everything = [
+      ...content.sections.flatMap((s) => [s.heading, ...s.body]),
+      content.subtitle,
+      content.recap?.thisChapter,
+      content.recap?.byTheEnd,
+      ...(content.recap?.settled ?? []),
+      ...(content.closing?.have ?? []),
+      ...(content.closing?.missing ?? []),
+      ...(content.terms ?? []).flatMap((t) => [t.plain, t.gloss]),
+    ]
+      .filter(Boolean)
+      .join('\n');
+
+    for (const pattern of CHAT_REGISTER) {
+      expect(everything, `chapter ${n} slips into reply-to-a-question register`).not.toMatch(
+        pattern,
+      );
+    }
+  });
+
   it.each(chapters)('chapter %i has a recap and a closing', (n) => {
     const content = bookChapter(n);
     expect(content.recap.thisChapter?.length).toBeGreaterThan(20);

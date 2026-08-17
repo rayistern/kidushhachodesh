@@ -211,7 +211,7 @@ describe("the chapter answers 'above what?'", () => {
     // side — is correct about the dominant term. The chapter should say
     // so rather than leave them thinking they have misunderstood.
     expect(prose).toMatch(/along that road/);
-    expect(prose).toMatch(/your instinct is right/i);
+    expect(prose).toMatch(/what you see is right about the big part/i);
   });
 
   it("explains why the road's tilt is what makes 'above' slippery", () => {
