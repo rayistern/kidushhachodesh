@@ -20,6 +20,7 @@ import ch12 from './ch12';
 import ch13 from './ch13';
 import ch14 from './ch14';
 import ch15 from './ch15';
+import ch16 from './ch16';
 
 export const BOOK_CHAPTERS = {
   11: ch11,
@@ -27,6 +28,7 @@ export const BOOK_CHAPTERS = {
   13: ch13,
   14: ch14,
   15: ch15,
+  16: ch16,
 };
 
 /** The chapter's content, or null if it has not been written yet. */

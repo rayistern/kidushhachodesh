@@ -35,6 +35,10 @@ const SeasonBands = React.lazy(() => import('./SeasonBands'));
 const DoubleElongation = React.lazy(() => import('./DoubleElongation'));
 const MoonCorrectionTable = React.lazy(() => import('./MoonCorrectionTable'));
 const MoonTruePosition = React.lazy(() => import('./MoonTruePosition'));
+const MoonTilt = React.lazy(() => import('./MoonTilt'));
+const NodeMarch = React.lazy(() => import('./NodeMarch'));
+const LatitudeTable = React.lazy(() => import('./LatitudeTable'));
+const MoonLatitude = React.lazy(() => import('./MoonLatitude'));
 
 // ── Reused from /text, chapter 11 ──
 const ZodiacPosition = React.lazy(() => import('../../text/interactives/ZodiacPosition'));
@@ -98,6 +102,12 @@ export const FIGURES = {
   'double-elongation': DoubleElongation,
   'moon-correction-table': MoonCorrectionTable,
   'moon-true': MoonTruePosition,
+
+  // chapter 16
+  'moon-tilt': MoonTilt,
+  'node-march': NodeMarch,
+  'latitude-table': LatitudeTable,
+  'moon-latitude': MoonLatitude,
 };
 
 /** The component for a slot id, or null if the id is unknown. */
