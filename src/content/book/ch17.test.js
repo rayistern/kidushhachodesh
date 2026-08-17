@@ -421,3 +421,50 @@ describe('the by-sign tables carry civil months too', () => {
     }
   });
 });
+
+describe("the slice's fractions are one shape, not a list", () => {
+  const bands = CONSTANTS.MOON_CIRCLE_FRACTIONS;
+  const at = (lon) => bands.find((b) => lon >= b.from && lon < b.to).fraction;
+
+  it('peaks at two fifths around the starts of the 1st and 7th signs', () => {
+    expect(at(5)).toBe(2 / 5);
+    expect(at(175)).toBe(2 / 5);
+    expect(at(185)).toBe(2 / 5);
+    expect(at(355)).toBe(2 / 5);
+    expect(Math.max(...bands.map((b) => b.fraction))).toBe(2 / 5);
+  });
+
+  it('vanishes in bands straddling the starts of the 4th and 10th signs', () => {
+    // The same two turning points as ch11's climbing/falling halves and
+    // ch19's greatest tilt — the prose leans on the coincidence, so the
+    // straddle is pinned: the zero band must contain 90° and 270°.
+    for (const lon of [86, 90, 94]) expect(at(lon), `${lon}°`).toBe(0);
+    for (const lon of [266, 270, 274]) expect(at(lon), `${lon}°`).toBe(0);
+  });
+
+  it('shrinks by the stated stages from the peak to nothing', () => {
+    const stages = [2 / 5, 1 / 3, 1 / 4, 1 / 5, 1 / 6, 1 / 12, 1 / 24, 0];
+    const seen = [];
+    for (let lon = 0; lon < 90; lon += 1) {
+      const f = at(lon);
+      if (seen[seen.length - 1] !== f) seen.push(f);
+    }
+    expect(seen).toEqual(stages);
+  });
+
+  it('mirrors exactly: each half of the circle repeats the other', () => {
+    for (let lon = 0; lon < 180; lon += 1) {
+      expect(at(lon), `${lon}° vs ${lon + 180}°`).toBe(at(lon + 180));
+    }
+  });
+
+  it('is keyed on the moon alone, as the prose claims', () => {
+    // The bands tile [0,360) with no other input.
+    let cursor = 0;
+    for (const b of bands) {
+      expect(b.from).toBe(cursor);
+      cursor = b.to;
+    }
+    expect(cursor).toBe(360);
+  });
+});
