@@ -65,7 +65,7 @@ export default function SliceShape() {
   const padL = 34;
   const padR = 10;
   const padT = 14;
-  const padB = 30;
+  const padB = 38;
   const x = (deg) => padL + (deg / 360) * (w - padL - padR);
   const y = (f) => padT + (1 - f / PEAK) * (h - padT - padB);
 
@@ -107,13 +107,17 @@ export default function SliceShape() {
             </g>
           ))}
 
-          {/* the four anchors the book keeps meeting */}
+          {/* The four anchors, each labelled with what it IS, not only
+              where it falls: "start of the 7th" alone forced the reader
+              to guess "…of the 7th what?". Line one places it on the
+              circle of signs; line two names its role in the shape,
+              using the caption's own words. */}
           {[
-            [0, 'start of the 1st'],
-            [90, 'start of the 4th'],
-            [180, 'start of the 7th'],
-            [270, 'start of the 10th'],
-          ].map(([deg, label]) => (
+            [0, 'the 1st sign starts', 'a crossing'],
+            [90, 'the 4th sign starts', 'a turning point'],
+            [180, 'the 7th sign starts', 'a crossing'],
+            [270, 'the 10th sign starts', 'a turning point'],
+          ].map(([deg, where, role]) => (
             <g key={deg}>
               <line
                 x1={x(deg)}
@@ -127,12 +131,21 @@ export default function SliceShape() {
               />
               <text
                 x={x(deg) + (deg === 0 ? 2 : 0)}
-                y={h - padB + 14}
-                fontSize="7.5"
+                y={h - padB + 13}
+                fontSize="7"
                 fill="var(--color-text-secondary)"
-                textAnchor={deg === 0 ? 'start' : deg === 270 ? 'middle' : 'middle'}
+                textAnchor={deg === 0 ? 'start' : 'middle'}
               >
-                {label}
+                {where}
+              </text>
+              <text
+                x={x(deg) + (deg === 0 ? 2 : 0)}
+                y={h - padB + 22}
+                fontSize="7"
+                fill="var(--color-accent)"
+                textAnchor={deg === 0 ? 'start' : 'middle'}
+              >
+                {role}
               </text>
             </g>
           ))}
