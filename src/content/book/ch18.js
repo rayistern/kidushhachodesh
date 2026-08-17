@@ -130,6 +130,22 @@ export default {
     },
 
     {
+      id: 'tonight-here',
+      heading: 'Using it for real, from where you live',
+      source: 'KH 18:4',
+      nodeId: 'limits',
+      body: [
+        'Everything so far has been about reading his method. This section is about going outside.',
+        'Two things have to be kept apart, and the card below keeps them apart deliberately. **His verdict takes no location at all.** KH 11:17 fixes a single reference for everybody within six or seven days\' journey of Jerusalem, which he puts at about 32 degrees north, and that is the only geography the calculation has. So the answer to "will it be visible" is the same in Jerusalem, in Karmiel, and anywhere else in that band. Nothing is added to improve it, because nothing needs to be.',
+        'What his method genuinely cannot give you is **a time on a clock**. KH 14:6 asks for the moon\'s position about a third of an hour after sunset, and sunset is a local fact — it depends on how far north you are, how far east, and how high up you stand. He had no way to turn that into a clock reading and did not try. The card computes his moment at his own reference first, then shows what to add for where you are, so you can always see which part is his.',
+        'And the sizes are worth knowing, because they are not what you would guess. Moving from Jerusalem to **Karmiel** — a degree further north — shifts sunset by somewhere between four and a half minutes earlier and one minute later, depending on the season. In moon travel that is under two and a half arcminutes. It never changes a verdict.',
+        'But **standing higher up does matter**, and he is the one who says so. Karmiel sits around 330 metres, and height lets you see past the geometric horizon by roughly half a degree — about 32 arcminutes. That is larger than the entire margin on a borderline night. It is exactly the effect of 18:1: the watcher on the mountain catching what the calculation called marginal, and the one in the valley missing what it called easy. Your altitude is worth more than your latitude here.',
+        'The card also flags when a night is **close to the line**, because that is when this chapter\'s advice applies rather than the previous chapters\' arithmetic. And it carries two honest limits: his sun runs a hair fast, which tilts marginal nights very slightly toward "visible"; and there is no lunar ephemeris here, so it cannot tell you when the moon sets — the constraint that really decides a thin crescent. It tells you when and where to look. Whether anything is there to see is his answer, and the sky\'s.',
+      ],
+      interactive: 'tonight-here',
+    },
+
+    {
       id: 'east-west',
       heading: 'What a sighting somewhere else proves',
       source: 'KH 18:13',

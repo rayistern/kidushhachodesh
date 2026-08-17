@@ -45,6 +45,7 @@ const VisibilityChain = React.lazy(() => import('./VisibilityChain'));
 const SightingLimits = React.lazy(() => import('./SightingLimits'));
 const HowMarginal = React.lazy(() => import('./HowMarginal'));
 const EastWest = React.lazy(() => import('./EastWest'));
+const TonightHere = React.lazy(() => import('./TonightHere'));
 const DegreeScale = React.lazy(() => import('./DegreeScale'));
 const Declination = React.lazy(() => import('./Declination'));
 const MoonFromEquator = React.lazy(() => import('./MoonFromEquator'));
@@ -128,6 +129,7 @@ export const FIGURES = {
   // chapter 18
   'how-marginal': HowMarginal,
   'east-west': EastWest,
+  'tonight-here': TonightHere,
 
   // chapter 11 — a sense of scale for every angle that follows
   'degree-scale': DegreeScale,
