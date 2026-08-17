@@ -188,9 +188,16 @@ describe('why the gap gets doubled (KH 15:1)', () => {
     // that doubling makes one table serve both halves of the month, which
     // reads as convenience. The doubled gap is the quantity the effect
     // depends on — 180°-symmetric, like the tides.
-    expect(body).toMatch(/Not to save table space/);
-    expect(body).toMatch(/the line it lies along, not which end/);
-    expect(body).toMatch(/two high tides a day/);
+    // The pencil replaced a tides analogy, which was accurate but still
+    // abstract — "repeats after half a turn" is not a picture. A pencil
+    // turned half way round visibly IS the same pencil, and the arithmetic
+    // can be checked in the sentence.
+    expect(body).toMatch(/pencil lying on a table/);
+    expect(body).toMatch(/two ends and they are interchangeable/);
+    expect(body).toMatch(/twice 10 is 20, and twice 190 is 380/);
+    expect(body).toMatch(/it makes no difference which end the sun is sitting at/);
+    expect(body).toMatch(/Not a shortcut/);
+    expect(body).not.toMatch(/two high tides/);
     expect(body).not.toMatch(/twice as fast/);
     expect(body).not.toMatch(/one short table serves both halves/);
   });
@@ -230,5 +237,35 @@ describe('why the gap gets doubled (KH 15:1)', () => {
     expect(at(60)).toBe(9);
     expect(body).toMatch(/starts at nothing/);
     expect(body).toMatch(/grows to nine degrees/);
+  });
+});
+
+describe("the pencil's arithmetic, since the prose does it in words", () => {
+  it('really does send 10° and 190° to the same place', () => {
+    const doubled = (deg) => (deg * 2) % 360;
+    expect(doubled(10)).toBe(20);
+    expect(doubled(190)).toBe(20);
+  });
+
+  it('sends every pair of opposite angles to one value', () => {
+    // The general statement the pencil illustrates. If this failed for
+    // any angle the image would be a coincidence rather than a reason.
+    const doubled = (deg) => (deg * 2) % 360;
+    for (let deg = 0; deg < 180; deg += 7) {
+      expect(doubled(deg), `${deg}° vs ${deg + 180}°`).toBeCloseTo(doubled(deg + 180), 9);
+    }
+  });
+
+  it('does not send different-looking positions to the same place', () => {
+    // The other half of the claim: doubling must not collapse anything it
+    // should keep apart, or it would be losing information rather than
+    // expressing a symmetry.
+    const doubled = (deg) => (deg * 2) % 360;
+    const seen = new Map();
+    for (let deg = 0; deg < 180; deg += 1) {
+      const key = doubled(deg).toFixed(6);
+      expect(seen.has(key), `${deg}° collides with ${seen.get(key)}°`).toBe(false);
+      seen.set(key, deg);
+    }
   });
 });
