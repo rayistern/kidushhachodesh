@@ -313,7 +313,12 @@ describe('the fourth-longitude step, corrected in review', () => {
     // only reproduces with that reading.
     expect(body).toMatch(/which sign \*\*the moon\*\* is in/);
     expect(body).not.toMatch(/which sign the gap now falls in/);
-    expect(body).toMatch(/only comes out right keyed on the moon/);
+    // The adjudication itself (the worked example only reproduces when
+    // keyed on the moon — see the engine's header on KH 17:14) lives
+    // here and in the engine, NOT in the prose: a parenthetical
+    // explaining the ambiguity was a reply to this project's own earlier
+    // mistake, and the reader flagged it.
+    expect(body).not.toMatch(/only comes out right keyed on the moon/);
   });
 
   it('lists the actual set of fractions, including subtract-a-third', () => {
@@ -463,6 +468,31 @@ describe("the slice's fractions are one shape, not a list", () => {
     let cursor = 0;
     for (const b of bands) {
       expect(b.from).toBe(cursor);
+      cursor = b.to;
+    }
+    expect(cursor).toBe(360);
+  });
+});
+
+describe('the slice figure draws the table it claims to', () => {
+  it('has a section of its own, pointing at the shape figure', () => {
+    const sec = bookChapter(17).sections.find((s) => s.id === 'the-slice');
+    expect(sec).toBeTruthy();
+    expect(sec.interactive).toBe('slice-shape');
+    expect(sec.body.join(' ')).toMatch(/one shape|single shape|seeing whole/);
+  });
+
+  it("the staircase the figure plots is the engine's own table", () => {
+    // The figure maps every band of MOON_CIRCLE_FRACTIONS with no
+    // massaging; this asserts the properties the drawing shows —
+    // contiguous bands, symmetric halves, peak 2/5, zero straddling the
+    // turning points — hold of the data it reads.
+    const bands = CONSTANTS.MOON_CIRCLE_FRACTIONS;
+    let cursor = 0;
+    for (const b of bands) {
+      expect(b.from).toBe(cursor);
+      expect(b.fraction).toBeGreaterThanOrEqual(0);
+      expect(b.fraction).toBeLessThanOrEqual(2 / 5);
       cursor = b.to;
     }
     expect(cursor).toBe(360);

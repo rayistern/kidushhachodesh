@@ -66,7 +66,7 @@ export default {
       formal: 'the circuit of the moon',
       hebrew: 'מעגל הירח',
       gloss:
-        'A fraction of the height — two fifths, a third, a quarter — set aside to be applied to the gap. Which fraction depends on where the moon is.',
+        'A fraction of the height — anywhere from two fifths down to nothing, by where the moon stands — set aside to be applied to the gap.',
     },
     {
       plain: 'the final figure',
@@ -176,16 +176,26 @@ export default {
     },
 
     {
-      id: 'three-more',
-      heading: 'Three more adjustments, and then a single number',
+      id: 'the-slice',
+      heading: 'The slice — one shape, not a list',
       source: 'KH 17:10',
       nodeId: 'arc',
       body: [
-        'Three steps remain, and they are the fiddliest in the book. The good news is that a calculator can carry them and the ideas behind them are short.',
-        '**Take a slice of the adjusted height.** A fraction of it, and which fraction depends on one thing only: **where the moon stands on the circle**. The pattern is worth seeing whole, because it is not a list — it is a single shape. Near the starts of the 1st and 7th signs the slice is at its biggest, **two fifths**. Step away and it shrinks by stages — a third, a quarter, a fifth, a sixth, a twelfth, a twenty-fourth — until, in a small band straddling the starts of the 4th and 10th signs, it is **nothing at all**, and this step is skipped. Then it grows back by the same stages, and the second half of the circle mirrors the first exactly.',
+        'The first of the remaining steps takes **a slice of the adjusted height**, and which fraction to take depends on one thing only: **where the moon stands on the circle**. The pattern is worth seeing whole. Near the starts of the 1st and 7th signs the slice is at its biggest, **two fifths**. Step away and it shrinks by stages — a third, a quarter, a fifth, a sixth, a twelfth, a twenty-fourth — until, in a small band straddling the starts of the 4th and 10th signs, it is **nothing at all**, and the step is skipped. Then it grows back by the same stages, and the second half of the circle mirrors the first exactly.',
         'Those two special points should sound familiar: they are the turning points from chapter 11 — where the sun\'s road runs level with the equator. Where the road is level, the moon\'s height off it stays purely sideways and none of it tips along the road; where the road crosses at its steepest slant, near the 1st and 7th signs, the most height leaks into the along-the-road direction. (That reading is this book\'s; he states the fractions and gives no reason.) On sighting nights it means the slice matters most in spring and autumn and vanishes near midsummer and midwinter. The Rambam calls the result the *circuit of the moon*; call it **the slice**.',
+      ],
+      interactive: 'slice-shape',
+    },
+
+    {
+      id: 'three-more',
+      heading: 'Apply it, stretch it, and finish',
+      source: 'KH 17:10',
+      nodeId: 'arc',
+      body: [
+        'What remains is applying that slice and two last adjustments — the fiddliest stretch in the book. The good news is that a calculator can carry them and the ideas behind them are short.',
         '**Apply the slice to the gap.** North, subtract; south, add — and reversed if the moon is in the other half of the sky. Two adjustments down: the *third longitude*.',
-        '**Stretch or shrink it.** Depending on which sign **the moon** is in, add a sixth or a fifth, leave it alone, or subtract a fifth or a third. Three down: the *fourth longitude*. This one is about how steeply that part of the belt sets — the same underlying fact as the early-exit halves, applied more finely. (The text here could be read as keying on the adjusted gap instead of the moon; his own worked example only comes out right keyed on the moon, which settles it.)',
+        '**Stretch or shrink it.** Depending on which sign **the moon** is in, add a sixth or a fifth, leave it alone, or subtract a fifth or a third. Three down: the *fourth longitude*. This one is about how steeply that part of the belt sets — the same underlying fact as the early-exit halves, applied more finely.',
         'Then, finally, go back to the **original** height — the one you were told to keep at hand, before any adjustment — take **two thirds** of it, always two thirds for the land of Israel, and apply that to the gap: north adds, south takes away.',
         'What comes out is **the final figure** — the *arc of sighting*, קשת הראייה. The verdict depends on it and nothing else.',
       ],
