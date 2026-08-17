@@ -39,6 +39,10 @@ const MoonTilt = React.lazy(() => import('./MoonTilt'));
 const NodeMarch = React.lazy(() => import('./NodeMarch'));
 const LatitudeTable = React.lazy(() => import('./LatitudeTable'));
 const MoonLatitude = React.lazy(() => import('./MoonLatitude'));
+const QuickVerdict = React.lazy(() => import('./QuickVerdict'));
+const ParallaxBySign = React.lazy(() => import('./ParallaxBySign'));
+const VisibilityChain = React.lazy(() => import('./VisibilityChain'));
+const SightingLimits = React.lazy(() => import('./SightingLimits'));
 
 // ── Reused from /text, chapter 11 ──
 const ZodiacPosition = React.lazy(() => import('../../text/interactives/ZodiacPosition'));
@@ -108,6 +112,12 @@ export const FIGURES = {
   'node-march': NodeMarch,
   'latitude-table': LatitudeTable,
   'moon-latitude': MoonLatitude,
+
+  // chapter 17
+  'quick-verdict': QuickVerdict,
+  'parallax-by-sign': ParallaxBySign,
+  'visibility-chain': VisibilityChain,
+  'sighting-limits': SightingLimits,
 };
 
 /** The component for a slot id, or null if the id is unknown. */
