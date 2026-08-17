@@ -248,7 +248,7 @@ describe('why the gap gets doubled (KH 15:1)', () => {
     expect(Math.abs(360 / rate)).toBeLessThan(33);
     expect(body).toMatch(/about 11 degrees a day/);
     expect(body).toMatch(/roughly 32 days/);
-    expect(body).toMatch(/never mentions it/);
+    expect(body).toMatch(/never mentions any of it/);
   });
 });
 
@@ -262,5 +262,35 @@ describe('the glossary agrees with the prose about the doubling', () => {
     expect(term.gloss).toMatch(/twice its distance from the sun/);
     expect(term.gloss).not.toMatch(/twice\*\* in each lap|twice in each lap/);
     expect(term.gloss).not.toMatch(/epicycle/i);
+  });
+});
+
+describe('why the one-to-two lock holds', () => {
+  const body = bookChapter(15)
+    .sections.find((s) => s.id === 'double-elongation')
+    .body.join('\n');
+
+  it('gives both ingredients: common zero, fixed 2:1 growth', () => {
+    expect(body).toMatch(/both distances start at zero together/);
+    expect(body).toMatch(/twice as fast from the far point as from the sun/);
+    expect(body).toMatch(/backwards/);
+  });
+
+  it('is right that the rates really are exactly two to one', () => {
+    const sun = dmsToDecimal(CONSTANTS.SUN.MEAN_MOTION_PER_DAY);
+    const moon = dmsToDecimal(CONSTANTS.MOON.MEAN_MOTION_PER_DAY);
+    const far = 2 * sun - moon;
+    expect((moon - far) / (moon - sun)).toBeCloseTo(2, 12);
+    // And the backward speed the prose quotes.
+    expect(far).toBeLessThan(0);
+    expect(Math.abs(far)).toBeGreaterThan(11);
+    expect(Math.abs(far)).toBeLessThan(11.5);
+  });
+
+  it('says the march is built in, not discovered', () => {
+    // The direction of the logic matters: the model chooses the far
+    // point's speed so the lock holds, encoding the observed pattern —
+    // the lock is not derived from anything deeper.
+    expect(body).toMatch(/not a coincidence; it is built in/);
   });
 });
