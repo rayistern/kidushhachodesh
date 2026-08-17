@@ -94,23 +94,37 @@ export default function SunApogee() {
 
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] p-3">
-          <div className="text-xs text-[var(--color-text-secondary)]">Moved since the epoch</div>
+          <div className="text-xs text-[var(--color-text-secondary)]">
+            Moved since the epoch <span className="font-normal">(a distance, not a place)</span>
+          </div>
           <div className="font-mono text-lg font-bold text-[var(--color-gold)]">
             {formatDms(travelled)}
           </div>
           <div className="text-[11px] text-[var(--color-text-secondary)]">
-            over {years.toFixed(1)} years
+            {/* Spelled out because the DMS form of a tiny value reads as its
+                largest digit: "0° 0′ 15″" gets taken for fifteen degrees. */}
+            = {(travelled * 3600).toFixed(0)} arcseconds, over {years.toFixed(1)} years
           </div>
         </div>
         <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] p-3">
-          <div className="text-xs text-[var(--color-text-secondary)]">Apogee now stands at</div>
+          <div className="text-xs text-[var(--color-text-secondary)]">
+            Apogee now stands at <span className="font-normal">(a place)</span>
+          </div>
+          {/* The absolute longitude, NOT pos.degreesInto. Chapter 13
+              subtracts this figure from the sun's mean, so the card must
+              show the number that calculation consumes — the two pages
+              previously disagreed by a whole 60°, which is the sign offset. */}
           <div className="font-mono text-lg font-bold text-[var(--color-gold)]">
-            {formatDms(pos.degreesInto)}
+            {formatDms(longitude)}
           </div>
           <div className="text-[11px]">
-            <span className="font-bold">{pos.translit}</span>{' '}
-            <span className="hebrew-text text-[var(--color-accent)]">{pos.hebrew}</span>, {pos.ordinalDegree}
-            {ordinalSuffix(pos.ordinalDegree)} degree
+            = {formatDms(pos.degreesInto)} into the{' '}
+            <span className="font-bold">
+              {pos.index + 1}
+              {ordinalSuffix(pos.index + 1)}
+            </span>{' '}
+            sign (<span className="font-bold">{pos.translit}</span>{' '}
+            <span className="hebrew-text text-[var(--color-accent)]">{pos.hebrew}</span>)
           </div>
         </div>
       </div>
@@ -121,6 +135,7 @@ export default function SunApogee() {
             <tr className="border-b border-[var(--color-border)] text-left text-[var(--color-text-secondary)]">
               <th className="py-1 pr-3 font-bold">Interval</th>
               <th className="py-1 font-bold">Apogee moves</th>
+              <th className="py-1 pl-3 font-bold">in arcseconds</th>
             </tr>
           </thead>
           <tbody className="font-mono">
@@ -136,6 +151,12 @@ export default function SunApogee() {
                 <td className="py-1 pr-3 text-[var(--color-text-secondary)]">{label}</td>
                 <td className="py-1">
                   {formatDms(dmsToDecimal(CONSTANTS.SUN_APOGEE_PERIOD_BLOCKS[key]))}
+                </td>
+                {/* Every row of this table is under half an arcminute, so
+                    the DMS column is all leading zeros and the eye latches
+                    onto the last number. The plain count removes the doubt. */}
+                <td className="py-1 pl-3 text-[var(--color-text-secondary)]">
+                  {(dmsToDecimal(CONSTANTS.SUN_APOGEE_PERIOD_BLOCKS[key]) * 3600).toFixed(1)}″
                 </td>
               </tr>
             ))}
@@ -153,6 +174,14 @@ export default function SunApogee() {
         Why it is tracked at all: chapter 13 measures the maslul — the argument of the correction
         — as the sun's distance from this point. Move the apogee and every correction shifts with
         it.
+      </p>
+      <p className="mt-2 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
+        Two numbers on this card are easy to confuse, because one is tiny and one is large. The
+        movement is measured in <em>arcseconds</em> — 15 of them in a hundred days. The position
+        is measured in <em>degrees</em> — a little over 86 of them. The movement is the difference
+        between the position then and the position now, which is why a hundred days takes
+        86&deg;&nbsp;45&prime;&nbsp;8&Prime; to 86&deg;&nbsp;45&prime;&nbsp;23&Prime; and no
+        further. Chapter 13's subtraction uses the large one.
       </p>
     </InteractiveCard>
   );
