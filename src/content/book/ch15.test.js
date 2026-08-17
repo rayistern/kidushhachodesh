@@ -181,62 +181,62 @@ describe('why the gap gets doubled (KH 15:1)', () => {
     .sections.find((s) => s.id === 'double-elongation')
     .body.join('\n');
 
-  it('gives the physical reason, not a table-economy one', () => {
-    // Two earlier drafts got this wrong in opposite directions: the first
-    // said only that the effect "repeats twice a lap" and so needs an
-    // angle "twice as fast" (true, uninformative); the second explained
-    // that doubling makes one table serve both halves of the month, which
-    // reads as convenience. The doubled gap is the quantity the effect
-    // depends on — 180°-symmetric, like the tides.
-    // The pencil replaced a tides analogy, which was accurate but still
-    // abstract — "repeats after half a turn" is not a picture. A pencil
-    // turned half way round visibly IS the same pencil, and the arithmetic
-    // can be checked in the sentence.
+  it('leads with the whole-number reason, which is the operative one here', () => {
+    // Asked who cares about the symmetry when the numbers are this small.
+    // The answer is that nobody should: on the sighting range the doubling
+    // is a relabelling. What it actually buys is integer band boundaries.
+    expect(body).toMatch(/keeps the table in whole numbers/);
+    expect(body).toMatch(/2½, 5½, 9½, 12½/);
+  });
+
+  it('really would need half-degrees if the bands were undoubled', () => {
+    const rows = CONSTANTS.DOUBLE_ELONGATION_ADJUSTMENTS.filter(
+      (r) => r.maxElongation <= 63,
+    );
+    const bounds = [...new Set(rows.flatMap((r) => [r.minElongation, r.maxElongation]))];
+    const halves = bounds.filter((b) => (b / 2) % 1 !== 0);
+    // Half of them, which is what makes the point worth making.
+    expect(halves.length).toBeGreaterThanOrEqual(bounds.length / 2 - 1);
+    for (const h of [5, 11, 19, 25]) expect(bounds).toContain(h);
+  });
+
+  it('keeps the pencil as the account of where the quantity comes from', () => {
     expect(body).toMatch(/pencil lying on a table/);
     expect(body).toMatch(/two ends and they are interchangeable/);
-    expect(body).toMatch(/twice 10 is 20, and twice 190 is 380/);
-    expect(body).toMatch(/it makes no difference which end the sun is sitting at/);
-    expect(body).toMatch(/Not a shortcut/);
-    expect(body).not.toMatch(/two high tides/);
-    expect(body).not.toMatch(/twice as fast/);
-    expect(body).not.toMatch(/one short table serves both halves/);
+    expect(body).toMatch(/twice 10 is 20 and twice 190 is 380/);
   });
 
-  it('labels the explanation as the book\'s, since he gives none', () => {
-    expect(body).toMatch(/He gives no reason for any of this/);
+  it('says plainly that the symmetry is NOT the local reason', () => {
+    // The overclaim being corrected. An earlier draft presented the
+    // 180° symmetry as the reason for doubling in this calculation; the
+    // far side of the pencil is never reached on a sighting night.
+    expect(body).toMatch(/not why it matters \*here\*/);
+    expect(body).toMatch(/never reaches the far side of the pencil/);
+    expect(body).toMatch(/carries no extra information/);
   });
 
-  it('does not suggest full moon is ever computed', () => {
-    // It is not: the doubled gap never leaves the first sixth of the
-    // circle on a sighting night. An earlier draft leaned on new moon and
-    // full moon as if both were cases in play.
-    expect(body).not.toMatch(/full moon/i);
+  it('is right that the mapping is one-to-one on the sighting range', () => {
+    // 2.5-31 onto 5-62, monotonic: so the doubled value can be undoubled
+    // without ambiguity, which is exactly what "no extra information"
+    // means.
+    const doubled = (gap) => gap * 2;
+    expect(doubled(2.5)).toBe(5);
+    expect(doubled(31)).toBe(62);
+    let last = -1;
+    for (let gap = 2.5; gap <= 31; gap += 0.5) {
+      expect(doubled(gap)).toBeGreaterThan(last);
+      expect(doubled(gap)).toBeLessThan(360); // never wraps, so never folds
+      last = doubled(gap);
+    }
   });
 
-  it('is right that the practical range fits inside his table', () => {
-    // Measured over the sighting nights of fifty years: the doubled gap
-    // runs about 3° to 59°, and he tabulates to 63°.
-    expect(body).toMatch(/up to about sixty/);
-    expect(body).toMatch(/stops at 63°/);
-    const explicit = CONSTANTS.DOUBLE_ELONGATION_ADJUSTMENTS.filter(
-      (r) => !/extrapolat/i.test(r.source ?? ''),
-    );
-    const covered = Math.max(...explicit.map((r) => r.maxElongation));
-    expect(covered).toBeGreaterThanOrEqual(63);
+  it('labels the whole account as the book\'s', () => {
+    expect(body).toMatch(/None of this reasoning is his/);
   });
 
-  it('is right that the nudge starts at nothing and reaches nine', () => {
-    const at = (twoD) => {
-      const n = ((twoD % 360) + 360) % 360;
-      const row = CONSTANTS.DOUBLE_ELONGATION_ADJUSTMENTS.find(
-        (r) => n >= r.minElongation && n <= r.maxElongation,
-      );
-      return row ? row.adjustment : null;
-    };
-    expect(at(0)).toBe(0);
-    expect(at(60)).toBe(9);
-    expect(body).toMatch(/starts at nothing/);
-    expect(body).toMatch(/grows to nine degrees/);
+  it('does not pre-empt the sections that own the bounds and the nudge', () => {
+    expect(body).not.toMatch(/up to about sixty/);
+    expect(body).not.toMatch(/grows to nine degrees/);
   });
 });
 
