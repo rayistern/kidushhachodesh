@@ -11,6 +11,7 @@ import { describe, it, expect } from 'vitest';
 import { bookChapter, hasBookChapter } from './index';
 import { CONSTANTS } from '../../engine/constants';
 import { getFullCalculation } from '../../engine/pipeline';
+import { nextSightingNight } from '../../lib/sightingNight';
 import { dateFromEpochDays } from '../../engine/epochDays';
 import { zodiacPosition } from '../../engine/zodiac';
 import {
@@ -357,5 +358,38 @@ describe("the closing's description of chapters 18 and 19", () => {
     expect(missing).not.toMatch(/only in the Rambam's own words/);
     expect(hasBookChapter(18)).toBe(true);
     expect(hasBookChapter(19)).toBe(true);
+  });
+});
+
+describe('the civil-date gloss on the early-exit halves', () => {
+  const body = bookChapter(17)
+    .sections.find((s) => s.id === 'early-exit')
+    .body.join('\n');
+
+  it('states the month ranges and the crossover honestly', () => {
+    expect(body).toMatch(/January through May\*\* always fell in the narrow-window half/);
+    expect(body).toMatch(/July through November\*\* always in the wide one/);
+    expect(body).toMatch(/June and December\*\* are the crossover months/);
+    // And the reason dates are usable at all for a moon-keyed rule.
+    expect(body).toMatch(/on a sighting night the moon stands close to the sun/);
+  });
+
+  it('is true across four years of sighting nights', () => {
+    // The exact computation behind the claim. A bare date range for a
+    // moon-keyed rule would be wrong in general; it works only because
+    // the sighting night pins the moon near the sun, and this asserts
+    // the resulting month map rather than trusting it.
+    let d = new Date(2026, 0, 1);
+    for (let m = 0; m < 48; m++) {
+      const sn = nextSightingNight(d);
+      const lon = getFullCalculation(sn.date).moon.trueLongitude;
+      const easy = lon >= 270 || lon < 90;
+      const month = sn.date.getMonth(); // 0-based
+      if (month >= 0 && month <= 4) expect(easy, sn.hebrew).toBe(true);
+      if (month >= 6 && month <= 10) expect(easy, sn.hebrew).toBe(false);
+      // June (5) and December (11) are allowed either way.
+      d = new Date(sn.date);
+      d.setDate(d.getDate() + 1);
+    }
   });
 });
