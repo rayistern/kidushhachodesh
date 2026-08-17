@@ -106,6 +106,8 @@ export default function BookChapter() {
         <main className="min-w-0">
           <Recap recap={content.recap} />
 
+          {content.terms?.length > 0 && <Terms terms={content.terms} />}
+
           {content.sections.map((section) => (
             <BookSection
               key={section.id}
@@ -120,6 +122,55 @@ export default function BookChapter() {
       </div>
     </div>
     </FigureDefaults.Provider>
+  );
+}
+
+/**
+ * Plain names for the chapter's technical terms.
+ *
+ * These chapters carry three vocabularies at once — the Rambam's Hebrew,
+ * the conventional English rendering, and whatever a reader would
+ * naturally say. The first two are the ones every commentary uses and
+ * cannot be dropped; the third is the one that makes the sentence mean
+ * something on a first reading.
+ *
+ * So all three are shown, with the plain name first. Nothing is being
+ * replaced — a reader who goes to the source, or to any other book on
+ * this, still needs "latitude" and "rochav". They just should not have
+ * to hold them before they have understood what is being named.
+ */
+function Terms({ terms }) {
+  return (
+    <section className="mb-8 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+      <h2 className="text-xs font-bold uppercase tracking-wide text-[var(--color-gold)]">
+        The words in this chapter
+      </h2>
+      <p className="mt-1 text-[11px] text-[var(--color-text-secondary)]">
+        Plain name first. The other two are what you will meet in the text and in every
+        commentary, so they are worth knowing — but not worth being stopped by.
+      </p>
+      <dl className="mt-3 space-y-2.5">
+        {terms.map((term) => (
+          <div key={term.formal}>
+            <dt className="flex flex-wrap items-baseline gap-x-2">
+              <span className="text-sm font-bold text-[var(--color-text)]">{term.plain}</span>
+              <span className="text-xs text-[var(--color-text-secondary)]">
+                = {term.formal}
+              </span>
+              {term.hebrew && (
+                <span className="hebrew-text text-xs text-[var(--color-accent)]">
+                  {term.hebrew}
+                </span>
+              )}
+            </dt>
+            <dd
+              className="text-[11px] leading-relaxed text-[var(--color-text-secondary)]"
+              dangerouslySetInnerHTML={{ __html: renderEmphasis(term.gloss) }}
+            />
+          </div>
+        ))}
+      </dl>
+    </section>
   );
 }
 

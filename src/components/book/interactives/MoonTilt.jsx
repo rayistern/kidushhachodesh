@@ -57,7 +57,7 @@ export default function MoonTilt() {
 
       <label className="mt-3 block">
         <span className="text-xs font-bold text-[var(--color-text-secondary)]">
-          How far the moon has travelled past the head — {course}°
+          How far the moon has travelled past the up-crossing — {course}°
         </span>
         <input
           type="range"
@@ -83,9 +83,9 @@ export default function MoonTilt() {
               on the crossing point — the moon is exactly on the sun's track
             </span>
           ) : latitude > 0 ? (
-            <span className="text-[var(--color-accent)]">northerly — above the track</span>
+            <span className="text-[var(--color-accent)]">above the line — "northerly"</span>
           ) : (
-            <span className="text-[var(--color-gold)]">southerly — below the track</span>
+            <span className="text-[var(--color-gold)]">below the line — "southerly"</span>
           )}
         </div>
       </div>
@@ -133,9 +133,9 @@ function Wave({ course, latitude }) {
 
         {/* the crossings */}
         {[
-          { deg: 0, label: 'head', hebrew: 'ראש' },
-          { deg: 180, label: 'tail', hebrew: 'זנב' },
-          { deg: 360, label: 'head', hebrew: '' },
+          { deg: 0, label: 'up-crossing', hebrew: 'ראש · head' },
+          { deg: 180, label: 'down-crossing', hebrew: 'זנב · tail' },
+          { deg: 360, label: 'up-crossing', hebrew: '' },
         ].map(({ deg, label, hebrew }, i) => (
           <g key={i}>
             <circle cx={x(deg)} cy={midY} r="4" fill="var(--color-accent)" />
@@ -152,10 +152,10 @@ function Wave({ course, latitude }) {
 
         {/* extremes */}
         <text x={x(90)} y={y(MAX_LATITUDE) - 6} fontSize="8" textAnchor="middle" fill="var(--color-text-secondary)">
-          5° north
+          5° above
         </text>
         <text x={x(270)} y={y(-MAX_LATITUDE) + 12} fontSize="8" textAnchor="middle" fill="var(--color-text-secondary)">
-          5° south
+          5° below
         </text>
 
         {/* the moon, and a dropped line to the track */}

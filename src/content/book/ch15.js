@@ -33,6 +33,37 @@ export default {
   subtitle:
     "Chapter 14's two numbers finally come together — with help from the sun, of all things, and a correction two and a half times bigger than anything the sun needed.",
 
+  terms: [
+    {
+      plain: 'the gap to the sun',
+      formal: 'the elongation',
+      hebrew: null,
+      gloss:
+        'How far the moon has pulled away from the sun since they were last together. Subtract one position from the other.',
+    },
+    {
+      plain: 'the gap, doubled',
+      formal: 'the double elongation',
+      hebrew: 'מרחק כפול',
+      gloss:
+        'Exactly what it says — the gap multiplied by two. Doubled because the wobble being corrected for happens **twice** in each lap, not once.',
+    },
+    {
+      plain: 'the course after its nudge',
+      formal: 'the correct course',
+      hebrew: 'המסלול הנכון',
+      gloss:
+        "Where the moon sits on its small circle, after adding the nudge the doubled gap earns it. This is the number you look the real correction up by.",
+    },
+    {
+      plain: 'the fix from the table',
+      formal: 'the angle of the course',
+      hebrew: 'מנת המסלול',
+      gloss:
+        'How much to shift the average position to get the real one. Up to 5° 8′ for the moon — two and a half times anything the sun needed.',
+    },
+  ],
+
   recap: {
     settled: [
       "The moon's **mean** — where its small circle has got to — nudged to the moment of sighting.",

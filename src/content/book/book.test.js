@@ -93,6 +93,50 @@ describe('every written chapter is structurally sound', () => {
     }
   });
 
+  it.each(chapters)('chapter %i — any glossary is well formed', (n) => {
+    const terms = bookChapter(n).terms;
+    if (!terms) return;
+    expect(terms.length).toBeGreaterThan(0);
+    const plains = terms.map((t) => t.plain);
+    expect(new Set(plains).size, 'plain names must be unique').toBe(plains.length);
+    for (const term of terms) {
+      // The plain name is the point — it must not just restate the
+      // formal one, or the glossary is doing nothing.
+      expect(term.plain?.length, `${n}: missing plain name`).toBeGreaterThan(2);
+      expect(term.formal?.length, `${n}: missing formal name`).toBeGreaterThan(2);
+      expect(term.plain.toLowerCase()).not.toBe(term.formal.toLowerCase());
+      expect(term.gloss?.length, `${n}: ${term.plain} has no gloss`).toBeGreaterThan(40);
+      expect(term.gloss).not.toContain('${');
+    }
+  });
+
+  it.each(chapters)('chapter %i — every glossary word is actually used', (n) => {
+    // A term nobody says is a term nobody needed. This checks the
+    // chapter genuinely talks about each thing it glosses, keyed on the
+    // distinctive word rather than the exact phrase — prose naturally
+    // varies ("where the arm of the ride is pointing" for "where the arm
+    // is pointing"), and demanding a verbatim match would push the
+    // writing around to satisfy the test rather than the reader.
+    const STOPWORDS = new Set([
+      'the', 'a', 'an', 'of', 'to', 'in', 'on', 'off', 'at', 'is', 'it',
+      'you', 'your', 'how', 'far', 'past', 'where', 'what', 'from', 'and',
+      'or', 'up', 'down', 'above', 'below', 'sit', 'sits',
+    ]);
+    const content = bookChapter(n);
+    if (!content.terms) return;
+    const prose = content.sections.flatMap((s) => s.body).join('\n').toLowerCase();
+    for (const term of content.terms) {
+      const keyword = term.plain
+        .toLowerCase()
+        .replace(/[^a-z\s'-]/g, ' ')
+        .split(/\s+/)
+        .filter((w) => w && !STOPWORDS.has(w))
+        .sort((a, b) => b.length - a.length)[0];
+      expect(keyword, `${n}: "${term.plain}" is all stopwords`).toBeTruthy();
+      expect(prose, `${n}: the prose never mentions "${keyword}"`).toContain(keyword);
+    }
+  });
+
   it.each(chapters)('chapter %i has a recap and a closing', (n) => {
     const content = bookChapter(n);
     expect(content.recap.thisChapter?.length).toBeGreaterThan(20);

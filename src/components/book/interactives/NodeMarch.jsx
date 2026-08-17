@@ -66,7 +66,7 @@ export default function NodeMarch() {
 
   return (
     <InteractiveCard
-      title="The head walks backwards"
+      title="The up-crossing walks backwards"
       source="KH 16:2-3"
       blurb="which is the whole reason you subtract from 360"
       defaultOpen
@@ -102,14 +102,14 @@ export default function NodeMarch() {
           <span>360° − {formatDms(runningTotal)}</span>
         </div>
         <div className="flex justify-between gap-4 pt-1">
-          <span className="font-bold">The head is at</span>
+          <span className="font-bold">The up-crossing is at</span>
           <span className="font-bold text-[var(--color-gold)]">{formatDms(head)}</span>
         </div>
       </div>
 
       <div className="mt-3 grid gap-2 sm:grid-cols-2 text-xs">
         <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] p-2">
-          <div className="text-[var(--color-text-secondary)]">Head <span className="hebrew-text">ראש</span></div>
+          <div className="text-[var(--color-text-secondary)]">The up-crossing — head <span className="hebrew-text">ראש</span></div>
           <div className="text-sm">
             <span className="font-bold">{headSign.translit}</span>{' '}
             <span className="hebrew-text text-[var(--color-accent)]">{headSign.hebrew}</span>,{' '}
@@ -117,7 +117,7 @@ export default function NodeMarch() {
           </div>
         </div>
         <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] p-2">
-          <div className="text-[var(--color-text-secondary)]">Tail <span className="hebrew-text">זנב</span></div>
+          <div className="text-[var(--color-text-secondary)]">The down-crossing — tail <span className="hebrew-text">זנב</span></div>
           <div className="text-sm">
             <span className="font-bold">{tailSign.translit}</span>{' '}
             <span className="hebrew-text text-[var(--color-accent)]">{tailSign.hebrew}</span>,{' '}

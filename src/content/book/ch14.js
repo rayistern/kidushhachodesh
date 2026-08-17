@@ -32,6 +32,37 @@ export default {
   hebrewTitle: 'אמצע הירח',
   subtitle: "The moon's turn. Two speeds, one strange correction, and an answer that is tied to a particular moment of a particular evening.",
 
+  terms: [
+    {
+      plain: 'where the arm is pointing',
+      formal: "the moon's mean",
+      hebrew: 'אמצע הירח',
+      gloss:
+        'Where the **small circle itself** has got to as it travels round the big one. Think of the arm of a fairground ride, and this is where the arm points.',
+    },
+    {
+      plain: 'where you sit in the cup',
+      formal: 'the mean within its path',
+      hebrew: 'אמצע המסלול',
+      gloss:
+        'Where the **moon** has got to around the edge of the small circle. Same ride, the other question.',
+    },
+    {
+      plain: 'average place',
+      formal: 'mean position',
+      hebrew: 'אמצע',
+      gloss:
+        'Where something would be if it never changed speed. Easy to work out, and never quite where you see it. *Emtza* just means "middle".',
+    },
+    {
+      plain: 'the sunset nudge',
+      formal: 'the season correction',
+      hebrew: null,
+      gloss:
+        'A small adjustment of up to half a degree, added or taken off so the answer lands at the moment someone is actually outside looking — about twenty minutes after sunset.',
+    },
+  ],
+
   recap: {
     settled: [
       "A day count from the Rambam's starting point to any evening you like.",

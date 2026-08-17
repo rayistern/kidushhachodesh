@@ -90,7 +90,7 @@ export default function MoonLatitude() {
     <InteractiveCard
       title="How high, and on which side"
       source="KH 16:10-19"
-      blurb="the moon's position less the head's — then a fold you have not seen before"
+      blurb="the moon's position less the up-crossing's — then a fold you have not seen before"
       defaultOpen
     >
       <div className="flex flex-wrap items-end gap-3">
@@ -119,12 +119,12 @@ export default function MoonLatitude() {
           note={`${moonSign.translit} ${formatDms(moonSign.degreesInto)}`}
         />
         <Row
-          label="Where the head is"
+          label="Where the up-crossing is (the head)"
           value={formatDms(calc.head)}
           note={`${headSign.translit} ${formatDms(headSign.degreesInto)}`}
           border
         />
-        <Row label="Course of the latitude" value={formatDms(calc.course)} emphasis />
+        <Row label="How far past it the moon has come" value={formatDms(calc.course)} emphasis />
       </div>
 
       <div className="mt-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] p-3">
@@ -162,9 +162,9 @@ export default function MoonLatitude() {
         </div>
         <div className="text-sm">
           {calc.latitude >= 0 ? (
-            <span className="text-[var(--color-accent)]">northerly — above the sun's track</span>
+            <span className="text-[var(--color-accent)]">above the line — "northerly"</span>
           ) : (
-            <span className="text-[var(--color-gold)]">southerly — below the sun's track</span>
+            <span className="text-[var(--color-gold)]">below the line — "southerly"</span>
           )}
         </div>
         {isExample && (
