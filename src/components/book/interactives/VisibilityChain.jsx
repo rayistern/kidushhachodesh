@@ -95,14 +95,35 @@ const CHAIN = [
     gapFamily: true,
     label: 'the gap, moved by the slice of the height (third longitude)',
     ref: 'KH 17:11',
-    how: () => '= step 5, moved by the slice of step 6',
+    // Stated live: which way and by how much, since "moved by" hides
+    // both. When the band's fraction is zero the step passes through.
+    how: (steps) => {
+      const delta = steps.orechShlishi?.result - steps.orechSheni?.result;
+      if (!delta) return '= step 5 unchanged — no slice in this band';
+      return `= step 5 ${delta > 0 ? '+' : '−'} ${formatDms(Math.abs(delta))} (the slice of step 6)`;
+    },
   },
   {
     id: 'orechRevii',
     gapFamily: true,
     label: 'the gap, stretched for how steeply this part sets (fourth longitude)',
     ref: 'KH 17:12',
-    how: () => "= step 7 ± a fraction picked by the moon's sign (or left alone)",
+    // Stated live. A reader met 17° falling to 11°21′ with only
+    // "± a fraction picked by the moon's sign" to explain it — the
+    // fraction in force (here, minus a third) has to be on screen.
+    how: (steps) => {
+      const before = steps.orechShlishi?.result;
+      const after = steps.orechRevii?.result;
+      if (!before || after === undefined) return '';
+      const f = (after - before) / before;
+      const name =
+        Math.abs(Math.abs(f) - 1 / 3) < 0.01 ? 'a third'
+        : Math.abs(Math.abs(f) - 1 / 5) < 0.01 ? 'a fifth'
+        : Math.abs(Math.abs(f) - 1 / 6) < 0.01 ? 'a sixth'
+        : null;
+      if (!name) return "= step 7 unchanged — the moon's sign asks for nothing";
+      return `= step 7 ${f > 0 ? '+' : '−'} ${name} of itself (the moon's sign says so)`;
+    },
   },
   {
     id: 'mnatGovahHaMedinah',

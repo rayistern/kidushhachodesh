@@ -70,3 +70,13 @@ describe('the running-number family is marked', () => {
     expect(ringed).toEqual([4, 5, 7, 8, 10]);
   });
 });
+
+describe('steps 7 and 8 state their live operation', () => {
+  it("names the actual slice and fraction on his example", async () => {
+    render(<VisibilityChain />);
+    // His evening: slice adds 1°0'50" (11°28' − 10°27'10"); the moon in
+    // the 2nd sign stretches by a fifth.
+    expect(await screen.findByText(/= step 5 \+ 1° 0′ .*the slice of step 6/)).toBeTruthy();
+    expect(screen.getByText(/= step 7 \+ a fifth of itself/)).toBeTruthy();
+  });
+});
