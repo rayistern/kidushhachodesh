@@ -152,11 +152,18 @@ export default function HowMarginal() {
           >
             {result.visible ? 'Seen' : 'Not seen'}
           </span>
-          {result.visible && (
+          {/* "Past the line by 0° 0′ 0.0″" read as nonsense on the one
+              case the card opens with — KH 18:4's, which sits exactly ON
+              the line. Zero slack is its own message, not a quantity. */}
+          {result.visible && result.margin < 1 / 3600 ? (
             <span className="font-mono text-sm text-[var(--color-gold)]">
-              past the line by {formatDms(Math.max(0, result.margin))}
+              exactly ON the line — the narrowest yes the table allows
             </span>
-          )}
+          ) : result.visible ? (
+            <span className="font-mono text-sm text-[var(--color-gold)]">
+              past the line by {formatDms(result.margin)}
+            </span>
+          ) : null}
         </div>
         <div className="mt-0.5 font-mono text-[11px] text-[var(--color-text-secondary)]">
           {result.rule}
