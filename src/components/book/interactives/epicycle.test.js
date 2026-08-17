@@ -117,3 +117,36 @@ describe('the exaggeration is acknowledged, not hidden', () => {
     expect(realMaxEquation).toBeLessThan(5.2);
   });
 });
+
+describe('the far point is drawn where the maslul counts from', () => {
+  it('sits on the arm extended, at every arm position', () => {
+    // The marker is at (ex + r·cos(mean), ey − r·sin(mean)) — the point of
+    // the small circle furthest from the earth. Collinearity with earth
+    // and small-circle centre is what "on the arm extended" means, and it
+    // must hold as the arm turns or the marker is decoration.
+    for (const mean of [0, 37, 90, 210, 333]) {
+      const rad = mean * DEG;
+      const ex = R * Math.cos(rad);
+      const ey = R * Math.sin(rad);
+      const fx = ex + r * Math.cos(rad);
+      const fy = ey + r * Math.sin(rad);
+      // Cross product of (earth→centre) and (earth→far point) is zero
+      // exactly when the three are on one line.
+      expect(Math.abs(ex * fy - ey * fx), `${mean}°`).toBeLessThan(1e-9);
+      // And it is the FAR intersection, not the near one.
+      expect(Math.hypot(fx, fy)).toBeCloseTo(R + r, 9);
+    }
+  });
+
+  it('is the zero of the maslul: the moon drawn at maslul 0 lands on it', () => {
+    // offsetFromArm(mean, 0) = 0 was already pinned; this ties that fact
+    // to the marker — the moon at maslul 0 sits at distance R + r from
+    // the earth, i.e. exactly on the far point.
+    const mean = 50 * DEG;
+    const ex = R * Math.cos(mean);
+    const ey = R * Math.sin(mean);
+    const mx = ex + r * Math.cos(mean); // theta = mean - 0
+    const my = ey + r * Math.sin(mean);
+    expect(Math.hypot(mx, my)).toBeCloseTo(R + r, 9);
+  });
+});

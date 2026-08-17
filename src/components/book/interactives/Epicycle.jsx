@@ -180,6 +180,28 @@ function Figure({ mean, anomaly }) {
         {/* Where you'd actually look to see the moon */}
         <line x1={cx} y1={cy} x2={mx} y2={my} stroke="var(--color-gold)" strokeWidth="1" strokeDasharray="2 3" opacity="0.5" />
 
+        {/* The far point of the small circle — where the maslul counts
+            from. It lies on the arm extended, so it turns with the arm;
+            a reader asked where it was, having met it in chapter 15's
+            one-to-two lock, and it was not drawn. */}
+        <circle
+          cx={ex + r * Math.cos(meanRad)}
+          cy={ey - r * Math.sin(meanRad)}
+          r="2.5"
+          fill="none"
+          stroke="var(--color-text-secondary)"
+          strokeWidth="1.2"
+        />
+        <text
+          x={ex + (r + 12) * Math.cos(meanRad)}
+          y={ey - (r + 12) * Math.sin(meanRad) + 3}
+          fontSize="7"
+          textAnchor="middle"
+          fill="var(--color-text-secondary)"
+        >
+          far point
+        </text>
+
         <circle cx={ex} cy={ey} r="3" fill="var(--color-silver)" />
         <circle cx={mx} cy={my} r="6" fill="var(--color-gold)" />
         <circle cx={cx} cy={cy} r="6" fill="var(--color-accent)" />

@@ -74,6 +74,8 @@ export default function DoubleElongation() {
 
       <SkyGap elongation={elongation} />
 
+      <HalfLock elongation={elongation} />
+
       <div className="mt-3 grid gap-2 sm:grid-cols-3">
         <Box label="Elongation" value={formatDms(elongation)} note="moon less sun" />
         <Box
@@ -215,6 +217,92 @@ function SkyGap({ elongation }) {
       </svg>
       <figcaption className="text-center text-[10px] text-[var(--color-text-secondary)]">
         Not to scale — the point is the gap, not the geometry.
+      </figcaption>
+    </figure>
+  );
+}
+
+/**
+ * The one-to-two lock, drawn — the Chitrik edition's reason for doubling.
+ *
+ * Top-down view. Three directions from the earth: towards the sun,
+ * towards the small circle, towards the far point. The far point is
+ * placed at (sun − gap), which is what the lock means — so the sun's
+ * direction always sits exactly half way between the other two, and
+ * dragging the slider cannot break it. That bisection IS the picture:
+ * the arc from the far point to the small circle is always twice the
+ * arc from the sun to the small circle.
+ *
+ * Distances here are angles round the sky, as the caption says — the
+ * same warning the prose carries, because "far point" is named for
+ * physical distance while everything drawn is angular.
+ */
+function HalfLock({ elongation }) {
+  const size = 250;
+  const cx = size / 2;
+  const cy = size / 2 + 6;
+  const R = 96;
+  const DEG = Math.PI / 180;
+
+  const sunA = 90; // straight up
+  const moonA = sunA + elongation; // the moon pulls ahead of the sun
+  const farA = sunA - elongation; // the far point retreats behind it
+
+  const at = (angle, r) => [cx + r * Math.cos(angle * DEG), cy - r * Math.sin(angle * DEG)];
+  const arc = (from, to, r) => {
+    const [x1, y1] = at(from, r);
+    const [x2, y2] = at(to, r);
+    return `M ${x1.toFixed(1)} ${y1.toFixed(1)} A ${r} ${r} 0 0 0 ${x2.toFixed(1)} ${y2.toFixed(1)}`;
+  };
+
+  const [sx, sy] = at(sunA, R);
+  const [mx, my] = at(moonA, R);
+  const [fx, fy] = at(farA, R);
+
+  return (
+    <figure className="mt-3">
+      <svg
+        viewBox={`0 0 ${size} ${size}`}
+        className="mx-auto w-full max-w-[250px]"
+        role="img"
+        aria-label="Three directions from the earth — the far point, the sun, and the small circle — with the sun always exactly half way between the other two"
+      >
+        <circle cx={cx} cy={cy} r={R} fill="none" stroke="var(--color-border)" strokeWidth="1.2" />
+        <circle cx={cx} cy={cy} r="5" fill="var(--color-accent)" />
+        <text x={cx} y={cy + 16} fontSize="8" textAnchor="middle" fill="var(--color-text-secondary)">
+          earth
+        </text>
+
+        {/* the far point — behind the sun by exactly the gap */}
+        <line x1={cx} y1={cy} x2={fx} y2={fy} stroke="var(--color-border)" strokeWidth="1.2" strokeDasharray="4 3" />
+        <circle cx={fx} cy={fy} r="3" fill="var(--color-text-secondary)" />
+        <text x={fx} y={fy - 8} fontSize="8" textAnchor="middle" fill="var(--color-text-secondary)">
+          far point
+        </text>
+
+        {/* the sun's direction */}
+        <line x1={cx} y1={cy} x2={sx} y2={sy} stroke="var(--color-gold)" strokeWidth="1.5" />
+        <circle cx={sx} cy={sy} r="5" fill="var(--color-gold)" />
+        <text x={sx} y={sy - 9} fontSize="8" textAnchor="middle" fill="var(--color-gold)">
+          sun
+        </text>
+
+        {/* the small circle, riding the big one */}
+        <line x1={cx} y1={cy} x2={mx} y2={my} stroke="var(--color-silver)" strokeWidth="1.5" />
+        <circle cx={mx} cy={my} r="11" fill="var(--color-accent)" fillOpacity="0.12" stroke="var(--color-accent)" strokeWidth="1.2" />
+        <text x={mx} y={my - 15} fontSize="8" textAnchor="middle" fill="var(--color-text-secondary)">
+          small circle
+        </text>
+
+        {/* the gap — sun round to the small circle */}
+        <path d={arc(sunA, moonA, R * 0.5)} fill="none" stroke="var(--color-accent)" strokeWidth="1.8" />
+        {/* the doubled gap — far point round to the small circle */}
+        <path d={arc(farA, moonA, R * 0.72)} fill="none" stroke="var(--color-gold)" strokeWidth="1.4" strokeDasharray="5 3" />
+      </svg>
+      <figcaption className="text-center text-[10px] leading-relaxed text-[var(--color-text-secondary)]">
+        The solid arc is <strong>the gap</strong>; the dashed arc, far point round to the small
+        circle, is always exactly <strong>twice</strong> it — the sun sits half way between the
+        other two, at every position of the slider. All three distances are angles round the sky.
       </figcaption>
     </figure>
   );
