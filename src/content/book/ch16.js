@@ -140,7 +140,7 @@ export default {
       nodeId: 'latitude',
       body: [
         'Here is the fact that makes this chapter\'s instructions look strange, and the one the text states almost in passing.',
-        'The up-crossing does not stay put, and it does not travel the way everything else does. It moves **against** the order of the signs — the Rambam says it goes "from Dagim to D\'li", which is backwards through the list. Everything else in the book counts forwards.',
+        'The up-crossing does not stay put, and it does not travel the way everything else does. It moves **against** the order of the signs — the Rambam says it goes "from Dagim to D\'li" — from the 12th sign to the 11th, which is backwards through the list. Everything else in the book counts forwards.',
         'It is also extremely slow: **3 minutes and 11 seconds of arc a day**, which works out to a full lap in a little over eighteen and a half years.',
         'That backwards march is why KH 16:3 gives an instruction that otherwise makes no sense. You work out its progress exactly as you did the sun\'s and the moon\'s — count the days, add up the chunks, add the starting figure — and then you **subtract the whole thing from 360**. Everything else you calculate, you use as it stands. This one you flip.',
         'The flip is simply what "backwards" means in arithmetic. Your running total counts how far the up-crossing has gone; because it goes the other way, that distance has to be taken off a full circle to give a position.',

@@ -36,6 +36,9 @@ export default {
   subtitle:
     'Everything so far has been preparing three numbers. This chapter turns them into one number, and that number into a yes or a no.',
 
+  // Leans on sign names, so the reference strip is offered here.
+  signStrip: true,
+
   terms: [
     {
       plain: 'the gap',
@@ -117,7 +120,7 @@ export default {
         'If the gap is **nine degrees or less** — about one fist at arm\'s length — the moon cannot be seen. Anywhere in the land, no exceptions, stop calculating.',
         'If it is **more than fifteen degrees** — a fist and a half — it will certainly be seen. Stop calculating.',
         'Only between those two does anything else in this chapter apply. That band is narrow, and the moon crosses it quickly — so on most evenings the whole apparatus below is simply not needed.',
-        'There is a catch, and it is the sort that would quietly ruin an answer. Those thresholds hold only when the moon sits in one half of the sky — from the start of G\'di round to the end of Teomim. In the other half the numbers change: **ten degrees** for certain invisibility, **twenty-four** for certain visibility. That is a very different window, and which one applies depends on nothing but where the moon is.',
+        'There is a catch, and it is the sort that would quietly ruin an answer. Those thresholds hold only when the moon sits in one half of the sky — from the start of the 10th sign round to the end of the 3rd — G\'di through Teomim. In the other half the numbers change: **ten degrees** for certain invisibility, **twenty-four** for certain visibility. That is a very different window, and which one applies depends on nothing but where the moon is.',
         'How much difference does that make? The undecided band is six degrees wide in one half of the sky and fourteen in the other — **nearly two and a half times wider**. So in one half you will rarely need the long calculation, and in the other you often will.',
         'Why the halves differ is the same reason chapter 11 gave for naming the signs at all: the belt meets the horizon at different angles in different parts of the year, and a moon setting at a shallow angle needs far more separation from the sun to clear the glare.',
       ],
@@ -163,8 +166,8 @@ export default {
       nodeId: 'arc',
       body: [
         'Here is the promise chapter 11 made coming due. Back then, the question was why the Rambam bothers naming the twelve signs when a position is already a number. This is the answer.',
-        'The first correction takes minutes off the gap, and **how many depends on the sign the moon is in**: 59 minutes in Taleh, a full degree in Shor, 58 in Teomim, down to 34 in Moznayim and back up again. Twelve signs, twelve numbers. The result is the gap after one adjustment — the *second longitude*.',
-        'The second does the same to the height, with its own set of twelve — 9 minutes in Taleh, 10 in Shor, up to 46 in Moznayim. And here the direction matters: if the moon is north of the sun\'s road you take the correction off, if south you add it on. That gives the height after its one adjustment — the *second latitude*.',
+        'The first correction takes minutes off the gap, and **how many depends on the sign the moon is in**: 59 minutes in the 1st sign, a full degree in the 2nd, 58 in the 3rd, down to 34 in the 7th, and back up again. Twelve signs, twelve numbers. The result is the gap after one adjustment — the *second longitude*.',
+        'The second does the same to the height, with its own set of twelve — 9 minutes in the 1st sign, 10 in the 2nd, up to 46 in the 7th. And here the direction matters: if the moon is north of the sun\'s road you take the correction off, if south you add it on. That gives the height after its one adjustment — the *second latitude*.',
         'Neither table is arbitrary. Both are tracking the same thing — how the parallax shift breaks down into sideways and vertical parts, which depends on the angle the belt makes with the horizon, which depends on which stretch of the belt is setting. The sign is a shorthand for that angle.',
       ],
       interactive: 'parallax-by-sign',

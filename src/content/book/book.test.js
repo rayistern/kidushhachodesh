@@ -137,6 +137,51 @@ describe('every written chapter is structurally sound', () => {
     }
   });
 
+  it.each(chapters)('chapter %i names signs by number, not name alone', (n) => {
+    // A reader said the transliterated sign names made the book sound
+    // foreign, and they were right: twelve unfamiliar words are twelve
+    // things to hold before a sentence can be read. The book now leads
+    // with the position — "the 2nd sign (Shor)" — because the position is
+    // the fact the calculations use and the name is a label on it.
+    //
+    // So a bare sign name in the prose has to be accompanied by an
+    // ordinal somewhere in the same paragraph, or it is asking the reader
+    // to remember. The chapters that deliberately discuss the naming
+    // itself (11's "why bother naming the twelve") are the exception and
+    // say so in their own words.
+    const NAMES = [
+      'Taleh', 'Shor', 'Teomim', 'Sartan', 'Aryeh', 'Betulah',
+      'Moznayim', 'Akrav', 'Keshet', "G'di", "D'li", 'Dagim',
+    ];
+    const ORDINAL = /\b(1st|2nd|3rd|[4-9]th|1[0-2]th)\b|\bnineteenth degree\b|names themselves|familiar English names/;
+
+    for (const section of bookChapter(n).sections) {
+      const prose = section.body.join(' ');
+      // A trailing lookahead, not \b — "Shor" must not match "Short",
+      // and two of the names contain an apostrophe so \b cannot close them.
+      const namesUsed = NAMES.filter((name) =>
+        new RegExp(`\\b${name}(?![a-z])`).test(prose),
+      );
+      if (namesUsed.length === 0) continue;
+      expect(
+        ORDINAL.test(prose),
+        `${n}:${section.id} names ${namesUsed.join('/')} with no position to anchor it`,
+      ).toBe(true);
+    }
+  });
+
+  it('offers the sign reference only where signs are discussed', () => {
+    // On a chapter that never mentions a sign it would be furniture.
+    const withStrip = chapters.filter((n) => bookChapter(n).signStrip);
+    expect(withStrip).toEqual([11, 17, 19]);
+    for (const n of withStrip) {
+      const prose = bookChapter(n).sections.flatMap((s) => s.body).join(' ');
+      expect(prose, `chapter ${n} has the strip but discusses no signs`).toMatch(
+        /\bsign\b|\bsigns\b/,
+      );
+    }
+  });
+
   it.each(chapters)('chapter %i does not address a reader who asked a question', (n) => {
     // Several sections of this book were written in reply to a specific
     // question, and the reply's register is easy to leave behind. A

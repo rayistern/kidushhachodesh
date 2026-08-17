@@ -159,7 +159,7 @@ export default {
       nodeId: 'sun-true',
       body: [
         'The Rambam now runs the entire calculation through for a single evening, and helpfully it is the same evening chapter 12 used — a hundred days after the starting point.',
-        'Average position, far point, subtract to get the course, round it, look up the correction, apply it in the direction the course dictates. Six steps, and he states the answer: the sun stands in Sartan, a whisker short of fifteen degrees into the sign.',
+        'Average position, far point, subtract to get the course, round it, look up the correction, apply it in the direction the course dictates. Six steps, and he states the answer: the sun stands a whisker short of fifteen degrees into the 4th sign (Sartan).',
         'The calculator below walks all six, marking each figure he states outright. It also does something he could not: it shows you where the sun **actually** was that evening, by modern reckoning.',
         "The gap is about half a degree, and his sun runs a little behind. It is worth seeing. It is also worth knowing that the gap does not grow — it is no larger today than it was in his own lifetime, which tells you his method is sound and its starting values slightly off, rather than the other way round.",
       ],

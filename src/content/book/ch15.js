@@ -153,7 +153,7 @@ export default {
       body: [
         'The Rambam works it right through, for the evening of the second of Iyar — twenty-nine days after the starting point. That is one month on from the epoch, which is not a coincidence: twenty-nine days is exactly the gap from one possible sighting to the next.',
         'Every figure he states along the way is marked in the calculator below. The chain runs: the sun\'s average place, the moon\'s average place at sighting, the moon within its path, the gap between moon and sun, that gap doubled, the nudge it earns, the course after its nudge, the fix from the table, and finally the subtraction.',
-        'His answer: the moon stands at **18 degrees and 36 minutes into Shor**.',
+        'His answer: the moon stands **18 degrees 36 minutes into the 2nd sign** (Shor).',
         'One thing to watch as you step through it. He truncates the correct course to a whole number of degrees before reading the table, exactly as he did with the sun in chapter 13 — 108 degrees and 21 minutes becomes simply 108. That is the same licence, spent the same way.',
       ],
       interactive: 'moon-true',

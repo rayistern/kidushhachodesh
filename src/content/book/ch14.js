@@ -132,7 +132,7 @@ export default {
       body: [
         'This part you already know how to do, because it is exactly what chapter 12 did for the sun — the same adding-up, with the moon\'s tables instead.',
         'Count the days from the starting point. Break that number into the Rambam\'s ready-made chunks — ten days, a hundred days, a thousand, ten thousand. Look up how far the moon travels in each chunk, add them all together, throw away whole circles, and add the position it started from.',
-        'Where the arm pointed at the starting point was **1° 14\' 43" in Shor** (14:4). Where the moon sat in the cup was **84° 28\' 42"**.',
+        'Where the arm pointed at the starting point was **1° 14\' 43" into the 2nd sign** (Shor) (14:4). Where the moon sat in the cup was **84° 28\' 42"**.',
         'The only thing different from the sun is that the numbers are bigger, because the moon moves about thirteen times faster.',
       ],
       interactive: 'moon-mean',

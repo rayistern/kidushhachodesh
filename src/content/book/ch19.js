@@ -38,6 +38,9 @@ export default {
   subtitle:
     'Not "could it be seen" — that is settled. Which way was the crescent tilted, and how high did it stand? The court asked both, so both get worked out.',
 
+  // Leans on sign names, so the reference strip is offered here.
+  signStrip: true,
+
   terms: [
     {
       plain: "how far from the equator",
@@ -95,7 +98,7 @@ export default {
       body: [
         'First, a switch that is easy to miss and will muddle everything if you do miss it.',
         'Chapters 16 and 17 measured heights off **the sun\'s road**. This chapter measures off **the equator** — the line running round the middle of the earth, extended out into the sky.',
-        'Those are two different lines, and they cross each other. The sun\'s road is itself tilted against the equator, by up to about **23½ degrees** — which is a lot; it is more than a spread hand at arm\'s length. It crosses the equator at exactly two points: the start of Taleh and the start of Moznayim.',
+        'Those are two different lines, and they cross each other. The sun\'s road is itself tilted against the equator, by up to about **23½ degrees** — which is a lot; it is more than a spread hand at arm\'s length. It crosses the equator at exactly two points: the start of the 1st sign and the start of the 7th — Taleh and Moznayim.',
         'So six of the signs lie north of the equator and six lie south. And when the sun is at either crossing it rises due east and sets due west, and day and night are equal the world over. That is the equinox, falling out of the geometry as a by-product.',
         'The upshot: the moon\'s distance from the equator is **two tilts added together** — how far its own degree of the sun\'s road sits from the equator, plus its own height off that road. Combining them is what this chapter is for.',
       ],
@@ -108,7 +111,7 @@ export default {
       source: 'KH 19:7',
       nodeId: 'rules',
       body: [
-        'He gives the tilt every ten degrees along the sun\'s road, starting from Taleh: 10 degrees along is 4 from the equator, 20 is 8, 30 is 11½, and so on to 90, which is the full 23½.',
+        'He gives the tilt every ten degrees along the sun\'s road, starting from the 1st sign: 10 degrees along is 4 from the equator, 20 is 8, 30 is 11½, and so on to 90, which is the full 23½.',
         'Between rows, share out the difference — the same method as the sun, the moon, and the moon\'s height. And past 90 degrees, fold the circle in four, exactly as chapter 16 did. He says so explicitly, pointing back to the moon\'s-latitude method rather than restating it.',
         'By this point in the book that should feel routine, and that is the real lesson of the chapter: a table, an interpolation, a fold. The fourth time you meet the pattern it is no longer a pattern, it is just how the work is done.',
       ],
@@ -122,7 +125,7 @@ export default {
       body: [
         'Now the combination, and the rule is what you would hope.',
         'If the degree\'s tilt and the moon\'s own height are **the same direction** — both north, or both south — add them. If they are **opposite**, take the smaller from the larger and keep the direction of the larger.',
-        'He works his usual evening. The moon stands in the nineteenth degree of Shor, whose tilt from the equator is about **18 degrees north**. The moon\'s own height is about **4 degrees south**. Opposite directions, so subtract: the moon sits **14 degrees north of the equator**.',
+        'He works his usual evening. The moon stands in the nineteenth degree of the 2nd sign (Shor), whose tilt from the equator is about **18 degrees north**. The moon\'s own height is about **4 degrees south**. Opposite directions, so subtract: the moon sits **14 degrees north of the equator**.',
       ],
       interactive: 'moon-from-equator',
     },

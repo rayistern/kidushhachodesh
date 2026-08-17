@@ -257,7 +257,9 @@ describe('KH 17:5, 17:8 — the tables read by sign', () => {
     expect(lat[0]).toBe(9);
     expect(lat[1]).toBe(10);
     expect(Math.max(...lat)).toBe(46); // Moznayim
-    for (const quoted of ['59 minutes', 'a full degree', '34 in Moznayim', '46 in Moznayim']) {
+    // The prose names the signs by number now, with the name in
+    // brackets, so it quotes "34 in the 7th" rather than "34 in Moznayim".
+    for (const quoted of ['59 minutes in the 1st sign', 'a full degree in the 2nd', '34 in the 7th', '46 in the 7th']) {
       expect(prose, quoted).toContain(quoted);
     }
   });

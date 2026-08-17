@@ -29,6 +29,7 @@ import { bookChapter, hasBookChapter } from '../../content/book';
 import { CHAPTER_TITLES, isValidChapter } from '../../content/khChapters';
 import { renderEmphasis } from '../../lib/markup';
 import ChainMap from './ChainMap';
+import SignStrip from './SignStrip';
 import { figureById } from './interactives';
 import { FigureDefaults } from '../text/interactives/InteractiveCard';
 
@@ -105,6 +106,8 @@ export default function BookChapter() {
 
         <main className="min-w-0">
           <Recap recap={content.recap} />
+
+          {content.signStrip && <SignStrip />}
 
           {content.terms?.length > 0 && <Terms terms={content.terms} />}
 
