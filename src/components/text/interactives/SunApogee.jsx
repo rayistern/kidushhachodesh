@@ -56,6 +56,9 @@ export default function SunApogee() {
   // KH 12:2 gives the rate as "about one degree in seventy years"; check
   // that characterisation against the per-block figures he publishes.
   const yearsPerDegree = 1 / (RATE * 365.25);
+  // How far it has drifted by now, so the footnote's "about twelve
+  // degrees" can be checked on screen rather than taken on trust.
+  const longitudeDriftToday = RATE * todayDays();
 
   return (
     <InteractiveCard
@@ -167,8 +170,25 @@ export default function SunApogee() {
       <p className="mt-3 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
         Those blocks work out to a flat 0.15" per day — one degree every{' '}
         {yearsPerDegree.toFixed(0)} years, which is the "approximately seventy" he states. It is
-        the slowest motion in the book, and the only one where his own aside can be checked: he
-        notes the apogee had moved about twelve degrees since his time and stood in Sartan.
+        the slowest motion in the book.
+      </p>
+      <p className="mt-2 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
+        {/* This card previously credited the twelve-degree remark to the
+            Rambam. It is Touger's footnote 10 on KH 12:2 — "since more than
+            800 years have passed since the composition of the Mishneh Torah"
+            is not something its author could write. */}
+        A note in Touger's translation (footnote 10 to KH 12:2, not the Rambam) observes that in
+        the 800-odd years since he wrote, the apogee has moved about twelve degrees and now sits
+        in Sartan. That checks out: the rate above puts it {longitudeDriftToday.toFixed(1)}&deg; on
+        from its starting point, in the 4th sign.
+      </p>
+      <p className="mt-2 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
+        Does he actually use the moved value, or just the starting one? He uses the moved one —
+        KH 13:9 says to take "the apogee of the sun <em>at this time</em>, which is
+        86&deg;&nbsp;45&prime;&nbsp;23&Prime;", the starting figure plus its 15&Prime;. Though over
+        his own hundred days it makes no difference to the answer: the next sentence rounds the
+        course to whole degrees, so 15&Prime; cannot survive. The drift only starts to matter over
+        centuries — by now it shifts the sun's true position by about a sixth of a degree.
       </p>
       <p className="mt-2 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
         Why it is tracked at all: chapter 13 measures the maslul — the argument of the correction

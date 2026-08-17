@@ -16,7 +16,8 @@ import { CHAIN_NODES, chainStatus, nodesForChapter, nodeById } from './chain';
 import { figureIds } from '../../components/book/interactives';
 import { isValidChapter, HALACHA_COUNTS } from '../khChapters';
 import { CONSTANTS } from '../../engine/constants';
-import { dmsToDecimal, formatDms } from '../../engine/dmsUtils';
+import { dmsToDecimal, formatDms, normalizeDegrees } from '../../engine/dmsUtils';
+import { calculateSunMeanLongitude, calculateSunApogee } from '../../engine/sunCalculations';
 import { zodiacPosition } from '../../engine/zodiac';
 import { trueFromMean } from '../../lib/maslulTable';
 
@@ -303,6 +304,26 @@ describe('every figure in the prose is pinned to the engine', () => {
       "9° 51' 20\"": () => formatDms(dmsToDecimal(FLAT_DAILY) * 10),
       "7° 3' 32\"": () => formatDms(dmsToDecimal(CONSTANTS.SUN.START_POSITION)),
       "26° 45' 8\"": () => formatDms(dmsToDecimal(CONSTANTS.SUN.APOGEE_START)),
+      // The same instant as an absolute longitude — the form chapter 13
+      // subtracts. A reader compared the two pages and found them 60°
+      // apart, so the book now gives both and both are pinned.
+      "86° 45' 8\"": () =>
+        formatDms(
+          dmsToDecimal(CONSTANTS.SUN.APOGEE_START) + CONSTANTS.SUN.APOGEE_CONSTELLATION * 30,
+        ),
+      // And after the hundred days of his worked example (KH 13:9).
+      "86° 45' 23\"": () => formatDms(calculateSunApogee(100).result),
+      // The course, worked both ways: with the apogee's drift and without.
+      // Both round to 19, which is the point being made.
+      "18° 52' 2\"": () =>
+        formatDms(normalizeDegrees(calculateSunMeanLongitude(100).result - calculateSunApogee(100).result)),
+      "18° 52' 17\"": () =>
+        formatDms(
+          normalizeDegrees(
+            calculateSunMeanLongitude(100).result -
+              (dmsToDecimal(CONSTANTS.SUN.APOGEE_START) + CONSTANTS.SUN.APOGEE_CONSTELLATION * 30),
+          ),
+        ),
       // The two blocks he nicknames "a month" and "a year". Pinned here
       // as figures; that they are NOT a month and a year is checked in
       // ch12.test.js against the real synodic month and solar year.

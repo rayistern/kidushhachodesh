@@ -19,7 +19,9 @@
 import { describe, it, expect } from 'vitest';
 import { bookChapter } from './index';
 import { CONSTANTS } from '../../engine/constants';
-import { dmsToDecimal } from '../../engine/dmsUtils';
+import { dmsToDecimal, formatDms, normalizeDegrees } from '../../engine/dmsUtils';
+import { calculateSunMeanLongitude, calculateSunApogee } from '../../engine/sunCalculations';
+import { roundCourse, trueFromMean } from '../../lib/maslulTable';
 
 const chapter = bookChapter(12);
 const section = chapter.sections.find((s) => s.id === 'month-and-year-blocks');
@@ -145,5 +147,80 @@ describe('the nicknames are defused rather than repeated', () => {
     expect(idx).toBeGreaterThan(-1);
     // The correction must follow within the same section, not chapters later.
     expect(body.slice(idx)).toMatch(/block of twenty-nine days/);
+  });
+});
+
+describe('whether the apogee is tracked forward (KH 12:2 / 13:9)', () => {
+  const apo = chapter.sections.find((s) => s.id === 'apogee').body.join('\n');
+
+  it('answers the question, and answers it yes', () => {
+    expect(apo).toMatch(/\*\*He tracks it\.\*\*/);
+    expect(apo).toMatch(/at this time/);
+  });
+
+  it("quotes his figure, which is the epoch value plus a hundred days' drift", () => {
+    expect(apo).toMatch(/86° 45' 23"/);
+    const start = dmsToDecimal(CONSTANTS.SUN.APOGEE_START) +
+      CONSTANTS.SUN.APOGEE_CONSTELLATION * 30;
+    const moved = dmsToDecimal(CONSTANTS.SUN_APOGEE_PERIOD_BLOCKS.p100);
+    expect(formatDms(start + moved)).toBe(formatDms(dmsToDecimal({ degrees: 86, minutes: 45, seconds: 23 })));
+  });
+
+  it('gives both forms of the epoch position, since mixing them costs a sign', () => {
+    // The 26 vs 86 confusion is what prompted this section.
+    expect(apo).toMatch(/26° 45' 8"/);
+    expect(apo).toMatch(/86° 45' 8"/);
+    expect(apo).toMatch(/costs you a whole sign/);
+  });
+
+  it('is right that his own example comes out the same either way', () => {
+    const mean = calculateSunMeanLongitude(100).result;
+    const moved = calculateSunApogee(100).result;
+    const frozen = dmsToDecimal(CONSTANTS.SUN.APOGEE_START) +
+      CONSTANTS.SUN.APOGEE_CONSTELLATION * 30;
+
+    const courseMoved = normalizeDegrees(mean - moved);
+    const courseFrozen = normalizeDegrees(mean - frozen);
+    expect(formatDms(courseMoved)).toMatch(/^18° 52′ 2/);
+    expect(formatDms(courseFrozen)).toMatch(/^18° 52′ 17/);
+    expect(apo).toMatch(/18° 52' 2"/);
+    expect(apo).toMatch(/18° 52' 17"/);
+
+    // Both round to 19, so the true position is identical — which is the
+    // claim, and the only reason it is safe to call the term pointless
+    // over short spans.
+    expect(roundCourse(courseMoved)).toBe(19);
+    expect(roundCourse(courseFrozen)).toBe(19);
+    expect(formatDms(trueFromMean(mean, moved).trueLongitude))
+      .toBe(formatDms(trueFromMean(mean, frozen).trueLongitude));
+  });
+
+  it('is right that over centuries it stops being pointless', () => {
+    const days = 848 * 365.25;
+    const drift = CONSTANTS.SUN.APOGEE_MOTION_PER_DAY * days;
+    expect(drift).toBeGreaterThan(12);
+    expect(drift).toBeLessThan(13.5);
+    expect(apo).toMatch(/thirteen degrees/);
+    expect(apo).toMatch(/3rd sign and into the 4th/);
+
+    // "roughly a sixth of a degree" on the true position.
+    const mean = calculateSunMeanLongitude(309866).result;
+    const moved = calculateSunApogee(309866).result;
+    const frozen = dmsToDecimal(CONSTANTS.SUN.APOGEE_START) +
+      CONSTANTS.SUN.APOGEE_CONSTELLATION * 30;
+    const gap = Math.abs(
+      trueFromMean(mean, moved).trueLongitude - trueFromMean(mean, frozen).trueLongitude,
+    );
+    expect(gap).toBeGreaterThan(0.1);
+    expect(gap).toBeLessThan(0.3);
+    expect(apo).toMatch(/a sixth of a degree/);
+  });
+
+  it("credits the twelve-degree remark to the translator, not the Rambam", () => {
+    // The card and this section both used to attribute it to him. It is
+    // Touger's footnote 10, and its own wording rules him out: nobody
+    // writes "since the Mishneh Torah was written" about their own book.
+    expect(apo).toMatch(/the translator's note, not the Rambam's/);
+    expect(apo).not.toMatch(/he himself anticipated|a drift he anticipated/);
   });
 });
