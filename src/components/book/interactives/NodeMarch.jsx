@@ -189,23 +189,34 @@ function Dial({ head, tail }) {
         {/* the axis through both crossings */}
         <line x1={hx} y1={hy} x2={tx} y2={ty} stroke="var(--color-accent)" strokeWidth="1.5" strokeDasharray="4 3" />
 
-        {/* the direction of travel — backwards through the signs */}
+        {/* The direction of travel — backwards through the signs. The
+            arrowhead is an SVG marker with orient="auto", so it turns
+            with the path; a previous version floated a literal "←"
+            character beside the arc, which pointed left regardless of
+            where on the circle the head stood and read as clutter. The
+            arc runs from head+38 down to head+10 — from higher
+            longitude towards lower, which is what "backwards" means —
+            and the head of the arrow sits at the moving end. */}
+        <defs>
+          <marker
+            id="nodeMarchArrow"
+            viewBox="0 0 8 8"
+            refX="6"
+            refY="4"
+            markerWidth="5.5"
+            markerHeight="5.5"
+            orient="auto"
+          >
+            <path d="M 0 0 L 8 4 L 0 8 z" fill="var(--color-gold)" />
+          </marker>
+        </defs>
         <path
-          d={`M ${point(r + 16, head + 14)[0]} ${point(r + 16, head + 14)[1]} A ${r + 16} ${r + 16} 0 0 1 ${point(r + 16, head + 40)[0]} ${point(r + 16, head + 40)[1]}`}
+          d={`M ${point(r + 16, head + 38)[0].toFixed(1)} ${point(r + 16, head + 38)[1].toFixed(1)} A ${r + 16} ${r + 16} 0 0 1 ${point(r + 16, head + 10)[0].toFixed(1)} ${point(r + 16, head + 10)[1].toFixed(1)}`}
           fill="none"
           stroke="var(--color-gold)"
           strokeWidth="1.5"
+          markerEnd="url(#nodeMarchArrow)"
         />
-        <text
-          x={point(r + 26, head + 27)[0]}
-          y={point(r + 26, head + 27)[1]}
-          fontSize="8"
-          fill="var(--color-gold)"
-          textAnchor="middle"
-          dominantBaseline="central"
-        >
-          ←
-        </text>
 
         <circle cx={hx} cy={hy} r="5" fill="var(--color-accent)" />
         <circle cx={tx} cy={ty} r="4" fill="var(--color-silver)" />
