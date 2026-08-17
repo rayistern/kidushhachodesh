@@ -79,6 +79,8 @@ describe('the season comes from the sun because the zodiac is tropical', () => {
     expect(degreesPerYear * 848).toBeLessThan(13);
     expect(body).toMatch(/a degree every seventy years/);
     expect(body).toMatch(/some twelve degrees/);
+    // The handle most readers already have for precession.
+    expect(body).toMatch(/star signs no longer match the constellations/);
   });
 
   it('quotes the dates the prose states', () => {
