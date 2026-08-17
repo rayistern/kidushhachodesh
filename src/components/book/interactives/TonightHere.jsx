@@ -178,15 +178,30 @@ export default function TonightHere() {
       {/* ── LAYER 2: his moment ── */}
       <div className="mt-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] p-3">
         <div className="text-xs font-bold text-[var(--color-text-secondary)]">
-          His moment, at his reference (KH 14:6)
+          His instruction, put on a modern clock
         </div>
         <div className="mt-1 font-mono text-sm">
           sunset <strong>{formatClock(base.sunset)}</strong> → a third of an hour later,{' '}
           <strong className="text-[var(--color-gold)]">{formatClock(base.reference)}</strong>
         </div>
-        <div className="mt-1 text-[11px] text-[var(--color-text-secondary)]">
-          {RAMBAM_REFERENCE.note} Clock times are Israel local (UTC+{base.utcOffset}); he gives
-          none, so the conversion is ours.
+        {/* The provenance has to be explicit here. A sunset time under a
+            heading with a KH reference reads as his figure, and it is
+            not: nothing in nineteen chapters computes a sunset. */}
+        <div className="mt-2 space-y-1 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
+          <div>
+            <strong>His:</strong> the instruction "about a third of an hour after the setting of the
+            sun" (KH 14:6), and the reference latitude — {RAMBAM_REFERENCE.note}
+          </div>
+          <div>
+            <strong>Ours:</strong> a latitude of {RAMBAM_REFERENCE.latitude}° and a longitude of{' '}
+            {RAMBAM_REFERENCE.longitude}° fed to a modern sunset algorithm, because a clock time
+            cannot be had without them.
+          </div>
+          <div>
+            <strong>Not his:</strong> <em>the sunset time itself.</em> He publishes no sunset table,
+            and the engine contains no sunset computation anywhere. The timezone (Israel local,
+            UTC+{base.utcOffset}) and the daylight-saving rule are modern too.
+          </div>
         </div>
       </div>
 
@@ -270,6 +285,16 @@ export default function TonightHere() {
             stood, and to cross-examine hard. Treat the verdict as a prompt to look, not a promise.
           </p>
         )}
+        <p>
+          <strong>He never needed a clock, and that is worth noticing.</strong> Nothing in the
+          nineteen chapters computes a sunset. The one place his method reacts to sunset at all is
+          the season correction of KH 14:5 — the nudge of nothing, or a quarter of a degree, or half
+          a degree, applied to the moon's average place according to where the sun is. Sunset slides
+          through the year, so the moon has travelled further by the time it arrives in summer than
+          in winter, and he absorbs that as <em>arcminutes of moon motion</em> rather than as a time.
+          That correction is already inside the verdict above. Reading his table as a sunset proxy is
+          our interpretation, though — he gives no reason for it.
+        </p>
         <p>
           <strong>Your height matters more than your position.</strong> Karmiel's sunset differs
           from Jerusalem's by between −4.5 and +1.2 minutes across the year — under 2.5 arcminutes

@@ -31,6 +31,7 @@ import {
 } from './localObserver';
 import { getFullCalculation } from '../engine/pipeline';
 import { jerusalemSunsetHours } from './modernAstronomy';
+import { CONSTANTS } from '../engine/constants';
 
 const AUG = new Date(2026, 7, 17);
 const DEC = new Date(2026, 11, 21);
@@ -183,5 +184,55 @@ describe('clock formatting', () => {
     expect(formatClock(23.999)).toBe('00:00'); // rounds up past midnight
     expect(formatClock(null)).toBe('—');
     expect(formatClock(NaN)).toBe('—');
+  });
+});
+
+describe('the sunset time is ours, not his — and must be labelled so', () => {
+  it('is not produced by the engine anywhere', async () => {
+    // A reader asked whether the sunset shown was from his calculation.
+    // It is not, and the card said "His moment" over it, which implied
+    // otherwise. This asserts the underlying fact so the labelling has
+    // something to be true to: no engine module computes a sunset.
+    const engine = await Promise.all([
+      import('../engine/pipeline'),
+      import('../engine/sunCalculations'),
+      import('../engine/moonCalculations'),
+      import('../engine/constants'),
+    ]);
+    for (const mod of engine) {
+      for (const key of Object.keys(mod)) {
+        expect(key.toLowerCase(), `engine exports ${key}`).not.toMatch(/sunset|shkia/);
+      }
+    }
+  });
+
+  it('comes from this module, whose header says it is modern', () => {
+    // The regime tag is the contract; a surface reading these numbers is
+    // required to attribute them correctly.
+    expect(typeof sunsetUtcHours).toBe('function');
+    const hours = sunsetUtcHours(AUG, RAMBAM_REFERENCE);
+    expect(hours).toBeGreaterThan(14);
+    expect(hours).toBeLessThan(18);
+  });
+
+  it('is the only sunset-dependent thing NOT already in his verdict', () => {
+    // His method does react to sunset drift — via KH 14:5's season
+    // correction, in arcminutes of moon motion rather than as a time.
+    // That is inside the verdict, which is the point the card makes.
+    const rows = CONSTANTS.SEASON_CORRECTIONS;
+    expect(rows.length).toBeGreaterThan(0);
+    // Every row keys on where the SUN is and adjusts the MOON's mean, in
+    // degrees — never a time. That is the whole point being made.
+    for (const row of rows) {
+      expect(typeof row.sunFrom).toBe('number');
+      expect(typeof row.sunTo).toBe('number');
+      expect(typeof row.adjustment).toBe('number');
+      // Nothing bigger than half a degree, per KH 14:5.
+      expect(Math.abs(row.adjustment)).toBeLessThanOrEqual(0.5);
+    }
+    // And the set of distinct nudges is the nothing / quarter / half the
+    // card and chapter 18 describe.
+    const distinct = [...new Set(rows.map((r) => Math.abs(r.adjustment)))].sort();
+    expect(distinct).toEqual([0, 0.25, 0.5]);
   });
 });
