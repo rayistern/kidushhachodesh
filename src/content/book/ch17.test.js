@@ -123,7 +123,7 @@ describe('the four longitudes really are one number', () => {
   });
 
   it('and the chapter says so, with his own run of figures', () => {
-    expect(prose).toMatch(/There are not four longitudes|not\. It is one number|one number, adjusted four times/i);
+    expect(prose).toMatch(/There are not four longitudes|one number, adjusted four times/i);
     expect(prose).toMatch(/11° 27′ → 10° 27′ → 11° 28′ → 13° 46′/);
     expect(prose).toMatch(/the gap, after two adjustments/);
   });

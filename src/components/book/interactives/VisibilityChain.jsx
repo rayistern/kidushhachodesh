@@ -203,8 +203,8 @@ export default function VisibilityChain() {
 
       <p className="mt-3 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
         Notice that steps 4, 5, 7 and 8 are all <strong>the same number</strong>. The gap is
-        worked out once and then adjusted three times, and each adjustment earns it a new ordinal
-        in the text. There are not four longitudes; there is one gap, corrected.
+        worked out once and then adjusted three times, and the text calls it by the next number
+        along each time. There are not four longitudes; there is one gap, corrected.
       </p>
       <p className="mt-2 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
         Every step comes from this project's engine running its ordinary pipeline — the same code

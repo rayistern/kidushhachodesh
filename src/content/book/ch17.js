@@ -132,9 +132,9 @@ export default {
       body: [
         'Before the adjustments start, one thing about the naming, because it is the single most confusing feature of this chapter and it is entirely an accident of vocabulary.',
         'You are about to meet a **first longitude**, a **second longitude**, a **third longitude** and a **fourth longitude**. That sounds like four quantities to keep track of. It is not.',
-        '**It is one number, adjusted four times.** The gap between the sun and the moon is worked out once, and then nudged — for standing on the ground, for the moon\'s height, for how steeply the sky sets — and each nudge earns the result a new ordinal. On the evening the Rambam works through, the single number goes:',
+        '**It is one number, adjusted four times.** The gap between the sun and the moon is worked out once, and then nudged — for standing on the ground, for the moon\'s height, for how steeply the sky sets — and after each nudge the text calls it by the next number along: second, then third, then fourth. On the evening the Rambam works through, that single running number goes:',
         '11° 27′ → 10° 27′ → 11° 28′ → 13° 46′ → and finally 11° 10′, which he calls the arc of sighting.',
-        'That last one gets a different name rather than a fifth ordinal, but it is the same running quantity, and it is what the verdict is read from.',
+        'The last one gets a name of its own instead of being called the fifth, but it is still the same running number, and it is the one the verdict is read from.',
         'So when the text says "the third longitude", read it as **"the gap, after two adjustments"**. Nothing is being introduced; something is being corrected. Hold on to the one number and the chapter becomes a list of four things done to it.',
       ],
     },
