@@ -65,6 +65,22 @@ describe('the season comes from the sun because the zodiac is tropical', () => {
     }
   });
 
+  it('explains what the star-anchored alternative is, and why it matters', () => {
+    // The phrase appeared unexplained in a first draft. It carries the
+    // whole weight of the check: without an alternative that would fail,
+    // "his sun reaches 0° at the equinox" reads as a tautology.
+    expect(body).toMatch(/a fixed \*\*star\*\* instead of to the equinox/);
+    expect(body).toMatch(/real test rather than a tautology/);
+    // The drift rate quoted is precession, ~50.3 arcsec a year.
+    const degreesPerYear = 50.29 / 3600;
+    expect(1 / degreesPerYear).toBeGreaterThan(65);
+    expect(1 / degreesPerYear).toBeLessThan(75);
+    expect(degreesPerYear * 848).toBeGreaterThan(11);
+    expect(degreesPerYear * 848).toBeLessThan(13);
+    expect(body).toMatch(/a degree every seventy years/);
+    expect(body).toMatch(/some twelve degrees/);
+  });
+
   it('quotes the dates the prose states', () => {
     for (const d of ['21 March 2026', '22 June', '23 September', '22 December']) {
       expect(body).toContain(d);
