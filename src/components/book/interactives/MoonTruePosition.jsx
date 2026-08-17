@@ -130,36 +130,39 @@ export default function MoonTruePosition() {
       </div>
 
       <ol className="mt-4 space-y-2">
-        <Step n={1} label="The sun's average position" ref_="KH 12" value={formatDms(calc.sunMean)} stated={s('sunMean')} />
-        <Step n={2} label="The moon's average" ref_="KH 14:1-4" value={formatDms(calc.moonRaw)} />
+        <Step n={1} label="The sun's average position" ref_="KH 12" value={formatDms(calc.sunMean)} stated={s('sunMean')} how="from chapter 12's tables — speed × days, plus the start" />
+        <Step n={2} label="The moon's average — where the arm points" ref_="KH 14:1-4" value={formatDms(calc.moonRaw)} how="from chapter 14's tables, the same way" />
         <Step
           n={3}
           label={`Nudged to the moment of sighting (${calc.season === 0 ? 'no change' : formatDms(calc.season)})`}
           ref_="KH 14:5"
           value={formatDms(calc.moonAtSighting)}
           stated={s('moonAtSighting')}
+          how="= step 2 + the season nudge"
         />
-        <Step n={4} label="The moon within its path" ref_="KH 14:3" value={formatDms(calc.withinPath)} stated={s('withinPath')} />
-        <Step n={5} label="How far the moon has pulled away from the sun" ref_="KH 15:1" value={formatDms(calc.elongation)} stated={s('elongation')} />
-        <Step n={6} label="Doubled" ref_="KH 15:1" value={formatDms(calc.doubled)} stated={s('doubled')} />
+        <Step n={4} label="The moon within its path — where it sits round the small circle" ref_="KH 14:3" value={formatDms(calc.withinPath)} stated={s('withinPath')} how="from chapter 14's tables — the second of its two numbers" />
+        <Step n={5} label="How far the moon has pulled away from the sun" ref_="KH 15:1" value={formatDms(calc.elongation)} stated={s('elongation')} how="= step 3 − step 1" />
+        <Step n={6} label="Doubled — now measured from the far point instead of the sun" ref_="KH 15:1" value={formatDms(calc.doubled)} stated={s('doubled')} how="= step 5 × 2" />
         <Step
           n={7}
-          label={`The correct course — the path plus ${calc.nudge === 0 ? 'nothing' : `${Math.round(calc.nudge)}°`}`}
+          label={`The correct course — the nudge step 6 earns, added on`}
           ref_="KH 15:3"
           value={formatDms(calc.hanachon)}
           stated={s('hanachon')}
+          how={`= step 4 + ${calc.nudge === 0 ? 'nothing (step 6 is under 6°)' : `${Math.round(calc.nudge)}° (looked up by step 6)`}`}
         />
-        <Step n={8} label="Its correction, from the table" ref_="KH 15:6" value={formatDms(calc.correction)} stated={s('correction')} />
+        <Step n={8} label="The fix, from the big table" ref_="KH 15:6" value={formatDms(calc.correction)} stated={s('correction')} how="looked up by step 7 — nothing is added yet" />
         <Step
           n={9}
           label={
             calc.direction === 'add'
-              ? 'Course is over 180°, so this is added to the moon\'s mean'
-              : "Course is under 180°, so this is taken off the moon's mean"
+              ? 'The answer. Step 7 is over 180°, so the fix is added'
+              : 'The answer. Step 7 is under 180°, so the fix is taken off'
           }
           ref_="KH 15:4"
           value={formatDms(calc.trueLongitude)}
           emphasis
+          how={`= step 3 ${calc.direction === 'add' ? '+' : '−'} step 8`}
         />
       </ol>
 
@@ -197,7 +200,7 @@ export default function MoonTruePosition() {
   );
 }
 
-function Step({ n, label, ref_, value, stated, emphasis }) {
+function Step({ n, label, ref_, value, stated, emphasis, how }) {
   return (
     <li className="flex gap-2.5">
       <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--color-card)] font-mono text-[10px] text-[var(--color-text-secondary)]">
@@ -215,6 +218,14 @@ function Step({ n, label, ref_, value, stated, emphasis }) {
         <span className="block text-[11px] text-[var(--color-text-secondary)]">
           {label} <span className="font-mono opacity-60">{ref_}</span>
         </span>
+        {/* Where this step's number comes from, in terms of the steps
+            above it. Without this the chain's plumbing was invisible —
+            a reader saw nine values and had to guess what fed what. */}
+        {how && (
+          <span className="block font-mono text-[10px] text-[var(--color-accent)] opacity-80">
+            {how}
+          </span>
+        )}
       </span>
     </li>
   );
