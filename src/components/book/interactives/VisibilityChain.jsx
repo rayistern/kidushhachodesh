@@ -66,7 +66,7 @@ const CHAIN = [
   {
     id: 'elongation',
     gapFamily: true,
-    label: 'THE GAP between them (first longitude)',
+    label: 'THE GAP — how far the moon has pulled away from the sun (first longitude)',
     ref: 'KH 17:1',
     key: true,
     how: () => '= step 2 − step 1',
