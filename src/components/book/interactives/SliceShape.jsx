@@ -59,6 +59,10 @@ export default function SliceShape() {
 
   const band = bandAt(lon);
   const signNo = Math.floor(((lon % 360) + 360) % 360 / 30) + 1;
+  // KH 17:11's direction rule is split at 90° and 270° — inside the
+  // zero bands, so the reversal never lands where a slice is applied.
+  const n = ((lon % 360) + 360) % 360;
+  const inCapGem = n >= 270 || n < 90;
 
   const w = 520;
   const h = 170;
@@ -89,6 +93,11 @@ export default function SliceShape() {
           role="img"
           aria-label="The circuit fraction plotted around the circle: a staircase peaking at two fifths near 0 and 180 degrees and stepping down to nothing around 90 and 270"
         >
+          {/* The two halves of KH 17:11's direction rule, shaded. The
+              boundaries (90° and 270°) sit inside the zero bands, so the
+              rule never reverses while the slice is nonzero. */}
+          <rect x={x(90)} y={padT} width={x(270) - x(90)} height={h - padT - padB} fill="var(--color-silver)" fillOpacity="0.06" />
+
           {/* fraction guide lines */}
           {FRACTION_LABELS.map(([f, label]) => (
             <g key={label}>
@@ -195,13 +204,30 @@ export default function SliceShape() {
         <div className="mt-0.5 font-mono text-lg font-bold text-[var(--color-gold)]">
           {fractionWords(band.fraction)}
         </div>
+        {band.fraction > 0 && (
+          <div className="mt-1.5 border-t border-[var(--color-border)]/60 pt-1.5 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
+            Which way it goes depends on which side of the road the moon sits (its height, as
+            adjusted in the previous step). Here, in the {inCapGem ? '10th-through-3rd' : '4th-through-9th'}{' '}
+            half: <strong>north → taken {inCapGem ? 'off' : 'onto'} the gap; south → {inCapGem ? 'added on' : 'taken off'}</strong>
+            {inCapGem ? '' : ' — the reverse of the other half'}. (KH 17:11)
+          </div>
+        )}
+        {band.fraction === 0 && (
+          <div className="mt-1.5 border-t border-[var(--color-border)]/60 pt-1.5 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
+            Nothing to apply here — and no direction to worry about. These zero bands are also
+            where the direction rule reverses, so the flip happens exactly where there is nothing
+            to flip.
+          </div>
+        )}
       </div>
 
       <p className="mt-3 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
         One staircase, climbed four times. It peaks where the sun's road crosses the equator at
         its steepest slant — the starts of the 1st and 7th signs — and dies to nothing where the
         road runs level, at the turning points the book keeps returning to. Drag through the
-        second half and watch it repeat the first exactly.
+        second half and watch it repeat the first exactly. The shaded region is the half of the
+        sky where the direction rule runs in reverse — and its edges fall inside the zero bands,
+        so the flip happens exactly where there is no slice to flip.
       </p>
     </InteractiveCard>
   );

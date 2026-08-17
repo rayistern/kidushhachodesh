@@ -11,6 +11,7 @@ import { describe, it, expect } from 'vitest';
 import { bookChapter, hasBookChapter } from './index';
 import { CONSTANTS } from '../../engine/constants';
 import { getFullCalculation } from '../../engine/pipeline';
+import { calculateOrechShlishi } from '../../engine/visibilityCalculations';
 import { nextSightingNight } from '../../lib/sightingNight';
 import { dateFromEpochDays } from '../../engine/epochDays';
 import { zodiacPosition } from '../../engine/zodiac';
@@ -496,5 +497,41 @@ describe('the slice figure draws the table it claims to', () => {
       cursor = b.to;
     }
     expect(cursor).toBe(360);
+  });
+});
+
+describe("the slice's direction rule, as the figure states it", () => {
+  // KH 17:11, from the engine: 10th-through-3rd half (270°-90°) —
+  // north subtracts, south adds; 4th-through-9th half — reversed.
+  const BASE = 12; // an arbitrary second longitude
+
+  const shlishi = (lon, lat) => calculateOrechShlishi(BASE, lat, lon).result;
+
+  it('holds in all four combinations', () => {
+    // 10th-through-3rd half (lon 40): north off, south on.
+    expect(shlishi(40, +2)).toBeLessThan(BASE);
+    expect(shlishi(40, -2)).toBeGreaterThan(BASE);
+    // 4th-through-9th half (lon 130): reversed.
+    expect(shlishi(130, +2)).toBeGreaterThan(BASE);
+    expect(shlishi(130, -2)).toBeLessThan(BASE);
+  });
+
+  it('flips only inside the zero bands, so no applied slice ever reverses', () => {
+    // The elegance the figure points at: the halves split at 90° and
+    // 270°, and the fraction is zero for 85°-95° and 265°-275°. Walk the
+    // whole circle; wherever the direction differs from one degree
+    // earlier, the slice at both points must be nothing.
+    const dirAt = (lon) => Math.sign(shlishi(lon, +2) - BASE); // north case
+    const fracAt = (lon) =>
+      CONSTANTS.MOON_CIRCLE_FRACTIONS.find((b) => lon >= b.from && lon < b.to).fraction;
+    for (let lon = 1; lon < 360; lon++) {
+      if (dirAt(lon) !== 0 && dirAt(lon - 1) !== 0 && dirAt(lon) !== dirAt(lon - 1)) {
+        throw new Error(`direction reversed with a live slice at ${lon}°`);
+      }
+      if (dirAt(lon) !== dirAt(lon - 1)) {
+        // Any change must pass through the zero band.
+        expect(fracAt(lon) === 0 || fracAt(lon - 1) === 0, `${lon}°`).toBe(true);
+      }
+    }
   });
 });
