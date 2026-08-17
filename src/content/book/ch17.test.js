@@ -299,3 +299,38 @@ describe('KH 17:15-21 — the trade between the two numbers', () => {
     expect(Math.max(...rows.map((r) => r.kashtUpTo))).toBe(14);
   });
 });
+
+describe('the fourth-longitude step, corrected in review', () => {
+  const body = bookChapter(17)
+    .sections.find((s) => s.id === 'three-more')
+    .body.join('\n');
+
+  it('keys the stretch/shrink on the moon, not on the gap', () => {
+    // The prose said "which sign the gap now falls in". The engine's
+    // adjudicated reading (its own header note on KH 17:14) keys
+    // SETTING_TIME_BY_MAZAL on the moon's position — the worked example
+    // only reproduces with that reading.
+    expect(body).toMatch(/which sign \*\*the moon\*\* is in/);
+    expect(body).not.toMatch(/which sign the gap now falls in/);
+    expect(body).toMatch(/only comes out right keyed on the moon/);
+  });
+
+  it('lists the actual set of fractions, including subtract-a-third', () => {
+    // The old list omitted 1/3 — Betulah and Moznayim both subtract it.
+    expect(body).toMatch(/subtract a fifth or a third/);
+    const ops = CONSTANTS.SETTING_TIME_BY_MAZAL;
+    const subtractions = ops.filter((r) => r.operation === 'subtract').map((r) => r.fraction);
+    expect(subtractions).toContain(1 / 3);
+    expect(subtractions).toContain(1 / 5);
+    const additions = ops.filter((r) => r.operation === 'add').map((r) => r.fraction);
+    expect(new Set(additions)).toEqual(new Set([1 / 6, 1 / 5]));
+  });
+
+  it('states the final fraction as the fixed two thirds, with its direction', () => {
+    // "A fraction of it" was vague; KH 17:13 fixes 2/3 for the land of
+    // Israel, and the engine applies north → add, south → subtract.
+    expect(body).toMatch(/two thirds\*\* of it, always two thirds/);
+    expect(body).toMatch(/north adds, south takes away/);
+    expect(CONSTANTS.GEOGRAPHIC_HEIGHT_FRACTION_OF_ROCHAV_RISHON).toBeCloseTo(2 / 3, 9);
+  });
+});

@@ -102,7 +102,7 @@ export default {
         'And now the step stops being strange, because it is the same step chapter 13 took. There, the sun\'s correction was measured from **its** far point, and you had to track that point across the centuries to do it. Here the same idea applies to the moon — a correction is always counted from the far point — but its far point never has to be tracked at all. That is why the Rambam gives the sun a govah with its own tables and gives the moon nothing of the kind. He does not need to. Doubling the gap *is* the moon\'s far-point calculation.',
         'It also explains why the table starts at nothing. When sun and moon are together the gap is zero, so the epicycle is sitting **on** the far point — and there is nothing to correct, exactly as the sun\'s correction vanishes at its own govah.',
         'One consequence, if you want to see the machinery: for the halves to stay locked as the month runs, that far point has to travel **backwards** — about 11 degrees a day, right round in roughly 32 days. The Rambam never mentions it. He does not have to, and that is the elegance of it.',
-        'This is a real effect, not a bookkeeping trick. Modern astronomy calls it the *evection*, and it is the largest single irregularity in the moon\'s motion after the one chapter 14 already handled. The Rambam has no theory of gravity to explain it with, but he has the pattern, and the pattern is what the table needs.',
+        'And what is all this machinery *for*? The nudge it feeds — the next section — corrects a real disturbance: the sun genuinely drags the moon off its simple path, and by how much depends on how the moon, the sun and the far point stand relative to one another, which is exactly what the doubled gap measures. Modern astronomy calls that wobble the *evection*; after the in-and-out of chapter 14\'s small circle, it is the largest irregularity in the moon\'s motion. The Rambam has no theory of gravity to explain it, but he has the pattern, and the pattern is all the table needs.',
       ],
       interactive: 'double-elongation',
     },
@@ -132,7 +132,9 @@ export default {
         'What you get after adding is **the course after its nudge** — his *correct course*, the *maslul hanachon* (המסלול הנכון). From here on it plays exactly the part the sun\'s course played in chapter 13: it is the number you look the real correction up by.',
         'So the shape of the chapter is: build a course, correct it, then use it. The sun needed only the second half of that.',
       ],
-      interactive: 'double-elongation',
+      // The doubled-gap card (with this nudge table inside it) is already
+      // shown in the previous section; rendering it twice on one page
+      // reads as an error, not an emphasis.
     },
 
     {
