@@ -45,6 +45,7 @@ const VisibilityChain = React.lazy(() => import('./VisibilityChain'));
 const SightingLimits = React.lazy(() => import('./SightingLimits'));
 const HowMarginal = React.lazy(() => import('./HowMarginal'));
 const EastWest = React.lazy(() => import('./EastWest'));
+const DegreeScale = React.lazy(() => import('./DegreeScale'));
 
 // ── Reused from /text, chapter 11 ──
 const ZodiacPosition = React.lazy(() => import('../../text/interactives/ZodiacPosition'));
@@ -124,6 +125,9 @@ export const FIGURES = {
   // chapter 18
   'how-marginal': HowMarginal,
   'east-west': EastWest,
+
+  // chapter 11 — a sense of scale for every angle that follows
+  'degree-scale': DegreeScale,
 };
 
 /** The component for a slot id, or null if the id is unknown. */

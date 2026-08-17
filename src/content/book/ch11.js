@@ -75,6 +75,22 @@ export default {
     },
 
     {
+      id: 'how-big',
+      heading: 'How big is a degree?',
+      source: 'KH 11:7',
+      nodeId: 'days',
+      body: [
+        'Short, and it will pay for itself in every chapter after this one.',
+        'The numbers ahead are all angles, and an angle you cannot picture is just a digit on a page. So before going any further, get a physical sense of the sizes. The only tool needed is your own hand.',
+        'Hold your arm straight out and look past it. Your **little finger** covers about **one degree** of sky. Your **closed fist**, knuckles across, about **ten**. A **spread hand**, thumb-tip to little-finger-tip, about **twenty**. From the horizon to **straight overhead** is **ninety** — a quarter of the whole circle.',
+        'And for scale at the small end: the **full moon itself is only half a degree wide**. So one degree is two moons side by side, and a fist is twenty of them.',
+        'The trick works for almost anybody without measuring anything, because a bigger hand tends to sit on the end of a longer arm.',
+        'Keep these. They turn the rest of the book from arithmetic into something you can picture. When chapter 17 says the moon must be more than nine degrees from the sun to be seen at all, it is saying **about one fist**. When it says more than fifteen is certain, that is a fist and a half. The whole question turns on distances you could measure with your hand at arm\'s length.',
+      ],
+      interactive: 'degree-scale',
+    },
+
+    {
       id: 'why-name-them',
       heading: 'Why bother naming the twelve?',
       source: 'KH 11:9',
