@@ -200,6 +200,23 @@ describe('every written chapter is structurally sound', () => {
       /good question/i,
       /to answer your/i,
       /as (we|I) discussed/i,
+      // Added after two more got through in chapter 12. The first
+      // attributed a state of mind to the reader ("the fraction you are
+      // worried about"), which presumes the exchange just as much as
+      // "your instinct" did.
+      /you (are|were|'re) (worried|confused|concerned|puzzled)/i,
+      /you (asked|wondered|queried)/i,
+      // NB: a pattern for "the fraction you ..." was tried here and
+      // removed — it fired on chapter 15's "the number you get", which is
+      // ordinary generic second person and exactly what this guard is
+      // meant to permit. The register is set by presuming a *state of
+      // mind* or a prior exchange, not by the word "you" near a noun.
+      // The second quoted the question back verbatim and in the first
+      // person — "The question \"how would I know the value of the
+      // previous month?\" has a short answer". A quoted question
+      // containing "I" cannot be the book's own voice, since the book
+      // never speaks as "I"; it is always someone else's words.
+      /["“][^"”]*\bI\b[^"”]*\?["”]/,
     ];
     const content = bookChapter(n);
     const everything = [

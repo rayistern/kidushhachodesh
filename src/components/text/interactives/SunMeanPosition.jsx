@@ -45,11 +45,18 @@ const RAMBAM_EXAMPLE_DAYS = 100;
  * card can put his stated figure next to the one it assembled from the
  * 10/1 blocks.
  *
- * He publishes these two precisely because they are the intervals that
- * matter (KH 12:1): 29 days is sighting to sighting, and 354 days is a
- * regular lunar year. The decomposition never reaches for them — 29
+ * He publishes these two because they are the spans his reader is handed
+ * by the calendar (KH 12:1): 29 days is a short Hebrew month and 354 a
+ * common Hebrew year. The decomposition never reaches for them — 29
  * becomes two tens and nine singles — which makes them a free check on
  * the blocks rather than a shortcut.
+ *
+ * The labels are nicknames and this card used to repeat one of them as
+ * fact, telling the reader there are "exactly 29 days" from one sighting
+ * to the next. There are not: the synodic month is 29.53 days, so the
+ * interval is 29 or 30, which is the whole reason months come in two
+ * lengths (KH 18:5, and see the book's chapter 12). Neither block is an
+ * astronomical period — each is a pre-computed whole number of days.
  */
 const PUBLISHED_INTERVALS = [
   { days: 29, key: 'p29', label: 'one month (29 days)' },
@@ -245,8 +252,16 @@ export default function SunMeanPosition() {
       </div>
 
       <p className="mt-3 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
-        Stepping by 29 days is what the chapter is built for: there are exactly 29 days from the
-        night the moon is sighted in one month to the night it may be sighted in the next.
+        These two rows are a <em>check</em>, not a shortcut. The decomposition never reaches for
+        them — 29 days becomes two tens and nine singles — so his published figure and the one
+        assembled from the blocks are two independent routes to the same number.
+      </p>
+
+      <p className="mt-2 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
+        And take the label loosely: 29 days is not a month. A lunar month runs 29 days and about
+        12<sup>3</sup>&frasl;<sub>4</sub> hours, so one sighting to the next is 29 <em>or</em> 30
+        days — which is exactly why months come in both lengths. This row is a block of
+        twenty-nine days and nothing more.
       </p>
 
       <p className="mt-2 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">

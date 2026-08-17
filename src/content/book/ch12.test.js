@@ -101,7 +101,7 @@ describe('the blocks do not compose into each other', () => {
 
 describe('the answer to the question actually asked', () => {
   it("says outright that no previous month's value is ever needed", () => {
-    expect(body).toMatch(/you never need it|never chain them/);
+    expect(body).toMatch(/never needed|never chained/);
     expect(body).toMatch(/no previous month in the arithmetic/);
   });
 
@@ -115,6 +115,10 @@ describe('the answer to the question actually asked', () => {
     // only the powers of ten.
     expect(body).toMatch(/optional/);
     expect(body).toMatch(/Nothing depends on them/);
+    // And says what they ARE for, since "optional" alone invites the
+    // reader to think a row got deleted.
+    expect(body).toMatch(/a \*\*check\*\*/);
+    expect(body).toMatch(/two independent routes to the same number/);
   });
 
   it('and the engine really does decompose without them', () => {
