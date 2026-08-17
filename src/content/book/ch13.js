@@ -93,7 +93,7 @@ export default {
       nodeId: 'sun-true',
       body: [
         'The rule is: if the course is **less than half a circle**, subtract the correction from the average. If it is **more**, add it.',
-        'That can look arbitrary, but it falls straight out of the geometry. Coming away from the far point, the sun is on the slow side of its circle, so it lags behind where steady motion would have put it — you subtract. Coming back round on the near side it is running ahead — you add.',
+        'That can look like a rule pulled out of nowhere, but it falls straight out of the picture. Coming away from the far point, the sun is on the slow side of its circle, so it lags behind where steady motion would have put it — you subtract. Coming back round on the near side it is running ahead — you add.',
         "Touger's notes on this halacha include a small geometric proof, and refer you to a diagram. That diagram is in the printed book and did not survive into the digital text, so the figure below restores it — with his own letters, and with the conclusion stated correctly (the digitised text has lost a plus sign and reads as nonsense).",
       ],
       interactive: 'correction-triangle',
@@ -173,7 +173,7 @@ export default {
       nodeId: 'sun-true',
       body: [
         'The chapter ends by pointing out something you may not have noticed you can now do.',
-        'If you can find the sun\'s true position on any day, you can run the question backwards: pick a position and hunt for the day the sun reaches it. The seasons begin at the four quarter-points of the circle — so you can now find the true equinoxes and solstices, for any year, forwards or back.',
+        'If you can find the sun\'s true position on any day, you can run the question backwards: pick a position and hunt for the day the sun reaches it. The seasons begin at the four quarter-points of the circle — so you can now find the true equinoxes and solstices — the days when the seasons begin: equal day and night in spring and autumn, the longest day of summer, the shortest of winter — for any year, forwards or back.',
         'One honest note on the figure below. His answers come out as whole days, not times of day, and that is not a limitation of the calculator — his day count is in whole days and his table is read in whole degrees, so a day is genuinely the finest answer his method carries. The modern column beside it can give you the minute.',
       ],
       interactive: 'tekufah',

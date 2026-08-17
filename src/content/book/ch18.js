@@ -110,8 +110,8 @@ export default {
       body: [
         'The court, says the Rambam, should always keep two things in mind: **the season, and the place the witnesses were standing**. And it should ask them outright: where were you when you saw it?',
         'He gives the case. Suppose the arc of sighting came to 9 degrees 5 minutes and the gap to exactly 13 degrees. By the rules of chapter 17 that is a yes — but only just; it is the narrowest passing verdict the table allows. Witnesses arrive saying they saw it.',
-        'If it is summer, or they were standing somewhere low, **suspect the testimony and cross-examine hard**. If it is the rainy season, or they were high up, the claim is entirely plausible and can be accepted.',
-        'Nothing about the astronomy has changed between those two cases. What changed is how much weight a marginal calculation can bear — and the court adjusts its scrutiny to match. The arithmetic does not overrule the witnesses; it tells the judges how carefully to listen.',
+        'If it is summer, or they were standing somewhere low, **suspect the testimony and cross-examine hard**. If it is the rainy season, or they were high up, the claim is entirely believable and can be accepted.',
+        'Nothing about the astronomy has changed between those two cases. What changed is how much weight a marginal calculation can bear — and the court adjusts how hard it questions to match. The arithmetic does not overrule the witnesses; it tells the judges how carefully to listen.',
       ],
     },
 
@@ -122,7 +122,7 @@ export default {
       nodeId: 'limits',
       body: [
         'Then a genuine problem, which the Rambam sets out at length because the obvious answer fails.',
-        'A month is sanctified when the moon is seen. If it is not seen on the thirtieth night, the month gets a thirty-first day. Fine once. But suppose the moon goes unseen month after month — a long cloudy winter will do it — and every month gains a day. By the end of the year the calendar has drifted so far that the moon would be plainly visible on the twenty-fifth of the month. He calls the prospect ludicrous and demeaning, and he is right.',
+        'A month is sanctified when the moon is seen. If it is not seen on the thirtieth night, the month gets a thirty-first day. Fine once. But suppose the moon goes unseen month after month — a long cloudy winter will do it — and every month gains a day. By the end of the year the calendar has drifted so far that the moon would be plainly visible on the twenty-fifth of the month. He calls the prospect laughable and an embarrassment, and he is right.',
         'And he refuses to dismiss it as unlikely. On the contrary, he says, **it is very likely**, and common in countries with long rainy seasons.',
         'The answer is a tradition, carried back to Moses: when sighting fails repeatedly, the court establishes months by alternating — one full month of thirty days, one short of twenty-nine — **establishing** them without **sanctifying** them, since sanctification depends on sighting alone. Two full or two short in a row where the calculation calls for it. Never fewer than four full months in a year, never more than eight.',
         'What the calculation is for, in that situation, is a guard rail: it tells the court which arrangement keeps the moon visible at the *start* of the coming month rather than on its twenty-eighth night.',
@@ -179,7 +179,7 @@ export default {
   closing: {
     have: [
       'The method, and an honest sense of what its answers are worth.',
-      'Why two identical verdicts can deserve very different scrutiny in court.',
+      'Why two identical verdicts can deserve very different questioning in court.',
       'What the court did when sighting failed for months together.',
       'What a sighting east or west of the land does and does not prove.',
     ],

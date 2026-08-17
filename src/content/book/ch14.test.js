@@ -70,7 +70,10 @@ describe('the season comes from the sun because the zodiac is tropical', () => {
     // whole weight of the check: without an alternative that would fail,
     // "his sun reaches 0° at the equinox" reads as a tautology.
     expect(body).toMatch(/a fixed \*\*star\*\* instead of to the equinox/);
-    expect(body).toMatch(/real test rather than a tautology/);
+    // "Tautology" was the justifying word for one draft — vocabulary the
+    // book has no business using. The substance stays in plain words.
+    expect(body).toMatch(/could have failed, which is what makes it worth running/);
+    expect(body).not.toMatch(/tautology/i);
     // The drift rate quoted is precession, ~50.3 arcsec a year.
     const degreesPerYear = 50.29 / 3600;
     expect(1 / degreesPerYear).toBeGreaterThan(65);

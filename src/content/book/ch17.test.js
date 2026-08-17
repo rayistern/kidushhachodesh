@@ -211,7 +211,7 @@ describe('KH 17:22 — the two figures the English transposes', () => {
 
   it('and the chapter attributes the slip to the translation, not the source', () => {
     expect(prose).toMatch(/The Hebrew has the two figures the other way round/);
-    expect(prose).toMatch(/transposed somewhere between the Hebrew and the English/);
+    expect(prose).toMatch(/swapped somewhere between the Hebrew and the English/);
     // The retracted claim must not survive anywhere.
     expect(prose).not.toMatch(/slipped in transmission/);
   });
