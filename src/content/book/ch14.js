@@ -182,7 +182,7 @@ export default {
       nodeId: 'season',
       body: [
         'The table is short. Find where the sun is, read off the adjustment, and add it to or subtract it from the moon\'s average.',
-        'One thing to know before you use it: **the printed texts disagree about one row of this table**, and the disagreement is not settled. The calculator below shows you both readings and what the choice costs. It is worth knowing about rather than discovering later as a contradiction.',
+        'The nudge is at its largest twice a year, half a degree either way, and vanishes near the equinoxes — which is what you would expect of something tracking how far sunset has drifted from a fixed hour.',
       ],
       interactive: 'season-table',
     },

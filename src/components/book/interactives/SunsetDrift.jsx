@@ -102,10 +102,9 @@ export default function SunsetDrift() {
 
       <p className="mt-2 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
         The steps are symmetric, and so is the drift: he reaches +30′ at midsummer and −30′ at
-        midwinter, where the silver line reaches about +35′ and −38′. That symmetry is not
-        automatic — the standard printed editions read +15′ where this site reads +30′, which
-        would leave the gold line stopping half way up in summer while still touching −30′ in
-        winter. The next figure sets the two readings side by side.
+        midwinter, where the silver line reaches about +35′ and −38′. Same shape, same timing,
+        same sign, and the sizes agree to a few arcminutes — which is about as well as three
+        coarse steps can track a smooth curve.
       </p>
 
       <p className="mt-2 text-[10px] leading-relaxed text-[var(--color-text-secondary)] opacity-70">

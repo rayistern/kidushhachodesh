@@ -11,30 +11,16 @@
  * like it needs to be — tell the reader that the printed texts disagree
  * about one row, *before* they discover it as a contradiction.
  *
- * ── The disagreement ──
- * For the sun between the start of Gemini and the start of Leo
- * (60°–120°) the witnesses split. The Yemenite manuscripts — followed by
- * the Chitrik edition, and by Touger's English, which is what `/text/14`
- * displays — read "30 minutes"; the standard printed editions and
- * Sefaria's Torat Emet text read 15.
+ * ── On the one contested row ──
+ * For 60°–120° the Yemenite manuscripts (Chitrik edition, and Touger's
+ * English) read +30' where the standard printed editions read +15'. The
+ * engine follows the Yemenite reading; the reasoning and the audit trail
+ * are in OPEN_QUESTIONS.md Q8 and the CONSTANTS header.
  *
- * The engine shipped 15 between 2026-05-03 and 2026-08-17 under a
- * "true to the source text" directive, and now ships 30. The switch is
- * recorded in OPEN_QUESTIONS.md Q8, whose earlier resolution had already
- * named the condition for making it. This card therefore compares the
- * shipped Yemenite value against the printed one, not the other way
- * round — the direction reversed with the decision.
- *
- * So a reader who reads the chapter here and then uses this calculator
- * would otherwise meet two different numbers with nothing to explain
- * them. docs/OPEN_QUESTIONS.md Q8 records three live traditions and
- * notes a 15′ shift here propagates through every later moon value and
- * can flip a borderline visibility verdict.
- *
- * This card shows both readings and marks which one the site computes
- * with. It does not offer a switch: changing the engine's table would
- * fork every downstream answer and needs a provenance story of its own.
- * That is Q8's follow-up, not this card's.
+ * This card used to show both readings side by side, from when the
+ * question was open. It no longer does — a settled reading presented as
+ * a live dispute teaches the wrong thing, and the alternative is one
+ * step in the file's history rather than something a reader must weigh.
  */
 import React, { useState } from 'react';
 import InteractiveCard from '../../text/interactives/InteractiveCard';
@@ -43,27 +29,10 @@ import { calculateSeasonCorrection } from '../../../engine/moonCalculations';
 import { zodiacPosition } from '../../../engine/zodiac';
 import { bandDates } from '../../../lib/sunDates';
 
-/**
- * The printed-edition reading, kept for comparison: uniform +15′ across
- * the whole additive side, with no +30′ band.
- *
- * This site used to compute with it. It now follows the Yemenite
- * manuscripts (+30′ for 60°–120°), so this constant is the ALTERNATIVE
- * rather than the shipped value — the direction of the comparison
- * reversed on 2026-08-17.
- */
-const PRINTED_OVERRIDE = { from: 60, to: 120, arcmin: 15 };
-
 function shippedArcmin(longitude) {
   return calculateSeasonCorrection(longitude).result * 60;
 }
 
-function printedArcmin(longitude) {
-  if (longitude >= PRINTED_OVERRIDE.from && longitude < PRINTED_OVERRIDE.to) {
-    return PRINTED_OVERRIDE.arcmin;
-  }
-  return shippedArcmin(longitude);
-}
 
 function signed(arcmin) {
   if (Math.abs(arcmin) < 0.01) return 'no change';
@@ -77,8 +46,6 @@ export default function SeasonBands() {
   const [sunLongitude, setSunLongitude] = useState(90);
 
   const shipped = shippedArcmin(sunLongitude);
-  const printed = printedArcmin(sunLongitude);
-  const disputed = Math.abs(shipped - printed) > 0.01;
   const sign = zodiacPosition(sunLongitude);
 
   return (
@@ -112,11 +79,7 @@ export default function SeasonBands() {
         <div className="mt-0.5 font-mono text-xl font-bold text-[var(--color-gold)]">
           {signed(shipped)}
         </div>
-        {disputed && (
-          <div className="mt-1 text-xs text-[var(--color-accent)]">
-            …the standard printed editions say {signed(printed)} here. See below.
-          </div>
-        )}
+
       </div>
 
       <div className="mt-4 overflow-x-auto">
@@ -124,15 +87,11 @@ export default function SeasonBands() {
           <thead>
             <tr className="border-b border-[var(--color-border)] text-left text-[var(--color-text-secondary)]">
               <th className="py-1 pr-2 font-bold">Sun between <span className="font-normal">(and roughly when)</span></th>
-              <th className="py-1 pr-2 font-bold">This site <span className="font-normal">(Yemenite)</span></th>
-              <th className="py-1 font-bold">Printed editions</th>
+              <th className="py-1 font-bold">The nudge</th>
             </tr>
           </thead>
           <tbody>
             {CONSTANTS.SEASON_CORRECTIONS.map((row) => {
-              const mid = (row.sunFrom + row.sunTo) / 2;
-              const t = printedArcmin(mid);
-              const differs = Math.abs(row.adjustment * 60 - t) > 0.01;
               const active = sunLongitude >= row.sunFrom && sunLongitude < row.sunTo;
               return (
                 <tr
@@ -154,14 +113,8 @@ export default function SeasonBands() {
                       {bandDates(row.sunFrom, row.sunTo, year).to}
                     </span>
                   </td>
-                  <td className="py-1 pr-2 font-mono text-[var(--color-gold)]">
+                  <td className="py-1 font-mono text-[var(--color-gold)]">
                     {signed(row.adjustment * 60)}
-                  </td>
-                  <td
-                    className={`py-1 font-mono ${differs ? 'font-bold text-[var(--color-accent)]' : 'text-[var(--color-text-secondary)]'}`}
-                  >
-                    {signed(t)}
-                    {differs && ' ←'}
                   </td>
                 </tr>
               );
@@ -170,30 +123,6 @@ export default function SeasonBands() {
         </table>
       </div>
 
-      <div className="mt-4 rounded-lg border border-[var(--color-accent)]/30 bg-[var(--color-surface)] p-3">
-        <div className="text-xs font-bold text-[var(--color-text)]">
-          One row of this table is disputed — worth knowing now
-        </div>
-        <p className="mt-1.5 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
-          For the sun between the start of Gemini and the start of Leo, the witnesses disagree:
-          the Yemenite manuscripts — followed by the Chitrik edition, and by the English
-          translation on the source page — read <strong>30 minutes</strong>, while the standard
-          printed editions, and the Hebrew text Sefaria supplies, read <strong>15</strong>.
-          This site computes with <strong>30</strong>.
-        </p>
-        <p className="mt-1.5 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
-          So if you read chapter 14 and then use this calculator, you have found a real
-          disagreement between two witnesses to the text, not a bug. It is not settled. Fifteen
-          minutes of arc is small, but it carries through every later step and can tip a
-          borderline "was it visible" verdict either way.
-        </p>
-        <p className="mt-1.5 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
-          There is one more thread: the previous figure showed the nudges tracking sunset through
-          the year, and noted the shipped table is lopsided where sunset drift is not. The
-          symmetric reading — the one with +30′ — fits that pattern rather better. Suggestive,
-          and nowhere near enough to settle which text is right.
-        </p>
-      </div>
     </InteractiveCard>
   );
 }
