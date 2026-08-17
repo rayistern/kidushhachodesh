@@ -45,32 +45,77 @@ const STATED = {
 // own ordinal in brackets — because "third longitude" tells a reader
 // nothing and "the gap, after two adjustments" tells them everything.
 const CHAIN = [
-  { id: 'sunTrueLongitude', label: 'Where the sun really is', ref: 'KH 13' },
-  { id: 'moonTrueLongitude', label: 'Where the moon really is', ref: 'KH 15' },
-  { id: 'moonLatitude', label: "The height off the sun's road (first latitude)", ref: 'KH 16' },
-  { id: 'elongation', label: 'THE GAP between them (first longitude)', ref: 'KH 17:1', key: true },
+  {
+    id: 'sunTrueLongitude',
+    label: 'Where the sun really is',
+    ref: 'KH 13',
+    how: () => "chapter 13's whole calculation, in one number",
+  },
+  {
+    id: 'moonTrueLongitude',
+    label: 'Where the moon really is',
+    ref: 'KH 15',
+    how: () => "chapter 15's nine steps, in one number",
+  },
+  {
+    id: 'moonLatitude',
+    label: "The height off the sun's road (first latitude)",
+    ref: 'KH 16',
+    how: () => "chapter 16's up-crossing rule — kept at hand for steps 9 and 10",
+  },
+  {
+    id: 'elongation',
+    label: 'THE GAP between them (first longitude)',
+    ref: 'KH 17:1',
+    key: true,
+    how: () => '= step 2 − step 1',
+  },
   {
     id: 'orechSheni',
     label: 'the gap, shifted for standing on the ground (second longitude)',
     ref: 'KH 17:5',
+    how: () => "= step 4 − the by-sign minutes (always taken off)",
   },
   {
     id: 'rochavSheni',
     label: 'the height, shifted the same way (second latitude)',
     ref: 'KH 17:7-8',
+    // Standing on the ground always pushes the moon southward, so the
+    // by-sign minutes come OFF a northerly height and go ONTO a
+    // southerly one — one rule, stated by the case in force.
+    how: (steps) =>
+      steps.moonLatitude?.result >= 0
+        ? '= step 3 − its by-sign minutes (north, so pushed back south)'
+        : '= step 3 + its by-sign minutes (south, so pushed further south)',
   },
   {
     id: 'orechShlishi',
     label: 'the gap, moved by the slice of the height (third longitude)',
     ref: 'KH 17:11',
+    how: () => '= step 5, moved by the slice of step 6',
   },
   {
     id: 'orechRevii',
     label: 'the gap, stretched for how steeply this part sets (fourth longitude)',
     ref: 'KH 17:12',
+    how: () => "= step 7 ± a fraction picked by the moon's sign (or left alone)",
   },
-  { id: 'mnatGovahHaMedinah', label: 'a fraction of the ORIGINAL height', ref: 'KH 17:14' },
-  { id: 'keshetHaReiyah', label: 'THE FINAL FIGURE — the arc of sighting', ref: 'KH 17:14', key: true },
+  {
+    id: 'mnatGovahHaMedinah',
+    label: 'a fraction of the ORIGINAL height',
+    ref: 'KH 17:14',
+    how: () => '= two thirds of step 3 — the height before any adjustment, not step 6',
+  },
+  {
+    id: 'keshetHaReiyah',
+    label: 'THE FINAL FIGURE — the arc of sighting',
+    ref: 'KH 17:14',
+    key: true,
+    how: (steps) =>
+      steps.moonLatitude?.result >= 0
+        ? '= step 8 + step 9 (step 3 was north)'
+        : '= step 8 − step 9 (step 3 was south)',
+  },
 ];
 
 export default function VisibilityChain() {
@@ -169,6 +214,13 @@ export default function VisibilityChain() {
                     </span>
                   )}
                 </span>
+                {/* The recipe, in terms of the steps above — same device
+                    as the ch15 card, which a reader asked for here too. */}
+                {row.how && (
+                  <span className="block font-mono text-[10px] text-[var(--color-accent)] opacity-80">
+                    {row.how(steps)}
+                  </span>
+                )}
               </span>
             </li>
           );
