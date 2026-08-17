@@ -153,10 +153,14 @@ describe('the season-correction disclosure', () => {
     const disclosure = screen.getByText(/One row of this table is disputed/);
     const text = disclosure.parentElement.textContent;
 
-    // Touger's translation is the one with 30; the site computes with 15.
-    // Swapping these would be a plausible-sounding, entirely wrong claim.
-    expect(text).toMatch(/says\s+30 minutes/);
-    expect(text).toMatch(/This site computes with\s+15/);
+    // Which witness says what, and which one the site follows. Getting
+    // these the wrong way round would be a plausible-sounding and
+    // entirely wrong claim, so both directions are pinned.
+    expect(text).toMatch(/Yemenite manuscripts/);
+    expect(text).toMatch(/Chitrik/);
+    expect(text).toMatch(/read\s+30 minutes/);
+    expect(text).toMatch(/printed editions[\s\S]*read\s+15/);
+    expect(text).toMatch(/This site computes with\s+30/);
     expect(text).toMatch(/not a bug/);
   });
 
@@ -166,10 +170,13 @@ describe('the season-correction disclosure', () => {
     // The slider opens at 90°, inside the disputed 60-120° band.
     const slider = screen.getByLabelText("The sun's position in degrees");
     expect(slider.value).toBe('90');
-    expect(screen.getByText(/but Touger's text says/)).toBeTruthy();
+    // The site now computes the Yemenite +30' and flags the printed
+    // editions' 15' as the alternative — the comparison reversed on
+    // 2026-08-17 when the manuscript reading was confirmed.
+    expect(screen.getByText(/standard printed editions say/)).toBeTruthy();
 
     // Move outside the disputed band; the warning goes away.
     fireEvent.change(slider, { target: { value: '200' } });
-    await waitFor(() => expect(screen.queryByText(/but Touger's text says/)).toBeNull());
+    await waitFor(() => expect(screen.queryByText(/standard printed editions say/)).toBeNull());
   });
 });

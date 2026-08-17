@@ -13,12 +13,17 @@
  *
  * ── The disagreement ──
  * For the sun between the start of Gemini and the start of Leo
- * (60°–120°), Touger's English — which is what `/text/14` displays —
- * reads "30 minutes should be added", with his own footnote conceding
- * that most standard printed texts say 15. The engine ships +15′
- * uniformly from 15° to 165°, following Sefaria's Torat Emet text; that
- * was a deliberate decision (2026-05-03, issue #19) under a
- * "true to the source text" directive.
+ * (60°–120°) the witnesses split. The Yemenite manuscripts — followed by
+ * the Chitrik edition, and by Touger's English, which is what `/text/14`
+ * displays — read "30 minutes"; the standard printed editions and
+ * Sefaria's Torat Emet text read 15.
+ *
+ * The engine shipped 15 between 2026-05-03 and 2026-08-17 under a
+ * "true to the source text" directive, and now ships 30. The switch is
+ * recorded in OPEN_QUESTIONS.md Q8, whose earlier resolution had already
+ * named the condition for making it. This card therefore compares the
+ * shipped Yemenite value against the printed one, not the other way
+ * round — the direction reversed with the decision.
  *
  * So a reader who reads the chapter here and then uses this calculator
  * would otherwise meet two different numbers with nothing to explain
@@ -36,17 +41,26 @@ import InteractiveCard from '../../text/interactives/InteractiveCard';
 import { CONSTANTS } from '../../../engine/constants';
 import { calculateSeasonCorrection } from '../../../engine/moonCalculations';
 import { zodiacPosition } from '../../../engine/zodiac';
+import { bandDates } from '../../../lib/sunDates';
 
-/** Touger's reading: as shipped, but +30′ between Gemini and Leo. */
-const TOUGER_OVERRIDE = { from: 60, to: 120, arcmin: 30 };
+/**
+ * The printed-edition reading, kept for comparison: uniform +15′ across
+ * the whole additive side, with no +30′ band.
+ *
+ * This site used to compute with it. It now follows the Yemenite
+ * manuscripts (+30′ for 60°–120°), so this constant is the ALTERNATIVE
+ * rather than the shipped value — the direction of the comparison
+ * reversed on 2026-08-17.
+ */
+const PRINTED_OVERRIDE = { from: 60, to: 120, arcmin: 15 };
 
 function shippedArcmin(longitude) {
   return calculateSeasonCorrection(longitude).result * 60;
 }
 
-function tougerArcmin(longitude) {
-  if (longitude >= TOUGER_OVERRIDE.from && longitude < TOUGER_OVERRIDE.to) {
-    return TOUGER_OVERRIDE.arcmin;
+function printedArcmin(longitude) {
+  if (longitude >= PRINTED_OVERRIDE.from && longitude < PRINTED_OVERRIDE.to) {
+    return PRINTED_OVERRIDE.arcmin;
   }
   return shippedArcmin(longitude);
 }
@@ -57,11 +71,14 @@ function signed(arcmin) {
 }
 
 export default function SeasonBands() {
+  // Dates shift a day either way between years, so they are computed for
+  // the current one and shown as approximate.
+  const year = new Date().getFullYear();
   const [sunLongitude, setSunLongitude] = useState(90);
 
   const shipped = shippedArcmin(sunLongitude);
-  const touger = tougerArcmin(sunLongitude);
-  const disputed = Math.abs(shipped - touger) > 0.01;
+  const printed = printedArcmin(sunLongitude);
+  const disputed = Math.abs(shipped - printed) > 0.01;
   const sign = zodiacPosition(sunLongitude);
 
   return (
@@ -97,7 +114,7 @@ export default function SeasonBands() {
         </div>
         {disputed && (
           <div className="mt-1 text-xs text-[var(--color-accent)]">
-            …but Touger's text says {signed(touger)} here. See below.
+            …the standard printed editions say {signed(printed)} here. See below.
           </div>
         )}
       </div>
@@ -106,15 +123,15 @@ export default function SeasonBands() {
         <table className="w-full min-w-[420px] text-xs">
           <thead>
             <tr className="border-b border-[var(--color-border)] text-left text-[var(--color-text-secondary)]">
-              <th className="py-1 pr-2 font-bold">Sun between</th>
-              <th className="py-1 pr-2 font-bold">This site</th>
-              <th className="py-1 font-bold">Touger's text</th>
+              <th className="py-1 pr-2 font-bold">Sun between <span className="font-normal">(and roughly when)</span></th>
+              <th className="py-1 pr-2 font-bold">This site <span className="font-normal">(Yemenite)</span></th>
+              <th className="py-1 font-bold">Printed editions</th>
             </tr>
           </thead>
           <tbody>
             {CONSTANTS.SEASON_CORRECTIONS.map((row) => {
               const mid = (row.sunFrom + row.sunTo) / 2;
-              const t = tougerArcmin(mid);
+              const t = printedArcmin(mid);
               const differs = Math.abs(row.adjustment * 60 - t) > 0.01;
               const active = sunLongitude >= row.sunFrom && sunLongitude < row.sunTo;
               return (
@@ -126,6 +143,15 @@ export default function SeasonBands() {
                     <span className="hebrew-text">{row.sourcePhrase.replace(/\s*\(.*\)$/, '')}</span>
                     <span className="block font-mono text-[10px] text-[var(--color-text-secondary)]">
                       {row.sunFrom}°–{row.sunTo}°
+                    </span>
+                    {/* The degrees are exact and unreadable. These dates are
+                        his own sun run backwards (KH 13:11's move), so the
+                        reader can see that the -30' band really does sit on
+                        midwinter. Approximate because the ranges shift a day
+                        either way between years. */}
+                    <span className="block text-[10px] text-[var(--color-text-secondary)]">
+                      ≈ {bandDates(row.sunFrom, row.sunTo, year).from} –{' '}
+                      {bandDates(row.sunFrom, row.sunTo, year).to}
                     </span>
                   </td>
                   <td className="py-1 pr-2 font-mono text-[var(--color-gold)]">
@@ -149,11 +175,11 @@ export default function SeasonBands() {
           One row of this table is disputed — worth knowing now
         </div>
         <p className="mt-1.5 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
-          For the sun between the start of Gemini and the start of Leo, the English translation
-          you will read on the source page says <strong>30 minutes</strong>. Its own footnote
-          adds that most standard printed texts say <strong>15</strong>. This site computes with{' '}
-          <strong>15</strong>, following the Hebrew text it takes from Sefaria — a deliberate
-          choice to stay with the source edition rather than the translation.
+          For the sun between the start of Gemini and the start of Leo, the witnesses disagree:
+          the Yemenite manuscripts — followed by the Chitrik edition, and by the English
+          translation on the source page — read <strong>30 minutes</strong>, while the standard
+          printed editions, and the Hebrew text Sefaria supplies, read <strong>15</strong>.
+          This site computes with <strong>30</strong>.
         </p>
         <p className="mt-1.5 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
           So if you read chapter 14 and then use this calculator, you have found a real

@@ -199,18 +199,41 @@ describe('KH 17:14 interpretive choice — SETTING_TIME keys on moon\'s mazal, N
   });
 });
 
-describe('KH 14:5 season-correction table — verbatim Sefaria reading (issue #19)', () => {
-  // Source text in `docs/sources/KH_14_verbatim.md`. Tests pin the
-  // boundary of every band to verbatim-stated values and guard against
-  // accidental reversion to the prior unverified table (which had +30'
-  // at 60°-90° on the additive side).
-  it('has +15ʹ uniformly from 15° through 165° (no +30ʹ band on the additive side)', async () => {
+describe('KH 14:5 season-correction table — Yemenite reading (issue #19)', () => {
+  // Source text in `docs/sources/KH_14_verbatim.md`; the reading adopted
+  // on 2026-08-17 is recorded in OPEN_QUESTIONS.md Q8. The additive side
+  // runs +15/+30/+15, mirroring the subtractive side's -15/-30/-15.
+  //
+  // NB this replaces a test that pinned Sefaria's uniform +15ʹ. That was
+  // the right pin while Sefaria was the load-bearing source; the Q8
+  // resolution itself said to flip if the user's tradition turned out to
+  // be Yemenite, which it did (Chitrik edition).
+  it('has +30ʹ for תחילת תאומים → תחילת אריה (60°-120°)', async () => {
     const mod = await import('../moonCalculations.js');
-    for (const lon of [16, 30, 59, 60, 89, 90, 119, 120, 164]) {
+    for (const lon of [60, 75, 90, 105, 119] ) {
       const s = mod.calculateSeasonCorrection(lon);
       const arcmin = Math.round(s.result * 60);
-      expect(arcmin, `sun=${lon}° expected +15ʹ got ${arcmin}ʹ`).toBe(15);
+      expect(arcmin, `sun=${lon}° expected +30ʹ got ${arcmin}ʹ`).toBe(30);
     }
+  });
+
+  it('flanks it with +15ʹ, so the additive side is +15/+30/+15', async () => {
+    const mod = await import('../moonCalculations.js');
+    for (const lon of [16, 30, 59]) {
+      expect(Math.round((await mod.calculateSeasonCorrection(lon)).result * 60), `${lon}°`).toBe(15);
+    }
+    for (const lon of [120, 140, 164]) {
+      expect(Math.round((await mod.calculateSeasonCorrection(lon)).result * 60), `${lon}°`).toBe(15);
+    }
+  });
+
+  it('mirrors the subtractive side exactly, which is the structural argument', async () => {
+    const mod = await import('../moonCalculations.js');
+    const at = async (lon) => Math.round((await mod.calculateSeasonCorrection(lon)).result * 60);
+    // Each additive band and its opposite number 180° away.
+    expect(await at(30)).toBe(-(await at(210)));
+    expect(await at(90)).toBe(-(await at(270)));
+    expect(await at(140)).toBe(-(await at(320)));
   });
 
   it('has the asymmetric -30ʹ band only at 240°-300° (start קשת → start דלי)', async () => {

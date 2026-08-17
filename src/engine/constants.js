@@ -610,7 +610,7 @@ export const CONSTANTS = {
   },
 
   // ═══════════════════════════════════════════════════════════════
-  //  SEASON CORRECTION — [R] KH 14:5 (verbatim Sefaria text)
+  //  SEASON CORRECTION — [R] KH 14:5 (Yemenite reading; see HISTORY)
   //  Adjusts the moon's mean longitude for the time difference between
   //  6:00 PM and actual sunset (the actual reference time of the
   //  Rambam's calculation, per KH 14:6: "כשליש שעה אחר שקיעת החמה").
@@ -624,22 +624,43 @@ export const CONSTANTS = {
   //    תחילת קשת = 240°   תחילת דלי = 300°
   //    חצי דגים = 345°
   //
-  //  HISTORY (2026-05-03): the prior table placed +30' at 60°-90°.
-  //  That value was shipped from the original rebuild without source
-  //  verification, despite its [R] tag (per feedback_r_tags memory:
-  //  "[R] tags can hide undocumented drift; verify verbatim"). The
-  //  Sefaria text shows +15' uniformly from 15° → 165° on the
-  //  additive side, with NO +30' band. The asymmetric -30' band
-  //  exists only on the subtractive side at 240°-300°. Switched to
-  //  Sefaria's reading per the user's "true to source text" directive
-  //  on 2026-05-03; resolves issue #19.
+  //  HISTORY, in three steps — see OPEN_QUESTIONS.md Q8.
+  //
+  //  1. The original rebuild placed +30' at 60°-90°, untraced despite
+  //     its [R] tag.
+  //  2. 2026-05-03: switched to Sefaria's printed text, +15' uniformly
+  //     from 15° → 165° with no +30' band on the additive side, per a
+  //     "true to source text" directive. That resolution recorded that
+  //     the user's own worksheet showed +30' and said: "possibly
+  //     Frankel, possibly Yemenite... If the user prefers his
+  //     tradition, we can either flip back or expose a per-tradition
+  //     selector. Until that input arrives, Sefaria is the
+  //     load-bearing primary source."
+  //  3. 2026-08-17: that input arrived. The user reports the Chitrik
+  //     edition, which follows the Yemenite manuscripts, reads +30'
+  //     for תחילת תאומים → תחילת אריה (60°-120°). Adopted.
+  //
+  //  Four independent lines agree on +30' there, which is why this is a
+  //  textual correction rather than a preference:
+  //    - the Yemenite manuscript tradition (Chitrik), generally the
+  //      best witness for the Mishneh Torah;
+  //    - Touger's English, which renders that band as 30 minutes and
+  //      footnotes that standard prints read 15;
+  //    - internal structure: the subtractive side runs -15/-30/-15, so
+  //      +15/+30/+15 makes the table a clean mirror, where Sefaria's
+  //      +15/+15/+15 leaves it lopsided for no stated reason;
+  //    - fit: against Jerusalem's sunset drift the mean gap falls from
+  //      8.4' to 6.0' (see SunsetDrift, and sunDates.test.js).
+  //
+  //  Cost of the change: 2 verdict flips in 315 sampled sighting
+  //  nights over 50 years (0.63%), all in the marginal band.
   // ═══════════════════════════════════════════════════════════════
   SEASON_CORRECTIONS: [
     // { sunFrom°, sunTo°, adjustment in degrees, sourcePhrase }
     { sunFrom: 345, sunTo: 360, adjustment: 0,      sourcePhrase: 'מחצי דגים עד חצי טלה (no change)' },
     { sunFrom: 0,   sunTo: 15,  adjustment: 0,      sourcePhrase: 'מחצי דגים עד חצי טלה (no change)' },
     { sunFrom: 15,  sunTo: 60,  adjustment: 15/60,  sourcePhrase: 'מחצי טלה עד תחילת תאומים (+15ʹ)' },
-    { sunFrom: 60,  sunTo: 120, adjustment: 15/60,  sourcePhrase: 'מתחילת תאומים עד תחילת אריה (+15ʹ)' },
+    { sunFrom: 60,  sunTo: 120, adjustment: 30/60,  sourcePhrase: 'מתחילת תאומים עד תחילת אריה (+30ʹ)' },
     { sunFrom: 120, sunTo: 165, adjustment: 15/60,  sourcePhrase: 'מתחילת אריה עד חצי בתולה (+15ʹ)' },
     { sunFrom: 165, sunTo: 195, adjustment: 0,      sourcePhrase: 'מחצי בתולה עד חצי מאזנים (no change)' },
     { sunFrom: 195, sunTo: 240, adjustment: -15/60, sourcePhrase: 'מחצי מאזנים עד תחילת קשת (-15ʹ)' },
