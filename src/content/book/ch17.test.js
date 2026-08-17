@@ -8,7 +8,7 @@
  * agrees with the Rambam or does not.
  */
 import { describe, it, expect } from 'vitest';
-import { bookChapter } from './index';
+import { bookChapter, hasBookChapter } from './index';
 import { CONSTANTS } from '../../engine/constants';
 import { getFullCalculation } from '../../engine/pipeline';
 import { dateFromEpochDays } from '../../engine/epochDays';
@@ -332,5 +332,30 @@ describe('the fourth-longitude step, corrected in review', () => {
     expect(body).toMatch(/two thirds\*\* of it, always two thirds/);
     expect(body).toMatch(/north adds, south takes away/);
     expect(CONSTANTS.GEOGRAPHIC_HEIGHT_FRACTION_OF_ROCHAV_RISHON).toBeCloseTo(2 / 3, 9);
+  });
+});
+
+describe("the closing's description of chapters 18 and 19", () => {
+  const missing = bookChapter(17).closing.missing.join(' ');
+
+  it('describes what those chapters actually contain', () => {
+    expect(missing).toMatch(/stepping back from his own method/);
+    expect(missing).toMatch(/which way the crescent leaned/);
+  });
+
+  it('does not claim they correct for observers away from Jerusalem', () => {
+    // They do not: 18 is limits and court practice, 19 is crescent tilt
+    // and height. The east-west passage of 18:13-16 is the nearest thing,
+    // and he closes it by saying it has no practical consequence.
+    expect(missing).not.toMatch(/observers away from Jerusalem/);
+  });
+
+  it('does not claim the book has yet to write them — it has', () => {
+    // "Still only in the Rambam's own words" was true when this closing
+    // was written and false ever since; derived from the registry so it
+    // can never go stale in either direction again.
+    expect(missing).not.toMatch(/only in the Rambam's own words/);
+    expect(hasBookChapter(18)).toBe(true);
+    expect(hasBookChapter(19)).toBe(true);
   });
 });

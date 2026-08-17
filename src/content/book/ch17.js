@@ -226,7 +226,7 @@ export default {
       'Every quantity the court would have needed to test a witness who claimed to have seen the new moon.',
     ],
     missing: [
-      'The edge cases, and the checks. Chapters 18 and 19 handle what to do when the answer sits close to the line, how the court used the calculation against testimony in practice, and the corrections for observers away from Jerusalem. The engine here follows chapters 11 to 17; those last two are still only in the Rambam\'s own words.',
+      'Perspective on the answer you now have. Chapter 18 is the Rambam stepping back from his own method — what the calculation cannot know, why a court treats a marginal verdict differently from a comfortable one, and what happened when the moon went unseen for months. Chapter 19 answers the court\'s other two questions: which way the crescent leaned, and how high it stood. The calculators on this site follow chapters 11 to 17, which is where the verdict lives; 18 and 19 reuse them rather than adding machinery.',
     ],
   },
 };

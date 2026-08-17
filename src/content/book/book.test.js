@@ -147,6 +147,28 @@ describe('every written chapter is structurally sound', () => {
     }
   });
 
+  it.each(chapters)('chapter %i does not describe a written chapter as unwritten', (n) => {
+    // Closings were written before their successors existed, and two of
+    // them kept saying so after the fact — ch17's "still only in the
+    // Rambam's own words" and ch18's "the only one this book has not yet
+    // reached" both survived the writing of chapters 18 and 19. The
+    // register is forward-looking by design, so the guard is on the
+    // staleness phrases themselves: none of them can be true while every
+    // astronomical chapter is registered.
+    const closing = [
+      ...(bookChapter(n).closing?.have ?? []),
+      ...(bookChapter(n).closing?.missing ?? []),
+    ].join(' ');
+    for (const stale of [
+      /not yet reached/i,
+      /has not yet (written|reached)/i,
+      /only in the Rambam's own words/i,
+      /still to be written/i,
+    ]) {
+      expect(closing, `chapter ${n} closing claims something is unwritten`).not.toMatch(stale);
+    }
+  });
+
   it.each(chapters)('chapter %i names signs by number, not name alone', (n) => {
     // A reader said the transliterated sign names made the book sound
     // foreign, and they were right: twelve unfamiliar words are twelve

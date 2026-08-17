@@ -184,7 +184,7 @@ export default {
       'What a sighting east or west of the land does and does not prove.',
     ],
     missing: [
-      'One chapter. Nineteen collects the remaining rules — including how the court handled the moon appearing at unexpected times, and the checks that guard against a calculation quietly going wrong. It is the shortest of the astronomical chapters and the only one this book has not yet reached.',
+      'One chapter. The court did not only ask witnesses *whether* they saw the moon — it asked which way the crescent was tilted and how high it stood, questions with checkable answers. Nineteen shows how to work both out, and it is the last of the astronomy.',
     ],
   },
 };
