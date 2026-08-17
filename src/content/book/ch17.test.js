@@ -11,7 +11,7 @@ import { describe, it, expect } from 'vitest';
 import { bookChapter, hasBookChapter } from './index';
 import { CONSTANTS } from '../../engine/constants';
 import { getFullCalculation } from '../../engine/pipeline';
-import { calculateOrechShlishi } from '../../engine/visibilityCalculations';
+import { calculateOrechShlishi, calculateOrechRevii } from '../../engine/visibilityCalculations';
 import { nextSightingNight } from '../../lib/sightingNight';
 import { dateFromEpochDays } from '../../engine/epochDays';
 import { zodiacPosition } from '../../engine/zodiac';
@@ -546,6 +546,12 @@ describe('the apply-stretch-finish section names its outputs', () => {
     // tally the prose never showed; the ordinal now opens each bullet.
     expect(body).toMatch(/\*\*The third longitude\*\* is the gap after the slice/);
     expect(body).toMatch(/\*\*The fourth longitude\*\* is that number stretched or shrunk/);
+    // A reader asked whether the fourth was "the same slice". It is not,
+    // and the two fraction-takings must be explicitly contrasted: the
+    // slice is a fraction of the HEIGHT, the stretch a fraction of the
+    // gap ITSELF — checked against the engine below.
+    expect(body).toMatch(/not\* the slice again/);
+    expect(body).toMatch(/fraction \*\*of itself\*\*/);
     expect(body).not.toMatch(/Two adjustments down|Three down/);
   });
 
@@ -558,5 +564,24 @@ describe('the apply-stretch-finish section names its outputs', () => {
   it('defers the slice direction to the figure that now shows it', () => {
     expect(body).toMatch(/the rule the figure above just showed/);
     expect(body).not.toMatch(/North, subtract; south, add/);
+  });
+});
+
+describe('the third and fourth longitudes take fractions of different things', () => {
+  it("the slice's magnitude scales with the height and not with the gap", () => {
+    // Double the height: the third-longitude delta doubles. Double the
+    // gap: it does not change at all.
+    const d = (gap, lat) => calculateOrechShlishi(gap, lat, 40).result - gap;
+    expect(d(12, -4)).toBeCloseTo(2 * d(12, -2), 9);
+    expect(d(24, -2)).toBeCloseTo(d(12, -2), 9);
+  });
+
+  it("the stretch's magnitude scales with the gap and ignores the height entirely", () => {
+    // calculateOrechRevii takes no latitude at all — the strongest
+    // possible statement that the height is not involved.
+    expect(calculateOrechRevii.length).toBe(2);
+    const d = (gap) => calculateOrechRevii(gap, 40).result - gap; // moon in the 2nd sign: +1/5
+    expect(d(20)).toBeCloseTo(2 * d(10), 9);
+    expect(d(10)).toBeCloseTo(2, 9); // a fifth of ten
   });
 });
