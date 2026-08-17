@@ -58,6 +58,15 @@ describe('every written chapter is structurally sound', () => {
       // A stray `${` means a template literal was half-written and the
       // sentence will render with visible braces.
       expect(prose, `${n}:${section.id} unclosed interpolation`).not.toContain('${');
+      // markup.js renders bold and italic and nothing else. A markdown
+      // table or an embedded newline was written into chapter 14 first
+      // and would have printed as literal pipes on the page — the
+      // renderer puts each body entry in its own <p> and breaks nothing
+      // inside it.
+      expect(prose, `${n}:${section.id} markdown table will not render`).not.toMatch(/\|\s*---/);
+      for (const para of section.body) {
+        expect(para, `${n}:${section.id} embedded newline will not render`).not.toContain('\n');
+      }
     }
   });
 
