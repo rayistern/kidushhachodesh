@@ -110,10 +110,21 @@ export const CHAIN_NODES = [
   {
     id: 'verdict',
     label: 'Can it be seen?',
-    hebrew: 'תנאי הראייה',
-    chapter: 18,
+    hebrew: null,
+    // The verdict is KH 17:15-21, not 18 — the engine's own step carries
+    // rambamRef 'KH 17:3-4, 17:15-21'. An earlier draft filed it under
+    // 18 to give that chapter a node; the node below is the honest one.
+    chapter: 17,
     stepId: 'moonVisibility',
     blurb: 'The answer the whole book was for.',
+  },
+  {
+    id: 'limits',
+    label: 'How far to trust the answer',
+    hebrew: 'תנאי הראייה',
+    chapter: 18,
+    stepId: null,
+    blurb: 'The calculation says "probable", not "certain" — and why that matters in court.',
   },
   {
     id: 'rules',

@@ -43,6 +43,8 @@ const QuickVerdict = React.lazy(() => import('./QuickVerdict'));
 const ParallaxBySign = React.lazy(() => import('./ParallaxBySign'));
 const VisibilityChain = React.lazy(() => import('./VisibilityChain'));
 const SightingLimits = React.lazy(() => import('./SightingLimits'));
+const HowMarginal = React.lazy(() => import('./HowMarginal'));
+const EastWest = React.lazy(() => import('./EastWest'));
 
 // ── Reused from /text, chapter 11 ──
 const ZodiacPosition = React.lazy(() => import('../../text/interactives/ZodiacPosition'));
@@ -118,6 +120,10 @@ export const FIGURES = {
   'parallax-by-sign': ParallaxBySign,
   'visibility-chain': VisibilityChain,
   'sighting-limits': SightingLimits,
+
+  // chapter 18
+  'how-marginal': HowMarginal,
+  'east-west': EastWest,
 };
 
 /** The component for a slot id, or null if the id is unknown. */
