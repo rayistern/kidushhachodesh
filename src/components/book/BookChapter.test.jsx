@@ -60,11 +60,21 @@ describe('a written chapter', () => {
 });
 
 describe('chapters that are not written yet', () => {
+  // Derived, not hardcoded — this test named chapter 15 until chapter 15
+  // was written, at which point it failed for the happiest possible
+  // reason. It now finds whichever astronomical chapter is next.
+  const written = new Set(writtenChapters());
+  const unwritten = [11, 12, 13, 14, 15, 16, 17, 18, 19].find((n) => !written.has(n));
+
+  it('there is still an unwritten chapter to test with', () => {
+    expect(unwritten, 'the whole book is written — retire this describe block').toBeDefined();
+  });
+
   it('sends the reader to the source instead of failing', async () => {
-    const { container } = renderAt('/book/15');
+    const { container } = renderAt(`/book/${unwritten}`);
     await waitFor(() => expect(screen.getByText(/not written yet/)).toBeTruthy());
     const hrefs = Array.from(container.querySelectorAll('a')).map((a) => a.getAttribute('href'));
-    expect(hrefs).toContain('/text/15');
+    expect(hrefs).toContain(`/text/${unwritten}`);
   });
 
   it('redirects a chapter number that does not exist', async () => {
