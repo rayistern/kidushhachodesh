@@ -183,19 +183,29 @@ export default {
       body: [
         'The first of the remaining steps takes **a slice of the adjusted height**, and which fraction to take depends on one thing only: **where the moon stands on the circle**. The pattern is worth seeing whole. Near the starts of the 1st and 7th signs the slice is at its biggest, **two fifths**. Step away and it shrinks by stages — a third, a quarter, a fifth, a sixth, a twelfth, a twenty-fourth — until, in a small band straddling the starts of the 4th and 10th signs, it is **nothing at all**, and the step is skipped. Then it grows back by the same stages, and the second half of the circle mirrors the first exactly.',
         'Those two special points should sound familiar: they are the turning points from chapter 11 — where the sun\'s road runs level with the equator. Where the road is level, the moon\'s height off it stays purely sideways and none of it tips along the road; where the road crosses at its steepest slant, near the 1st and 7th signs, the most height leaks into the along-the-road direction. (That reading is this book\'s; he states the fractions and gives no reason.) On sighting nights it means the slice matters most in spring and autumn and vanishes near midsummer and midwinter. The Rambam calls the result the *circuit of the moon*; call it **the slice**.',
+        '**The third longitude** is the gap after the slice is applied — step 7 of the finishing card below. Which way the slice goes is the rule the figure above shows: it depends on which half of the sky the moon is in and which side of the road it sits.',
       ],
       interactive: 'slice-shape',
     },
 
     {
+      id: 'the-stretch',
+      heading: 'The stretch — not the slice again',
+      source: 'KH 17:12',
+      nodeId: 'arc',
+      body: [
+        '**The fourth longitude** is that number stretched or shrunk — step 8 — and this is *not* the slice again, though it sounds like it. The slice was a fraction of the **height**, brought in from a different measurement. Here the gap is scaled by a fraction **of itself**: depending on which sign **the moon** is in, add a sixth or a fifth of it, leave it alone, or subtract a fifth or a third. The reason is how steeply that part of the belt sets — a slow-setting stretch of sky makes each degree of gap worth more, so the number is stretched to match; a fast-setting stretch, the reverse. The same underlying fact as the early-exit halves, applied more finely.',
+      ],
+      interactive: 'stretch-shape',
+    },
+
+    {
       id: 'three-more',
-      heading: 'Apply it, stretch it, and finish',
+      heading: 'The finish',
       source: 'KH 17:10',
       nodeId: 'arc',
       body: [
-        'Three adjustments remain, and the calculator below carries all of them — its steps 7, 8 and 10, each showing what it is built from. Keep the tally straight by what each one *produces*, because the text names the running number afresh after every touch: the gap started as the *first longitude*, and the standing-on-the-ground shift already made it the *second*.',
-        '**The third longitude** is the gap after the slice is applied — step 7 below. Which way the slice goes is the rule the figure above just showed: it depends on which half of the sky the moon is in and which side of the road it sits.',
-        '**The fourth longitude** is that number stretched or shrunk — step 8 — and this is *not* the slice again, though it sounds like it. The slice was a fraction of the **height**, brought in from a different measurement. Here the gap is scaled by a fraction **of itself**: depending on which sign **the moon** is in, add a sixth or a fifth of it, leave it alone, or subtract a fifth or a third. The reason is how steeply that part of the belt sets — a slow-setting stretch of sky makes each degree of gap worth more, so the number is stretched to match; a fast-setting stretch, the reverse. The same underlying fact as the early-exit halves, applied more finely.',
+        'One step remains, and then the whole chain runs below — every step showing what it is built from. Keep the tally straight by what each touch *produces*: the gap began as the *first longitude*; standing-on-the-ground made the *second*; the slice made the *third*; the stretch, the *fourth*.',
         'Then, finally, go back to the **original** height — the one you were told to keep at hand, before any adjustment — take **two thirds** of it, always two thirds for the land of Israel, and apply that to the gap: north adds, south takes away.',
         'What comes out is **the final figure** — the *arc of sighting*, קשת הראייה. The verdict depends on it and nothing else.',
       ],

@@ -47,6 +47,7 @@ const HowMarginal = React.lazy(() => import('./HowMarginal'));
 const EastWest = React.lazy(() => import('./EastWest'));
 const TonightHere = React.lazy(() => import('./TonightHere'));
 const SliceShape = React.lazy(() => import('./SliceShape'));
+const StretchShape = React.lazy(() => import('./StretchShape'));
 const DegreeScale = React.lazy(() => import('./DegreeScale'));
 const Declination = React.lazy(() => import('./Declination'));
 const MoonFromEquator = React.lazy(() => import('./MoonFromEquator'));
@@ -132,6 +133,7 @@ export const FIGURES = {
   'east-west': EastWest,
   'tonight-here': TonightHere,
   'slice-shape': SliceShape,
+  'stretch-shape': StretchShape,
 
   // chapter 11 — a sense of scale for every angle that follows
   'degree-scale': DegreeScale,

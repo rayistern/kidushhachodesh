@@ -303,9 +303,11 @@ describe('KH 17:15-21 — the trade between the two numbers', () => {
 });
 
 describe('the fourth-longitude step, corrected in review', () => {
+  // Spread across the slice/stretch/finish sections since; union below.
   const body = bookChapter(17)
-    .sections.find((s) => s.id === 'three-more')
-    .body.join('\n');
+    .sections.filter((s) => ['the-slice', 'the-stretch', 'three-more'].includes(s.id))
+    .flatMap((s) => s.body)
+    .join('\n');
 
   it('keys the stretch/shrink on the moon, not on the gap', () => {
     // The prose said "which sign the gap now falls in". The engine's
@@ -536,34 +538,50 @@ describe("the slice's direction rule, as the figure states it", () => {
   });
 });
 
-describe('the apply-stretch-finish section names its outputs', () => {
+describe('the adjustments name their outputs where they are made', () => {
+  // The prose spread across three sections (the slice, the stretch, the
+  // finish), each beside its own figure; the claims hold of their union.
   const body = bookChapter(17)
-    .sections.find((s) => s.id === 'three-more')
-    .body.join('\n');
+    .sections.filter((s) => ['the-slice', 'the-stretch', 'three-more'].includes(s.id))
+    .flatMap((s) => s.body)
+    .join('\n');
 
   it('leads each adjustment with the longitude it produces', () => {
     // "Two adjustments down: the third longitude" made the reader keep a
-    // tally the prose never showed; the ordinal now opens each bullet.
+    // tally the prose never showed; the ordinal now opens each bullet —
+    // the third at the end of the slice section, the fourth beside the
+    // stretch's own figure.
     expect(body).toMatch(/\*\*The third longitude\*\* is the gap after the slice/);
     expect(body).toMatch(/\*\*The fourth longitude\*\* is that number stretched or shrunk/);
-    // A reader asked whether the fourth was "the same slice". It is not,
-    // and the two fraction-takings must be explicitly contrasted: the
-    // slice is a fraction of the HEIGHT, the stretch a fraction of the
-    // gap ITSELF — checked against the engine below.
+    // A reader asked whether the fourth was "the same slice". It is not:
+    // the slice is a fraction of the HEIGHT, the stretch a fraction of
+    // the gap ITSELF — checked against the engine below.
     expect(body).toMatch(/not\* the slice again/);
     expect(body).toMatch(/fraction \*\*of itself\*\*/);
     expect(body).not.toMatch(/Two adjustments down|Three down/);
   });
 
   it("maps each one to the chain card's own step numbers", () => {
-    expect(body).toMatch(/step 7 below/);
+    expect(body).toMatch(/step 7 of the finishing card below/);
     expect(body).toMatch(/step 8/);
-    expect(body).toMatch(/steps 7, 8 and 10/);
   });
 
-  it('defers the slice direction to the figure that now shows it', () => {
-    expect(body).toMatch(/the rule the figure above just showed/);
+  it('defers the slice direction to the figure that shows it', () => {
+    expect(body).toMatch(/the rule the figure above shows/);
     expect(body).not.toMatch(/North, subtract; south, add/);
+  });
+
+  it('keeps the running tally in the finish, first through fourth', () => {
+    const finish = bookChapter(17)
+      .sections.find((s) => s.id === 'three-more')
+      .body.join('\n');
+    expect(finish).toMatch(/the slice made the \*third\*; the stretch, the \*fourth\*/);
+  });
+
+  it('gives the stretch its own section and figure, as the slice has', () => {
+    const sec = bookChapter(17).sections.find((s) => s.id === 'the-stretch');
+    expect(sec).toBeTruthy();
+    expect(sec.interactive).toBe('stretch-shape');
   });
 });
 
