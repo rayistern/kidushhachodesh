@@ -46,7 +46,7 @@ export default {
       formal: 'the double elongation',
       hebrew: 'מרחק כפול',
       gloss:
-        'Exactly what it says — the gap multiplied by two. Doubled because the wobble being corrected for happens **twice** in each lap, not once.',
+        "Exactly what it says — the gap multiplied by two. Doubled because the small circle's distance from the far point is always twice its distance from the sun, so doubling the easy measurement hands you the one the correction needs.",
     },
     {
       plain: 'the course after its nudge',
@@ -97,10 +97,10 @@ export default {
       body: [
         'The first step is simple enough. Take the moon\'s average place, take the sun\'s, and subtract. What is left is **the gap** — how far the moon has pulled away from the sun since the two were last together. The text calls it the *elongation*.',
         'Then comes the odd instruction: **double it**. He calls the result the *double elongation* — מרחק כפול, which literally means "doubled distance". Plainly: **the gap, doubled**.',
-        'Why double? The commentary in the **Chitrik edition** gives a reason, and it is much better than it looks: **the epicycle\'s distance from the sun is always exactly half its distance from the far point** — the נקודת הגובה, the apogee of the circle the epicycle rides on.',
-        'That is worth stopping on, because it means the doubling is not a relabelling. It **converts one quantity into another**. You can measure the gap between moon and sun easily; what the correction actually needs is the epicycle\'s distance from the far point. Those two are locked together at one to two, so doubling the first hands you the second for nothing.',
+        'Why double? The commentary in the **Chitrik edition** gives a reason, and it is much better than it looks: **the small circle\'s distance from the sun is always exactly half its distance from the far point** — the נקודת הגובה, the high point of the big circle the small one rides round. (The small circle is chapter 14\'s: the one the moon rides on the end of the arm.)',
+        'That is worth stopping on, because it means the doubling is not a relabelling. It **converts one quantity into another**. You can measure the gap between moon and sun easily; what the correction actually needs is the small circle\'s distance from the far point. Those two are locked together at one to two, so doubling the first hands you the second for nothing.',
         'And now the step stops being strange, because it is the same step chapter 13 took. There, the sun\'s correction was measured from **its** far point, and you had to track that point across the centuries to do it. Here the same idea applies to the moon — a correction is always counted from the far point — but its far point never has to be tracked at all. That is why the Rambam gives the sun a govah with its own tables and gives the moon nothing of the kind. He does not need to. Doubling the gap *is* the moon\'s far-point calculation.',
-        'It also explains why the table starts at nothing. When sun and moon are together the gap is zero, so the epicycle is sitting **on** the far point — and there is nothing to correct, exactly as the sun\'s correction vanishes at its own govah.',
+        'It also explains why the table starts at nothing. When sun and moon are together the gap is zero, so the small circle is sitting **on** the far point — and there is nothing to correct, exactly as the sun\'s correction vanishes at its own govah.',
         'One consequence, if you want to see the machinery: for the halves to stay locked as the month runs, that far point has to travel **backwards** — about 11 degrees a day, right round in roughly 32 days. The Rambam never mentions it. He does not have to, and that is the elegance of it.',
         'And what is all this machinery *for*? The nudge it feeds — the next section — corrects a real disturbance: the sun genuinely drags the moon off its simple path, and by how much depends on how the moon, the sun and the far point stand relative to one another, which is exactly what the doubled gap measures. Modern astronomy calls that wobble the *evection*; after the in-and-out of chapter 14\'s small circle, it is the largest irregularity in the moon\'s motion. The Rambam has no theory of gravity to explain it, but he has the pattern, and the pattern is all the table needs.',
       ],

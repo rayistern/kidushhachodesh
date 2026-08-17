@@ -193,6 +193,11 @@ describe('why the gap gets doubled (KH 15:1)', () => {
     // the table in whole numbers.
     expect(body).toMatch(/Chitrik edition/);
     expect(body).toMatch(/distance from the sun is always exactly half its distance from the far point/);
+    // In chapter 14's vocabulary. "Epicycle" appears nowhere in the book's
+    // prose and is defined nowhere — a reader asked what it meant, which
+    // is proof it should not have been used.
+    expect(body).toMatch(/small circle\\'s distance|small circle's distance/);
+    expect(body).not.toMatch(/epicycle/i);
     expect(body).toMatch(/נקודת הגובה/);
     expect(body).toMatch(/not a relabelling/);
   });
@@ -247,3 +252,15 @@ describe('why the gap gets doubled (KH 15:1)', () => {
   });
 });
 
+
+describe('the glossary agrees with the prose about the doubling', () => {
+  it('carries the Chitrik account, not the superseded twice-a-lap one', () => {
+    // The prose was corrected to the far-point geometry; the glossary
+    // kept the old "happens twice in each lap" reason and disagreed with
+    // the section it summarises. A reader may meet either first.
+    const term = bookChapter(15).terms.find((t) => t.formal === 'the double elongation');
+    expect(term.gloss).toMatch(/twice its distance from the sun/);
+    expect(term.gloss).not.toMatch(/twice\*\* in each lap|twice in each lap/);
+    expect(term.gloss).not.toMatch(/epicycle/i);
+  });
+});
