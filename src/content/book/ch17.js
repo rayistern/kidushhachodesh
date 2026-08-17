@@ -193,9 +193,9 @@ export default {
       source: 'KH 17:10',
       nodeId: 'arc',
       body: [
-        'What remains is applying that slice and two last adjustments — the fiddliest stretch in the book. The good news is that a calculator can carry them and the ideas behind them are short.',
-        '**Apply the slice to the gap.** North, subtract; south, add — and reversed if the moon is in the other half of the sky. Two adjustments down: the *third longitude*.',
-        '**Stretch or shrink it.** Depending on which sign **the moon** is in, add a sixth or a fifth, leave it alone, or subtract a fifth or a third. Three down: the *fourth longitude*. This one is about how steeply that part of the belt sets — the same underlying fact as the early-exit halves, applied more finely.',
+        'Three adjustments remain, and the calculator below carries all of them — its steps 7, 8 and 10, each showing what it is built from. Keep the tally straight by what each one *produces*, because the text names the running number afresh after every touch: the gap started as the *first longitude*, and the standing-on-the-ground shift already made it the *second*.',
+        '**The third longitude** is the gap after the slice is applied — step 7 below. Which way the slice goes is the rule the figure above just showed: it depends on which half of the sky the moon is in and which side of the road it sits.',
+        '**The fourth longitude** is that number stretched or shrunk — step 8. Depending on which sign **the moon** is in, add a sixth or a fifth, leave it alone, or subtract a fifth or a third. This one is about how steeply that part of the belt sets — the same underlying fact as the early-exit halves, applied more finely.',
         'Then, finally, go back to the **original** height — the one you were told to keep at hand, before any adjustment — take **two thirds** of it, always two thirds for the land of Israel, and apply that to the gap: north adds, south takes away.',
         'What comes out is **the final figure** — the *arc of sighting*, קשת הראייה. The verdict depends on it and nothing else.',
       ],

@@ -535,3 +535,28 @@ describe("the slice's direction rule, as the figure states it", () => {
     }
   });
 });
+
+describe('the apply-stretch-finish section names its outputs', () => {
+  const body = bookChapter(17)
+    .sections.find((s) => s.id === 'three-more')
+    .body.join('\n');
+
+  it('leads each adjustment with the longitude it produces', () => {
+    // "Two adjustments down: the third longitude" made the reader keep a
+    // tally the prose never showed; the ordinal now opens each bullet.
+    expect(body).toMatch(/\*\*The third longitude\*\* is the gap after the slice/);
+    expect(body).toMatch(/\*\*The fourth longitude\*\* is that number stretched or shrunk/);
+    expect(body).not.toMatch(/Two adjustments down|Three down/);
+  });
+
+  it("maps each one to the chain card's own step numbers", () => {
+    expect(body).toMatch(/step 7 below/);
+    expect(body).toMatch(/step 8/);
+    expect(body).toMatch(/steps 7, 8 and 10/);
+  });
+
+  it('defers the slice direction to the figure that now shows it', () => {
+    expect(body).toMatch(/the rule the figure above just showed/);
+    expect(body).not.toMatch(/North, subtract; south, add/);
+  });
+});
