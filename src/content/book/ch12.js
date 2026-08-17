@@ -105,6 +105,23 @@ export default {
     },
 
     {
+      id: 'month-and-year-blocks',
+      heading: 'The two extra rows, and why they are not a month and a year',
+      source: 'KH 12:1',
+      nodeId: 'sun-mean',
+      body: [
+        'Alongside the four round blocks he gives two more, and they cause more confusion than the rest of the chapter put together: **29 days** (28° 35\' 1") and **354 days** (348° 55\' 15"). He calls them the distance travelled "in a month" and "in a year".',
+        'Take those labels off. They are nicknames, and they will mislead you in two different ways.',
+        '**First: the 29-day block is a block of twenty-nine days.** Not a month. There is no fraction in it and no rounding of a month\'s length — it is simply the daily rate multiplied by 29, and it comes out to his figure exactly. (Multiply 59\' 8⅓" by 29 and you land on his 28° 35\' 1" with about two-thirds of a second to spare, which is the rounding. Use the flat 59\' 8" instead and you come out 9 seconds off — the hidden third showing itself again.)',
+        'So the fraction you are worried about is real, but it is not here. A true lunar month is **29 days and about 12¾ hours**, so his 29-day row falls half a day short of one. The fraction lives in the *rate*, which is why the rate carries a third of a second; the *block* is a whole number of days by construction, because whole days are all the method ever handles.',
+        '**Second, and this is the useful part: you never chain them.** The question "how would I know the value of the previous month?" has a short answer — you never need it. There is no month-to-month running total anywhere in the method. Every calculation goes back to the same fixed evening in 1178 and asks one question: *how many days from then to now?* That single number gets broken into blocks and added up. Nothing carries forward from a previous month, because there is no previous month in the arithmetic.',
+        'That also means these two rows are **optional**. They are shortcuts for when your day count happens to contain a round 29 or 354, saving you a few lookups. Drop them entirely and you can still reach every answer in the book with the four round blocks and single days. Nothing depends on them.',
+        'And the labels do make sense once you see where they come from — they are **calendar** lengths, not astronomical ones. Twenty-nine days is a short Hebrew month; 354 days is a common Hebrew year, one of the six year lengths from chapter 11. So if you already know "this is one common year on from the date I did last time", you get there in one lookup instead of nine. He is pre-computing the spans his reader would actually be handed.',
+        'Which is worth checking against the sky, because one of the two labels is honest and one is not. 354 days really is a lunar year — twelve true lunar months come to 354.37 days, so his row is within nine hours of it. But it is nowhere near a **solar** year of 365¼ days; it is eleven days short, which is exactly the gap the leap month exists to close. And twelve of his 29-day blocks give 348 days, over six days shy of a lunar year. **The blocks do not compose into each other.** Treat each as what it is — a pre-computed number of days — and the trap disappears.',
+      ],
+    },
+
+    {
       id: 'apogee',
       heading: 'The far point, and why it has to be tracked',
       source: 'KH 12:2',

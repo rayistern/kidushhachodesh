@@ -286,6 +286,11 @@ describe('every figure in the prose is pinned to the engine', () => {
       "9° 51' 20\"": () => formatDms(dmsToDecimal(FLAT_DAILY) * 10),
       "7° 3' 32\"": () => formatDms(dmsToDecimal(CONSTANTS.SUN.START_POSITION)),
       "26° 45' 8\"": () => formatDms(dmsToDecimal(CONSTANTS.SUN.APOGEE_START)),
+      // The two blocks he nicknames "a month" and "a year". Pinned here
+      // as figures; that they are NOT a month and a year is checked in
+      // ch12.test.js against the real synodic month and solar year.
+      "28° 35' 1\"": () => formatDms(dmsToDecimal(CONSTANTS.SUN_MEAN_PERIOD_BLOCKS.p29)),
+      "348° 55' 15\"": () => formatDms(dmsToDecimal(CONSTANTS.SUN_MEAN_PERIOD_BLOCKS.p354)),
     },
     14: {
       "13° 10' 35\"": () => formatDms(dmsToDecimal(CONSTANTS.MOON.MEAN_MOTION_PER_DAY)),
