@@ -95,9 +95,9 @@ export default {
       source: 'KH 15:1',
       nodeId: 'double-elongation',
       body: [
-        'The first step is simple enough. Take the moon\'s mean, take the sun\'s mean, and subtract: that gap is how far the moon has pulled away from the sun since they were last together. It is called the **elongation**.',
-        'Then comes the odd instruction: **double it**. The result is the *double elongation* — מרחק כפול, "doubled distance".',
-        'Why double? Because the disturbance being corrected for repeats **twice** in each lap of the moon around the sky. It reaches its greatest at new moon and at full moon, and dies away at the two quarters in between. A quantity that repeats twice per lap has to be tracked by an angle that goes round twice as fast — which is exactly what doubling the elongation does.',
+        'The first step is simple enough. Take the moon\'s average place, take the sun\'s, and subtract. What is left is **the gap** — how far the moon has pulled away from the sun since the two were last together. The text calls it the *elongation*.',
+        'Then comes the odd instruction: **double it**. He calls the result the *double elongation* — מרחק כפול, which literally means "doubled distance". Plainly: **the gap, doubled**.',
+        'Why double? Because the wobble being corrected for happens **twice** in each lap of the moon around the sky. It is greatest at new moon and at full moon, and dies away at the two quarters in between. Something that repeats twice a lap has to be tracked by an angle that goes round twice as fast — which is exactly what doubling the gap gives you.',
         'This is a real effect, not a bookkeeping trick. Modern astronomy calls it the *evection*, and it is the largest single irregularity in the moon\'s motion after the one chapter 14 already handled. The Rambam has no theory of gravity to explain it with, but he has the pattern, and the pattern is what the table needs.',
       ],
       interactive: 'double-elongation',
@@ -109,8 +109,8 @@ export default {
       source: 'KH 15:2',
       nodeId: 'double-elongation',
       body: [
-        'The Rambam then says something that looks like a very bold claim: the double elongation can never be less than **5 degrees** nor more than **62**.',
-        'That would be false for the moon in general — the elongation runs the whole way from 0° to 360° across a month, so doubled it covers everything. The claim only holds because of *when* the question is being asked.',
+        'The Rambam then says something that looks like a very bold claim: the doubled gap can never be less than **5 degrees** nor more than **62**.',
+        'That would be false for the moon in general — across a month the gap runs the whole way from nothing to a full circle, so doubled it covers everything. The claim only holds because of *when* the question is being asked.',
         'Remember what all this is for. Nobody works out the moon\'s position on a random Tuesday. The court asks on one particular night — the evening the new moon might first be spotted, just after the moon and sun have parted company. On that night the moon is never more than about two and a half days clear of the sun, and never less than a few hours.',
         'Two and a half degrees of separation at the earliest, about thirty-one at the latest. Double those and you get five and sixty-two. His bound is not a fact about the moon; it is a fact about the question.',
         'Which is also why his table in the next halacha stops at 63. He never needs more, so he never tabulates more.',
@@ -125,7 +125,7 @@ export default {
       body: [
         'Now the doubled figure gets used. Look it up in a short table, and it tells you to add somewhere between **nothing and nine degrees** to the moon\'s position on the small circle.',
         'Five degrees or so: add nothing. Six to eleven: add one. Twelve to eighteen: add two. And so on up to sixty to sixty-three, which adds nine.',
-        'What you get after adding is called the **correct course** — the *maslul hanachon* (המסלול הנכון). From here on it plays exactly the part the sun\'s course played in chapter 13: it is the number you look the real correction up by.',
+        'What you get after adding is **the course after its nudge** — his *correct course*, the *maslul hanachon* (המסלול הנכון). From here on it plays exactly the part the sun\'s course played in chapter 13: it is the number you look the real correction up by.',
         'So the shape of the chapter is: build a course, correct it, then use it. The sun needed only the second half of that.',
       ],
       interactive: 'double-elongation',
@@ -138,7 +138,7 @@ export default {
       nodeId: 'moon-true',
       body: [
         'The correct course now goes into a table, and everything about how to read it you already know from chapter 13. Under half a circle, subtract; over, add. At exactly 180 or 360, no correction at all. Past 180, take it from 360 and read the mirror. Between rows, share out the difference.',
-        'The only thing that changes is the numbers — and they change a lot. The sun\'s correction peaked at **1° 59\'**. The moon\'s peaks at **5° 8\'**, and it peaks at 100 degrees rather than 90.',
+        'The only thing that changes is the numbers — and they change a lot. The fix from the table peaked at **1° 59\'** for the sun. For the moon it peaks at **5° 8\'**, and it peaks at 100 degrees rather than 90.',
         'That is two and a half times larger. The moon genuinely wanders much further from its average than the sun does, which is the single best reason the moon takes four chapters and the sun took two.',
         'The figure below plots both tables together so the difference in scale is visible rather than something you have to take on trust.',
       ],
@@ -152,7 +152,7 @@ export default {
       nodeId: 'moon-true',
       body: [
         'The Rambam works it right through, for the evening of the second of Iyar — twenty-nine days after the starting point. That is one month on from the epoch, which is not a coincidence: twenty-nine days is exactly the gap from one possible sighting to the next.',
-        'Every figure he states along the way is marked in the calculator below. The chain runs: the sun\'s mean, the moon\'s mean at sighting, the moon within its path, the elongation between moon and sun, doubled, the nudge it earns, the correct course, the correction from the table, and finally the subtraction.',
+        'Every figure he states along the way is marked in the calculator below. The chain runs: the sun\'s average place, the moon\'s average place at sighting, the moon within its path, the gap between moon and sun, that gap doubled, the nudge it earns, the course after its nudge, the fix from the table, and finally the subtraction.',
         'His answer: the moon stands at **18 degrees and 36 minutes into Shor**.',
         'One thing to watch as you step through it. He truncates the correct course to a whole number of degrees before reading the table, exactly as he did with the sun in chapter 13 — 108 degrees and 21 minutes becomes simply 108. That is the same licence, spent the same way.',
       ],

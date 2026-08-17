@@ -25,6 +25,30 @@ export default {
   subtitle:
     'The first real calculation. Two halachot, one method — and a small puzzle in the numbers that tells you a lot about how he works.',
 
+  terms: [
+    {
+      plain: 'average place',
+      formal: 'the mean position',
+      hebrew: 'אמצע',
+      gloss:
+        'Where the sun would be if it never changed speed. Easy to work out, and deliberately not yet the real answer. *Emtza* just means "middle".',
+    },
+    {
+      plain: 'the far point',
+      formal: 'the apogee',
+      hebrew: 'גובה השמש',
+      gloss:
+        "The one place on the sun's circle where it is furthest from us. Chapter 13 measures its correction from this point, so you have to know where it is before you can correct anything.",
+    },
+    {
+      plain: 'the chunks',
+      formal: 'the period-block tables',
+      hebrew: null,
+      gloss:
+        'How far the sun travels in ten days, a hundred, a thousand, ten thousand — worked out once by him, so that anyone can handle any date with nothing harder than adding up.',
+    },
+  ],
+
   recap: {
     settled: [
       'A way to write down any position in the sky — degrees, minutes, seconds.',

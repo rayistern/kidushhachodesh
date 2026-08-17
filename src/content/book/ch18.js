@@ -38,6 +38,30 @@ export default {
   subtitle:
     'Seven chapters of arithmetic, and then the Rambam turns round and says: this gives you probable, not certain. Here is how a court should handle that.',
 
+  terms: [
+    {
+      plain: 'how close to the line it fell',
+      formal: 'the margin past the sighting limits',
+      hebrew: null,
+      gloss:
+        'Not a term of his — a way of naming what KH 18:3 describes. A verdict of "visible" that only just cleared the thresholds means a thin crescent; one that cleared them by degrees means an obvious moon.',
+    },
+    {
+      plain: 'fixing a month without sanctifying it',
+      formal: 'kove\'in without kidush',
+      hebrew: 'קובעין ולא מקדשין',
+      gloss:
+        'The distinction the whole middle of this chapter turns on. When sighting fails, the court may **fix** a month by calculation — but only an actual sighting **sanctifies** it.',
+    },
+    {
+      plain: 'a full month / a short month',
+      formal: 'male / chaser',
+      hebrew: 'מלא / חסר',
+      gloss:
+        'Thirty days and twenty-nine days. When the moon goes unseen for months the court alternates them, never fewer than four full months in a year and never more than eight.',
+    },
+  ],
+
   recap: {
     settled: [
       'The complete method — a date in, and a yes or a no out.',

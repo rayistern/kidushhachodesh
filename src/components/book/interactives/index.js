@@ -46,6 +46,9 @@ const SightingLimits = React.lazy(() => import('./SightingLimits'));
 const HowMarginal = React.lazy(() => import('./HowMarginal'));
 const EastWest = React.lazy(() => import('./EastWest'));
 const DegreeScale = React.lazy(() => import('./DegreeScale'));
+const Declination = React.lazy(() => import('./Declination'));
+const MoonFromEquator = React.lazy(() => import('./MoonFromEquator'));
+const CrescentDirection = React.lazy(() => import('./CrescentDirection'));
 
 // ── Reused from /text, chapter 11 ──
 const ZodiacPosition = React.lazy(() => import('../../text/interactives/ZodiacPosition'));
@@ -128,6 +131,11 @@ export const FIGURES = {
 
   // chapter 11 — a sense of scale for every angle that follows
   'degree-scale': DegreeScale,
+
+  // chapter 19
+  declination: Declination,
+  'moon-from-equator': MoonFromEquator,
+  'crescent-direction': CrescentDirection,
 };
 
 /** The component for a slot id, or null if the id is unknown. */

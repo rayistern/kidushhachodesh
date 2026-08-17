@@ -29,6 +29,37 @@ export default {
   subtitle:
     'The correction that turns the average into the real thing — and the pattern every later correction copies.',
 
+  terms: [
+    {
+      plain: 'how far round from the far point',
+      formal: 'the course',
+      hebrew: 'מסלול',
+      gloss:
+        "One subtraction — the average place less the far point. Everything else in the chapter is looked up by this single number, including which direction the correction goes.",
+    },
+    {
+      plain: 'the fix',
+      formal: 'the angle of the course',
+      hebrew: 'מנת המסלול',
+      gloss:
+        'How much to shift the average place to get the real one. Never more than 1° 59′ for the sun — about two moon-widths.',
+    },
+    {
+      plain: 'real place',
+      formal: 'the true position',
+      hebrew: 'מקום השמש האמיתי',
+      gloss:
+        'Where you would actually see the sun, once the average has been corrected. The first finished answer in the book.',
+    },
+    {
+      plain: 'sharing out the difference',
+      formal: 'interpolating',
+      hebrew: null,
+      gloss:
+        'The table gives every tenth degree. For anything in between, see how much the answer moves across those ten degrees, divide by ten, and step forward from the lower row.',
+    },
+  ],
+
   recap: {
     settled: [
       "The sun's **average** position on any date, worked out by adding published chunks.",
@@ -87,7 +118,7 @@ export default {
       source: 'KH 13:4',
       nodeId: 'sun-true',
       body: [
-        'Now the answers themselves. The Rambam lists the correction for every ten degrees of course, from nothing up to a maximum and back down to nothing.',
+        'Now the answers themselves — **the fix** to apply. The Rambam lists it for every ten degrees of course, from nothing up to a maximum and back down to nothing.',
         'In the text it is nineteen lines of prose and hard to see any shape in. Plotted, it is obviously a smooth arch: zero at the start, rising to **1° 59\'** when the course is 90 degrees, falling back to zero at 180.',
         'Two degrees, at most. That is the entire size of the difference between the pretend sun and the real one — small, but far too big to ignore when the whole question turns on a few degrees of angle.',
       ],

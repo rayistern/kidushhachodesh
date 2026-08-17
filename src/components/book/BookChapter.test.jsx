@@ -60,14 +60,16 @@ describe('a written chapter', () => {
 });
 
 describe('chapters that are not written yet', () => {
-  // Derived, not hardcoded — this test named chapter 15 until chapter 15
-  // was written, at which point it failed for the happiest possible
-  // reason. It now finds whichever astronomical chapter is next.
+  // Derived, not hardcoded. This test named chapter 15, then searched
+  // 11-19, and both times failed for the happiest possible reason: the
+  // chapter it was using got written. The astronomical arc (11-19) is now
+  // complete, so it searches the whole book — chapters 1-10, the court
+  // and the fixed calendar, are still source-only.
   const written = new Set(writtenChapters());
-  const unwritten = [11, 12, 13, 14, 15, 16, 17, 18, 19].find((n) => !written.has(n));
+  const unwritten = Array.from({ length: 19 }, (_, i) => i + 1).find((n) => !written.has(n));
 
   it('there is still an unwritten chapter to test with', () => {
-    expect(unwritten, 'the whole book is written — retire this describe block').toBeDefined();
+    expect(unwritten, 'every chapter 1-19 is written — retire this block').toBeDefined();
   });
 
   it('sends the reader to the source instead of failing', async () => {
@@ -117,8 +119,11 @@ describe('the chain map', () => {
   });
 
   it('routes written chapters to the book and unwritten ones to the source', () => {
-    // Derived from the registry rather than hardcoded, so writing a new
-    // chapter does not break this test — it just widens what it checks.
+    // Derived from the registry, so writing a chapter widens what this
+    // checks rather than breaking it. Every chapter the chain covers
+    // (11-19) is now written, so in practice every node points at /book —
+    // the /text branch is kept because the rule, not the current state,
+    // is what is being asserted.
     const { container } = renderMap(14);
     const hrefs = new Set(
       Array.from(container.querySelectorAll('a')).map((a) => a.getAttribute('href')),
@@ -131,9 +136,10 @@ describe('the chain map', () => {
         : `/text/${node.chapter}`;
       expect(hrefs, `chapter ${node.chapter}`).toContain(expected);
     }
-    // And the two kinds must both be represented, or the test is vacuous.
-    expect(written.size).toBeGreaterThan(0);
-    expect(CHAIN_NODES.some((n) => !written.has(n.chapter))).toBe(true);
+    // Not vacuous: every node must resolve to a link of some kind.
+    expect(hrefs.size).toBeGreaterThanOrEqual(
+      new Set(CHAIN_NODES.map((n) => n.chapter)).size,
+    );
   });
 });
 

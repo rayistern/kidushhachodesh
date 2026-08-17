@@ -13,6 +13,10 @@ import { CONSTANTS } from '../../engine/constants';
 import { getFullCalculation } from '../../engine/pipeline';
 import { dateFromEpochDays } from '../../engine/epochDays';
 import { zodiacPosition } from '../../engine/zodiac';
+import {
+  calculateOrechSheni,
+  calculateRochavSheni,
+} from '../../engine/visibilityCalculations';
 
 const prose = bookChapter(17)
   .sections.flatMap((s) => s.body)
@@ -87,6 +91,45 @@ describe("KH 17:6 — his own name for the change in appearance", () => {
 
   it("says what it literally means", () => {
     expect(prose).toMatch(/change in appearance/i);
+  });
+});
+
+describe('the change in appearance always goes the same way', () => {
+  // A reader asked whether it moves the moon up or down. The answer is
+  // always down — you stand on the surface, displaced from the centre
+  // towards your own zenith, so everything appears pushed away from
+  // overhead. Both corrections are that one fact split in two, and the
+  // chapter now says so. Checked across the whole circle, because "always"
+  // is the load-bearing word.
+  const SIGNS = [15, 48.6, 100, 150, 200, 250, 300, 350];
+
+  it('never enlarges the gap, in any sign', () => {
+    for (const lon of SIGNS) {
+      expect(calculateOrechSheni(12, lon).result, `moon at ${lon}°`).toBeLessThan(12);
+    }
+  });
+
+  it('always pushes the height southward, whichever side it started on', () => {
+    for (const lon of SIGNS) {
+      for (const lat of [+4, -4]) {
+        expect(calculateRochavSheni(lat, lon).result, `${lon}° / ${lat}°`).toBeLessThan(lat);
+      }
+    }
+  });
+
+  it('so it always works against seeing the moon', () => {
+    // Smaller gap is harder (the thresholds are minimums), and south is
+    // the unhelpful verge — established in chapter 16's tests. Both
+    // components of one shift, both unfavourable.
+    expect(calculateOrechSheni(12, 48.6).result).toBeLessThan(12);
+    expect(calculateRochavSheni(+4, 48.6).result).toBeLessThan(4);
+    expect(prose).toMatch(/always works \*\*against\*\* you|always works against you/);
+  });
+
+  it('says which way, and why', () => {
+    expect(prose).toMatch(/same way: down/i);
+    expect(prose).toMatch(/pushed away from overhead|away from overhead/i);
+    expect(prose).toMatch(/gap always gets \*smaller\*|gap always gets smaller/);
   });
 });
 
