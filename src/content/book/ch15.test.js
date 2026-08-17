@@ -175,3 +175,63 @@ describe('KH 15:2 — why the doubled gap is bounded', () => {
     expect(prose).toMatch(/two and a half days/);
   });
 });
+
+describe('why the gap gets doubled (KH 15:1)', () => {
+  const body = bookChapter(15)
+    .sections.find((s) => s.id === 'double-elongation')
+    .body.join('\n');
+
+  const nudgeAt = (twoD) => {
+    const n = ((twoD % 360) + 360) % 360;
+    const row = CONSTANTS.DOUBLE_ELONGATION_ADJUSTMENTS.find(
+      (r) => n >= r.minElongation && n <= r.maxElongation,
+    );
+    return row ? row.adjustment : null;
+  };
+
+  it('gives the reason as a collapse of opposite configurations', () => {
+    // An earlier draft said only that the effect "repeats twice a lap" and
+    // so needs "an angle that goes round twice as fast" — true but
+    // useless, since it never said what doubling actually buys you.
+    expect(body).toMatch(/new moon and full moon alike/);
+    expect(body).toMatch(/Doubling collapses each pair onto one/);
+    expect(body).not.toMatch(/twice as fast/);
+  });
+
+  it('is right that doubling lands the two lineups on one row', () => {
+    expect(nudgeAt(2 * 0)).toBe(nudgeAt(2 * 180));
+    expect(nudgeAt(2 * 90)).toBe(nudgeAt(2 * 270));
+    // And that the pairs really are distinct before doubling, which is
+    // the whole reason the step exists.
+    expect(0).not.toBe(180);
+    expect(90).not.toBe(270);
+  });
+
+  it('no longer claims the nudge peaks at new moon — it is zero there', () => {
+    // The old prose said the effect was "greatest at new moon and at full
+    // moon, and dies away at the two quarters", which is backwards
+    // against his own table.
+    expect(nudgeAt(0)).toBe(0);
+    expect(body).not.toMatch(/greatest at new moon/);
+    expect(body).toMatch(/at the moment of lineup it is zero/);
+  });
+
+  it('quotes the growth correctly: nothing, up to nine by about 30° of gap', () => {
+    expect(nudgeAt(2 * 30)).toBe(9);
+    const tabulated = CONSTANTS.DOUBLE_ELONGATION_ADJUSTMENTS.filter(
+      (r) => r.maxElongation <= 63,
+    );
+    expect(Math.max(...tabulated.map((r) => r.adjustment))).toBe(9);
+    expect(body).toMatch(/maximum of nine/);
+  });
+
+  it('says he stops tabulating at 63°, and he does', () => {
+    expect(body).toMatch(/up to 63°/);
+    // Beyond that the file extrapolates and says so; the prose must not
+    // imply he covers the whole circle.
+    const explicit = CONSTANTS.DOUBLE_ELONGATION_ADJUSTMENTS.filter(
+      (r) => !r.source || !/extrapolat/i.test(r.source ?? ''),
+    );
+    expect(Math.max(...explicit.map((r) => r.maxElongation))).toBeGreaterThanOrEqual(63);
+  });
+});
