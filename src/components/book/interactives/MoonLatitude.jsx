@@ -162,9 +162,13 @@ export default function MoonLatitude() {
         </div>
         <div className="text-sm">
           {calc.latitude >= 0 ? (
-            <span className="text-[var(--color-accent)]">above the line — "northerly"</span>
+            <span className="text-[var(--color-accent)]">
+              north of the sun's road — "northerly"
+            </span>
           ) : (
-            <span className="text-[var(--color-gold)]">below the line — "southerly"</span>
+            <span className="text-[var(--color-gold)]">
+              south of the sun's road — "southerly"
+            </span>
           )}
         </div>
         {isExample && (
@@ -182,8 +186,8 @@ export default function MoonLatitude() {
       </p>
       <p className="mt-2 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
         {calc.latitude < 0
-          ? 'Southerly is the unhelpful direction: it sets the moon lower in the sky at sunset, deeper into the light the sun leaves behind. Chapter 17 is where that gets weighed.'
-          : 'Northerly is the helpful direction: it lifts the moon higher at sunset, clear of the worst of the glare. Chapter 17 is where that gets weighed.'}
+          ? 'South is the unhelpful verge. Working the same evening through chapter 17 with the moon south rather than north shrinks the arc of sighting by several degrees, which is often the whole difference between seen and unseen.'
+          : 'North is the helpful verge. Working the same evening through chapter 17 with the moon north rather than south grows the arc of sighting by several degrees — often the whole difference between seen and unseen.'}
       </p>
     </InteractiveCard>
   );

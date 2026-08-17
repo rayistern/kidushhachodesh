@@ -59,11 +59,11 @@ export default {
         'The one number this chapter looks everything up by: how far round the moon has travelled since the up-crossing.',
     },
     {
-      plain: 'above the line / below the line',
+      plain: "which side of the sun's road",
       formal: 'northerly / southerly',
       hebrew: 'צפוני / דרומי',
       gloss:
-        "Which side of the sun's track the moon is on. Above is the helpful side — it lifts the moon higher at sunset.",
+        "Which side of the sun's *own path* the moon has strayed to — **not** which side of the horizon. North is the side that helps: it makes the arc of sighting come out larger.",
     },
   ],
 
@@ -92,6 +92,23 @@ export default {
         'Five degrees does not sound like much. It is about ten times the width of the moon itself, and on the night in question it is the difference between a crescent sitting clear of the horizon glow and one lost in it. That is why the chapter is here.',
       ],
       interactive: 'moon-tilt',
+    },
+
+    {
+      id: 'above-what',
+      heading: 'Above and below *what*, exactly?',
+      source: 'KH 16:1',
+      nodeId: 'latitude',
+      body: [
+        'This is the question that trips people up, and it is worth stopping on, because "above" and "below" are misleading words if you take them the obvious way.',
+        'Go outside at sunset with a new moon. The sun goes down; the moon hangs somewhere off to one side of it. **Off to the side** — not obviously above or below. So what is all this talk of five degrees north and south?',
+        'The answer is that the moon\'s offset from the sun has **two parts**, and you have been computing them in different chapters.',
+        'Think of the sun as travelling along a road across the sky. Most of the moon\'s distance from the sun is **along that road** — the moon is further down it, in the direction the sun has come from. That is the *gap*, and it can be twenty or thirty degrees. It is the whole of what you notice when you look up, and it is what chapter 17 will call the first longitude.',
+        'The rest — never more than five degrees — is the moon sitting a little **off the edge of the road**, to one side of it. That is what this chapter measures. North means one verge, south the other.',
+        'So your instinct is right about the big part: the moon really is mostly just *further along* from the sun. This chapter is about the small sideways part on top of that.',
+        'And here is why "above" is a slippery word for it. **The sun\'s road is not level.** It cuts across the sky at an angle, and the angle changes through the year — steep on some evenings, shallow on others. So being off the north verge of the road translates into a mixture of higher and sideways, in a proportion that depends on the season.',
+        'That is precisely why chapter 17 will need twelve separate corrections, one for each sign: the sign tells you what angle the road is making with the horizon that night, and therefore how much of the moon\'s five degrees turns into useful height.',
+      ],
     },
 
     {

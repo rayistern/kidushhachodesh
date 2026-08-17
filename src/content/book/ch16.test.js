@@ -11,13 +11,25 @@ import { describe, it, expect } from 'vitest';
 import { bookChapter } from './index';
 import { CONSTANTS, GALGAL_NOTEH_INCLINATION_DEG } from '../../engine/constants';
 import { calculateNodePosition, calculateMoonLatitude } from '../../engine/moonCalculations';
+import {
+  calculateRochavSheni,
+  calculateOrechShlishi,
+  calculateOrechRevii,
+  calculateMnatGovahHaMedinah,
+  calculateKeshetHaReiyah,
+} from '../../engine/visibilityCalculations';
 import { meanLongitudeByPeriodBlocks } from '../../engine/periodBlocks';
 import { dmsToDecimal, normalizeDegrees } from '../../engine/dmsUtils';
 import { zodiacPosition } from '../../engine/zodiac';
 
-const prose = bookChapter(16)
-  .sections.flatMap((s) => s.body)
-  .join('\n');
+const chapter = bookChapter(16);
+const prose = chapter.sections.flatMap((s) => s.body).join('\n');
+/** Everything the reader sees, glossary included — the glosses carry
+ *  claims too, and a test that only reads the sections misses them. */
+const allText = [
+  prose,
+  ...(chapter.terms ?? []).flatMap((t) => [t.plain, t.formal, t.gloss]),
+].join('\n');
 
 const dms = (d, m = 0, s = 0) => d + m / 60 + s / 3600;
 const arcsec = (a, b) => Math.abs(a - b) * 3600;
@@ -149,6 +161,62 @@ describe('KH 16:13-18 — the fold is four-way, not two-way', () => {
 
   it('warns the reader in as many words', () => {
     expect(prose).toMatch(/folding rule is not the one you learned|folds in \*four\*/i);
+  });
+});
+
+describe('which verge actually helps', () => {
+  // The chapter tells the reader north is the helpful side. That is a
+  // claim about the KH 17 chain, not about this chapter, and it is not
+  // obvious — KH 17:11 flips the sign of one step between the two halves
+  // of the sky, which makes it look as though the answer should flip
+  // too. It does not: the KH 17:14 step dominates and always favours
+  // north. Checked in both halves rather than assumed.
+  it('gives a larger arc of sighting for north, in both halves of the sky', () => {
+    const LAT = 3.888;
+    const ORECH_SHENI = 10.4547; // from the N=29 example
+
+    const arcFor = (moonLon, rochavRishon) => {
+      const rochavSheni = calculateRochavSheni(rochavRishon, moonLon).result;
+      const third = calculateOrechShlishi(ORECH_SHENI, rochavSheni, moonLon).result;
+      const fourth = calculateOrechRevii(third, moonLon).result;
+      const portion = calculateMnatGovahHaMedinah(rochavRishon).result;
+      return calculateKeshetHaReiyah(fourth, portion, rochavRishon).result;
+    };
+
+    for (const moonLon of [48.6, 130]) {
+      const north = arcFor(moonLon, +LAT);
+      const south = arcFor(moonLon, -LAT);
+      expect(north, `moon at ${moonLon}°`).toBeGreaterThan(south);
+      // And by enough to matter — degrees, not arcminutes.
+      expect(north - south, `moon at ${moonLon}°`).toBeGreaterThan(2);
+    }
+  });
+
+  it('says so, and does not claim it simply means higher in the sky', () => {
+    expect(allText).toMatch(/North is the side that helps|north is the helpful/i);
+    // The earlier wording said north "lifts the moon higher at sunset",
+    // which invites reading the sun's road as the horizon. It should
+    // talk about the arc, not about altitude.
+    expect(allText).not.toMatch(/lifts the moon higher/);
+  });
+});
+
+describe("the chapter answers 'above what?'", () => {
+  it('says plainly that the line is the sun\'s path, not the horizon', () => {
+    expect(allText).toMatch(/not the horizon|not\*\* which side of the horizon/i);
+  });
+
+  it("tells the reader the big offset is along the road, not across it", () => {
+    // The reader's own observation — that the moon just looks off to one
+    // side — is correct about the dominant term. The chapter should say
+    // so rather than leave them thinking they have misunderstood.
+    expect(prose).toMatch(/along that road/);
+    expect(prose).toMatch(/your instinct is right/i);
+  });
+
+  it("explains why the road's tilt is what makes 'above' slippery", () => {
+    expect(prose).toMatch(/is not level|cuts across the sky at an angle/);
+    expect(prose).toMatch(/twelve separate corrections/);
   });
 });
 

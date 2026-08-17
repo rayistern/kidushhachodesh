@@ -83,9 +83,13 @@ export default function MoonTilt() {
               on the crossing point — the moon is exactly on the sun's track
             </span>
           ) : latitude > 0 ? (
-            <span className="text-[var(--color-accent)]">above the line — "northerly"</span>
+            <span className="text-[var(--color-accent)]">
+              north of the sun's road — "northerly"
+            </span>
           ) : (
-            <span className="text-[var(--color-gold)]">below the line — "southerly"</span>
+            <span className="text-[var(--color-gold)]">
+              south of the sun's road — "southerly"
+            </span>
           )}
         </div>
       </div>
@@ -125,7 +129,7 @@ function Wave({ course, latitude }) {
         {/* the sun's track */}
         <line x1="0" y1={midY} x2={w} y2={midY} stroke="var(--color-gold)" strokeWidth="2" />
         <text x="4" y={midY - 5} fontSize="9" fill="var(--color-gold)">
-          the sun's track
+          the sun's road (not the horizon)
         </text>
 
         {/* the moon's tilted circle, edge-on */}
@@ -152,10 +156,10 @@ function Wave({ course, latitude }) {
 
         {/* extremes */}
         <text x={x(90)} y={y(MAX_LATITUDE) - 6} fontSize="8" textAnchor="middle" fill="var(--color-text-secondary)">
-          5° above
+          5° north
         </text>
         <text x={x(270)} y={y(-MAX_LATITUDE) + 12} fontSize="8" textAnchor="middle" fill="var(--color-text-secondary)">
-          5° below
+          5° south
         </text>
 
         {/* the moon, and a dropped line to the track */}
@@ -163,7 +167,8 @@ function Wave({ course, latitude }) {
         <circle cx={x(course)} cy={y(latitude)} r="6" fill="var(--color-silver)" stroke="var(--color-bg)" strokeWidth="1.5" />
       </svg>
       <figcaption className="mt-1 text-center text-[11px] text-[var(--color-text-secondary)]">
-        Seen edge-on, so above and below the line really are north and south of the sun's track.
+        The straight line is <strong>the sun's own path</strong>, not the horizon. Seen edge-on,
+        so the wave is the moon straying to one verge of it and then the other.
       </figcaption>
     </figure>
   );
