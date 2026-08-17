@@ -37,6 +37,7 @@ import { trueFromMean } from '../../../lib/maslulTable';
 import { formatDms, normalizeDegrees } from '../../../engine/dmsUtils';
 import { zodiacPosition, ordinalSuffix } from '../../../engine/zodiac';
 import { daysFromEpoch } from '../../../engine/epochDays';
+import { nextSightingNight } from '../../../lib/sightingNight';
 
 const EXAMPLE_DAYS = 29;
 
@@ -51,11 +52,6 @@ const STATED = {
   correction: `5° 1'`,
   result: `18° 36' into Shor`,
 };
-
-function todayDays() {
-  const now = new Date();
-  return daysFromEpoch(new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12));
-}
 
 export default function MoonTruePosition() {
   const [days, setDays] = useState(EXAMPLE_DAYS);
@@ -126,7 +122,12 @@ export default function MoonTruePosition() {
         <PresetButton onClick={() => setDays(EXAMPLE_DAYS)} title="2 Iyar — the example of KH 15:8">
           His example (29)
         </PresetButton>
-        <PresetButton onClick={() => setDays(todayDays())}>Today</PresetButton>
+        <PresetButton
+          onClick={() => setDays(nextSightingNight().days)}
+          title="The evening after the 29th — the night the court would look"
+        >
+          Next Rosh Chodesh ({nextSightingNight().hebrew.replace(/ \d+$/, '')})
+        </PresetButton>
       </div>
 
       <ol className="mt-4 space-y-2">

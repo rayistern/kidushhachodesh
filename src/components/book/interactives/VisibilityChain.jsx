@@ -24,6 +24,7 @@ import InteractiveCard, { PresetButton } from '../../text/interactives/Interacti
 import { getFullCalculation } from '../../../engine/pipeline';
 import { formatDms } from '../../../engine/dmsUtils';
 import { dateFromEpochDays, daysFromEpoch } from '../../../engine/epochDays';
+import { nextSightingNight } from '../../../lib/sightingNight';
 import { zodiacPosition } from '../../../engine/zodiac';
 
 const EXAMPLE_DAYS = 29;
@@ -72,11 +73,6 @@ const CHAIN = [
   { id: 'keshetHaReiyah', label: 'THE FINAL FIGURE — the arc of sighting', ref: 'KH 17:14', key: true },
 ];
 
-function todayDays() {
-  const now = new Date();
-  return daysFromEpoch(new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12));
-}
-
 export default function VisibilityChain() {
   const [days, setDays] = useState(EXAMPLE_DAYS);
 
@@ -112,7 +108,12 @@ export default function VisibilityChain() {
         <PresetButton onClick={() => setDays(EXAMPLE_DAYS)} title="2 Iyar — the example of KH 17:13">
           His example (29)
         </PresetButton>
-        <PresetButton onClick={() => setDays(todayDays())}>Today</PresetButton>
+        <PresetButton
+          onClick={() => setDays(nextSightingNight().days)}
+          title="The evening after the 29th — the night the court would look"
+        >
+          Next Rosh Chodesh ({nextSightingNight().hebrew.replace(/ \d+$/, '')})
+        </PresetButton>
         <span className="pb-1 text-[11px] text-[var(--color-text-secondary)]">
           = {dateFromEpochDays(days).toISOString().slice(0, 10)}
         </span>
