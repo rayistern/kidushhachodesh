@@ -102,7 +102,15 @@ export default function HowMarginal() {
         </label>
         <label className="block">
           <span className="text-xs font-bold text-[var(--color-text-secondary)]">
-            Gap to the sun — {formatDms(orech)}
+            The ORIGINAL gap to the sun — {formatDms(orech)}
+          </span>
+          {/* First longitude, not fourth. The verdict table reaches back
+              past all four adjustments to the raw gap of KH 17:1 — the
+              number the Rambam said to keep "at hand", and the reason he
+              said it. A reader reasonably guessed the fourth. */}
+          <span className="block text-[10px] text-[var(--color-text-secondary)]">
+            the <em>first</em> longitude — step 4 of the chain, before any of the four
+            adjustments. This is why he said to keep it at hand.
           </span>
           <input
             type="range"
