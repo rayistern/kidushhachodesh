@@ -184,16 +184,30 @@ export default function HowMarginal() {
   );
 }
 
-/** A crescent that thickens with the margin — the point of KH 18:3. */
+/**
+ * A crescent that thickens with the margin — the point of KH 18:3.
+ *
+ * The construction: the moon's disc, with a same-sized dark circle
+ * displaced across it. The displacement IS the crescent's width, so a
+ * thin night gets a sliver and a comfortable one a fat crescent. A
+ * first version displaced the occluder by 2r·(1−t) instead of 2r·t —
+ * geometry exactly inverted, so the THINNEST night drew a nearly full
+ * disc with a nick out of one edge, which a reader rightly called
+ * weird.
+ */
+export function crescentGeometry(margin, r = 34) {
+  // Purely illustrative of "the moon will appear large", not a computed
+  // illuminated fraction.
+  const thickness = Math.max(0.06, Math.min(0.5, 0.06 + Math.max(0, margin) * 0.09));
+  return { thickness, offset: 2 * r * thickness };
+}
+
 function Crescent({ margin, visible }) {
   const size = 108;
   const cx = size / 2;
   const cy = size / 2;
   const r = 34;
-  // Wider margin, fatter crescent. Purely illustrative of "the moon
-  // will appear large", not a computed illuminated fraction.
-  const thickness = Math.max(0.06, Math.min(0.5, 0.06 + Math.max(0, margin) * 0.09));
-  const offset = r * 2 * (1 - thickness);
+  const { offset } = crescentGeometry(margin, r);
 
   return (
     <figure className="mt-3 flex items-center justify-center gap-4">

@@ -14,6 +14,7 @@ import { render, screen, cleanup } from '@testing-library/react';
 
 afterEach(cleanup);
 import VisibilityChain from './VisibilityChain';
+import { crescentGeometry } from './HowMarginal';
 import { getFullCalculation } from '../../../engine/pipeline';
 import { dateFromEpochDays } from '../../../engine/epochDays';
 
@@ -78,5 +79,26 @@ describe('steps 7 and 8 state their live operation', () => {
     // the 2nd sign stretches by a fifth.
     expect(await screen.findByText(/= step 5 \+ 1° 0′ .*the slice of step 6/)).toBeTruthy();
     expect(screen.getByText(/= step 7 \+ a fifth of itself/)).toBeTruthy();
+  });
+});
+
+describe('the marginal-night crescent points the right way', () => {
+  it('is a sliver when thin and fat when comfortable — not the reverse', () => {
+    // The occluder's displacement is the crescent's width. A first
+    // version used 2r·(1−t): the thinnest night drew a nearly full disc.
+    const thin = crescentGeometry(0);
+    const fat = crescentGeometry(5);
+    expect(thin.offset).toBeLessThan(fat.offset);
+    // A margin of nothing must leave only a sliver — well under a
+    // quarter of the disc's width.
+    expect(thin.offset).toBeLessThan(34 * 0.5);
+    expect(thin.offset / (2 * 34)).toBeLessThan(0.1);
+    // And the growth is monotonic.
+    let last = -1;
+    for (let m = 0; m <= 6; m += 0.5) {
+      const { offset } = crescentGeometry(m);
+      expect(offset).toBeGreaterThanOrEqual(last);
+      last = offset;
+    }
   });
 });
