@@ -40,17 +40,36 @@ const STATED = {
   keshetHaReiyah: `11° 11'`,
 };
 
+// Labelled by what each step DOES to the running number, with the text's
+// own ordinal in brackets — because "third longitude" tells a reader
+// nothing and "the gap, after two adjustments" tells them everything.
 const CHAIN = [
   { id: 'sunTrueLongitude', label: 'Where the sun really is', ref: 'KH 13' },
   { id: 'moonTrueLongitude', label: 'Where the moon really is', ref: 'KH 15' },
-  { id: 'moonLatitude', label: "Its height off the sun's track — the first latitude", ref: 'KH 16' },
-  { id: 'elongation', label: 'The gap between them — the first longitude', ref: 'KH 17:1', key: true },
-  { id: 'orechSheni', label: 'Shifted for standing on the surface — second longitude', ref: 'KH 17:5' },
-  { id: 'rochavSheni', label: 'The height, likewise shifted — second latitude', ref: 'KH 17:7-8' },
-  { id: 'orechShlishi', label: 'After the circuit of the moon — third longitude', ref: 'KH 17:11' },
-  { id: 'orechRevii', label: 'Stretched for how steeply this part sets — fourth longitude', ref: 'KH 17:12' },
-  { id: 'mnatGovahHaMedinah', label: 'The portion taken from the first latitude', ref: 'KH 17:14' },
-  { id: 'keshetHaReiyah', label: 'The arc of sighting', ref: 'KH 17:14', key: true },
+  { id: 'moonLatitude', label: "The height off the sun's road (first latitude)", ref: 'KH 16' },
+  { id: 'elongation', label: 'THE GAP between them (first longitude)', ref: 'KH 17:1', key: true },
+  {
+    id: 'orechSheni',
+    label: 'the gap, shifted for standing on the ground (second longitude)',
+    ref: 'KH 17:5',
+  },
+  {
+    id: 'rochavSheni',
+    label: 'the height, shifted the same way (second latitude)',
+    ref: 'KH 17:7-8',
+  },
+  {
+    id: 'orechShlishi',
+    label: 'the gap, moved by the slice of the height (third longitude)',
+    ref: 'KH 17:11',
+  },
+  {
+    id: 'orechRevii',
+    label: 'the gap, stretched for how steeply this part sets (fourth longitude)',
+    ref: 'KH 17:12',
+  },
+  { id: 'mnatGovahHaMedinah', label: 'a fraction of the ORIGINAL height', ref: 'KH 17:14' },
+  { id: 'keshetHaReiyah', label: 'THE FINAL FIGURE — the arc of sighting', ref: 'KH 17:14', key: true },
 ];
 
 function todayDays() {
@@ -183,9 +202,14 @@ export default function VisibilityChain() {
       )}
 
       <p className="mt-3 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
-        Every step here comes from this project's engine running its ordinary pipeline — the same
-        code the dashboard uses. On his example it matches all nine of the figures he states, to
-        within a minute of arc.
+        Notice that steps 4, 5, 7 and 8 are all <strong>the same number</strong>. The gap is
+        worked out once and then adjusted three times, and each adjustment earns it a new ordinal
+        in the text. There are not four longitudes; there is one gap, corrected.
+      </p>
+      <p className="mt-2 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
+        Every step comes from this project's engine running its ordinary pipeline — the same code
+        the dashboard uses. On his example it matches all nine of the figures he states, to within
+        a minute of arc.
       </p>
     </InteractiveCard>
   );

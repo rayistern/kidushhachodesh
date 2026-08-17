@@ -36,6 +36,51 @@ export default {
   subtitle:
     'Everything so far has been preparing three numbers. This chapter turns them into one number, and that number into a yes or a no.',
 
+  terms: [
+    {
+      plain: 'the gap',
+      formal: 'the first longitude',
+      hebrew: 'אורך ראשון',
+      gloss:
+        'How far the moon has pulled away from the sun, measured along the sun\'s own path. The number this whole chapter works on, and the one it keeps coming back to.',
+    },
+    {
+      plain: 'the height',
+      formal: 'the first latitude',
+      hebrew: 'רוחב ראשון',
+      gloss:
+        "How far off the sun's path the moon sits, north or south — chapter 16's answer, brought in unchanged.",
+    },
+    {
+      plain: 'the standing-on-the-ground shift',
+      formal: 'parallax, the sighting adjustment',
+      hebrew: null,
+      gloss:
+        'Every position so far has been the moon as seen from the **centre** of the earth. Nobody stands there. Correcting for standing on the surface instead moves the moon by up to a degree.',
+    },
+    {
+      plain: 'the slice',
+      formal: 'the circuit of the moon',
+      hebrew: 'מעגל הירח',
+      gloss:
+        'A fraction of the height — two fifths, a third, a quarter — set aside to be applied to the gap. Which fraction depends on where the moon is.',
+    },
+    {
+      plain: 'the final figure',
+      formal: 'the arc of sighting',
+      hebrew: 'קשת הראייה',
+      gloss:
+        'What the gap has become after all four adjustments. The verdict depends on this and nothing else.',
+    },
+    {
+      plain: 'the pass marks',
+      formal: 'the sighting limits',
+      hebrew: 'קיצי הראייה',
+      gloss:
+        'The short table for the nights that fall between the two flat cutoffs, pairing a range of final figures with the smallest gap that will do.',
+    },
+  ],
+
   recap: {
     settled: [
       "The sun's true position on any evening.",
@@ -56,8 +101,8 @@ export default {
       nodeId: 'arc',
       body: [
         'The chapter opens by naming the two things it will work with, and both are already in your hands.',
-        'Subtract the sun\'s position from the moon\'s. That gap is the **first longitude** — how far the moon has pulled clear of the sun. It is the single most important number in the chapter, and you have been computing it since chapter 15 under a different name.',
-        'The moon\'s height off the sun\'s track, from chapter 16, becomes the **first latitude**. Keep the direction with it; north and south behave differently from here on.',
+        'Subtract the sun\'s position from the moon\'s. That is **the gap** — how far the moon has pulled clear of the sun along the sun\'s own road. The text calls it the *first longitude*. It is the single most important number in the chapter, and you have been computing it since chapter 15 under a different name.',
+        'The moon\'s height off the sun\'s road, from chapter 16, comes in as **the height** — the text\'s *first latitude*. Keep the direction with it; north and south behave differently from here on.',
         'The Rambam says to have both "at hand". He means it — they get used repeatedly, including right at the end, long after several rounds of adjustment have produced other numbers that look similar and are not the same.',
       ],
     },
@@ -69,14 +114,29 @@ export default {
       nodeId: 'verdict',
       body: [
         'Before any of the hard work, the Rambam gives you a way out — and it settles the great majority of nights.',
-        'If the first longitude is **nine degrees or less**, the moon cannot be seen. Anywhere in the land, no exceptions, stop calculating.',
-        'If it is **more than fifteen degrees**, it will certainly be seen. Stop calculating.',
+        'If the gap is **nine degrees or less** — about one fist at arm\'s length — the moon cannot be seen. Anywhere in the land, no exceptions, stop calculating.',
+        'If it is **more than fifteen degrees** — a fist and a half — it will certainly be seen. Stop calculating.',
         'Only between those two does anything else in this chapter apply. That band is narrow, and the moon crosses it quickly — so on most evenings the whole apparatus below is simply not needed.',
         'There is a catch, and it is the sort that would quietly ruin an answer. Those thresholds hold only when the moon sits in one half of the sky — from the start of G\'di round to the end of Teomim. In the other half the numbers change: **ten degrees** for certain invisibility, **twenty-four** for certain visibility. That is a very different window, and which one applies depends on nothing but where the moon is.',
         'How much difference does that make? The undecided band is six degrees wide in one half of the sky and fourteen in the other — **nearly two and a half times wider**. So in one half you will rarely need the long calculation, and in the other you often will.',
         'Why the halves differ is the same reason chapter 11 gave for naming the signs at all: the belt meets the horizon at different angles in different parts of the year, and a moon setting at a shallow angle needs far more separation from the sun to clear the glare.',
       ],
       interactive: 'quick-verdict',
+    },
+
+    {
+      id: 'one-number',
+      heading: 'There are not four longitudes',
+      source: 'KH 17:1',
+      nodeId: 'arc',
+      body: [
+        'Before the adjustments start, one thing about the naming, because it is the single most confusing feature of this chapter and it is entirely an accident of vocabulary.',
+        'You are about to meet a **first longitude**, a **second longitude**, a **third longitude** and a **fourth longitude**. That sounds like four quantities to keep track of. It is not.',
+        '**It is one number, adjusted four times.** The gap between the sun and the moon is worked out once, and then nudged — for standing on the ground, for the moon\'s height, for how steeply the sky sets — and each nudge earns the result a new ordinal. On the evening the Rambam works through, the single number goes:',
+        '11° 27′ → 10° 27′ → 11° 28′ → 13° 46′ → and finally 11° 10′, which he calls the arc of sighting.',
+        'That last one gets a different name rather than a fifth ordinal, but it is the same running quantity, and it is what the verdict is read from.',
+        'So when the text says "the third longitude", read it as **"the gap, after two adjustments"**. Nothing is being introduced; something is being corrected. Hold on to the one number and the chapter becomes a list of four things done to it.',
+      ],
     },
 
     {
@@ -87,7 +147,7 @@ export default {
       body: [
         'For the nights that do not resolve early, six adjustments follow, and taken one at a time they look arbitrary. They are not. Almost all of them come from a single fact, which the Rambam states plainly at 17:6.',
         'Every position computed so far has been the moon\'s place **as seen from the centre of the earth**. That is where the geometry of circles naturally puts you. But nobody observes from there. An observer stands on the surface, some four thousand miles off-centre, and from there the moon — which is close, as celestial things go — appears shifted against the background stars.',
-        'The shift is called **parallax**, and it is not small. It moves the moon by up to about a degree, which is twice the moon\'s own width and easily enough to change the answer on a marginal night.',
+        'The shift is called **parallax** — or in plainer words, the **standing-on-the-ground shift**. It is not small: it moves the moon by up to about a degree, which is twice the moon\'s own width and easily enough to change the answer on a marginal night.',
         'So the true position has to be nudged into an *apparent* position. That takes two corrections, one for the sideways shift and one for the up-and-down, and they are the next two steps.',
       ],
     },
@@ -99,8 +159,8 @@ export default {
       nodeId: 'arc',
       body: [
         'Here is the promise chapter 11 made coming due. Back then, the question was why the Rambam bothers naming the twelve signs when a position is already a number. This is the answer.',
-        'The first correction takes minutes off the first longitude, and **how many depends on the sign the moon is in**: 59 minutes in Taleh, a full degree in Shor, 58 in Teomim, down to 34 in Moznayim and back up again. Twelve signs, twelve numbers. That gives the **second longitude**.',
-        'The second does the same to the latitude, with its own set of twelve — 9 minutes in Taleh, 10 in Shor, up to 46 in Moznayim. And here the direction matters: if the moon is north of the sun\'s track you take the correction off, if south you add it on. That gives the **second latitude**.',
+        'The first correction takes minutes off the gap, and **how many depends on the sign the moon is in**: 59 minutes in Taleh, a full degree in Shor, 58 in Teomim, down to 34 in Moznayim and back up again. Twelve signs, twelve numbers. The result is the gap after one adjustment — the *second longitude*.',
+        'The second does the same to the height, with its own set of twelve — 9 minutes in Taleh, 10 in Shor, up to 46 in Moznayim. And here the direction matters: if the moon is north of the sun\'s road you take the correction off, if south you add it on. That gives the height after its one adjustment — the *second latitude*.',
         'Neither table is arbitrary. Both are tracking the same thing — how the parallax shift breaks down into sideways and vertical parts, which depends on the angle the belt makes with the horizon, which depends on which stretch of the belt is setting. The sign is a shorthand for that angle.',
       ],
       interactive: 'parallax-by-sign',
@@ -113,11 +173,11 @@ export default {
       nodeId: 'arc',
       body: [
         'Three steps remain, and they are the fiddliest in the book. The good news is that a calculator can carry them and the ideas behind them are short.',
-        '**Set aside a portion of the second latitude.** A fraction — two fifths, a third, a quarter, depending again on where the moon sits. The Rambam calls the result the **circuit of the moon**.',
-        '**Apply it to the second longitude.** North, subtract; south, add — and reversed if the moon is in the other half of the sky. That gives the **third longitude**.',
-        '**Stretch or shrink it.** Depending on which sign the third longitude falls in, add a sixth, or a fifth, or nothing, or subtract a fifth. That gives the **fourth longitude**. This one is about how steeply that part of the belt sets — the same underlying fact as the early-exit halves, applied more finely.',
-        'Then, finally, go back to the **first** latitude — the one you were told to keep at hand — take a fraction of it, and apply that to the fourth longitude.',
-        'What comes out is the **arc of sighting**, the קשת הראייה. One number, and the verdict depends on nothing else.',
+        '**Take a slice of the adjusted height.** A fraction — two fifths, a third, a quarter, depending again on where the moon sits. The Rambam calls the result the *circuit of the moon*; call it **the slice**.',
+        '**Apply the slice to the gap.** North, subtract; south, add — and reversed if the moon is in the other half of the sky. Two adjustments down: the *third longitude*.',
+        '**Stretch or shrink it.** Depending on which sign the gap now falls in, add a sixth, or a fifth, or nothing, or subtract a fifth. Three down: the *fourth longitude*. This one is about how steeply that part of the belt sets — the same underlying fact as the early-exit halves, applied more finely.',
+        'Then, finally, go back to the **original** height — the one you were told to keep at hand, before any adjustment — take a fraction of it, and apply that to the gap.',
+        'What comes out is **the final figure** — the *arc of sighting*, קשת הראייה. The verdict depends on it and nothing else.',
       ],
       interactive: 'visibility-chain',
     },
@@ -129,7 +189,7 @@ export default {
       nodeId: 'verdict',
       body: [
         'Nine degrees or less: not visible. More than fourteen: visible. Between the two, one more table — and it is the only place in the book where two numbers are weighed together.',
-        'The rule is a sliding trade. A large arc of sighting can carry a small first longitude, and a large first longitude can carry a small arc. If the arc is between 11 and 12 degrees the first longitude must reach 11; if the arc is between 13 and 14 the first longitude need only reach 9. The bigger one gets, the less is asked of the other.',
+        'The rule is a sliding trade between the final figure and the original gap. A large final figure can carry a small gap, and a large gap can carry a small final figure. If the final figure is between 11 and 12 degrees the gap must reach 11; if it is between 13 and 14 the gap need only reach 9. The bigger one gets, the less is asked of the other.',
         'For his worked evening the arc comes to **11 degrees and 11 minutes** and the first longitude to **11 degrees and 27 minutes** — so the moon would have been seen.',
         'A note on the text here, because you may notice it. At 17:22 the printed number for the longitude is *ten* degrees and 27 minutes, and he immediately concludes it is "greater than eleven" — which it is not. Ten degrees 27 is the **second** longitude, computed a few steps earlier. His conclusion follows from the **first** longitude, 11° 27′, which is the figure the rule actually asks for. Something has slipped in transmission between the numeral and the label; the reasoning is sound and the answer is right.',
       ],

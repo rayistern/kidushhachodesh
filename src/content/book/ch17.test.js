@@ -56,6 +56,45 @@ describe('KH 17:13-14, 17:22 — the whole chain on his evening', () => {
   });
 });
 
+describe('the four longitudes really are one number', () => {
+  // The chapter now leads on this, and it is the whole reason the naming
+  // is confusing. If the engine's steps were genuinely four independent
+  // quantities the claim would be false and the section misleading.
+  const RUNNING = ['elongation', 'orechSheni', 'orechShlishi', 'orechRevii', 'keshetHaReiyah'];
+
+  it('each step is a small adjustment of the one before, not a fresh figure', () => {
+    for (let i = 1; i < RUNNING.length; i++) {
+      const change = Math.abs(at(RUNNING[i]) - at(RUNNING[i - 1]));
+      // An adjustment, not a new measurement: never more than a few
+      // degrees, and never zero (each step does something).
+      expect(change, `${RUNNING[i - 1]} → ${RUNNING[i]}`).toBeGreaterThan(0);
+      expect(change, `${RUNNING[i - 1]} → ${RUNNING[i]}`).toBeLessThan(4);
+    }
+  });
+
+  it('stays in the same neighbourhood throughout', () => {
+    // Start and finish are within a degree of each other on his evening,
+    // which is what "one number, corrected" looks like from outside.
+    const values = RUNNING.map(at);
+    expect(Math.max(...values) - Math.min(...values)).toBeLessThan(4);
+    expect(Math.abs(at('keshetHaReiyah') - at('elongation'))).toBeLessThan(1);
+  });
+
+  it('later steps really do feed off earlier ones', () => {
+    // Each engine step names its upstream input, which is the machine
+    // form of the same claim.
+    expect(steps.orechSheni.inputs.orechRishon.refId).toBe('elongation');
+    expect(steps.orechShlishi.inputs.orechSheni.refId).toBe('orechSheni');
+    expect(steps.orechRevii.inputs.orechShlishi.refId).toBe('orechShlishi');
+  });
+
+  it('and the chapter says so, with his own run of figures', () => {
+    expect(prose).toMatch(/There are not four longitudes|not\. It is one number|one number, adjusted four times/i);
+    expect(prose).toMatch(/11° 27′ → 10° 27′ → 11° 28′ → 13° 46′/);
+    expect(prose).toMatch(/the gap, after two adjustments/);
+  });
+});
+
 describe('KH 17:22 — the figure that does not support its own conclusion', () => {
   // The chapter tells the reader about this rather than letting them
   // trip over it, so the tests have to establish that the reading given

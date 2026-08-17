@@ -30,13 +30,13 @@ const TABLE = CONSTANTS.KITZEI_HAREIYAH_TABLE;
 
 /** The KH 17:15-21 verdict, from the arc and the first longitude alone. */
 function verdictFor(arc, orech) {
-  if (arc <= 9) return { visible: false, why: 'KH 17:15 — an arc of 9° or less is never seen.' };
-  if (arc > 14) return { visible: true, why: 'KH 17:15 — an arc above 14° is always seen.' };
+  if (arc <= 9) return { visible: false, why: 'KH 17:15 — a final figure of 9° or less is never seen.' };
+  if (arc > 14) return { visible: true, why: 'KH 17:15 — a final figure above 14° is always seen.' };
   const row = TABLE.find((r) => arc > r.kashtFromExclusive && arc <= r.kashtUpTo);
   if (!row) return { visible: false, why: 'outside the tabulated band' };
   return {
     visible: orech >= row.orechMin,
-    why: `Arc between ${row.kashtFromExclusive}° and ${row.kashtUpTo}° needs a first longitude of at least ${row.orechMin}° — this one is ${orech.toFixed(2)}°.`,
+    why: `A final figure between ${row.kashtFromExclusive}° and ${row.kashtUpTo}° needs a gap of at least ${row.orechMin}° — this one is ${orech.toFixed(2)}°.`,
     row,
   };
 }
@@ -53,7 +53,7 @@ export default function SightingLimits() {
     <InteractiveCard
       title="Where the line falls"
       source="KH 17:15-21"
-      blurb="two cutoffs, and between them a trade between the arc and the gap"
+      blurb="two cutoffs, and between them a trade between the final figure and the gap"
       defaultOpen
     >
       <Map arc={arc} orech={orech} visible={result.visible} />
@@ -61,7 +61,7 @@ export default function SightingLimits() {
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         <label className="block">
           <span className="text-xs font-bold text-[var(--color-text-secondary)]">
-            Arc of sighting — {formatDms(arc)}
+            The final figure (arc of sighting) — {formatDms(arc)}
           </span>
           <input
             type="range"
@@ -71,12 +71,12 @@ export default function SightingLimits() {
             value={arc}
             onChange={(e) => setArc(Number(e.target.value))}
             className="mt-1 w-full accent-[var(--color-accent)]"
-            aria-label="Arc of sighting in degrees"
+            aria-label="The final figure, the arc of sighting, in degrees"
           />
         </label>
         <label className="block">
           <span className="text-xs font-bold text-[var(--color-text-secondary)]">
-            First longitude — {formatDms(orech)}
+            The gap (first longitude) — {formatDms(orech)}
           </span>
           <input
             type="range"
@@ -86,7 +86,7 @@ export default function SightingLimits() {
             value={orech}
             onChange={(e) => setOrech(Number(e.target.value))}
             className="mt-1 w-full accent-[var(--color-gold)]"
-            aria-label="First longitude in degrees"
+            aria-label="The gap, the first longitude, in degrees"
           />
         </label>
       </div>
@@ -99,7 +99,7 @@ export default function SightingLimits() {
           }}
           title="The evening the Rambam works through"
         >
-          His evening — arc 11° 11′, gap 11° 27′
+          His evening — final figure 11° 11′, gap 11° 27′
         </PresetButton>
       </div>
 
@@ -129,7 +129,7 @@ export default function SightingLimits() {
         <table className="w-full min-w-[320px] text-xs">
           <thead>
             <tr className="border-b border-[var(--color-border)] text-left text-[var(--color-text-secondary)]">
-              <th className="py-1 pr-3 font-bold">If the arc is</th>
+              <th className="py-1 pr-3 font-bold">If the final figure is</th>
               <th className="py-1 pr-3 font-bold">the gap must reach</th>
               <th className="py-1 font-bold">halacha</th>
             </tr>
@@ -155,10 +155,10 @@ export default function SightingLimits() {
       </div>
 
       <p className="mt-3 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
-        Read the table downwards and the trade is obvious: as the required arc rises by a degree,
-        the required gap falls by one. A moon that stands well clear of the horizon can be seen
-        with less separation from the sun; a moon further from the sun can be seen from lower
-        down. Five sentences in the text, one staircase here.
+        Read the table downwards and the trade is obvious: as the required final figure rises by
+        a degree, the required gap falls by one. A moon that stands well clear of the horizon can
+        be seen with less separation from the sun; a moon further from the sun can be seen from
+        lower down. Five sentences in the text, one staircase here.
       </p>
     </InteractiveCard>
   );
@@ -225,7 +225,7 @@ function Map({ arc, orech, visible }) {
         ))}
 
         <text x={(w + padL) / 2} y={h - 4} fontSize="9" textAnchor="middle" fill="var(--color-text-secondary)">
-          arc of sighting →
+          the final figure →
         </text>
         <text
           x={12}
@@ -235,7 +235,7 @@ function Map({ arc, orech, visible }) {
           fill="var(--color-text-secondary)"
           transform={`rotate(-90 12 ${(h - padB + padT) / 2})`}
         >
-          first longitude →
+          the gap →
         </text>
 
         <line x1={x(arc)} y1={padT} x2={x(arc)} y2={h - padB} stroke="var(--color-accent)" strokeWidth="1" opacity="0.5" />

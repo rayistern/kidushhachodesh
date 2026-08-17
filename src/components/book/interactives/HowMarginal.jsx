@@ -32,14 +32,14 @@ const TABLE = CONSTANTS.KITZEI_HAREIYAH_TABLE;
 
 /** The KH 17:15-21 verdict, plus how far past the line it fell. */
 function assess(arc, orech) {
-  if (arc <= 9) return { visible: false, margin: arc - 9, rule: 'KH 17:15 — 9° or less is never seen' };
-  if (arc > 14) return { visible: true, margin: arc - 14, rule: 'KH 17:15 — above 14° is always seen' };
+  if (arc <= 9) return { visible: false, margin: arc - 9, rule: 'KH 17:15 — a final figure of 9° or less is never seen' };
+  if (arc > 14) return { visible: true, margin: arc - 14, rule: 'KH 17:15 — a final figure above 14° is always seen' };
   const row = TABLE.find((r) => arc > r.kashtFromExclusive && arc <= r.kashtUpTo);
   if (!row) return { visible: false, margin: 0, rule: 'outside the table' };
   return {
     visible: orech >= row.orechMin,
     margin: orech - row.orechMin,
-    rule: `arc ${row.kashtFromExclusive}°–${row.kashtUpTo}° needs a gap of ${row.orechMin}°`,
+    rule: `a final figure of ${row.kashtFromExclusive}°–${row.kashtUpTo}° needs a gap of ${row.orechMin}°`,
     row,
   };
 }
@@ -87,7 +87,7 @@ export default function HowMarginal() {
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="block">
           <span className="text-xs font-bold text-[var(--color-text-secondary)]">
-            Arc of sighting — {formatDms(arc)}
+            The final figure (arc of sighting) — {formatDms(arc)}
           </span>
           <input
             type="range"
@@ -125,7 +125,7 @@ export default function HowMarginal() {
           }}
           title="The case the Rambam puts at KH 18:4"
         >
-          His case — arc 9° 5′, gap exactly 13°
+          His case — final figure 9° 5′, gap exactly 13°
         </PresetButton>
       </div>
 
