@@ -18,9 +18,16 @@
  *      EQUATOR, and the two tilts then have to be combined. A reader
  *      who does not notice the switch will conflate them. Section 2.
  *   2. He opens by saying this chapter will not be exact, because it
- *      does not affect the verdict — and then gives the most accurate
- *      table in the book. That is worth pointing at, and it is the
- *      note the whole astronomical arc ends on. Sections 3 and 7.
+ *      does not affect the verdict — and then gives a table good to
+ *      about a fifth of a degree, which makes the apology unnecessary.
+ *      That is worth pointing at, and it is the note the whole
+ *      astronomical arc ends on. Sections 3 and 7.
+ *
+ * An earlier draft called it "the most accurate table in the book". That
+ * is false and is now removed: KH 13:4's sun correction is tighter both
+ * absolutely (0.009° against 0.214°) and as a fraction of what it
+ * tabulates. The observation that survives is the apology, not a
+ * ranking.
  */
 
 export default {
@@ -156,7 +163,7 @@ export default {
       nodeId: 'rules',
       body: [
         'Two things about the end of this chapter are worth more than the arithmetic in it.',
-        'The first is a small joke the text plays on itself, though not deliberately. He opened by apologising that this chapter would not be exact, since none of it affects the verdict. His tilt table is accurate to about **a fifth of a degree** at every row — which makes it, as far as one can check, **the most accurate table in the book**. The one he apologised for.',
+        'The first is a small joke the text plays on itself, though not deliberately. He opened by apologising that this chapter would not be exact, since none of it affects the verdict. His tilt table then turns out to be right to about **a fifth of a degree** at every row — measured against the real geometry, which he had no way to compute. The apology was not needed.',
         'The second is his closing sentence. He has explained all of it, he says, so that everything will be clear to people of understanding, "and they will not lack awareness of any of the Torah\'s paths" — so that a student would **not need to go looking in other books** for it. Then he quotes Isaiah: *"Seek out of the book of God, read it. None of these will be lacking."*',
         'Which is a fair description of what he had just done. Nine chapters of astronomy, tables, worked examples and honest admissions of approximation, written into a code of law so that nobody studying it would have to go elsewhere. And, four chapters earlier, the remark that it does not matter whether the person who first worked these things out was a prophet or a gentile, provided the proof holds.',
         'That is where the astronomy ends.',

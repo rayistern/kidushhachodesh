@@ -18,7 +18,10 @@
  *
  * The reality check is the closing note of the book: his table is right
  * to about a fifth of a degree, in the chapter he opens by apologising
- * for.
+ * for. It is NOT the most accurate table in the book — KH 13:4's sun
+ * correction beats it on both absolute and relative error — and an
+ * earlier draft claimed otherwise. The apology is the point, not a
+ * ranking.
  */
 import React, { useState } from 'react';
 import InteractiveCard, { PresetButton } from '../../text/interactives/InteractiveCard';
@@ -118,8 +121,8 @@ export default function Declination() {
       <p className="mt-2 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
         And note the two figures above. He opens this chapter warning that it "will not be exact,
         because this knowledge is of no consequence regarding the actual sighting" — and then his
-        table lands within about a fifth of a degree everywhere. It is the most accurate table in
-        the book, in the chapter he apologises for.
+        table lands within about a fifth of a degree of the real geometry, everywhere. Not the
+        tightest table in the book, but easily good enough that the apology was unnecessary.
       </p>
     </InteractiveCard>
   );

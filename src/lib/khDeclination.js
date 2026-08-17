@@ -29,8 +29,10 @@
  * exact, because this knowledge is of no consequence regarding the
  * actual sighting". The table is nonetheless correct to within about a
  * fifth of a degree of arcsin(sin ε · sin λ) at every row — pinned in
- * khDeclination.test.js. The one table he apologises for is the most
- * accurate one in the book.
+ * khDeclination.test.js. So the apology was unnecessary, which is the
+ * point worth making. It is not, however, the most accurate table in the
+ * book: KH 13:4's sun correction is tighter both absolutely and as a
+ * fraction of what it tabulates.
  */
 
 /** [R] KH 19:7 — degrees along the sun's road → degrees from the equator. */
