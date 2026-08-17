@@ -34,6 +34,18 @@ import { zodiacPosition } from '../../../engine/zodiac';
 
 const LON = CONSTANTS.PARALLAX_LON_BY_MAZAL;
 const LAT = CONSTANTS.PARALLAX_LAT_BY_MAZAL;
+
+/**
+ * Which civil months a sighting night finds the moon in each sign —
+ * measured over eight years of sighting nights, two adjacent months per
+ * sign, marching round the year. Meaningful ONLY on sighting nights
+ * (the moon laps the whole circle every month); pinned in ch17.test.js.
+ */
+const SIGHTING_MONTHS = [
+  'Mar–Apr', 'Apr–May', 'May–Jun', 'Jun–Jul', 'Jul–Aug', 'Aug–Sep',
+  'Sep–Oct', 'Oct–Nov', 'Nov–Dec', 'Dec–Jan', 'Jan–Feb', 'Feb–Mar',
+];
+
 const MAX = Math.max(...LON.map((r) => r.chalakim), ...LAT.map((r) => r.chalakim));
 
 export default function ParallaxBySign() {
@@ -63,9 +75,15 @@ export default function ParallaxBySign() {
             }`}
           >
             {name}
+            <span className="ml-1 opacity-60">{i + 1}</span>
           </button>
         ))}
       </div>
+      <p className="mt-1 text-[11px] text-[var(--color-text-secondary)]">
+        The {index + 1}
+        {['st', 'nd', 'rd'][index] ?? 'th'} sign — where sighting nights find the moon in{' '}
+        <strong>{SIGHTING_MONTHS[index]}</strong>, roughly.
+      </p>
 
       <Curves index={index} />
 

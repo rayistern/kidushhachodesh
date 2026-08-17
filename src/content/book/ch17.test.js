@@ -393,3 +393,31 @@ describe('the civil-date gloss on the early-exit halves', () => {
     }
   });
 });
+
+describe('the by-sign tables carry civil months too', () => {
+  it('says the trick carries over, with the 1st sign in March-April', () => {
+    const body = bookChapter(17)
+      .sections.find((s) => s.id === 'by-sign')
+      .body.join('\n');
+    expect(body).toMatch(/two months at a time/);
+    expect(body).toMatch(/March and April\*\*/);
+    expect(body).toMatch(/12th in February and March/);
+  });
+
+  it('holds: each sign owns two adjacent months, over eight years', () => {
+    // The figure's SIGHTING_MONTHS list, recomputed rather than copied.
+    // sign k (1-based) pairs months (k+1, k+2) mod 12, 0-based Jan=0:
+    // sign 1 = Mar/Apr = (2,3), sign 10 = Dec/Jan = (11,0), etc.
+    let d = new Date(2026, 0, 1);
+    for (let m = 0; m < 96; m++) {
+      const sn = nextSightingNight(d);
+      const lon = getFullCalculation(sn.date).moon.trueLongitude;
+      const sign = Math.floor(((lon % 360) + 360) % 360 / 30) + 1;
+      const month = sn.date.getMonth();
+      const allowed = [(sign + 1) % 12, (sign + 2) % 12];
+      expect(allowed, `${sn.hebrew}: sign ${sign}, month ${month}`).toContain(month);
+      d = new Date(sn.date);
+      d.setDate(d.getDate() + 1);
+    }
+  });
+});

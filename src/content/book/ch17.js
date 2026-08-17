@@ -170,6 +170,7 @@ export default {
         'The first correction takes minutes off the gap, and **how many depends on the sign the moon is in**: 59 minutes in the 1st sign, a full degree in the 2nd, 58 in the 3rd, down to 34 in the 7th, and back up again. Twelve signs, twelve numbers. The result is the gap after one adjustment — the *second longitude*.',
         'The second does the same to the height, with its own set of twelve — 9 minutes in the 1st sign, 10 in the 2nd, up to 46 in the 7th. And here the direction matters: if the moon is north of the sun\'s road you take the correction off, if south you add it on. That gives the height after its one adjustment — the *second latitude*.',
         'Neither table is a list of made-up numbers. Both are tracking the same thing — how the parallax shift breaks down into sideways and vertical parts, which depends on the angle the belt makes with the horizon, which depends on which stretch of the belt is setting. The sign is a shorthand for that angle.',
+        'The civil-date trick from the early exits works here too, sign by sign. On sighting nights the moon\'s sign steps through the year two months at a time: the 1st sign belongs to the nights of **March and April**, the 2nd to April and May, and so on round to the 12th in February and March. So each row of these tables is, in practice, the row for one stretch of the calendar — the figure below shows the months beside each sign.',
       ],
       interactive: 'parallax-by-sign',
     },
