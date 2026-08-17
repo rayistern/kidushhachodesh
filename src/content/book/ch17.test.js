@@ -603,3 +603,26 @@ describe('the third and fourth longitudes take fractions of different things', (
     expect(d(10)).toBeCloseTo(2, 9); // a fifth of ten
   });
 });
+
+describe('"the stretch" is declared two-way', () => {
+  it('warns that the short name covers shrinking too', () => {
+    const body = bookChapter(17)
+      .sections.find((s) => s.id === 'the-stretch')
+      .body.join('\n');
+    // A reader hit a night where "the stretch" removed a third of the
+    // gap and reasonably asked whether stretching makes things smaller.
+    expect(body).toMatch(/it runs both ways/);
+    expect(body).toMatch(/On many nights "the stretch" shrinks/);
+  });
+
+  it('supports "many nights" without overclaiming: 6 signs stretch, 4 shrink, 2 rest', () => {
+    // Checked before writing the prose: stretching is in fact the
+    // commoner case sign-for-sign, so the section says the shrink
+    // happens on MANY nights, not most. (A draft of this very test
+    // asserted the majority the other way round; the numbers refused.)
+    const ops = CONSTANTS.SETTING_TIME_BY_MAZAL.map((r) => r.operation);
+    expect(ops.filter((o) => o === 'add').length).toBe(6);
+    expect(ops.filter((o) => o === 'subtract').length).toBe(4);
+    expect(ops.filter((o) => o === 'none').length).toBe(2);
+  });
+});

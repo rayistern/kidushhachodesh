@@ -106,7 +106,7 @@ const CHAIN = [
   {
     id: 'orechRevii',
     gapFamily: true,
-    label: 'the gap, stretched for how steeply this part sets (fourth longitude)',
+    label: 'the gap, stretched or shrunk by how steeply this part sets (fourth longitude)',
     ref: 'KH 17:12',
     // Stated live. A reader met 17° falling to 11°21′ with only
     // "± a fraction picked by the moon's sign" to explain it — the

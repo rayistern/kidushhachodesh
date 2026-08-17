@@ -194,6 +194,7 @@ export default {
       source: 'KH 17:12',
       nodeId: 'arc',
       body: [
+        'One naming note first, because the short name misleads exactly once: this book calls the whole step **the stretch**, but it runs both ways — the gap is pulled longer over the slow-setting parts of the belt and let back shorter over the plunging ones. On many nights "the stretch" shrinks.',
         '**The fourth longitude** is that number stretched or shrunk — step 8 — and this is *not* the slice again, though it sounds like it. The slice was a fraction of the **height**, brought in from a different measurement. Here the gap is scaled by a fraction **of itself**: depending on which sign **the moon** is in, add a sixth or a fifth of it, leave it alone, or subtract a fifth or a third. The reason is how steeply that part of the belt sets — a slow-setting stretch of sky makes each degree of gap worth more, so the number is stretched to match; a fast-setting stretch, the reverse. The same underlying fact as the early-exit halves, applied more finely.',
       ],
       interactive: 'stretch-shape',
