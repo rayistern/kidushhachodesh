@@ -123,6 +123,15 @@ export default function ParallaxBySign() {
         />
         The moon is north of the sun's track
       </label>
+      {/* A bare toggle invited a fair question: how would anyone know
+          which way to set it? It is not a free choice — chapter 16
+          computes it — and the card must say where the fact comes from. */}
+      <p className="mt-1 text-[10px] leading-relaxed text-[var(--color-text-secondary)]">
+        Not something you choose — chapter 16 already answered it: how far the moon has travelled
+        past the up-crossing. Under half a circle and it is north; over, south. The card on that
+        page works it out for any date; the toggle here is only for seeing what each case does. On
+        his worked evening the moon was <strong>south</strong>, 3° 53′ below the road.
+      </p>
 
       <p className="mt-3 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
         Look at the two curves rather than the two lists. Each rises and falls once around the
