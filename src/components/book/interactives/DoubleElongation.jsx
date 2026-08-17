@@ -107,9 +107,11 @@ export default function DoubleElongation() {
         ) : (
           <>
             You have slid outside the range the chapter is about. At{' '}
-            {daysSinceConjunction.toFixed(1)} days past conjunction the moon is either still
-            invisible in the sun's glare or long since obvious — either way, not the night the
-            court is asking about.
+            {daysSinceConjunction.toFixed(1)} days since the moon and sun were together,{' '}
+            {doubled < BOUNDS.min
+              ? 'the moon is still lost in the sun’s glare — nobody would be out looking yet'
+              : 'the moon has been plainly visible for a night or more already — nobody needs a calculation'}
+            . Either way, not the night the court is asking about.
           </>
         )}
       </p>
