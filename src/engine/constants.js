@@ -636,9 +636,10 @@ export const CONSTANTS = {
   //     tradition, we can either flip back or expose a per-tradition
   //     selector. Until that input arrives, Sefaria is the
   //     load-bearing primary source."
-  //  3. 2026-08-17: that input arrived. The user reports the Chitrik
-  //     edition, which follows the Yemenite manuscripts, reads +30'
-  //     for תחילת תאומים → תחילת אריה (60°-120°). Adopted.
+  //  3. 2026-08-17: that input arrived. The **Chitrik edition**,
+  //     which follows the Yemenite manuscripts, reads +30' for
+  //     תחילת תאומים → תחילת אריה (60°-120°). Adopted, and credited
+  //     as the source of the reading wherever it is taught.
   //
   //  Four independent lines agree on +30' there, which is why this is a
   //  textual correction rather than a preference:

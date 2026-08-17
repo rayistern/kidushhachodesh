@@ -16,6 +16,7 @@
 import { describe, it, expect } from 'vitest';
 import { bookChapter } from './index';
 import { CONSTANTS } from '../../engine/constants';
+import { dmsToDecimal } from '../../engine/dmsUtils';
 import {
   calculateMoonMeanLongitude,
   calculateSeasonCorrection,
@@ -181,91 +182,68 @@ describe('why the gap gets doubled (KH 15:1)', () => {
     .sections.find((s) => s.id === 'double-elongation')
     .body.join('\n');
 
-  it('leads with the whole-number reason, which is the operative one here', () => {
-    // Asked who cares about the symmetry when the numbers are this small.
-    // The answer is that nobody should: on the sighting range the doubling
-    // is a relabelling. What it actually buys is integer band boundaries.
-    expect(body).toMatch(/keeps the table in whole numbers/);
-    expect(body).toMatch(/2½, 5½, 9½, 12½/);
+  const moonRate = dmsToDecimal(CONSTANTS.MOON.MEAN_MOTION_PER_DAY);
+  const sunRate = dmsToDecimal(CONSTANTS.SUN.MEAN_MOTION_PER_DAY);
+
+  it("gives the commentaries' reason: half the distance to the far point", () => {
+    // Supplied by the user from his commentary — המרחק שבין השמש וגלגל
+    // ההקפה הוא תמיד חצי מהמרחק שבין נקודת הגובה וגלגל ההקפה — and it
+    // supersedes two weaker accounts this section carried before: that
+    // doubling tracked a twice-per-lap effect, and that it merely kept
+    // the table in whole numbers.
+    expect(body).toMatch(/Chitrik edition/);
+    expect(body).toMatch(/distance from the sun is always exactly half its distance from the far point/);
+    expect(body).toMatch(/נקודת הגובה/);
+    expect(body).toMatch(/not a relabelling/);
   });
 
-  it('really would need half-degrees if the bands were undoubled', () => {
-    const rows = CONSTANTS.DOUBLE_ELONGATION_ADJUSTMENTS.filter(
-      (r) => r.maxElongation <= 63,
-    );
-    const bounds = [...new Set(rows.flatMap((r) => [r.minElongation, r.maxElongation]))];
-    const halves = bounds.filter((b) => (b / 2) % 1 !== 0);
-    // Half of them, which is what makes the point worth making.
-    expect(halves.length).toBeGreaterThanOrEqual(bounds.length / 2 - 1);
-    for (const h of [5, 11, 19, 25]) expect(bounds).toContain(h);
-  });
-
-  it('keeps the pencil as the account of where the quantity comes from', () => {
-    expect(body).toMatch(/pencil lying on a table/);
-    expect(body).toMatch(/two ends and they are interchangeable/);
-    expect(body).toMatch(/twice 10 is 20 and twice 190 is 380/);
-  });
-
-  it('says plainly that the symmetry is NOT the local reason', () => {
-    // The overclaim being corrected. An earlier draft presented the
-    // 180° symmetry as the reason for doubling in this calculation; the
-    // far side of the pencil is never reached on a sighting night.
-    expect(body).toMatch(/not why it matters \*here\*/);
-    expect(body).toMatch(/never reaches the far side of the pencil/);
-    expect(body).toMatch(/carries no extra information/);
-  });
-
-  it('is right that the mapping is one-to-one on the sighting range', () => {
-    // 2.5-31 onto 5-62, monotonic: so the doubled value can be undoubled
-    // without ambiguity, which is exactly what "no extra information"
-    // means.
-    const doubled = (gap) => gap * 2;
-    expect(doubled(2.5)).toBe(5);
-    expect(doubled(31)).toBe(62);
-    let last = -1;
-    for (let gap = 2.5; gap <= 31; gap += 0.5) {
-      expect(doubled(gap)).toBeGreaterThan(last);
-      expect(doubled(gap)).toBeLessThan(360); // never wraps, so never folds
-      last = doubled(gap);
+  it('holds exactly, at any pair of positions', () => {
+    // The relation forces the far point to sit at 2*sun - moon. If that
+    // is right, (far point -> epicycle) is 2 x (sun -> epicycle) always.
+    const norm = (d) => ((d % 360) + 360) % 360;
+    for (const days of [0, 7, 29, 100, 1000, 309866]) {
+      const moon = norm(31.2469 + moonRate * days);
+      const sun = norm(7.0589 + sunRate * days);
+      const gap = norm(moon - sun);
+      const farPoint = norm(2 * sun - moon);
+      expect(norm(moon - farPoint), `${days} days`).toBeCloseTo(norm(2 * gap), 9);
     }
   });
 
-  it('labels the whole account as the book\'s', () => {
-    expect(body).toMatch(/None of this reasoning is his/);
+  it('explains the vanishing at zero by the epicycle sitting on the far point', () => {
+    expect(body).toMatch(/sitting \*\*on\*\* the far point/);
+    expect(CONSTANTS.DOUBLE_ELONGATION_ADJUSTMENTS[0].adjustment).toBe(0);
+    // The same thing is true of the sun at its own govah, which is the
+    // parallel the prose draws.
+    expect(CONSTANTS.SUN_MASLUL_CORRECTIONS[0].maslul).toBe(0);
+    expect(CONSTANTS.SUN_MASLUL_CORRECTIONS[0].correction).toBe(0);
   });
 
-  it('does not pre-empt the sections that own the bounds and the nudge', () => {
-    expect(body).not.toMatch(/up to about sixty/);
-    expect(body).not.toMatch(/grows to nine degrees/);
+  it('draws the parallel with chapter 13, and the structural proof of it', () => {
+    expect(body).toMatch(/same step chapter 13 took/);
+    expect(body).toMatch(/gives the sun a govah with its own tables and gives the moon nothing/);
+
+    // That claim is checkable and is the strongest evidence for the whole
+    // account: he tracks an apogee for the sun and none for the moon,
+    // because doubling supplies the moon's.
+    expect(CONSTANTS.SUN.APOGEE_START).toBeTruthy();
+    expect(CONSTANTS.SUN.APOGEE_MOTION_PER_DAY).toBeTruthy();
+    expect(CONSTANTS.SUN_APOGEE_PERIOD_BLOCKS).toBeTruthy();
+    expect(CONSTANTS.MOON.APOGEE_START).toBeUndefined();
+    expect(CONSTANTS.MOON.APOGEE_MOTION_PER_DAY).toBeUndefined();
+    expect(CONSTANTS.MOON_APOGEE_PERIOD_BLOCKS).toBeUndefined();
+  });
+
+  it('quotes the implied backward motion correctly', () => {
+    const rate = 2 * sunRate - moonRate;
+    expect(rate).toBeLessThan(0); // backwards
+    expect(Math.abs(rate)).toBeGreaterThan(11);
+    expect(Math.abs(rate)).toBeLessThan(11.5);
+    expect(Math.abs(360 / rate)).toBeGreaterThan(31.5);
+    expect(Math.abs(360 / rate)).toBeLessThan(33);
+    expect(body).toMatch(/about 11 degrees a day/);
+    expect(body).toMatch(/roughly 32 days/);
+    expect(body).toMatch(/never mentions it/);
   });
 });
 
-describe("the pencil's arithmetic, since the prose does it in words", () => {
-  it('really does send 10° and 190° to the same place', () => {
-    const doubled = (deg) => (deg * 2) % 360;
-    expect(doubled(10)).toBe(20);
-    expect(doubled(190)).toBe(20);
-  });
-
-  it('sends every pair of opposite angles to one value', () => {
-    // The general statement the pencil illustrates. If this failed for
-    // any angle the image would be a coincidence rather than a reason.
-    const doubled = (deg) => (deg * 2) % 360;
-    for (let deg = 0; deg < 180; deg += 7) {
-      expect(doubled(deg), `${deg}° vs ${deg + 180}°`).toBeCloseTo(doubled(deg + 180), 9);
-    }
-  });
-
-  it('does not send different-looking positions to the same place', () => {
-    // The other half of the claim: doubling must not collapse anything it
-    // should keep apart, or it would be losing information rather than
-    // expressing a symmetry.
-    const doubled = (deg) => (deg * 2) % 360;
-    const seen = new Map();
-    for (let deg = 0; deg < 180; deg += 1) {
-      const key = doubled(deg).toFixed(6);
-      expect(seen.has(key), `${deg}° collides with ${seen.get(key)}°`).toBe(false);
-      seen.set(key, deg);
-    }
-  });
-});

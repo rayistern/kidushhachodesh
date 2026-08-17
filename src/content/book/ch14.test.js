@@ -188,3 +188,29 @@ describe('the two month-lengths, and what may be claimed about them', () => {
     expect(Math.abs(his - ANOMALISTIC) * 86400).toBeLessThan(2);
   });
 });
+
+describe('the season-correction reading is credited', () => {
+  const body = section('the-table').body.join('\n');
+
+  it('names the Chitrik edition as the source of the reading followed', () => {
+    // The engine adopted the Yemenite +30' on the strength of this
+    // edition; the reader should be able to see whose text is being
+    // computed with. OPEN_QUESTIONS Q8 carries the full reasoning.
+    expect(body).toMatch(/Chitrik edition/);
+    expect(body).toMatch(/Yemenite/);
+  });
+
+  it('states the disagreement without reopening it', () => {
+    // One sentence: what differs, which is followed. The side-by-side
+    // comparison was deliberately removed once the question was settled.
+    expect(body).toMatch(/standard printed editions read a quarter of a degree/);
+    expect(body).toMatch(/This book follows the Yemenite reading/);
+  });
+
+  it('is right that the adopted reading is the symmetric one', () => {
+    const arcmin = CONSTANTS.SEASON_CORRECTIONS.map((r) => r.adjustment * 60);
+    expect(Math.max(...arcmin)).toBe(30);
+    expect(Math.min(...arcmin)).toBe(-30);
+    expect(body).toMatch(/symmetric, half a degree either way/);
+  });
+});

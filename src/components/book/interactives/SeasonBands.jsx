@@ -12,9 +12,9 @@
  * about one row, *before* they discover it as a contradiction.
  *
  * ── On the one contested row ──
- * For 60°–120° the Yemenite manuscripts (Chitrik edition, and Touger's
- * English) read +30' where the standard printed editions read +15'. The
- * engine follows the Yemenite reading; the reasoning and the audit trail
+ * For 60°–120° the Yemenite manuscripts read +30' where the standard
+ * printed editions read +15'. The engine follows the Yemenite reading as
+ * given in the **Chitrik edition** (Touger's English agrees); the reasoning and the audit trail
  * are in OPEN_QUESTIONS.md Q8 and the CONSTANTS header.
  *
  * This card used to show both readings side by side, from when the

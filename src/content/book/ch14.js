@@ -183,6 +183,7 @@ export default {
       body: [
         'The table is short. Find where the sun is, read off the adjustment, and add it to or subtract it from the moon\'s average.',
         'The nudge is at its largest twice a year, half a degree either way, and vanishes near the equinoxes — which is what you would expect of something tracking how far sunset has drifted from a fixed hour.',
+        'A note on the text. For the sun between the start of the 3rd sign and the start of the 5th, the witnesses differ: the standard printed editions read a quarter of a degree where the Yemenite manuscripts read half. This book follows the Yemenite reading, as given in the **Chitrik edition** — which also makes the table symmetric, half a degree either way at the two solstices.',
       ],
       interactive: 'season-table',
     },
