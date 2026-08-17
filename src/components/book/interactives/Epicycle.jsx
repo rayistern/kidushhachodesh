@@ -84,15 +84,23 @@ export default function Epicycle() {
               term="Where the moon sits on the small circle"
               hebrew="אמצע המסלול"
               value={formatDms(anomaly)}
-              note="measured round the small circle, not round the sky"
+              note="measured round the small circle from its far point, not round the sky"
             />
           </dl>
 
           <p className="mt-3 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
-            Slide it and watch the two disagree. The silver arm sweeps round steadily. The moon
-            on the end of it swings a little ahead of that arm and then a little behind, over and
-            over. That swinging is what the second number is for — and it is why one number could
+            Slide it and watch the two disagree. The silver arm sweeps round steadily, and the moon
+            travels round the small circle at its own steady rate — so the faint line from the earth
+            to the moon runs a little behind the arm, then catches up, then runs ahead, over and
+            over. That swinging is what the second number is for, and it is why one number could
             never have been enough.
+          </p>
+          <p className="mt-2 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
+            The second number is counted from the <strong>far point</strong> of the small circle —
+            the spot furthest from the earth — and that point turns along with the arm. So at 0° and
+            again at 180° the moon lies exactly on the arm and the faint line merges with it: no
+            disagreement at all. Those are precisely the two rows where his correction table (KH
+            15:4-6) reads zero, which is how you can tell that is what the number counts from.
           </p>
           <p className="mt-2 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
             Neither of these is yet "where the moon is". Combining them is chapter 15's job.
@@ -134,9 +142,22 @@ function Figure({ mean, anomaly }) {
   const ey = cy - R * Math.sin(meanRad);
 
   // The moon on the rim of the small circle.
-  const anomalyRad = anomaly * DEG;
-  const mx = ex + r * Math.cos(anomalyRad);
-  const my = ey - r * Math.sin(anomalyRad);
+  //
+  // The maslul is measured FROM THE APOGEE of the small circle — the
+  // point furthest from the earth, which lies along the arm and turns
+  // with it. So the moon's absolute direction is the arm's direction
+  // less the maslul, not the maslul on its own.
+  //
+  // The engine settles both halves of this. KH 15:4-6's table gives a
+  // correction of exactly 0 at maslul 0° and 0° at 180° — which happens
+  // only if those two points are the ones lying on the earth-centre
+  // line — and KH 15:6 subtracts the correction below 180°, so the moon
+  // must appear *behind* the arm there. Drawing the maslul from a fixed
+  // direction instead put the moon off the line at 0° and 180° and gave
+  // it the wrong sign for half the circle.
+  const moonRad = (mean - anomaly) * DEG;
+  const mx = ex + r * Math.cos(moonRad);
+  const my = ey - r * Math.sin(moonRad);
 
   return (
     <figure className="mx-auto w-full max-w-[280px]">
