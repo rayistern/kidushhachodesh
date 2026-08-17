@@ -27,8 +27,9 @@ describe('the season comes from the sun because the zodiac is tropical', () => {
   const body = section('why-sun').body.join('\n');
 
   it('says the signs are anchored to the seasons, not the stars', () => {
-    expect(body).toMatch(/anchored to the seasons themselves, not to the stars/);
+    expect(body).toMatch(/anchored to the seasons, not to the stars/);
     expect(body).toMatch(/one fact written two ways/);
+    expect(body).toMatch(/13:11/);
   });
 
   it('reaches each quarter-point within a day of the real season', () => {
@@ -132,50 +133,36 @@ describe('the two month-lengths, and what may be claimed about them', () => {
     expect(body).toMatch(/lap of the small circle/);
   });
 
-  it('marks "closest approach" as a deduction, not a quotation', () => {
-    // A reader asked whether that phrase was the Rambam's or modern. It
-    // is neither exactly: it follows from his model, but he never
-    // mentions the moon's distance in this chapter.
-    expect(body).toMatch(/fair deduction from his model/);
-    expect(body).toMatch(/not a quotation/);
-    expect(body).toMatch(/modern gloss/);
-  });
-
-  it('quotes what KH 14:1 actually says, which is only the structure', () => {
-    expect(body).toMatch(/revolves in a small orbit that does not encompass the earth/);
-    expect(body).toMatch(/rotates in a larger orbit that encompasses the earth/);
+  it('marks the near-and-far reading as following from his model, not from him', () => {
+    // A reader asked whether "closest approach to closest approach" was
+    // his or modern. He never mentions the moon's distance in this
+    // chapter; the reading follows from the geometry of a small circle
+    // that does not enclose the earth. One sentence, not an essay — an
+    // earlier draft answered the question with three paragraphs of
+    // argument, which is a reply and not book prose.
+    expect(body).toMatch(/follows from his model rather than from anything he says/);
+    expect(body).toMatch(/never mentions the moon's distance/);
+    expect(body).not.toMatch(/modern gloss|not a quotation/);
   });
 
   it('does not claim the first lap returns to the same star', () => {
-    // His frame is tropical — established in chapter 13 and checked
-    // there — so a sidereal gloss would contradict the rest of the book.
-    // The phrase may appear, but only where it is being rejected — the
-    // prose quotes it to warn against it. So check the context rather
-    // than banning the words, which is what a first version did and
-    // which failed on the correction itself.
-    for (const m of body.matchAll(/same star/g)) {
-      const after = body.slice(m.index, m.index + 260);
-      expect(after, 'a "same star" mention must be refused on the spot').toMatch(
-        /but that is the one reading|not the stars/,
-      );
-    }
-    expect(body).toMatch(/anchored to the seasons, not the stars/);
-    // And it must never be stated flatly, the way it was before.
-    expect(body).not.toMatch(/— that is how long the moon takes to go once around the sky/);
+    // His frame is tropical, so a sidereal gloss would contradict the
+    // rest of the book. The prose simply says "the same point of it" and
+    // makes no claim either way, which is the honest position: see below
+    // for why his numbers cannot settle it.
+    expect(body).not.toMatch(/same star/);
+    expect(body).toMatch(/back to the same point of it/);
   });
 
-  it("is right that his figure cannot separate the two kinds of month", () => {
-    // The claim: they differ by ~7 seconds, and his sits between them
-    // about 1.5s from one and 5.5s from the other.
+  it("could not have settled sidereal versus tropical anyway", () => {
+    // Kept as a numeric fact even though the prose no longer discusses
+    // it, because it is the reason the prose stays silent: the two
+    // months are ~7s apart and his figure sits between them.
     expect((SIDEREAL - TROPICAL) * 86400).toBeGreaterThan(6);
     expect((SIDEREAL - TROPICAL) * 86400).toBeLessThan(8);
-
     const his = period(CONSTANTS.MOON.MEAN_MOTION_PER_DAY);
     expect(his).toBeGreaterThan(TROPICAL);
     expect(his).toBeLessThan(SIDEREAL);
-    expect(Math.abs(his - TROPICAL) * 86400).toBeLessThan(2);
-    expect(Math.abs(his - SIDEREAL) * 86400).toBeLessThan(6);
-    expect(body).toMatch(/about seven seconds/);
   });
 
   it('is right that the second rate matches the anomalistic month closely', () => {

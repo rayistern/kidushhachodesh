@@ -84,7 +84,7 @@ describe('the 354-day block is a lunar year and not a solar one', () => {
   it('is one of the six Hebrew year lengths from chapter 11', () => {
     // The prose leans on this to explain why the row exists at all.
     expect(body).toMatch(/common Hebrew year/);
-    expect(body).toMatch(/six year lengths/);
+    expect(body).toMatch(/six lengths from chapter 11/);
   });
 });
 
@@ -116,11 +116,11 @@ describe('the answer to the question actually asked', () => {
     // worry cannot survive. The engine agrees: the decomposition uses
     // only the powers of ten.
     expect(body).toMatch(/optional/);
-    expect(body).toMatch(/Nothing depends on them/);
+    expect(body).toMatch(/Drop them and you can still reach every answer/);
     // And says what they ARE for, since "optional" alone invites the
     // reader to think a row got deleted.
     expect(body).toMatch(/a \*\*check\*\*/);
-    expect(body).toMatch(/two independent routes to the same number/);
+    expect(body).toMatch(/two routes to the same number/);
   });
 
   it('and the engine really does decompose without them', () => {
