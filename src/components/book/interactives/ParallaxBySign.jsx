@@ -27,10 +27,25 @@
  * and where it is seen. That is used in preference to "parallax", which
  * is the modern term for the same thing and not his.
  */
-import React, { useState } from 'react';
-import InteractiveCard from '../../text/interactives/InteractiveCard';
+import React, { useState, useMemo } from 'react';
+import InteractiveCard, { PresetButton } from '../../text/interactives/InteractiveCard';
 import { CONSTANTS } from '../../../engine/constants';
-import { zodiacPosition } from '../../../engine/zodiac';
+import { zodiacPosition, ordinalSuffix } from '../../../engine/zodiac';
+import {
+  calculateNodePosition,
+  calculateMoonLatitude,
+  calculateMoonMeanLongitude,
+  calculateSeasonCorrection,
+  calculateMoonMaslul,
+  calculateDoubleElongation,
+  calculateMaslulHanachon,
+  lookupMoonMaslulCorrection,
+  calculateMoonTrueLongitude,
+} from '../../../engine/moonCalculations';
+import { calculateSunMeanLongitude, calculateSunApogee } from '../../../engine/sunCalculations';
+import { trueFromMean } from '../../../lib/maslulTable';
+import { formatDms, normalizeDegrees } from '../../../engine/dmsUtils';
+import { nextSightingNight } from '../../../lib/sightingNight';
 
 const LON = CONSTANTS.PARALLAX_LON_BY_MAZAL;
 const LAT = CONSTANTS.PARALLAX_LAT_BY_MAZAL;
@@ -49,10 +64,35 @@ const SIGHTING_MONTHS = [
 const MAX = Math.max(...LON.map((r) => r.chalakim), ...LAT.map((r) => r.chalakim));
 
 export default function ParallaxBySign() {
-  const [index, setIndex] = useState(1); // Shor — his worked evening
-  const [north, setNorth] = useState(false);
+  // Driven by a night, not by assertions. A first version had sign
+  // buttons and a bare "the moon is north" checkbox; a reader asked how
+  // anyone would know which way to set it. They would not — both facts
+  // are computed, so both now come from the engine for a chosen night.
+  const [days, setDays] = useState(29); // his worked evening
 
-  const sign = zodiacPosition(index * 30 + 15);
+  const night = useMemo(() => {
+    const sunMean = calculateSunMeanLongitude(days).result;
+    const sunTrue = trueFromMean(sunMean, calculateSunApogee(days).result).trueLongitude;
+    const moonAdj = normalizeDegrees(
+      calculateMoonMeanLongitude(days).result + calculateSeasonCorrection(sunTrue).result,
+    );
+    const hanachon = calculateMaslulHanachon(
+      calculateMoonMaslul(days).result,
+      calculateDoubleElongation(moonAdj, sunMean).result,
+    );
+    const correction = lookupMoonMaslulCorrection(hanachon.result);
+    const moonTrue = calculateMoonTrueLongitude(
+      moonAdj,
+      hanachon.result,
+      correction.result,
+      correction.direction,
+    ).result;
+    const latitude = calculateMoonLatitude(moonTrue, calculateNodePosition(days).result).result;
+    return { moonTrue, latitude };
+  }, [days]);
+
+  const index = Math.floor(normalizeDegrees(night.moonTrue) / 30);
+  const north = night.latitude >= 0;
   const lon = LON[index].chalakim;
   const lat = LAT[index].chalakim;
 
@@ -63,26 +103,39 @@ export default function ParallaxBySign() {
       blurb="the change in appearance — שינוי המראה — split into sideways and vertical"
       defaultOpen
     >
-      <div className="flex flex-wrap items-center gap-1">
-        {CONSTANTS.CONSTELLATION_TRANSLIT.map((name, i) => (
-          <button
-            key={name}
-            onClick={() => setIndex(i)}
-            className={`rounded px-1.5 py-0.5 text-[11px] transition-colors ${
-              i === index
-                ? 'bg-[var(--color-accent)] text-white'
-                : 'bg-[var(--color-card)] text-[var(--color-text-secondary)] hover:bg-[var(--color-border)]'
-            }`}
-          >
-            {name}
-            <span className="ml-1 opacity-60">{i + 1}</span>
-          </button>
-        ))}
+      <div className="flex flex-wrap items-end gap-2">
+        <label className="block">
+          <span className="text-xs font-bold text-[var(--color-text-secondary)]">
+            Days from the starting point
+          </span>
+          <input
+            type="number"
+            value={days}
+            onChange={(e) => setDays(Number(e.target.value) || 0)}
+            className="mt-1 block w-32 rounded border border-[var(--color-border)] bg-[var(--color-bg)] px-2 py-1 font-mono text-sm"
+          />
+        </label>
+        <PresetButton onClick={() => setDays(29)} title="2 Iyar — the example of KH 17:8-9">
+          His example (29)
+        </PresetButton>
+        <PresetButton
+          onClick={() => setDays(nextSightingNight().days)}
+          title="The evening after the 29th — the night the court would look"
+        >
+          Next Rosh Chodesh
+        </PresetButton>
       </div>
-      <p className="mt-1 text-[11px] text-[var(--color-text-secondary)]">
-        The {index + 1}
-        {['st', 'nd', 'rd'][index] ?? 'th'} sign — where sighting nights find the moon in{' '}
-        <strong>{SIGHTING_MONTHS[index]}</strong>, roughly.
+      <p className="mt-2 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
+        On this night the moon stands at{' '}
+        <strong className="font-mono">{formatDms(night.moonTrue)}</strong> — the{' '}
+        <strong>
+          {index + 1}
+          {ordinalSuffix(index + 1)}
+        </strong>{' '}
+        sign, where sighting nights fall in {SIGHTING_MONTHS[index]} — and sits{' '}
+        <strong className="font-mono">{formatDms(Math.abs(night.latitude))}</strong>{' '}
+        <strong>{north ? 'north' : 'south'}</strong> of the road. Both computed, neither chosen:
+        the sign from chapter 15's position, the side from chapter 16's.
       </p>
 
       <Curves index={index} />
@@ -114,24 +167,6 @@ export default function ParallaxBySign() {
         </div>
       </div>
 
-      <label className="mt-2 flex items-center gap-2 text-xs text-[var(--color-text-secondary)]">
-        <input
-          type="checkbox"
-          checked={north}
-          onChange={(e) => setNorth(e.target.checked)}
-          className="accent-[var(--color-accent)]"
-        />
-        The moon is north of the sun's track
-      </label>
-      {/* A bare toggle invited a fair question: how would anyone know
-          which way to set it? It is not a free choice — chapter 16
-          computes it — and the card must say where the fact comes from. */}
-      <p className="mt-1 text-[10px] leading-relaxed text-[var(--color-text-secondary)]">
-        Not something you choose — chapter 16 already answered it: how far the moon has travelled
-        past the up-crossing. Under half a circle and it is north; over, south. The card on that
-        page works it out for any date; the toggle here is only for seeing what each case does. On
-        his worked evening the moon was <strong>south</strong>, 3° 53′ below the road.
-      </p>
 
       <p className="mt-3 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
         Look at the two curves rather than the two lists. Each rises and falls once around the
