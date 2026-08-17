@@ -299,3 +299,41 @@ describe('why the one-to-two lock holds', () => {
     expect(body).toMatch(/not a coincidence; it is built in/);
   });
 });
+
+describe('nothing in the section requires guessing (reader sweep)', () => {
+  const chapter15 = bookChapter(15);
+  const all = chapter15.sections.flatMap((s) => s.body).join('\n');
+
+  it('uses one name for the far point, not an unannounced synonym', () => {
+    // A draft called it "the high point of the big circle" in the same
+    // paragraph that everywhere else says "far point" — two names, one
+    // thing, and the reader left to guess they were the same.
+    expect(all).not.toMatch(/high point of the big circle/);
+    expect(all).toMatch(/same kind of far point the sun had in chapter 12/);
+  });
+
+  it('does not reference "the table" before any table has appeared', () => {
+    expect(all).toMatch(/short table of nudges coming two sections below/);
+  });
+
+  it('gives the days-to-degrees conversion the bounds depend on', () => {
+    // "Two and a half days" became "thirty-one degrees" with no bridge.
+    // The bridge is the separation rate, and it checks out: moon 13.18
+    // minus sun 0.99 is 12.19 a day, so 2.5 days is 30.5 degrees and a
+    // few hours is a couple of degrees.
+    expect(all).toMatch(/twelve degrees a day\*\* — its thirteen, less the sun/);
+    const sun = dmsToDecimal(CONSTANTS.SUN.MEAN_MOTION_PER_DAY);
+    const moon = dmsToDecimal(CONSTANTS.MOON.MEAN_MOTION_PER_DAY);
+    expect(moon - sun).toBeGreaterThan(12);
+    expect(moon - sun).toBeLessThan(12.5);
+    expect(2.5 * (moon - sun)).toBeGreaterThan(30);
+    expect(2.5 * (moon - sun)).toBeLessThan(31.5);
+  });
+
+  it("no longer says chapter 14's sun told you the time of sunset", () => {
+    // Chapter 14's own section is at pains to say no clock is ever used;
+    // this opener contradicted it.
+    expect(all).not.toMatch(/told you what time sunset was/);
+    expect(all).toMatch(/stood in for the time of year/);
+  });
+});
