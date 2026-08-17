@@ -198,6 +198,11 @@ describe('why the gap gets doubled (KH 15:1)', () => {
     // is proof it should not have been used.
     expect(body).toMatch(/small circle\\'s distance|small circle's distance/);
     expect(body).not.toMatch(/epicycle/i);
+    // "Distance" must be flagged as angular. Doubly confusable here: the
+    // far point is NAMED for physical distance from the earth, while the
+    // two distances in the lock are degrees round the sky.
+    expect(body).toMatch(/degrees apart against the sky/);
+    expect(body).toMatch(/Not miles/);
     expect(body).toMatch(/נקודת הגובה/);
     expect(body).toMatch(/not a relabelling/);
   });
