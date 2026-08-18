@@ -16,6 +16,8 @@ import {
   elongationReaches,
   moonsetUtcHours,
   assessEvening,
+  moonDistanceKm,
+  yallopFor,
   DANJON_LIMIT_DEG,
 } from './moonVisibility';
 import { sunsetUtcHours } from './localObserver';
@@ -95,5 +97,58 @@ describe('the whole evening, assessed', () => {
     expect(['likely', 'challenging']).toContain(a.verdict);
     expect(a.elongationAtSunset).toBeGreaterThan(0);
     expect(a.windowMinutes).toBeGreaterThan(15);
+  });
+});
+
+describe("the moon's distance (for the crescent's width)", () => {
+  it('swings between a plausible perigee and apogee over two months', () => {
+    let min = Infinity;
+    let max = 0;
+    for (let h = 0; h < 60 * 24; h += 6) {
+      const d = moonDistanceKm(new Date(Date.UTC(2026, 0, 1) + h * 3600000));
+      min = Math.min(min, d);
+      max = Math.max(max, d);
+    }
+    expect(min).toBeGreaterThan(355000);
+    expect(min).toBeLessThan(372000);
+    expect(max).toBeGreaterThan(400000);
+    expect(max).toBeLessThan(407500);
+  });
+});
+
+describe("Yallop's q-test", () => {
+  const JLM = { latitude: 31.78, longitude: 35.2137 };
+
+  it('has nothing to say on the conjunction evening: the moon is down by dusk', () => {
+    expect(yallopFor(new Date(2026, 7, 12), JLM)).toBeNull();
+  });
+
+  it('the first evening past 7° is band D — the gate passes, the eye fails', () => {
+    // THE case that shows why the full check exists: elongation ~11° at
+    // sunset clears the Danjon gate ("likely" by the coarse reading),
+    // but ARCV ~7.5° against a 0.4' crescent gives q ~ -0.20 — optical
+    // aid needed. First naked-eye sighting of this moon is the NEXT
+    // evening, which is what the record shows for crescents this young.
+    const y = yallopFor(new Date(2026, 7, 13), JLM);
+    expect(y.code).toBe('D');
+    expect(y.q).toBeGreaterThan(-0.25);
+    expect(y.q).toBeLessThan(-0.15);
+    expect(assessEvening(new Date(2026, 7, 13), JLM).yallop.code).toBe('D');
+  });
+
+  it('one evening later the same moon is band A — easily visible', () => {
+    const y = yallopFor(new Date(2026, 7, 14), JLM);
+    expect(y.code).toBe('A');
+    expect(y.q).toBeGreaterThan(0.216);
+  });
+
+  it("the Rambam's worked evening of 1178 comes out visible, as KH 17 says", () => {
+    // q = -0.006: band B, visible in perfect conditions — his verdict
+    // and the modern criterion agree across eight centuries. (Pinned to
+    // B-or-C: the value sits a hair from the band edge, and the moon
+    // series is only good to ~0.05 deg.)
+    const y = yallopFor(new Date(1178, 3, 27), JLM);
+    expect(['B', 'C']).toContain(y.code);
+    expect(y.q).toBeGreaterThan(-0.16);
   });
 });

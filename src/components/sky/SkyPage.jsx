@@ -300,9 +300,9 @@ export default function SkyPage() {
 
 const MODERN_VERDICT_PROSE = {
   likely:
-    'a crescent could well be caught — it passed 7° before sunset and is still up after it.',
+    'a crescent is there to look for — past 7° before sunset and still up after it.',
   challenging:
-    'borderline — 7° arrives only between sunset and moonset, so the thinnest of crescents.',
+    'barely past the gate — 7° arrives only between sunset and moonset, the thinnest of crescents.',
   impossible: 'no sighting possible — the moon sets before opening 7° from the sun.',
   'no-crescent-yet': 'no crescent exists yet — conjunction falls after sunset this evening.',
   'daylight-only':
@@ -310,6 +310,17 @@ const MODERN_VERDICT_PROSE = {
   'not-crescent-night': 'not a first-crescent evening.',
   indeterminate: 'no moonset found near this sunset to test against.',
 };
+
+/** Yallop's bands, in words (NAO TN 69). */
+const YALLOP_PROSE = {
+  A: 'easily visible to the naked eye',
+  B: 'visible to the naked eye in perfect conditions',
+  C: 'optical aid may be needed to find it, then the eye can hold it',
+  D: 'optical aid needed throughout — the eye alone will not catch it',
+  E: 'not visible even with a telescope',
+  F: 'not visible — below the Danjon limit',
+};
+const yallopSighted = (code) => code === 'A' || code === 'B' || code === 'C';
 
 /**
  * The modern check, for information: does the crescent actually exist
@@ -331,7 +342,12 @@ function ModernCheck({ eve, his }) {
     const t = new Date(d.getTime() + offset * 3600000);
     return `${t.getUTCDate()} ${MONTHS[t.getUTCMonth()]}, ${formatClock(t.getUTCHours() + t.getUTCMinutes() / 60)}`;
   };
-  const modernSighted = check.verdict === 'likely' || check.verdict === 'challenging';
+  // The full check trumps the gate for "would an eye catch it": bands
+  // A-C count as sightable, D-F as not. Without a q value (moon down by
+  // dusk, or no crescent), the coarse gate stands in.
+  const modernSighted = check.yallop
+    ? yallopSighted(check.yallop.code)
+    : check.verdict === 'likely' || check.verdict === 'challenging';
   const comparable =
     his.isCandidate && check.verdict !== 'not-crescent-night' && check.verdict !== 'indeterminate';
   return (
@@ -356,8 +372,34 @@ function ModernCheck({ eve, his }) {
           }${check.windowMinutes != null ? ` — a ${check.windowMinutes} min window` : ''}`}
         />
       </div>
+      {check.yallop && (
+        <div className="mt-2 grid gap-2 sm:grid-cols-3">
+          <Readout
+            title="Best moment (Yallop)"
+            value={formatClock(check.yallop.bestUtc + offset)}
+            note={`sunset + 4/9 of the ${check.yallop.lagMinutes}-minute lag to moonset`}
+          />
+          <Readout
+            title="Arc of vision vs crescent width"
+            value={`${check.yallop.arcv.toFixed(1)}° over ${check.yallop.wPrime.toFixed(2)}′`}
+            note="the moon's height above the sun then, against the lune's thickness"
+          />
+          <Readout
+            title="q-test"
+            value={`q = ${check.yallop.q.toFixed(3)} — band ${check.yallop.code}`}
+            note={YALLOP_PROSE[check.yallop.code]}
+          />
+        </div>
+      )}
       <p className="mt-3 text-xs leading-relaxed">
         <strong>Modern reading:</strong> {MODERN_VERDICT_PROSE[check.verdict]}
+        {check.yallop && (
+          <>
+            {' '}
+            The full q-test says the crescent is <strong>{YALLOP_PROSE[check.yallop.code]}</strong>{' '}
+            (band {check.yallop.code}).
+          </>
+        )}
         {comparable && (
           <>
             {' '}
@@ -369,9 +411,11 @@ function ModernCheck({ eve, his }) {
         )}
       </p>
       <p className="mt-2 text-[10px] leading-relaxed text-[var(--color-text-secondary)]">
-        The check is elongation-only. Full modern forecasts (Yallop, Odeh) also weigh the
-        crescent's width and its height above the sun, so "could well be caught" here is the
-        generous end of modern practice.
+        Two criteria: the 7° gate asks whether a crescent <em>exists</em> to look for; Yallop's
+        q-test — the criterion fitted to 295 recorded first sightings (NAO TN 69, 1997), weighing
+        the moon's height above the sun against the crescent's width at the best moment of dusk —
+        asks whether an eye would <em>catch</em> it, in bands A (easy) through F (below the Danjon
+        limit). Cloud, dust and haze remain outside every criterion.
       </p>
     </section>
   );

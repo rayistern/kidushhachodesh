@@ -114,16 +114,18 @@ describe('the modern check panel', () => {
     expect(screen.getByText('Elongation at sunset')).toBeTruthy();
     // The stance: information only, never feeding the verdict.
     expect(screen.getByText(/none of this feeds it/)).toBeTruthy();
-    // And the honesty note about the criterion's generosity.
-    expect(screen.getByText(/Yallop, Odeh/)).toBeTruthy();
+    // Both criteria present: the existence gate and the catchability test.
+    expect(screen.getByText(/fitted to 295 recorded first sightings/)).toBeTruthy();
+    expect(screen.getByText(/Best moment \(Yallop\)/)).toBeTruthy();
   });
 
   it("agrees with KH 17 on his worked evening, and says so", async () => {
-    // Day 29 (the default): his verdict is "visible", and the modern
-    // check finds a real crescent with a window (pinned numerically in
-    // moonVisibility.test.js) — so the comparison line reports agreement.
+    // Day 29 (the default): his verdict is "visible", and Yallop's
+    // q-test puts the crescent in a naked-eye band (pinned numerically
+    // in moonVisibility.test.js) — the comparison line reports agreement.
     page();
     expect(await screen.findByText(/Modern reading:/)).toBeTruthy();
+    expect(screen.getByText(/q = −?-?\d\.\d{3} — band [ABC]/)).toBeTruthy();
     expect(screen.getByText(/the two agree this evening/)).toBeTruthy();
   });
 });

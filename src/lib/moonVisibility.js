@@ -18,10 +18,14 @@
  * moon, so times found by inverting it carry ~5-10 minutes), and
  * skyView's frame conversion for the moonset search.
  *
- * The criterion is deliberately elongation-only. A full modern sighting
- * forecast (Yallop, Odeh) also weighs crescent width and the moon's
- * altitude above the sun; "likely" here is the generous end of modern
- * practice, and the surfaces say so.
+ * Two criteria, coarse then full. The elongation gate (Danjon limit)
+ * answers whether a crescent EXISTS to look for; Yallop's q-test —
+ * the arc of vision against the crescent's width at "best time",
+ * fitted to 295 recorded sightings (Yallop 1997, NAO TN 69) — answers
+ * whether an eye would actually catch it, in bands A (easy) through F
+ * (below the Danjon limit). Geocentric altitudes without refraction,
+ * as Yallop's formulation takes them; the atmosphere itself (cloud,
+ * dust, haze) is outside every criterion here.
  *
  * Cross-checked in moonVisibility.test.js against an independently
  * generated table (Meeus ch. 49 conjunctions verified against
@@ -125,6 +129,88 @@ export function moonsetUtcHours(eveDate, observer) {
 }
 
 /**
+ * The moon's distance in km — Meeus ch. 47's ΣR, truncated to terms of
+ * 10 km and larger (good to ~±30 km, which moves the crescent width by
+ * far less than the q-test can resolve). The mean elements mirror
+ * modernMoonPosition's; only the cosine series differs.
+ */
+export function moonDistanceKm(date) {
+  const T = ((date.getTime() / 86400000 + 2440587.5) - 2451545.0) / 36525;
+  const norm = (d) => ((d % 360) + 360) % 360;
+  const D = norm(297.8501921 + 445267.1114034 * T - 0.0018819 * T * T);
+  const M = norm(357.5291092 + 35999.0502909 * T - 0.0001536 * T * T);
+  const Mp = norm(134.9633964 + 477198.8675055 * T + 0.0087414 * T * T);
+  const F = norm(93.272095 + 483202.0175233 * T - 0.0036539 * T * T);
+  const DEG = Math.PI / 180;
+  const E = 1 - 0.002516 * T;
+  // [coeff (m), d, m, mp, f] — distance terms ≥ 10 km, Meeus table 47.A.
+  const R = [
+    [-20905355, 0, 0, 1, 0], [-3699111, 2, 0, -1, 0], [-2955968, 2, 0, 0, 0],
+    [-569925, 0, 0, 2, 0], [48888, 0, 1, 0, 0], [-3149, 0, 0, 0, 2],
+    [246158, 2, 0, -2, 0], [-152138, 2, -1, -1, 0], [-170733, 2, 0, 1, 0],
+    [-204586, 2, -1, 0, 0], [-129620, 0, 1, -1, 0], [108743, 1, 0, 0, 0],
+    [104755, 0, 1, 1, 0], [10321, 2, 0, 0, -2], [79661, 0, 0, 1, -2],
+    [-34782, 4, 0, -1, 0], [-23210, 0, 0, 3, 0], [-21636, 4, 0, -2, 0],
+    [24208, 2, 1, -1, 0], [30824, 2, 1, 0, 0], [-16675, 1, 1, 0, 0],
+    [-12831, 2, -1, 1, 0], [-10445, 2, 0, 2, 0], [-11650, 4, 0, 0, 0],
+    [14403, 2, 0, -3, 0],
+  ];
+  const sum = R.reduce((acc, [c, d, m, mp, f]) => {
+    const e = m === 0 ? 1 : Math.abs(m) === 1 ? E : E * E;
+    return acc + c * e * Math.cos((d * D + m * M + mp * Mp + f * F) * DEG);
+  }, 0);
+  return 385000.56 + sum / 1000;
+}
+
+/**
+ * Yallop's q-test for one evening (NAO Technical Note 69, 1997) — the
+ * full modern criterion, fitted to 295 recorded first sightings.
+ *
+ * At "best time" (sunset + 4/9 of the sunset-to-moonset lag): ARCV is
+ * the arc of vision, the moon's altitude above the sun's; ARCL the arc
+ * of light, the true angular separation; W' the crescent's width in
+ * arcminutes, the lune's thickness SD·(1 − cos ARCL). Then
+ *
+ *   q = (ARCV − (11.8371 − 6.3226·W' + 0.7319·W'² − 0.1018·W'³)) / 10
+ *
+ * read against Yallop's bands:
+ *   A  q > +0.216   easily visible to the naked eye
+ *   B  q > −0.014   visible in perfect conditions
+ *   C  q > −0.160   may need optical aid to FIND, then naked-eye
+ *   D  q > −0.232   needs optical aid throughout
+ *   E  q > −0.293   not visible even with a telescope
+ *   F  below        not visible; under the Danjon limit
+ *
+ * Returns null when the moon is down by sunset (no lag to take 4/9 of):
+ * the q-test is a dusk criterion and has nothing to say about a
+ * daylight-only window.
+ */
+export function yallopFor(eveDate, observer) {
+  const sunsetUtc = sunsetUtcHours(eveDate, observer);
+  const moonsetUtc = moonsetUtcHours(eveDate, observer);
+  if (sunsetUtc == null || moonsetUtc == null) return null;
+  const lagHours = moonsetUtc - sunsetUtc;
+  if (lagHours <= 0) return null;
+  const bestUtc = sunsetUtc + (4 / 9) * lagHours;
+  const midnightUtc = Date.UTC(eveDate.getFullYear(), eveDate.getMonth(), eveDate.getDate(), 0, 0, 0);
+  const instant = new Date(midnightUtc + bestUtc * HOUR_MS);
+  const jd = jdAt(eveDate, bestUtc);
+  const moon = modernMoonPosition(instant);
+  const sunLon = modernSunLongitude(instant);
+  const moonH = skyPosition(moon.longitude, moon.latitude, jd, observer);
+  const sunH = skyPosition(sunLon, 0, jd, observer);
+  const DEG = Math.PI / 180;
+  const dLon = ((moon.longitude - sunLon + 540) % 360) - 180;
+  const arcl = Math.acos(Math.cos(moon.latitude * DEG) * Math.cos(dLon * DEG)) / DEG;
+  const arcv = moonH.altitude - sunH.altitude;
+  const sdArcmin = (1737.4 / moonDistanceKm(instant)) * (180 / Math.PI) * 60;
+  const wPrime = sdArcmin * (1 - Math.cos(arcl * DEG));
+  const q = (arcv - (11.8371 - 6.3226 * wPrime + 0.7319 * wPrime ** 2 - 0.1018 * wPrime ** 3)) / 10;
+  const code = q > 0.216 ? 'A' : q > -0.014 ? 'B' : q > -0.16 ? 'C' : q > -0.232 ? 'D' : q > -0.293 ? 'E' : 'F';
+  return { bestUtc, lagMinutes: Math.round(lagHours * 60), arcv, arcl, wPrime, q, code };
+}
+
+/**
  * The whole modern question for one evening, answered at once.
  *
  * Verdict keys, in the order the evening's facts eliminate them:
@@ -169,5 +255,9 @@ export function assessEvening(eveDate, observer) {
     sevenDeg,
     elongationAtSunset,
     verdict,
+    // The full criterion, where it applies: a crescent-shaped evening
+    // with the moon still up at sunset.
+    yallop:
+      elongationAtSunset >= 0 && elongationAtSunset <= 40 ? yallopFor(eveDate, observer) : null,
   };
 }
