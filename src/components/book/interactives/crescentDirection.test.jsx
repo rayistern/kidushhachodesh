@@ -11,7 +11,7 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import React from 'react';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
-import CrescentDirection, { mouthScreenRotation } from './CrescentDirection';
+import CrescentDirection, { mouthScreenRotation, crescentScene } from './CrescentDirection';
 import { crescentDirection } from '../../../lib/khDeclination';
 import { skyPosition, jdAt } from '../../../lib/skyView';
 import { getFullCalculation } from '../../../engine/pipeline';
@@ -76,5 +76,32 @@ describe('the drawing shows the reversal instead of contradicting it', () => {
   it('states the not-exact caveat in his own terms', () => {
     render(<CrescentDirection />);
     expect(screen.getByText(/will not be exact/)).toBeTruthy();
+  });
+});
+
+describe('the scene obeys its own caption: bulge toward the sun', () => {
+  it.each([[14, 'south-east'], [0, 'due east'], [-14, 'north-east']])(
+    'at %i° from the equator the drawn sun sits opposite the mouth',
+    (fromEquator, horns) => {
+      const { mx, my, mouth, glow, groundY } = crescentScene(fromEquator, horns);
+      const toGlow = { x: glow.x - mx, y: glow.y - my };
+      const len = Math.hypot(toGlow.x, toGlow.y);
+      // Opposite side of the mouth (bulge side), nearly collinear —
+      // "nearly" because the glow is clamped just below the horizon.
+      const dot = (mouth.x * toGlow.x + mouth.y * toGlow.y) / len;
+      const cross = Math.abs(mouth.x * toGlow.y - mouth.y * toGlow.x) / len;
+      expect(dot).toBeLessThan(-0.99);
+      expect(cross).toBeLessThan(0.12);
+      // And below the horizon, where a set sun belongs.
+      expect(glow.y).toBeGreaterThan(groundY);
+    },
+  );
+
+  it('labels the glow as the set sun, not as due west', () => {
+    // Parking the glow at due west was the root of both reader
+    // complaints; it is now positioned per case and named for what it is.
+    render(<CrescentDirection />);
+    expect(screen.getByText('the set sun')).toBeTruthy();
+    expect(screen.queryByText(/west — where the sun has just set/)).toBeNull();
   });
 });

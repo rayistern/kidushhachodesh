@@ -109,40 +109,62 @@ export function mouthScreenRotation(horns) {
   return 0; // due east — straight up
 }
 
-/** The western horizon at sunset, with the moon where the rule puts it. */
-function Sky({ fromEquator, horns }) {
+/**
+ * The whole scene's geometry, exported so its one invariant is pinned:
+ * the drawn sun sits exactly opposite the crescent's mouth, so the
+ * bulge always faces it — the rule the caption teaches. A version that
+ * kept the sun-glow parked at due west broke that rule visibly (a
+ * reader asked why the shape made no sense given where the sun was).
+ * Placing the sun along the bulge is also truer: on his evening the
+ * real sun set at azimuth 290, NORTH of west — not at the centre.
+ */
+export function crescentScene(fromEquator, horns) {
   const w = 380;
-  const h = 190;
   const groundY = 150;
   const cx = w / 2;
-
-  // Lean the moon's position with its equator distance (right = north,
-  // since we face west), and rotate the crescent to the halacha's own
-  // answer for that case — not to a radial guess.
   const lean = Math.max(-1, Math.min(1, fromEquator / 24));
   const mx = cx + lean * 110;
   const my = groundY - 58 - Math.abs(lean) * 6;
-  const hornAngle = mouthScreenRotation(horns);
+  const rotation = mouthScreenRotation(horns);
+  // Mouth unit vector on screen; the bulge is its exact opposite, and
+  // the sun-glow sits along the bulge, below the horizon.
+  const rad = ((rotation - 90) * Math.PI) / 180;
+  const mouth = { x: Math.cos(rad), y: Math.sin(rad) };
+  const glow = { x: mx - mouth.x * 95, y: Math.max(groundY + 6, my - mouth.y * 95) };
+  return { w, groundY, cx, mx, my, rotation, mouth, glow };
+}
+
+/** The western horizon at sunset, with the moon where the rule puts it. */
+function Sky({ fromEquator, horns }) {
+  const { w, groundY, cx, mx, my, rotation, mouth, glow } = crescentScene(fromEquator, horns);
+  const h = 190;
 
   return (
     <figure className="mt-3">
       <svg viewBox={`0 0 ${w} ${h}`} className="w-full" role="img"
-        aria-label="The western horizon at sunset with the crescent moon leaning north or south and its horns pointing the opposite way">
+        aria-label="The western horizon after sunset with the crescent moon leaning north or south, its bulge facing the set sun and its horns aiming the opposite way">
         <line x1="10" y1={groundY} x2={w - 10} y2={groundY} stroke="var(--color-border)" strokeWidth="1.5" />
         <text x={cx} y={groundY + 16} fontSize="9" textAnchor="middle" fill="var(--color-text-secondary)">
-          west — where the sun has just set
+          west
         </text>
         <text x="14" y={groundY - 6} fontSize="9" fill="var(--color-text-secondary)">south</text>
         <text x={w - 14} y={groundY - 6} fontSize="9" textAnchor="end" fill="var(--color-text-secondary)">
           north
         </text>
 
-        {/* the set sun, as a glow at the centre of the horizon */}
-        <circle cx={cx} cy={groundY} r="26" fill="var(--color-gold)" fillOpacity="0.13" />
-        <circle cx={cx} cy={groundY} r="13" fill="var(--color-gold)" fillOpacity="0.2" />
+        {/* the set sun — below the horizon, along the bulge, so the lit
+            back of the bow visibly faces it */}
+        <circle cx={glow.x} cy={glow.y} r="24" fill="var(--color-gold)" fillOpacity="0.13" />
+        <circle cx={glow.x} cy={glow.y} r="12" fill="var(--color-gold)" fillOpacity="0.22" />
+        <text x={glow.x} y={Math.min(glow.y + 26, h - 4)} fontSize="8" textAnchor="middle" fill="var(--color-text-secondary)">
+          the set sun
+        </text>
 
-        {/* the crescent, rotated so its horns face away from the sun */}
-        <g transform={`translate(${mx} ${my}) rotate(${hornAngle})`}>
+        {/* faint line from sun to moon: the bulge faces along it */}
+        <line x1={glow.x} y1={glow.y} x2={mx} y2={my} stroke="var(--color-gold)" strokeWidth="0.75" strokeDasharray="3 4" opacity="0.5" />
+
+        {/* the crescent, rotated to the halacha's answer */}
+        <g transform={`translate(${mx} ${my}) rotate(${rotation})`}>
           <defs>
             <mask id="kh-horns">
               <rect x="-30" y="-30" width="60" height="60" fill="black" />
@@ -153,37 +175,30 @@ function Sky({ fromEquator, horns }) {
           <circle cx="0" cy="0" r="17" fill="var(--color-silver)" mask="url(#kh-horns)" />
         </g>
 
-        {/* The pointing, drawn as an arrow out of the crescent's mouth,
-            using the same screen rotation as the bow — so arrow, bow and
-            label agree by construction. Up is east; left is south. */}
-        {(() => {
-          const rad = ((hornAngle - 90) * Math.PI) / 180; // mouth vector
-          const ux = Math.cos(rad);
-          const uy = Math.sin(rad);
-          const x1 = mx + ux * 24;
-          const y1 = my + uy * 24;
-          const x2 = mx + ux * 56;
-          const y2 = my + uy * 56;
-          return (
-            <g>
-              <defs>
-                <marker id="kh-horn-arrow" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="5" markerHeight="5" orient="auto">
-                  <path d="M 0 0 L 8 4 L 0 8 z" fill="var(--color-gold)" />
-                </marker>
-              </defs>
-              <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="var(--color-gold)" strokeWidth="1.5" markerEnd="url(#kh-horn-arrow)" />
-              <text
-                x={x2 + ux * 12}
-                y={y2 + uy * 12 - 2}
-                fontSize="9"
-                fill="var(--color-gold)"
-                textAnchor="middle"
-              >
-                horns → {horns}
-              </text>
-            </g>
-          );
-        })()}
+        {/* the pointing, out of the mouth, sharing the same vectors */}
+        <line
+          x1={mx + mouth.x * 24}
+          y1={my + mouth.y * 24}
+          x2={mx + mouth.x * 56}
+          y2={my + mouth.y * 56}
+          stroke="var(--color-gold)"
+          strokeWidth="1.5"
+          markerEnd="url(#kh-horn-arrow2)"
+        />
+        <defs>
+          <marker id="kh-horn-arrow2" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="5" markerHeight="5" orient="auto">
+            <path d="M 0 0 L 8 4 L 0 8 z" fill="var(--color-gold)" />
+          </marker>
+        </defs>
+        <text
+          x={mx + mouth.x * 68}
+          y={my + mouth.y * 68 - 2}
+          fontSize="9"
+          fill="var(--color-gold)"
+          textAnchor="middle"
+        >
+          horns → {horns}
+        </text>
       </svg>
       <figcaption className="text-center text-[11px] text-[var(--color-text-secondary)]">
         The corner labels name the horizon's compass ends; the gold arrow names the horns. Bulge
