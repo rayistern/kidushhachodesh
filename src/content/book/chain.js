@@ -28,6 +28,30 @@
 
 export const CHAIN_NODES = [
   {
+    id: 'molad',
+    label: 'Add up the average new moons',
+    hebrew: 'מולד',
+    chapter: 6,
+    stepId: 'meanMoladOfMonth',
+    blurb: 'One anchor, one interval, addition — the calendar\'s raw material.',
+  },
+  {
+    id: 'rosh-hashanah',
+    label: 'Fix the day Rosh HaShanah falls',
+    hebrew: 'דחיות',
+    chapter: 7,
+    stepId: null,
+    blurb: 'The molad proposes; four postponements dispose.',
+  },
+  {
+    id: 'year-shape',
+    label: 'Shape the year — every month\'s length',
+    hebrew: 'קביעה',
+    chapter: 8,
+    stepId: null,
+    blurb: 'Two Rosh HaShanahs force all the months between them.',
+  },
+  {
     id: 'days',
     label: 'Count the days since the starting point',
     hebrew: null,
