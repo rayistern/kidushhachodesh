@@ -99,12 +99,12 @@ export default {
   sections: [
     {
       id: 'the-two-numbers',
-      heading: 'Two numbers, and what they are called',
+      heading: 'Two numbers, and what they are called — steps 3 and 4 of the chain',
       source: 'KH 17:1',
       nodeId: 'arc',
       body: [
         'The chapter opens by naming the two things it will work with, and both are already in your hands.',
-        'Subtract the sun\'s position from the moon\'s. That is **the gap** — how far the moon has pulled clear of the sun along the sun\'s own road. The text calls it the *first longitude*. It is the single most important number in the chapter, and you have been computing it since chapter 15 under a different name.',
+        'Subtract the sun\'s position from the moon\'s. That is **the gap** — how far the moon has pulled clear of the sun along the sun\'s own road. The text calls it the *first longitude* — **אורך ראשון**. It is the single most important number in the chapter, and you have been computing it since chapter 15 under a different name.',
         'The moon\'s height off the sun\'s road, from chapter 16, comes in as **the height** — the text\'s *first latitude*, **רוחב ראשון**. Keep the direction with it; north and south behave differently from here on.',
         'The Rambam says to have both "at hand". He means it — they get used repeatedly, including right at the end, long after several rounds of adjustment have produced other numbers that look similar and are not the same.',
       ],
@@ -162,7 +162,7 @@ export default {
 
     {
       id: 'by-sign',
-      heading: 'The corrections that depend on which sign the moon is in',
+      heading: 'The corrections that depend on which sign the moon is in — steps 5 and 6',
       source: 'KH 17:5',
       nodeId: 'arc',
       body: [
@@ -177,7 +177,7 @@ export default {
 
     {
       id: 'the-slice',
-      heading: 'The slice — one shape, not a list',
+      heading: 'The slice — one shape, not a list — step 7',
       source: 'KH 17:10',
       nodeId: 'arc',
       body: [
@@ -190,7 +190,7 @@ export default {
 
     {
       id: 'the-stretch',
-      heading: 'The stretch — not the slice again',
+      heading: 'The stretch — not the slice again — step 8',
       source: 'KH 17:12',
       nodeId: 'arc',
       body: [
@@ -202,12 +202,12 @@ export default {
 
     {
       id: 'three-more',
-      heading: 'The finish',
+      heading: 'The finish — steps 9 and 10',
       source: 'KH 17:10',
       nodeId: 'arc',
       body: [
         'One step remains, and then the whole chain runs below — every step showing what it is built from. Keep the tally straight by what each touch *produces*: the gap began as the *first longitude*; standing-on-the-ground made the *second*; the slice made the *third*; the stretch, the *fourth*.',
-        'Then, finally, go back to the **original** height — the one you were told to keep at hand, before any adjustment — take **two thirds** of it, always two thirds for the land of Israel, and apply that to the gap: north adds, south takes away.',
+        'Then, finally, go back to the **original** height — the one you were told to keep at hand, before any adjustment — take **two thirds** of it, always two thirds for the land of Israel, and apply that to the gap: north adds, south takes away. Two thirds of a height that can reach five degrees is a swing of more than three degrees between a northern moon and a southern one — the heaviest single lever in the whole chain, on verdicts whose margins are often fractions of a degree.',
         'What comes out is **the final figure** — the *arc of sighting*, קשת הראייה. The verdict depends on it and nothing else.',
       ],
       interactive: 'visibility-chain',

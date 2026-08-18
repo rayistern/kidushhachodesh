@@ -72,8 +72,9 @@ describe('the five pairs, from the constants', () => {
     }
     // The sun's rate carries the operative third of a second.
     expect(screen.getByText(/0° 59′ 8\.33″ a day/)).toBeTruthy();
-    // The node runs backwards, and the page says so.
-    expect(screen.getByText(/backwards/)).toBeTruthy();
+    // The node runs backwards, and the page says so (in the table and
+    // again in the odd-ones section).
+    expect(screen.getAllByText(/backwards/).length).toBeGreaterThan(0);
   });
 
   it('cites the epoch and each statement', () => {
@@ -82,6 +83,16 @@ describe('the five pairs, from the constants', () => {
     for (const ref of ['KH 12:1-2', 'KH 12:2', 'KH 14:1, 14:4', 'KH 14:3-4', 'KH 16:2-3']) {
       expect(screen.getByText(ref)).toBeTruthy();
     }
+  });
+});
+
+describe('the two odd ones', () => {
+  it('states the stakes of each: the gap transfer, and the heaviest lever', () => {
+    page();
+    expect(screen.getByText(/lands one-for-one in/)).toBeTruthy();
+    expect(screen.getByText(/up to 5°, north or south/)).toBeTruthy();
+    expect(screen.getByText(/no\s+eclipse of the sun every month/)).toBeTruthy();
+    expect(screen.getByText(/full lap in about 18.6 years/)).toBeTruthy();
   });
 });
 

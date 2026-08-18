@@ -188,6 +188,45 @@ export default function ThirteenNumbers() {
         </section>
 
         <section>
+          <h2 className="text-base font-bold">The two odd ones, and why they earn their place</h2>
+          <p className="mt-2">
+            Three of the five are self-explanatory — you need to know where the sun and moon are,
+            and the maslul is the moon's version of the story below. The other two look like
+            bookkeeping and are anything but.
+          </p>
+          <p className="mt-2">
+            <strong>The slow point (apogee)</strong> is where the sun's unevenness is anchored.
+            The sun drags near that point and hurries opposite it, and{' '}
+            <Link to="/book/13" className="text-[var(--color-accent)] hover:underline">
+              chapter 13's correction
+            </Link>{' '}
+            is looked up entirely by the sun's distance from it — reaching{' '}
+            <strong>1° 59′</strong> at ninety degrees away. Skip it and you are stuck with the
+            pretend sun, wrong by up to two degrees — and that error lands one-for-one in{' '}
+            <strong>the gap</strong> (moon minus sun), on which the verdict lives, with its
+            thresholds only single degrees apart. It is also why the seasons run unequal lengths;
+            and its crawl of a degree per seventy years is stated so the method would not quietly
+            expire — by now it has drifted a whole sign's worth of thirteen degrees.
+          </p>
+          <p className="mt-2">
+            <strong>The crossing point (node)</strong> is where the moon's tilt is anchored. The
+            moon does not ride the sun's road; its path is tilted against it, and{' '}
+            <Link to="/book/16" className="text-[var(--color-accent)] hover:underline">
+              chapter 16
+            </Link>{' '}
+            turns the moon's distance from the crossing into its <strong>height off the road —
+            up to 5°, north or south</strong>. That one number is the heaviest lever in the
+            verdict: it decides whether the crescent hangs above the road or below it at dusk,
+            and in the chain's last step two thirds of it swing the arc by more than three
+            degrees between a northern moon and a southern one. It also explains why there is no
+            eclipse of the sun every month — the monthly pass almost always sails above or below,
+            and only a meeting near a crossing truly lines up. And because the crossing walks{' '}
+            <em>backwards</em> (his 3′ 11″ a day works out to a full lap in about 18.6 years),
+            the pattern of high-riding and low-riding crescents slides slowly through the years.
+          </p>
+        </section>
+
+        <section>
           <h2 className="text-base font-bold">What the famous tables are not</h2>
           <p className="mt-2">
             The correction tables — the sun's (KH 13), the moon's (KH 15), the latitude rule with
