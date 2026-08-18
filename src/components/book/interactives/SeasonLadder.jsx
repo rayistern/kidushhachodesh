@@ -17,9 +17,16 @@
  * finer unit precisely because his year is not a round number of
  * quarter-days.
  */
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import InteractiveCard, { PresetButton } from '../../text/interactives/InteractiveCard';
 import { PARTS_PER_HOUR, PARTS_PER_DAY } from '../../../engine/fixedCalendar/constants';
+import {
+  shmuelNisanRd,
+  addaNisanRd,
+  rambamTrueNisanRd,
+  realNisanRd,
+  rdToDate,
+} from '../../../lib/tekufotCompare';
 
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Shabbat'];
 const WEEK_PARTS = 7 * PARTS_PER_DAY;
@@ -127,6 +134,54 @@ export default function SeasonLadder() {
           matters.
         </div>
       </div>
+
+      {/* The real numbers, at the reader's request: the same tekufah
+          four ways — his two traditions, his own true sun (the third
+          and finest method, KH 13:11), and the sky. Heavy scans, so
+          memoized on the year. */}
+      {(() => {
+        const rows = useMemo(() => {
+          const real = realNisanRd(year);
+          const fmt = (rd) => {
+            if (rd == null) return { date: '—', gap: '' };
+            const d = rdToDate(rd);
+            return {
+              date: d.toISOString().slice(0, 10),
+              gap: real == null ? '' : `${rd - real >= 0 ? '+' : '−'}${Math.abs(rd - real).toFixed(1)}d vs the sky`,
+            };
+          };
+          return [
+            { who: "Shmuel (this chapter's)", tag: '[R]', ...fmt(shmuelNisanRd(year)) },
+            { who: "Rav Adda (chapter 10's)", tag: '[R]', ...fmt(addaNisanRd(year)) },
+            { who: "the Rambam's own true sun (13:11)", tag: '[R]', ...fmt(rambamTrueNisanRd(year)) },
+            { who: 'the real sky', tag: '[M]', ...fmt(real) },
+          ];
+        }, [year]);
+        return (
+          <div className="mt-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] p-3">
+            <div className="text-xs font-bold text-[var(--color-text-secondary)]">
+              The real numbers — tekufat Nisan of {year}, four ways
+            </div>
+            <table className="mt-1.5 w-full text-xs">
+              <tbody>
+                {rows.map((r) => (
+                  <tr key={r.who} className="border-b border-[var(--color-border)]/40 last:border-0">
+                    <td className="py-1 pr-2 text-[var(--color-text-secondary)]">{r.who}</td>
+                    <td className="py-1 pr-2 font-mono text-[var(--color-gold)]">{r.date}</td>
+                    <td className="py-1 font-mono text-[10px] text-[var(--color-text-secondary)]">{r.gap}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <p className="mt-1.5 text-[10px] leading-relaxed text-[var(--color-text-secondary)]">
+              Dates are civil (proleptic Gregorian). His own true-sun method beats both traditions
+              by an order of magnitude — and Shmuel's drift went unnoticed for centuries because
+              his year IS the Julian year, exactly 365¼ days, so the civil calendar drifted in
+              lockstep with him until the Gregorian reform.
+            </p>
+          </div>
+        );
+      })()}
 
       <p className="mt-3 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
         The honest row, in his own words (KH 10:7): <em>both</em> reckonings run on the mean sun,

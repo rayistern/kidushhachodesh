@@ -144,3 +144,34 @@ describe("KH 10:7's two days IS chapter 13's correction at its peak", () => {
     expect(prose(10)).toMatch(/two days of the sun's travel/);
   });
 });
+
+describe('chapter 9 answers whether the tekufot are used', () => {
+  it('says nothing downstream consumes them, and where each survives', () => {
+    const body = prose(9);
+    expect(body).toMatch(/nothing consumes them/);
+    expect(body).toMatch(/nineteen-year cycle \*is\* his year/);
+    expect(body).toMatch(/supersedes both with the true sun \(13:11\)/);
+    expect(body).toMatch(/blessing of the sun/);
+    expect(body).toMatch(/sixty days after his autumn tekufah/);
+  });
+
+  it('is true that nothing in the engine consumes a tekufah', async () => {
+    // The verdict pipeline and the fixed calendar know nothing of
+    // chapters 9-10; the claim is structural, so it is asserted
+    // structurally: no engine module exports anything tekufah-named.
+    const mods = await Promise.all([
+      import('../../engine/pipeline'),
+      import('../../engine/fixedCalendar/index'),
+      import('../../engine/sunCalculations'),
+      import('../../engine/moonCalculations'),
+    ]);
+    // /tekuf/ only: the engine legitimately exports
+    // calculateSeasonCorrection, which is KH 14:5's sunset nudge — a
+    // different "season" from chapters 9-10's tekufot.
+    for (const m of mods) {
+      for (const key of Object.keys(m)) {
+        expect(key.toLowerCase()).not.toMatch(/tekuf/);
+      }
+    }
+  });
+});
