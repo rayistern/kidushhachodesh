@@ -13,11 +13,12 @@ import { describe, it, expect, afterEach } from 'vitest';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { render, screen, cleanup, fireEvent } from '@testing-library/react';
-import SkyPage from './SkyPage';
+import SkyPage, { eveningOf } from './SkyPage';
 import { getFullCalculation } from '../../engine/pipeline';
 import { dateFromEpochDays } from '../../engine/epochDays';
 import { skyPosition, jdAt } from '../../lib/skyView';
 import { sunsetUtcHours, RAMBAM_REFERENCE } from '../../lib/localObserver';
+import { modernMoonPosition, modernSunLongitude, angularDifference } from '../../lib/modernAstronomy';
 
 afterEach(cleanup);
 
@@ -52,10 +53,12 @@ describe("his worked evening's scene, numerically", () => {
   it('puts the sun just below the west horizon and the moon just above it', () => {
     // The same numbers the figure plots, computed the same way.
     const obs = { latitude: 31.78, longitude: 35.2137 };
-    const date = dateFromEpochDays(29);
-    const calc = getFullCalculation(date);
-    const utc = sunsetUtcHours(date, { ...RAMBAM_REFERENCE }) + 20 / 60;
-    const jd = jdAt(date, utc);
+    // The evening BEGINNING Hebrew day 29 — one civil day before the
+    // daytime date. Pinned this way after the one-day pairing bug.
+    const { daytime, eve } = eveningOf(29);
+    const calc = getFullCalculation(daytime);
+    const utc = sunsetUtcHours(eve, { ...RAMBAM_REFERENCE }) + 20 / 60;
+    const jd = jdAt(eve, utc);
     const sun = skyPosition(calc.sun.trueLongitude, 0, jd, obs);
     const moon = skyPosition(calc.moon.trueLongitude, calc.moon.latitude, jd, obs);
 
@@ -123,5 +126,28 @@ describe('the curve of the belt is explained', () => {
     }
     expect(Math.max(...alts)).toBeGreaterThan(20); // well up the sky
     expect(Math.min(...alts)).toBeLessThan(2); // down to the horizon
+  });
+});
+
+describe('the evening pairing (the one-day bug)', () => {
+  it("draws the evening before the day-count's civil daytime", () => {
+    const { daytime, eve } = eveningOf(29);
+    expect((daytime - eve) / 86400000).toBe(1);
+    // His example: night beginning Friday 2 Iyar = Thursday's evening.
+    expect(daytime.toISOString().slice(0, 10)).toBe('1178-04-28');
+    expect(eve.toISOString().slice(0, 10)).toBe('1178-04-27');
+  });
+
+  it('puts his moon within 1.5° of the real moon on his worked evening', () => {
+    // THE regression test. At the wrong evening the gap was 13° — a full
+    // day of moon travel — and the real-sky toggle exposed it.
+    const { daytime, eve } = eveningOf(29);
+    const calc = getFullCalculation(daytime);
+    const utc = sunsetUtcHours(eve, { ...RAMBAM_REFERENCE }) + 20 / 60;
+    const instant = new Date(Date.UTC(eve.getFullYear(), eve.getMonth(), eve.getDate(), 0, 0, 0) + utc * 3600000);
+    const moonGap = Math.abs(angularDifference(calc.moon.trueLongitude, modernMoonPosition(instant).longitude));
+    const sunGap = Math.abs(angularDifference(calc.sun.trueLongitude, modernSunLongitude(instant)));
+    expect(moonGap).toBeLessThan(1.5);
+    expect(sunGap).toBeLessThan(1.0);
   });
 });

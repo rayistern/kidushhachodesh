@@ -63,10 +63,14 @@ describe('the drawing shows the reversal instead of contradicting it', () => {
     // equator) stands at a smaller azimuth-from-north-offset than the
     // sun's set-point — i.e. on its SOUTH side, facing west.
     const obs = { latitude: 31.78, longitude: 35.2137 };
-    const date = dateFromEpochDays(29);
-    const calc = getFullCalculation(date);
-    const utc = sunsetUtcHours(date, { ...RAMBAM_REFERENCE }) + 20 / 60;
-    const jd = jdAt(date, utc);
+    // The evening beginning 2 Iyar — one civil day before the daytime
+    // date (the /sky page's one-day pairing bug, fixed everywhere).
+    const daytime = dateFromEpochDays(29);
+    const eve = new Date(daytime);
+    eve.setDate(eve.getDate() - 1);
+    const calc = getFullCalculation(daytime);
+    const utc = sunsetUtcHours(eve, { ...RAMBAM_REFERENCE }) + 20 / 60;
+    const jd = jdAt(eve, utc);
     const sun = skyPosition(calc.sun.trueLongitude, 0, jd, obs);
     const moon = skyPosition(calc.moon.trueLongitude, calc.moon.latitude, jd, obs);
     expect(moon.azimuth).toBeLessThan(sun.azimuth); // south of it, facing west

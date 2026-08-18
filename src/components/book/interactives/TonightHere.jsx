@@ -78,9 +78,15 @@ export default function TonightHere() {
     if (parts.length !== 3 || parts.some(Number.isNaN)) return null;
     const date = new Date(parts[0], parts[1] - 1, parts[2], 12);
     if (Number.isNaN(date.getTime())) return null;
+    // The engine's day N describes the evening BEGINNING Hebrew day N —
+    // and the Hebrew day beginning at this civil date's nightfall is the
+    // NEXT day's daytime. Pairing the calc with the same civil day gave
+    // last night's verdict under tonight's sunset (found via the /sky
+    // page's one-day moon jump, then traced here).
+    const nextNoon = new Date(parts[0], parts[1] - 1, parts[2] + 1, 12);
     try {
       return {
-        calc: getFullCalculation(date),
+        calc: getFullCalculation(nextNoon),
         base: rambamWindow(date),
         local: localOffsets(date, observer),
       };

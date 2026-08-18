@@ -39,14 +39,37 @@ const OBSERVER = { latitude: 31.78, longitude: 35.2137 };
 const EXAMPLE_DAYS = 29;
 
 function todayDays() {
+  // TONIGHT: the evening beginning the NEXT Hebrew day. daysFromEpoch of
+  // today's noon names the Hebrew day that began LAST night.
   const now = new Date();
-  return daysFromEpoch(new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12));
+  return daysFromEpoch(new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12)) + 1;
+}
+
+/**
+ * The civil evening of day count N.
+ *
+ * The engine's N means THE EVENING BEGINNING Hebrew day N — the epoch
+ * itself is "the eve of Thursday, 3 Nisan", i.e. Wednesday's civil
+ * evening. dateFromEpochDays(N) returns the civil date of that Hebrew
+ * day's DAYTIME, so the evening in question is the civil date before
+ * it. A first version of this page paired N with the same civil date's
+ * evening — one day late, which the real-sky toggle exposed as a 13°
+ * moon jump on his own worked example. At the correct evening his moon
+ * is within 1.3° of the real one, which is the accuracy his method is
+ * famous for.
+ */
+export function eveningOf(days) {
+  const daytime = dateFromEpochDays(days);
+  const eve = new Date(daytime);
+  eve.setDate(eve.getDate() - 1);
+  return { daytime, eve };
 }
 
 /** Everything the view needs for one day count and one UTC hour. */
 function sceneFor(days, utcHours, real) {
-  const date = dateFromEpochDays(days);
-  const calc = getFullCalculation(date);
+  const { daytime, eve } = eveningOf(days);
+  const date = eve; // sunset, sky frame and modern instant: the true evening
+  const calc = getFullCalculation(daytime); // engine positions: day count N
   const jd = jdAt(date, utcHours);
   // The instant, as a Date, for the modern theories.
   const instant = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0) + utcHours * 3600000);
@@ -88,7 +111,7 @@ export default function SkyPage() {
   // Swap the drawn positions for the real ones — the reader's request.
   const [real, setReal] = useState(false);
 
-  const date = dateFromEpochDays(days);
+  const { eve: date, daytime } = eveningOf(days);
   const sunsetUtc = sunsetUtcHours(date, { ...RAMBAM_REFERENCE }) ?? 15.5;
   const utcHours = heldUtc ?? sunsetUtc + minutes / 60;
   const offset = israelUtcOffsetHours(date);
@@ -147,7 +170,8 @@ export default function SkyPage() {
           </StepButton>
           <StepButton onClick={() => { setDays(todayDays()); setHeldUtc(null); }}>Today</StepButton>
           <span className="pb-1 font-mono text-[11px] text-[var(--color-text-secondary)]">
-            = {scene.date.toISOString().slice(0, 10)}
+            = the night of {scene.date.toISOString().slice(0, 10)}, beginning{' '}
+            {daytime.toISOString().slice(0, 10)}
           </span>
         </div>
 
@@ -209,11 +233,32 @@ export default function SkyPage() {
             value={`${formatDms(scene.shown.moonLon)} — the ${moonSign}${ordinalSuffix(moonSign)} sign`}
             note={`altitude ${scene.moon.altitude.toFixed(1)}°, azimuth ${scene.moon.azimuth.toFixed(0)}°${scene.moon.altitude < 0 ? ' — below the horizon tonight' : ''}${real ? ` · his sits ${scene.delta.moon >= 0 ? '+' : ''}${scene.delta.moon.toFixed(2)}° from this` : ''}`}
           />
-          <Readout
-            title="Verdict that evening"
-            value={scene.calc.moon.visibilityVerdict === 'visible' ? 'could be seen' : 'not seen'}
-            note="KH 17's rule, from the chain the book builds"
-          />
+          {(() => {
+            // Near conjunction the chain's arcs wrap and the verdict is
+            // meaningless — a reader caught it saying "could be seen"
+            // with the moon drawn ON the sun. Only sighting-shaped
+            // nights get a verdict.
+            const gap = scene.calc.moon.elongation;
+            const arc = scene.calc.moon.keshetHaReiyah;
+            const isCandidate = gap > 2.5 && gap < 40 && arc > 0 && arc < 40;
+            return (
+              <Readout
+                title="Verdict that evening"
+                value={
+                  isCandidate
+                    ? scene.calc.moon.visibilityVerdict === 'visible'
+                      ? 'could be seen'
+                      : 'not seen'
+                    : 'not a sighting night'
+                }
+                note={
+                  isCandidate
+                    ? "KH 17's rule, from the chain the book builds"
+                    : `the moon is ${gap > 180 ? (360 - gap).toFixed(1) : gap.toFixed(1)}° from the sun — nowhere near a first crescent`
+                }
+              />
+            );
+          })()}
         </div>
 
         <p className="mt-4 max-w-3xl text-xs leading-relaxed text-[var(--color-text-secondary)]">
