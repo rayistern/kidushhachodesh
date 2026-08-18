@@ -36,3 +36,6 @@ pnpm-debug.log*
 
 # test coverage
 /coverage 
+# Local Netlify folder
+.netlify
+deno.lock

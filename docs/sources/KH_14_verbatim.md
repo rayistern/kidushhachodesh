@@ -35,13 +35,28 @@ the moon's mean motion (14:1-4), the season correction at sunset
 
 > אִם הָיְתָה הַשֶּׁמֶשׁ מֵחֲצִי מַזַּל דָּגִים עַד חֲצִי מַזַּל טָלֶה. תָּנִיחַ אֶמְצַע הַיָּרֵחַ כְּמוֹת שֶׁהוּא. וְאִם תִּהְיֶה הַשֶּׁמֶשׁ מֵחֲצִי מַזַּל טָלֶה עַד תְּחִלַּת מַזַּל תְּאוֹמִים. תּוֹסִיף עַל אֶמְצַע הַיָּרֵחַ ט"ו חֲלָקִים. וְאִם תִּהְיֶה הַשֶּׁמֶשׁ מִתְּחִלַּת מַזַּל תְּאוֹמִים עַד תְּחִלַּת מַזַּל אַרְיֵה. תּוֹסִיף עַל אֶמְצַע הַיָּרֵחַ ט"ו חֲלָקִים. וְאִם תִּהְיֶה הַשֶּׁמֶשׁ מִתְּחִלַּת מַזַּל אַרְיֵה עַד חֲצִי מַזַּל בְּתוּלָה תּוֹסִיף עַל אֶמְצַע הַיָּרֵחַ ט"ו חֲלָקִים. וְאִם תִּהְיֶה הַשֶּׁמֶשׁ מֵחֲצִי מַזַּל בְּתוּלָה עַד חֲצִי מֹאזְנַיִם. הָנַח אֶמְצַע הַיָּרֵחַ כְּמוֹת שֶׁהוּא. וְאִם תִּהְיֶה הַשֶּׁמֶשׁ מֵחֲצִי מֹאזְנַיִם עַד תְּחִלַּת מַזַּל קֶשֶׁת. תִּגְרַע מֵאֶמְצַע הַיָּרֵחַ ט"ו חֲלָקִים. וְאִם תִּהְיֶה הַשֶּׁמֶשׁ מִתְּחִלַּת מַזַּל קֶשֶׁת עַד תְּחִלַּת מַזַּל דְּלִי. תִּגְרַע מֵאֶמְצַע הַיָּרֵחַ ל' חֲלָקִים. וְאִם תִּהְיֶה הַשֶּׁמֶשׁ מִתְּחִלַּת מַזַּל דְּלִי עַד חֲצִי מַזַּל דָּגִים. תִּגְרַע מֵאֶמְצַע הַיָּרֵחַ ט"ו חֲלָקִים:
 
+**The shipped reading's own witness (added 2026-08-18, PR #47 integration).**
+The engine ships the Yemenite +30' for 60°–120°, and the repo's discipline is
+that a shipped constant has a verbatim Hebrew witness in this directory — the
+Sefaria/Torat Emet transcription above reads ט"ו there, so it cannot be that
+witness. The same halacha as published by Mechon Mamre, whose Mishneh Torah is
+set from the Yemenite manuscripts (fetched raw from
+https://mechon-mamre.org/i/3814.htm, 2026-08-18 — their unvowelized text,
+halacha ה):
+
+> אם הייתה השמש מחצי מזל דגים עד חצי מזל טלה, תניח אמצע הירח כמות שהוא; ואם תהיה השמש מחצי מזל טלה עד תחילת מזל תאומים, תוסיף על אמצע הירח חמישה עשר חלקים; ואם תהיה השמש מתחילת מזל תאומים עד תחילת מזל אריה, תוסיף על אמצע הירח **שלושים חלקים**; ואם תהיה השמש מתחילת מזל אריה עד חצי מזל בתולה, תוסיף על אמצע הירח חמישה עשר חלקים; ואם תהיה השמש מחצי מזל בתולה עד חצי מזל מאזניים, הנח אמצע הירח כמות שהוא; ואם תהיה השמש מחצי מאזניים עד תחילת מזל קשת, תגרע מאמצע הירח חמישה עשר חלקים; ואם תהיה השמש מתחילת מזל קשת עד תחילת מזל דלי, תגרע מאמצע הירח שלושים חלקים; ואם תהיה השמש מתחילת מזל דלי עד חצי דגים, תגרע מאמצע הירח חמישה עשר חלקים.
+
+(Emphasis added on the band in question; Mechon Mamre spells the numbers out
+in words — "שלושים חלקים", thirty parts — where the printed editions above
+abbreviate "ט"ו", fifteen.)
+
 **Tabulated verbatim:**
 
 | Sun position | Operation | Boundary in degrees |
 |---|---|---|
 | מחצי דגים → מחצי טלה | leave unchanged | 345° → 15° |
 | מחצי טלה → תחילת תאומים | **+15'** | 15° → 60° |
-| תחילת תאומים → תחילת אריה | **+15'** | 60° → 120° |
+| תחילת תאומים → תחילת אריה | **+15'** (printed) / **+30'** (Yemenite — shipped) | 60° → 120° |
 | תחילת אריה → חצי בתולה | **+15'** | 120° → 165° |
 | חצי בתולה → חצי מאזנים | leave unchanged | 165° → 195° |
 | חצי מאזנים → תחילת קשת | −15' | 195° → 240° |
@@ -50,10 +65,10 @@ the moon's mean motion (14:1-4), the season correction at sunset
 
 **Key features of the verbatim text:**
 
-1. The **additive side** (sun in northern half, summer half) is **uniformly +15'** from mid-Aries (15°) through mid-Virgo (165°). There is **no +30' band** on the additive side.
+1. The **additive side** (sun in northern half, summer half) is **uniformly +15'** from mid-Aries (15°) through mid-Virgo (165°) *in the printed editions transcribed here*. There is no +30' band in this witness. **The engine no longer follows this reading** — since 2026-08-17 it ships the Yemenite +30' for 60°–120° (Chitrik edition; OPEN_QUESTIONS Q8). This file records the Sefaria/Torat Emet text as transcribed, and is deliberately left as such: it is a transcription, not the adjudication.
 2. The **subtractive side** has **one −30' band** at start-Sagittarius through start-Aquarius (240°-300°), flanked by −15' bands.
 3. The two no-correction bands sit at the equinoxes (mid-Pisces → mid-Aries and mid-Virgo → mid-Libra), as expected.
-4. Asymmetry is real: the −30' band exists only on the subtractive side. Astronomically, this corresponds to the longer nights of winter — sunset is much later than 6 PM relative to summer's small offset.
+4. Asymmetry is real *in this witness*: the −30' band exists only on the subtractive side. Under the Yemenite reading the table is symmetric (+15/+30/+15 against −15/−30/−15), which is one of the arguments for it. Astronomically, this corresponds to the longer nights of winter — sunset is much later than 6 PM relative to summer's small offset.
 
 ### 14:6 — definition of אמצע הירח לשעת הראיה
 

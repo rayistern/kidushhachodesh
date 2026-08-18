@@ -75,6 +75,45 @@ mark {
   color: inherit;
 }
 
+/* Touger's translation carries its footnotes inline, as a
+   <sup class="footnote-marker"> immediately followed by an
+   <i class="footnote"> holding the whole note. Rendered as-is the note
+   text splices into the middle of the sentence and the halacha becomes
+   unreadable, so inside .kh-halacha both are hidden by default. The
+   reader's "Footnotes" toggle puts .kh-show-footnotes on the ancestor,
+   which reveals the marker inline and the note as an indented block. */
+.kh-halacha .footnote-marker,
+.kh-halacha .footnote {
+  display: none;
+}
+
+.kh-show-footnotes .kh-halacha .footnote-marker {
+  display: inline;
+  color: var(--color-gold);
+  font-size: 0.7em;
+  vertical-align: super;
+  line-height: 0;
+  padding: 0 1px;
+}
+
+.kh-show-footnotes .kh-halacha .footnote {
+  display: block;
+  margin: 0.4em 0 0.6em;
+  padding-inline-start: 0.9em;
+  border-inline-start: 2px solid var(--color-border);
+  /* Set well below the halacha it hangs off, so a long note reads as
+     apparatus rather than competing with the text for attention.
+     Expressed in em, so it stays proportional in both columns — the
+     Hebrew is set larger than the English. Floored at 11px, since em
+     alone would take the English column's notes to about 10.5px, which
+     is below comfortable reading on a phone. */
+  font-size: max(11px, 0.76em);
+  font-style: italic;
+  line-height: 1.45;
+  color: var(--color-text-secondary);
+  opacity: 0.8;
+}
+
 /* Custom scrollbar (desktop only — mobile uses native overlay scrollbars). */
 @media (pointer: fine) {
   ::-webkit-scrollbar {

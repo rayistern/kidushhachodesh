@@ -147,7 +147,7 @@ export default function Sidebar() {
           />
           <ValueRow
             label="Constellation"
-            value={`${calculation.sun.constellation.hebrew} (${calculation.sun.constellation.english})`}
+            value={`${calculation.sun.constellation.hebrew} (${calculation.sun.constellation.translit})`}
           />
 
           {/* ── MOON ── */}

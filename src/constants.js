@@ -264,20 +264,13 @@ export const GALGAL_NOTEH_INCLINATION_DEG = 5;           // ≈ 5° north/south 
 //  3 ‘chalakim’ 11 ‘sec’ per day  ⇒  3/60 + 11/3600  deg
 export const NODE_REGRESSION_DEG_PER_DAY = -0.0529538;   // negative = retrograde 
 
-export const MAZALOT_LABELS = [
-  "Taleh",    // Aries
-  "Shor",     // Taurus
-  "Teomim",   // Gemini
-  "Sartan",   // Cancer
-  "Aryeh",    // Leo
-  "Betulah",  // Virgo
-  "Moznayim", // Libra
-  "Akrav",    // Scorpio
-  "Keshet",   // Sagittarius
-  "G'di",     // Capricorn
-  "D'li",     // Aquarius
-  "Dagim"     // Pisces
-];
+// Transliterated mazalot names for the 2D zodiac belt. These moved into
+// engine/constants.js (as CONSTELLATION_TRANSLIT) when the chapter-11
+// reading surfaces began using them too — re-exported here so the belt
+// labels and the reader can never disagree about a spelling.
+import { CONSTANTS as ENGINE_CONSTANTS } from './engine/constants.js';
+
+export const MAZALOT_LABELS = ENGINE_CONSTANTS.CONSTELLATION_TRANSLIT;
 
 // ESSENTIAL FIX: Add the correct daily motion constants as specified by Rambam
 export const DAILY_MOTIONS = {
