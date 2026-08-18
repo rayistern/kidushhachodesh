@@ -319,7 +319,14 @@ export function moonPhasePath(elongationDeg, r) {
   const e = ((elongationDeg % 360) + 360) % 360;
   const cos = Math.cos((e * Math.PI) / 180);
   const litFraction = (1 - cos) / 2;
-  const a = Math.abs(cos) * r;
+  // Visibility floor: at this drawing size a true 1%-lit crescent is a
+  // fraction of a pixel wide and the reader sees only the outline (day
+  // 29 did exactly that). The reported litFraction stays honest; the
+  // DRAWN sliver — lit or dark — is floored at ~a quarter of the radius
+  // so the phase always reads. The moon is already ~4× real size, so
+  // the drawing was schematic-scaled before this floor, not after it.
+  const minSliver = r * 0.24;
+  const a = Math.min(Math.abs(cos) * r, r - minSliver);
   // Outer: semicircle through +x (toward the sun). Inner: back along
   // the terminator — via +x for a crescent, via −x for a gibbous.
   const d =

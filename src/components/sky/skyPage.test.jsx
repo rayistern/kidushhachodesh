@@ -177,6 +177,22 @@ describe("the moon's drawn phase", () => {
     expect(litFraction).toBeLessThan(0.03); // ~1% lit: a genuine first crescent
   });
 
+  it('but the DRAWN sliver never vanishes into the outline', () => {
+    // A reader on day 29 saw only an empty circle: a true 1%-lit sliver
+    // is sub-pixel at r=7. The terminator's semi-axis is floored so at
+    // least a quarter-radius of sliver always shows, while litFraction
+    // keeps reporting the truth.
+    for (const elong of [1, 5, 11.4, 175, 359]) {
+      const d = moonPhasePath(elong, 7).d;
+      const a = Number(d.match(/A ([\d.]+) 7 0 0 [01] 0 -7 Z/)[1]);
+      expect(a, `elong ${elong}`).toBeLessThanOrEqual(7 - 7 * 0.24 + 1e-9);
+    }
+    // And an honest half-moon is untouched by the floor.
+    expect(
+      Number(moonPhasePath(90, 7).d.match(/A ([\d.]+) 7 0 0 [01] 0 -7 Z/)[1]),
+    ).toBeCloseTo(0, 3);
+  });
+
   it('renders as a path inside a rotated group, not a plain disc', async () => {
     const { container } = page();
     await screen.findByText('his moon');
