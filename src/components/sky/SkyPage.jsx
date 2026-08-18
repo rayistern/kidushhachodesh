@@ -1,0 +1,332 @@
+/**
+ * SkyPage — the book's numbers, drawn on the sky outside your window.
+ *
+ * ═══════════════════════════════════════════════════════════════════
+ *  REGIME TAG: **crossing** — [R] positions from the engine (the
+ *  Rambam's sun and moon), [M] sky frame from modern geometry
+ *  (lib/skyView). The page says so on itself.
+ *  SURFACE CATEGORY: user-facing page (/sky)
+ * ═══════════════════════════════════════════════════════════════════
+ *
+ * Two reader requests in one view:
+ *
+ *   (b) The western horizon a chosen number of minutes after sunset —
+ *       the belt crossing the sky at its evening slant, the sun below
+ *       the horizon seen through a translucent earth, the moon where
+ *       the engine puts it, the sign numbers along the belt.
+ *   (c) A date stepper that can HOLD THE CLOCK: keep the same civil
+ *       time while stepping days, so the sidereal fact becomes
+ *       visible — the star frame (and the belt's grid) slides about a
+ *       degree westward per night (a sidereal day is 23h 56m 4s), the
+ *       sun roughly holds its place, and the moon leaps ~13° east.
+ *
+ * Everything positional comes from the engine's own pipeline at the
+ * chosen day count; everything directional comes from lib/skyView.
+ * Nothing here feeds back into any calculation.
+ */
+import React, { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { getFullCalculation } from '../../engine/pipeline';
+import { dateFromEpochDays, daysFromEpoch } from '../../engine/epochDays';
+import { formatDms } from '../../engine/dmsUtils';
+import { ordinalSuffix } from '../../engine/zodiac';
+import { skyPosition, jdAt } from '../../lib/skyView';
+import { sunsetUtcHours, israelUtcOffsetHours, formatClock, RAMBAM_REFERENCE } from '../../lib/localObserver';
+import { nextSightingNight } from '../../lib/sightingNight';
+
+const OBSERVER = { latitude: 31.78, longitude: 35.2137 };
+const EXAMPLE_DAYS = 29;
+
+function todayDays() {
+  const now = new Date();
+  return daysFromEpoch(new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12));
+}
+
+/** Everything the view needs for one day count and one UTC hour. */
+function sceneFor(days, utcHours) {
+  const date = dateFromEpochDays(days);
+  const calc = getFullCalculation(date);
+  const jd = jdAt(date, utcHours);
+  const sun = skyPosition(calc.sun.trueLongitude, 0, jd, OBSERVER);
+  const moon = skyPosition(calc.moon.trueLongitude, calc.moon.latitude, jd, OBSERVER);
+  // The belt, sampled — and each sample keeps its longitude so the sign
+  // grid can be drawn on it.
+  const belt = [];
+  for (let lambda = 0; lambda < 360; lambda += 2) {
+    belt.push({ lambda, ...skyPosition(lambda, 0, jd, OBSERVER) });
+  }
+  return { date, calc, jd, sun, moon, belt };
+}
+
+export default function SkyPage() {
+  const [days, setDays] = useState(EXAMPLE_DAYS);
+  const [minutes, setMinutes] = useState(20);
+  // (c): when held, the UTC clock is frozen and date-stepping shows the
+  // sidereal slide. null = follow sunset (b-mode).
+  const [heldUtc, setHeldUtc] = useState(null);
+
+  const date = dateFromEpochDays(days);
+  const sunsetUtc = sunsetUtcHours(date, { ...RAMBAM_REFERENCE }) ?? 15.5;
+  const utcHours = heldUtc ?? sunsetUtc + minutes / 60;
+  const offset = israelUtcOffsetHours(date);
+
+  const scene = useMemo(() => sceneFor(days, utcHours), [days, utcHours]);
+
+  const moonSign = Math.floor(((scene.calc.moon.trueLongitude % 360) + 360) % 360 / 30) + 1;
+
+  return (
+    <div className="min-h-[100dvh] bg-[var(--color-bg)] text-[var(--color-text)]">
+      <header className="border-b border-[var(--color-border)] bg-[var(--color-surface)]">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 py-5 flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl font-bold">The sky from your window</h1>
+            <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
+              The book's numbers, drawn where you would actually see them — facing west after
+              sunset.
+            </p>
+          </div>
+          <Link to="/" className="shrink-0 text-sm text-[var(--color-accent)] hover:underline">
+            ← Dashboard
+          </Link>
+        </div>
+      </header>
+
+      <main className="mx-auto max-w-5xl px-4 sm:px-6 py-6">
+        <p className="mb-4 rounded-lg border-l-2 border-[var(--color-gold)]/50 bg-[var(--color-card)] px-3 py-2 text-xs leading-relaxed text-[var(--color-text-secondary)]">
+          The sun and moon here are <strong>the Rambam's</strong> — the engine's own positions,
+          the ones the <Link to="/book" className="text-[var(--color-accent)] hover:underline">book</Link>{' '}
+          computes. The sky they are drawn onto — horizon, slant, hour — is modern geometry.
+          Expect his sun to trail the real one by about half a degree.
+        </p>
+
+        {/* ── controls ── */}
+        <div className="flex flex-wrap items-end gap-3">
+          <label className="block">
+            <span className="block text-xs font-bold text-[var(--color-text-secondary)]">
+              Days from the starting point
+            </span>
+            <input
+              type="number"
+              value={days}
+              onChange={(e) => setDays(Math.max(0, Math.floor(Number(e.target.value) || 0)))}
+              className="mt-1 w-32 rounded border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-1 text-right font-mono text-sm"
+            />
+          </label>
+          <div className="flex gap-1">
+            <StepButton onClick={() => setDays((d) => Math.max(0, d - 1))}>−1 day</StepButton>
+            <StepButton onClick={() => setDays((d) => d + 1)}>+1 day</StepButton>
+          </div>
+          <StepButton onClick={() => { setDays(EXAMPLE_DAYS); setHeldUtc(null); }}>
+            His example (29)
+          </StepButton>
+          <StepButton onClick={() => { setDays(nextSightingNight().days); setHeldUtc(null); }}>
+            Next Rosh Chodesh
+          </StepButton>
+          <StepButton onClick={() => { setDays(todayDays()); setHeldUtc(null); }}>Today</StepButton>
+          <span className="pb-1 font-mono text-[11px] text-[var(--color-text-secondary)]">
+            = {scene.date.toISOString().slice(0, 10)}
+          </span>
+        </div>
+
+        <div className="mt-3 flex flex-wrap items-center gap-4">
+          <label className={`block min-w-56 ${heldUtc !== null ? 'opacity-40' : ''}`}>
+            <span className="text-xs font-bold text-[var(--color-text-secondary)]">
+              Minutes after sunset — {minutes} (sunset {formatClock(sunsetUtc + offset)}, so{' '}
+              {formatClock(sunsetUtc + offset + minutes / 60)})
+            </span>
+            <input
+              type="range"
+              min="0"
+              max="90"
+              value={minutes}
+              disabled={heldUtc !== null}
+              onChange={(e) => setMinutes(Number(e.target.value))}
+              className="mt-1 w-full accent-[var(--color-accent)]"
+              aria-label="Minutes after sunset"
+            />
+          </label>
+          <label className="flex items-center gap-2 text-xs text-[var(--color-text-secondary)]">
+            <input
+              type="checkbox"
+              checked={heldUtc !== null}
+              onChange={(e) => setHeldUtc(e.target.checked ? utcHours : null)}
+              className="accent-[var(--color-gold)]"
+            />
+            <span>
+              <strong>Hold the clock</strong> at {formatClock(utcHours + offset)} while stepping
+              days — a sidereal day is 23h 56m 4s, so at a fixed clock the belt slides about 1°
+              west per night; watch the sun stay put and the moon leap ~13° east against it.
+            </span>
+          </label>
+        </div>
+
+        <SkyFigure scene={scene} />
+
+        {/* ── readouts ── */}
+        <div className="mt-4 grid gap-2 sm:grid-cols-3">
+          <Readout
+            title="His sun"
+            value={`${formatDms(scene.calc.sun.trueLongitude)} on the circle`}
+            note={`altitude ${scene.sun.altitude.toFixed(1)}°, azimuth ${scene.sun.azimuth.toFixed(0)}° — ${scene.sun.altitude < -0.8 ? 'below the horizon' : 'setting'}`}
+          />
+          <Readout
+            title="His moon"
+            value={`${formatDms(scene.calc.moon.trueLongitude)} — the ${moonSign}${ordinalSuffix(moonSign)} sign`}
+            note={`altitude ${scene.moon.altitude.toFixed(1)}°, azimuth ${scene.moon.azimuth.toFixed(0)}°${scene.moon.altitude < 0 ? ' — below the horizon tonight' : ''}`}
+          />
+          <Readout
+            title="Verdict that evening"
+            value={scene.calc.moon.visibilityVerdict === 'visible' ? 'could be seen' : 'not seen'}
+            note="KH 17's rule, from the chain the book builds"
+          />
+        </div>
+
+        <p className="mt-4 max-w-3xl text-xs leading-relaxed text-[var(--color-text-secondary)]">
+          The gold band is <strong>the belt of the signs</strong> — the sun's road — crossing the
+          evening sky at that night's slant, numbered every 30°. The faint region below the
+          horizon is the earth, made see-through so the set sun stays visible. Step days with the
+          clock held and the three speeds of the book appear: the grid drifts a degree a night,
+          the sun barely moves against your window, the moon runs.
+        </p>
+      </main>
+    </div>
+  );
+}
+
+function StepButton({ onClick, children }) {
+  return (
+    <button
+      onClick={onClick}
+      className="rounded border border-[var(--color-border)] bg-[var(--color-card)] px-2 py-1 text-xs text-[var(--color-text-secondary)] hover:bg-[var(--color-border)]"
+    >
+      {children}
+    </button>
+  );
+}
+
+function Readout({ title, value, note }) {
+  return (
+    <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-3">
+      <div className="text-[11px] text-[var(--color-text-secondary)]">{title}</div>
+      <div className="mt-0.5 font-mono text-sm font-bold text-[var(--color-gold)]">{value}</div>
+      <div className="mt-0.5 text-[10px] text-[var(--color-text-secondary)]">{note}</div>
+    </div>
+  );
+}
+
+/** The window itself: azimuth 195°–345°, altitude −28°–+65°. */
+function SkyFigure({ scene }) {
+  const w = 900;
+  const h = 420;
+  const AZ_MIN = 195;
+  const AZ_MAX = 345;
+  const ALT_MIN = -28;
+  const ALT_MAX = 65;
+  const x = (az) => ((az - AZ_MIN) / (AZ_MAX - AZ_MIN)) * w;
+  const y = (alt) => ((ALT_MAX - alt) / (ALT_MAX - ALT_MIN)) * h;
+  const horizonY = y(0);
+
+  const inView = (p) =>
+    p.azimuth > AZ_MIN - 4 && p.azimuth < AZ_MAX + 4 && p.altitude > ALT_MIN - 4 && p.altitude < ALT_MAX + 4;
+
+  // Belt polyline segments (break where it leaves the window).
+  const segments = [];
+  let current = [];
+  for (const p of scene.belt) {
+    if (inView(p)) current.push(p);
+    else if (current.length) {
+      segments.push(current);
+      current = [];
+    }
+  }
+  if (current.length) segments.push(current);
+
+  const signTicks = scene.belt.filter((p) => p.lambda % 30 === 0 && inView(p));
+  const signMids = scene.belt.filter((p) => p.lambda % 30 === 14 && inView(p) && p.altitude > 2);
+
+  return (
+    <figure className="mt-4">
+      <svg
+        viewBox={`0 0 ${w} ${h}`}
+        className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]"
+        role="img"
+        aria-label="The western sky after sunset: the belt of the signs crossing at its evening slant, the sun below the translucent horizon, the moon at the engine's position"
+      >
+        {/* the earth, made see-through */}
+        <rect x="0" y={horizonY} width={w} height={h - horizonY} fill="var(--color-card)" fillOpacity="0.55" />
+        <line x1="0" y1={horizonY} x2={w} y2={horizonY} stroke="var(--color-border)" strokeWidth="1.5" />
+
+        {/* compass */}
+        {[
+          [202.5, 'SSW'],
+          [225, 'SW'],
+          [247.5, 'WSW'],
+          [270, 'W'],
+          [292.5, 'WNW'],
+          [315, 'NW'],
+          [337.5, 'NNW'],
+        ].map(([az, label]) => (
+          <g key={label}>
+            <line x1={x(az)} y1={horizonY - 4} x2={x(az)} y2={horizonY + 4} stroke="var(--color-border)" strokeWidth="1" />
+            <text x={x(az)} y={horizonY + 16} fontSize="11" textAnchor="middle" fill="var(--color-text-secondary)">
+              {label}
+            </text>
+          </g>
+        ))}
+        <text x={10} y={horizonY + 32} fontSize="10" fill="var(--color-text-secondary)">
+          below the line: the earth, made see-through
+        </text>
+
+        {/* the belt of the signs */}
+        {segments.map((seg, i) => (
+          <polyline
+            key={i}
+            points={seg.map((p) => `${x(p.azimuth).toFixed(1)},${y(p.altitude).toFixed(1)}`).join(' ')}
+            fill="none"
+            stroke="var(--color-gold)"
+            strokeWidth="1.5"
+            strokeOpacity="0.7"
+          />
+        ))}
+        {signTicks.map((p) => (
+          <circle key={p.lambda} cx={x(p.azimuth)} cy={y(p.altitude)} r="3" fill="var(--color-gold)" fillOpacity="0.8" />
+        ))}
+        {signMids.map((p) => (
+          <text
+            key={p.lambda}
+            x={x(p.azimuth)}
+            y={y(p.altitude) - 8}
+            fontSize="11"
+            textAnchor="middle"
+            fill="var(--color-gold)"
+          >
+            {Math.floor(p.lambda / 30) + 1}
+          </text>
+        ))}
+
+        {/* the sun — his */}
+        {inView(scene.sun) && (
+          <g>
+            <circle cx={x(scene.sun.azimuth)} cy={y(scene.sun.altitude)} r="11" fill="var(--color-gold)" fillOpacity={scene.sun.altitude < 0 ? 0.45 : 0.9} />
+            <text x={x(scene.sun.azimuth)} y={y(scene.sun.altitude) + 24} fontSize="11" textAnchor="middle" fill="var(--color-gold)">
+              his sun
+            </text>
+          </g>
+        )}
+
+        {/* the moon — his */}
+        {inView(scene.moon) && (
+          <g>
+            <circle cx={x(scene.moon.azimuth)} cy={y(scene.moon.altitude)} r="7" fill="var(--color-silver)" fillOpacity={scene.moon.altitude < 0 ? 0.4 : 1} />
+            <text x={x(scene.moon.azimuth)} y={y(scene.moon.altitude) - 12} fontSize="11" textAnchor="middle" fill="var(--color-silver)">
+              his moon
+            </text>
+          </g>
+        )}
+      </svg>
+      <figcaption className="mt-1 text-center text-[11px] text-[var(--color-text-secondary)]">
+        Facing west from Jerusalem's latitude. Positions his; sky frame modern.
+      </figcaption>
+    </figure>
+  );
+}

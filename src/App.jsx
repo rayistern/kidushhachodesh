@@ -31,6 +31,7 @@ const TextIndex = React.lazy(() => import('./components/text/TextIndex'));
 const TextChapter = React.lazy(() => import('./components/text/TextChapter'));
 const BookIndex = React.lazy(() => import('./components/book/BookIndex'));
 const BookChapter = React.lazy(() => import('./components/book/BookChapter'));
+const SkyPage = React.lazy(() => import('./components/sky/SkyPage'));
 
 const Fallback = () => (
   <div style={{ padding: 40, color: '#4ea1f7', background: '#0a0e14', minHeight: '100vh', fontFamily: 'monospace' }}>
@@ -55,6 +56,8 @@ export default function App() {
           {/* Plain-language companion — one chapter at a time, KH 14 first. */}
           <Route path="/book" element={<BookIndex />} />
           <Route path="/book/:chapter" element={<BookChapter />} />
+          {/* The book's numbers drawn on the real evening sky. */}
+          <Route path="/sky" element={<SkyPage />} />
           <Route path="/compare" element={<CompareView />} />
           <Route path="/embed" element={<EmbedView />} />
           <Route path="*" element={<Navigate to="/" replace />} />
