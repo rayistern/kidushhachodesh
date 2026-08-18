@@ -106,7 +106,7 @@ describe("chapter 10 — Rav Adda's exact fit", () => {
 
   it('quotes 10:7: both are means, and the true equinox runs about two days ahead', () => {
     expect(body).toMatch(/two days earlier/);
-    expect(body).toMatch(/mean motion, not its true position/i);
+    expect(body).toMatch(/mean\*\* motion .its pretend, perfectly-steady average pace., not its true position/i);
   });
 });
 

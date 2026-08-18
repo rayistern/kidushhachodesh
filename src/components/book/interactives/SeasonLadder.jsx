@@ -184,7 +184,7 @@ export default function SeasonLadder() {
       })()}
 
       <p className="mt-3 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
-        The honest row, in his own words (KH 10:7): <em>both</em> reckonings run on the mean sun,
+        The honest row, in his own words (KH 10:7): <em>both</em> reckonings run on the mean sun (the pretend, steady-average sun),
         and against the true sun the spring equinox falls about two days earlier than either
         computes. And both years are longer than the real one — Shmuel's by about 11 minutes a
         year, Rav Adda's by about 6½ — so the computed seasons drift later against the real sky

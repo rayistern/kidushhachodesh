@@ -91,7 +91,7 @@ export default {
       nodeId: 'seasons',
       body: [
         'The round year is not the real year. It is about **11 minutes too long**, so Shmuel\'s season-points drift later against the real sky by roughly a day every 128 years — the same kind of drift that pushed the civil world from the Julian calendar to the Gregorian, and for the same reason: 365¼ is beautifully divisible and slightly wrong.',
-        'The Rambam does not hide it. The next chapter carries the finer tradition, and ends by saying plainly which one the courts leaned on and why — and that *both* run on the mean sun rather than the true one.',
+        'The Rambam does not hide it. The next chapter carries the finer tradition, and ends by saying plainly which one the courts leaned on and why — and that *both* run on the **mean** sun rather than the true one — the mean sun being a pretend sun that moves at a perfectly steady average pace, where the true sun is where the sun actually stands.',
         'And is any of this **used**? Downstream of these two chapters, nothing consumes them: the fixed calendar already walks to Rav Adda\'s beat — the nineteen-year cycle *is* his year, as chapter 10 shows — and the astronomy of chapters 12-13 supersedes both with the true sun (13:11). What survives of Shmuel\'s is living custom: the once-in-28-years blessing of the sun falls on his cycle, and the diaspora\'s early-December start for asking rain in the daily prayer is sixty days after his autumn tekufah, drift included. The card below puts all the real numbers side by side.',
       ],
     },

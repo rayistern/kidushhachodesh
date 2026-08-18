@@ -106,7 +106,7 @@ export default {
       nodeId: 'rosh-hashanah',
       body: [
         'Then he explains himself, and the explanation is this book\'s oldest theme arriving five chapters early.',
-        'These calculations, he says, find the meeting **at the mean rate of travel** — not where the sun and moon truly are. The real sky runs ahead of the average and behind it; the postponements are shaped so the calendar day stays near the day the crescent would genuinely have been seen.',
+        'These calculations, he says, find the meeting **at the mean rate of travel** ("mean" = average: a pretend, perfectly steady pace) — not where the sun and moon truly are. The real sky runs ahead of the average and behind it; the postponements are shaped so the calendar day stays near the day the crescent would genuinely have been seen.',
         'He offers the proof from experience (7:8): sometimes the rules push Rosh HaShanah two days past the computed molad, and the moon is first seen — exactly then. The average said Tuesday; the sky said Thursday; the rules had already said Thursday.',
         'A reader coming from the astronomy chapters will recognise everything: pretend-steady average, real wobbling sky, and machinery to bridge them. Chapters 13 and 15 bridge it with correction tables; this chapter bridges it with postponements. Same gap, two tools.',
       ],

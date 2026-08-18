@@ -66,7 +66,7 @@ export default {
 
   recap: {
     settled: [
-      "The moon's **mean** — where its small circle has got to — nudged to the moment of sighting.",
+      "The moon's **mean** (its average position — the pretend steady-pace figure) — where its small circle has got to — nudged to the moment of sighting.",
       'The **mean within its path** — where the moon sits on that small circle.',
       "The sun's average and true positions, from chapters 12 and 13.",
     ],

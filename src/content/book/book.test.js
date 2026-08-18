@@ -470,3 +470,27 @@ describe('every figure in the prose is pinned to the engine', () => {
     expect(proseOf(14)).toContain('27 days and 13 hours');
   });
 });
+
+describe('the word "mean" never appears unexplained', () => {
+  // Reader feedback: "mean" is confusing to newbies. Chapter 11 carries
+  // the full definition; every OTHER chapter whose prose uses the word
+  // in the technical sense must carry a plain gloss beside it.
+  const chapterText = (n) => {
+    const ch = bookChapter(n);
+    return [
+      ...ch.sections.flatMap((s) => s.body),
+      ...(ch.recap ? [ch.recap.thisChapter, ch.recap.byTheEnd, ...(ch.recap.settled ?? [])] : []),
+      ...(ch.closing ? [...(ch.closing.have ?? []), ...(ch.closing.missing ?? [])] : []),
+    ].join('\n');
+  };
+
+  it.each([6, 7, 9, 10, 15])('chapter %i glosses "mean" in plain words', (n) => {
+    const text = chapterText(n);
+    expect(text).toMatch(/\bmean\b/i);
+    expect(text).toMatch(/pretend|technical word for (exactly this kind of )?(an )?average/);
+  });
+
+  it('chapter 11 carries the full definition', () => {
+    expect(chapterText(11)).toMatch(/pretending the motion is perfectly even/);
+  });
+});

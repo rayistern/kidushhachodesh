@@ -92,7 +92,7 @@ export default {
       source: 'KH 10:7',
       nodeId: 'seasons',
       body: [
-        'And then the closing halacha, which is the whole book\'s method in one sentence. **Both** of these reckonings, he says, are approximations running on the sun\'s mean motion, not its true position — and against the true sun, the spring season-point falls about **two days earlier** than either computes.',
+        'And then the closing halacha, which is the whole book\'s method in one sentence. **Both** of these reckonings, he says, are approximations running on the sun\'s **mean** motion (its pretend, perfectly-steady average pace), not its true position — and against the true sun, the spring season-point falls about **two days earlier** than either computes.',
         'Mean versus true: the same gap chapter 7 gave as the reason for the postponements, and the same gap chapters 12 and 13 will spend two chapters closing for the sun. And his "about two days" is not a loose guess — the spring point sits nearly a quarter-circle from the sun\'s far point, exactly where chapter 13\'s correction peaks at 1° 59\', which is two days of the sun\'s travel. Run his own machinery and his mean sun crosses the spring point two days after his true sun, to the day.',
         'So the calendar chapters end by pointing directly at the astronomy — which is where this book\'s chapter 11 begins, and which closes those two days down to the half-degree the reality checks of chapters 13 and 14 display.',
       ],

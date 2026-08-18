@@ -86,7 +86,7 @@ export default {
       nodeId: 'molad',
       body: [
         'From one meeting of the moon and sun to the next, at their average speeds, is **29 days, 12 hours, and 793 parts**. That triple is the entire raw material of the fixed calendar.',
-        'It is an average, in exactly the sense chapter 11 defined: the real moon speeds up and slows down, so real meetings wobble around this value by up to about fourteen hours either way — but the average holds, and holds spectacularly. It differs from the modern measured mean month by well under a second.',
+        'It is an average, in exactly the sense chapter 11 defined: the real moon speeds up and slows down, so real meetings wobble around this value by up to about fourteen hours either way — but the average holds, and holds spectacularly. It differs from the modern measured mean month by well under a second. ("Mean" is the technical word for exactly this kind of average — a pretend, perfectly steady pace — and the book will use it constantly from here on.)',
         'Stack twelve of them and a common lunar year is 354 days, 8 hours, 876 parts; thirteen give a leap year of 383 days, 21 hours, 589 parts (KH 6:4).',
       ],
     },

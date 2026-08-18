@@ -311,7 +311,7 @@ export default function TonightHere() {
           and one in a valley may miss an easy one.
         </p>
         <p>
-          <strong>His sun runs slightly fast, and it biases one way.</strong> His mean solar rate
+          <strong>His sun runs slightly fast, and it biases one way.</strong> His mean (average, steady-pace) solar rate
           is about 1.7 arcminutes per century ahead of the true tropical rate, so by now it has
           accumulated roughly a quarter of a degree. Over 50 years of sampled sighting nights that
           changed the verdict on about 1.6% of them — and every single change ran the same
