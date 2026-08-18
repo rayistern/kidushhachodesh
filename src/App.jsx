@@ -39,9 +39,24 @@ const Fallback = () => (
   </div>
 );
 
+/**
+ * בס"ד — top of every page. Fixed and pointer-events-none so it floats
+ * over any header without stealing a click; tiny and secondary-colored
+ * so it is present, not loud.
+ */
+const BsdMark = () => (
+  <div
+    className="pointer-events-none fixed inset-x-0 top-0 z-[60] pt-0.5 text-center text-[10px] leading-none text-[var(--color-text-secondary)] opacity-80"
+    lang="he"
+  >
+    בס"ד
+  </div>
+);
+
 export default function App() {
   return (
     <ErrorBoundary>
+      <BsdMark />
       <React.Suspense fallback={<Fallback />}>
         <Routes>
           <Route path="/" element={<AppShell initialPreset="home" />} />
