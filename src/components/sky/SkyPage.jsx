@@ -25,6 +25,8 @@
  * Nothing here feeds back into any calculation.
  */
 import React, { useMemo, useState } from 'react';
+import UpstreamLink from '../layout/UpstreamLink';
+import { LINKS } from '../../lib/upstreamLinks';
 import SiteCredit from '../layout/SiteCredit';
 import { Link } from 'react-router-dom';
 import { getFullCalculation } from '../../engine/pipeline';
@@ -136,9 +138,9 @@ export default function SkyPage() {
             <Link to="/book" className="text-sm text-[var(--color-accent)] hover:underline">
               ← The book
             </Link>
-            <Link to="/" className="text-sm text-[var(--color-accent)] hover:underline">
+            <UpstreamLink href={LINKS.dashboard} className="text-sm text-[var(--color-accent)] hover:underline">
               Dashboard
-            </Link>
+            </UpstreamLink>
           </div>
         </div>
       </header>

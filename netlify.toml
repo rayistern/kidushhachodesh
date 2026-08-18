@@ -11,6 +11,16 @@
   command = "npm run build"
   publish = "dist"
 
+# This deploy is the book (and the sky page). The dashboard and the
+# source reader are rayi's project, live at shluchimexchange.ai — the
+# env var turns the in-app links into external <a> tags at build time
+# (see src/lib/upstreamLinks.js), and the redirects below catch direct
+# URL hits. Local dev never reads this file, so localhost keeps every
+# surface internal. NOTE: this env only applies when building with
+# `netlify build`, not bare `npm run build`.
+[build.environment]
+  VITE_UPSTREAM_BASE = "https://www.shluchimexchange.ai/kh"
+
 # The bare app root lands on the book — the reading entry point.
 # Netlify-only by nature: the local dev server never reads this file,
 # so localhost:3000/kh/ still shows the dashboard.
@@ -34,6 +44,40 @@
   to = "/kh/book"
   status = 302
   force = true
+
+# Direct hits on the surfaces this deploy does not present — the
+# source reader and the dashboard views — go to rayi's deployment.
+# These sit before the SPA fallback so they win; unforced is enough
+# because no real files exist at these paths.
+[[redirects]]
+  from = "/kh/text/*"
+  to = "https://www.shluchimexchange.ai/kh/text/:splat"
+  status = 302
+
+[[redirects]]
+  from = "/kh/explore"
+  to = "https://www.shluchimexchange.ai/kh/explore"
+  status = 302
+
+[[redirects]]
+  from = "/kh/calculate/*"
+  to = "https://www.shluchimexchange.ai/kh/calculate/:splat"
+  status = 302
+
+[[redirects]]
+  from = "/kh/learn/*"
+  to = "https://www.shluchimexchange.ai/kh/learn/:splat"
+  status = 302
+
+[[redirects]]
+  from = "/kh/compare"
+  to = "https://www.shluchimexchange.ai/kh/compare"
+  status = 302
+
+[[redirects]]
+  from = "/kh/embed"
+  to = "https://www.shluchimexchange.ai/kh/embed"
+  status = 302
 
 [[redirects]]
   from = "/kh/*"

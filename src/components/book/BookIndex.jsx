@@ -16,6 +16,8 @@
  * about which is which.
  */
 import React from 'react';
+import UpstreamLink from '../layout/UpstreamLink';
+import { LINKS } from '../../lib/upstreamLinks';
 import SiteCredit from '../layout/SiteCredit';
 import { Link } from 'react-router-dom';
 import ChainMap from './ChainMap';
@@ -37,9 +39,9 @@ export default function BookIndex() {
               astronomy or mathematics.
             </p>
           </div>
-          <Link to="/" className="shrink-0 text-sm text-[var(--color-accent)] hover:underline">
+          <UpstreamLink href={LINKS.dashboard} className="shrink-0 text-sm text-[var(--color-accent)] hover:underline">
             ← Dashboard
-          </Link>
+          </UpstreamLink>
         </div>
       </header>
 
@@ -47,9 +49,9 @@ export default function BookIndex() {
         <p className="rounded-lg border-l-2 border-[var(--color-gold)]/50 bg-[var(--color-card)] px-3 py-2 text-xs leading-relaxed text-[var(--color-text-secondary)]">
           Everything here is editorial — written for this site, not a translation and not the
           Rambam. His own words are always one click away at{' '}
-          <Link to="/text" className="text-[var(--color-accent)] hover:underline">
+          <UpstreamLink href={LINKS.text()} className="text-[var(--color-accent)] hover:underline">
             the source reader
-          </Link>
+          </UpstreamLink>
           . And everything the book computes can be watched on the evening sky itself, at{' '}
           <Link to="/sky" className="text-[var(--color-accent)] hover:underline">
             the Sky page
@@ -106,7 +108,7 @@ export default function BookIndex() {
             </ul>
             <p className="mt-3 text-[11px] text-[var(--color-text-secondary)]">
               The rest of the chapters are available in the Rambam's own words, with calculators,
-              at <Link to="/text" className="text-[var(--color-accent)] hover:underline">/text</Link>.
+              at <UpstreamLink href={LINKS.text()} className="text-[var(--color-accent)] hover:underline">the source reader</UpstreamLink>.
             </p>
           </section>
         )}

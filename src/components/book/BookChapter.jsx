@@ -24,6 +24,8 @@
  * nothing that can go stale.
  */
 import React, { useState, useEffect } from 'react';
+import UpstreamLink from '../layout/UpstreamLink';
+import { LINKS } from '../../lib/upstreamLinks';
 import SiteCredit from '../layout/SiteCredit';
 import { Link, useParams, Navigate } from 'react-router-dom';
 import { bookChapter, hasBookChapter } from '../../content/book';
@@ -80,12 +82,12 @@ export default function BookChapter() {
                 )}
               </p>
             </div>
-            <Link
-              to={`/text/${chapter}`}
+            <UpstreamLink
+              href={LINKS.text(chapter)}
               className="shrink-0 rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-xs text-[var(--color-accent)] hover:bg-[var(--color-card)]"
             >
               Read the Rambam's own words →
-            </Link>
+            </UpstreamLink>
           </div>
 
           {content.subtitle && (
@@ -335,12 +337,12 @@ function NotYetWritten({ chapter, sourceTitle }) {
           The plain-language companion is being written a chapter at a time. This one —{' '}
           {sourceTitle?.en} — is still only available in the Rambam's own words.
         </p>
-        <Link
-          to={`/text/${chapter}`}
+        <UpstreamLink
+          href={LINKS.text(chapter)}
           className="mt-4 inline-block rounded-lg bg-[var(--color-accent)] px-3 py-1.5 text-sm text-white"
         >
           Read chapter {chapter} in the source →
-        </Link>
+        </UpstreamLink>
         <div className="mt-8">
           <div className="mb-2 text-[10px] font-bold uppercase tracking-wide text-[var(--color-text-secondary)]">
             The whole calculation
