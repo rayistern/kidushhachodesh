@@ -18,10 +18,13 @@
  * one is used.
  */
 import React, { useState } from 'react';
-import InteractiveCard from '../../text/interactives/InteractiveCard';
+import InteractiveCard, { PresetButton } from '../../text/interactives/InteractiveCard';
 import { CONSTANTS } from '../../../engine/constants';
 import { formatDms } from '../../../engine/dmsUtils';
 import { zodiacPosition } from '../../../engine/zodiac';
+import { getFullCalculation } from '../../../engine/pipeline';
+import { dateFromEpochDays, daysFromEpoch } from '../../../engine/epochDays';
+import { nextSightingNight } from '../../../lib/sightingNight';
 
 const { capricornGemini, cancerSagittarius } = CONSTANTS.EARLY_EXIT_THRESHOLDS;
 
@@ -35,14 +38,50 @@ function halfFor(moonLongitude) {
     : { ...cancerSagittarius, name: 'Sartan through Keshet', id: 'cs' };
 }
 
+/** Tonight = the evening beginning the NEXT Hebrew day (see SkyPage). */
+function tonightDays() {
+  const now = new Date();
+  return daysFromEpoch(new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12)) + 1;
+}
+
 export default function QuickVerdict() {
-  // His worked evening: moon at 48°36' (Shor), first longitude 11°27'.
-  const [moonLongitude, setMoonLongitude] = useState(48.6);
-  const [orech, setOrech] = useState(11.45);
+  // His worked evening (day 29): moon ~48°36' (Shor), first longitude
+  // ~11°27' — but taken FROM the engine, not typed in, since the card
+  // presents them as computed.
+  const [example] = useState(() => {
+    const calc = getFullCalculation(dateFromEpochDays(29));
+    return {
+      lon: ((calc.moon.trueLongitude % 360) + 360) % 360,
+      gap: calc.moon.elongation,
+    };
+  });
+  const [moonLongitude, setMoonLongitude] = useState(example.lon);
+  const [orech, setOrech] = useState(example.gap);
+  // The night the sliders were computed FROM — null once a slider is
+  // moved by hand, so the card never claims engine authority for a
+  // hand-set number.
+  const [nightDays, setNightDays] = useState(29);
+
+  // The calculator: both inputs from the engine for a chosen night —
+  // the moon's true place (ch. 15) and the first longitude (KH 17:1).
+  const applyNight = (d) => {
+    const calc = getFullCalculation(dateFromEpochDays(d));
+    setMoonLongitude(((calc.moon.trueLongitude % 360) + 360) % 360);
+    setOrech(calc.moon.elongation);
+    setNightDays(d);
+  };
+  const byHand = (setter) => (e) => {
+    setter(Number(e.target.value));
+    setNightDays(null);
+  };
+  const eve = nightDays != null ? new Date(dateFromEpochDays(nightDays) - 86400000) : null;
 
   const half = halfFor(moonLongitude);
   const sign = zodiacPosition(moonLongitude);
 
+  // A crescent question needs the moon AHEAD of the sun and near it.
+  const noCrescent = orech > 180;
+  const offChart = !noCrescent && orech > 30;
   const settled =
     orech <= half.invisibleMax ? 'not-seen' : orech > half.visibleMin ? 'seen' : 'undecided';
 
@@ -53,7 +92,33 @@ export default function QuickVerdict() {
       blurb="two thresholds on the gap alone — and they differ by half the sky"
       defaultOpen
     >
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-xs font-bold text-[var(--color-text-secondary)]">
+          Compute a real night:
+        </span>
+        <PresetButton onClick={() => applyNight(29)} title="2 Iyar 4938 — the evening KH 17 works through">
+          His example (29)
+        </PresetButton>
+        <PresetButton
+          onClick={() => applyNight(nextSightingNight().days)}
+          title="The evening after the 29th — the night the court would look"
+        >
+          Next Rosh Chodesh
+        </PresetButton>
+        <PresetButton onClick={() => applyNight(tonightDays())}>Tonight</PresetButton>
+      </div>
+      <p className="mt-1 text-[11px] text-[var(--color-text-secondary)]">
+        {nightDays != null ? (
+          <>
+            The night of <strong>{eve.toISOString().slice(0, 10)}</strong> — both numbers below
+            computed by the engine: the moon's place from chapter 15, the gap from KH 17:1.
+          </>
+        ) : (
+          <>Set by hand — slide freely; the presets above return to a computed night.</>
+        )}
+      </p>
+
+      <div className="mt-3 grid gap-3 sm:grid-cols-2">
         <label className="block">
           <span className="text-xs font-bold text-[var(--color-text-secondary)]">
             Where the moon is — {sign.translit} {formatDms(sign.degreesInto)}
@@ -64,7 +129,7 @@ export default function QuickVerdict() {
             max="359"
             step="1"
             value={moonLongitude}
-            onChange={(e) => setMoonLongitude(Number(e.target.value))}
+            onChange={byHand(setMoonLongitude)}
             className="mt-1 w-full accent-[var(--color-silver)]"
             aria-label="The moon's position in degrees"
           />
@@ -78,8 +143,8 @@ export default function QuickVerdict() {
             min="0"
             max="30"
             step="0.05"
-            value={orech}
-            onChange={(e) => setOrech(Number(e.target.value))}
+            value={Math.min(orech, 30)}
+            onChange={byHand(setOrech)}
             className="mt-1 w-full accent-[var(--color-gold)]"
             aria-label="First longitude in degrees"
           />
@@ -108,20 +173,32 @@ export default function QuickVerdict() {
           {half.invisibleMax}° and {half.visibleMin}° ({half.source})
         </div>
         <div className="mt-1 text-lg font-bold">
-          {settled === 'not-seen' && (
-            <span className="text-[var(--color-text-secondary)]">
-              Settled: cannot be seen
-            </span>
-          )}
-          {settled === 'seen' && <span className="text-[var(--color-accent)]">Settled: will be seen</span>}
-          {settled === 'undecided' && (
-            <span className="text-[var(--color-gold)]">Not settled — the long chain is needed</span>
+          {noCrescent ? (
+            <span className="text-[var(--color-text-secondary)]">No crescent to judge yet</span>
+          ) : (
+            <>
+              {settled === 'not-seen' && (
+                <span className="text-[var(--color-text-secondary)]">
+                  Settled: cannot be seen
+                </span>
+              )}
+              {settled === 'seen' && (
+                <span className="text-[var(--color-accent)]">Settled: will be seen</span>
+              )}
+              {settled === 'undecided' && (
+                <span className="text-[var(--color-gold)]">Not settled — the long chain is needed</span>
+              )}
+            </>
           )}
         </div>
         <div className="mt-0.5 text-[11px] text-[var(--color-text-secondary)]">
-          {settled === 'undecided'
-            ? `Between ${half.invisibleMax}° and ${half.visibleMin}°, so everything from the parallax corrections onward has to be worked out.`
-            : 'No further calculation needed. The Rambam says so in as many words.'}
+          {noCrescent
+            ? `The moon still trails the sun on this night — conjunction has not passed, so the early exit has nothing to rule on. Try the next evening.`
+            : offChart
+              ? `The gap is ${formatDms(orech)} — off this chart's 30° and far past every threshold: a mid-month moon, trivially seen.`
+              : settled === 'undecided'
+                ? `Between ${half.invisibleMax}° and ${half.visibleMin}°, so everything from the parallax corrections onward has to be worked out.`
+                : 'No further calculation needed. The Rambam says so in as many words.'}
         </div>
       </div>
 

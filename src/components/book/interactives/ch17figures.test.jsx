@@ -12,7 +12,7 @@
  */
 import { describe, it, expect, afterEach } from 'vitest';
 import React from 'react';
-import { render, screen, cleanup } from '@testing-library/react';
+import { render, screen, cleanup, fireEvent } from '@testing-library/react';
 import ParallaxBySign, { wholeShiftArcmin } from './ParallaxBySign';
 import { CONSTANTS } from '../../../engine/constants';
 
@@ -42,5 +42,28 @@ describe("the parallax triangle's claim: one shift, split by sign", () => {
     render(<ParallaxBySign />);
     expect(screen.getByText(/He gives only the two tables/)).toBeTruthy();
     expect(screen.getByText(/KH 17:24/)).toBeTruthy();
+  });
+});
+
+describe('the early-exit card computes real nights', () => {
+  // Deferred import keeps the top of the file about the parallax figure.
+  it("opens on his worked evening, engine-computed, and knows it isn't settled", async () => {
+    const { default: QuickVerdict } = await import('./QuickVerdict');
+    render(<QuickVerdict />);
+    // The evening of 2 Iyar 4938 — 1178-04-27 civil.
+    expect(screen.getByText('1178-04-27')).toBeTruthy();
+    expect(screen.getByText(/computed by the engine/)).toBeTruthy();
+    // His evening sits in the undecided band (9° < 11°27' ≤ 15°), which
+    // is exactly why KH 17 continues past the early exit.
+    expect(screen.getByText(/Not settled — the long chain is needed/)).toBeTruthy();
+  });
+
+  it('drops the engine claim the moment a slider is moved by hand', async () => {
+    const { default: QuickVerdict } = await import('./QuickVerdict');
+    render(<QuickVerdict />);
+    const slider = screen.getByLabelText('First longitude in degrees');
+    fireEvent.change(slider, { target: { value: '20' } });
+    expect(screen.getByText(/Set by hand/)).toBeTruthy();
+    expect(screen.queryByText(/computed by the engine/)).toBeNull();
   });
 });
