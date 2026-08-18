@@ -13,7 +13,7 @@ import { describe, it, expect, afterEach } from 'vitest';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { render, screen, cleanup, fireEvent } from '@testing-library/react';
-import SkyPage, { eveningOf } from './SkyPage';
+import SkyPage, { eveningOf, moonPhasePath } from './SkyPage';
 import { getFullCalculation } from '../../engine/pipeline';
 import { dateFromEpochDays } from '../../engine/epochDays';
 import { skyPosition, jdAt } from '../../lib/skyView';
@@ -149,5 +149,38 @@ describe('the evening pairing (the one-day bug)', () => {
     const sunGap = Math.abs(angularDifference(calc.sun.trueLongitude, modernSunLongitude(instant)));
     expect(moonGap).toBeLessThan(1.5);
     expect(sunGap).toBeLessThan(1.0);
+  });
+});
+
+describe("the moon's drawn phase", () => {
+  it('is a sliver at conjunction, a half at quadrature, full at opposition', () => {
+    expect(moonPhasePath(0, 7).litFraction).toBeCloseTo(0, 6);
+    expect(moonPhasePath(90, 7).litFraction).toBeCloseTo(0.5, 6);
+    expect(moonPhasePath(180, 7).litFraction).toBeCloseTo(1, 6);
+    expect(moonPhasePath(270, 7).litFraction).toBeCloseTo(0.5, 6);
+  });
+
+  it('bows the terminator the right way: toward the sun below 90°, away above', () => {
+    // The sweep flag in the path is the bow direction; a crescent's
+    // terminator returns via the sun side (sweep 0), a gibbous via the
+    // far side (sweep 1).
+    expect(moonPhasePath(20, 7).d).toMatch(/0 0 0 0 -7 Z$/);
+    expect(moonPhasePath(160, 7).d).toMatch(/0 0 1 0 -7 Z$/);
+  });
+
+  it("on his worked evening it is a thin crescent — the sliver a witness would report", () => {
+    const { daytime } = eveningOf(29);
+    const calc = getFullCalculation(daytime);
+    const elong = ((calc.moon.trueLongitude - calc.sun.trueLongitude) % 360 + 360) % 360;
+    const { litFraction } = moonPhasePath(elong, 7);
+    expect(litFraction).toBeGreaterThan(0.005);
+    expect(litFraction).toBeLessThan(0.03); // ~1% lit: a genuine first crescent
+  });
+
+  it('renders as a path inside a rotated group, not a plain disc', async () => {
+    const { container } = page();
+    await screen.findByText('his moon');
+    const rotated = [...container.querySelectorAll('g[transform*="rotate"] path')];
+    expect(rotated.length).toBeGreaterThan(0);
   });
 });

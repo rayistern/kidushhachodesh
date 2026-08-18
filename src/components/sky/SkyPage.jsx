@@ -302,6 +302,32 @@ function Readout({ title, value, note }) {
   );
 }
 
+
+/**
+ * The moon's lit shape, as it would really look.
+ *
+ * Standard phase construction: the outer edge is the sun-facing
+ * semicircle; the inner edge is the terminator, a half-ellipse whose
+ * minor axis is r·|cos ε| for elongation ε — bowing toward the sun for
+ * a crescent (ε < 90°), away from it for a gibbous moon. Drawn in a
+ * frame whose +x axis points at the sun, then rotated on screen so the
+ * bright limb faces the sun's actual drawn position — which makes the
+ * horns' tilt of KH 19 emerge from geometry instead of being asserted.
+ * Exported for the pins in skyPage.test.jsx.
+ */
+export function moonPhasePath(elongationDeg, r) {
+  const e = ((elongationDeg % 360) + 360) % 360;
+  const cos = Math.cos((e * Math.PI) / 180);
+  const litFraction = (1 - cos) / 2;
+  const a = Math.abs(cos) * r;
+  // Outer: semicircle through +x (toward the sun). Inner: back along
+  // the terminator — via +x for a crescent, via −x for a gibbous.
+  const d =
+    `M 0 ${-r} A ${r} ${r} 0 0 1 0 ${r} ` +
+    `A ${a.toFixed(3)} ${r} 0 0 ${cos > 0 ? 0 : 1} 0 ${-r} Z`;
+  return { d, litFraction };
+}
+
 /** The window itself: azimuth 195°–345°, altitude −28°–+65°. */
 function SkyFigure({ scene, real }) {
   const w = 900;
@@ -415,15 +441,30 @@ function SkyFigure({ scene, real }) {
           </g>
         )}
 
-        {/* the moon — his */}
-        {inView(scene.moon) && (
-          <g>
-            <circle cx={x(scene.moon.azimuth)} cy={y(scene.moon.altitude)} r="7" fill="var(--color-silver)" fillOpacity={scene.moon.altitude < 0 ? 0.4 : 1} />
-            <text x={x(scene.moon.azimuth)} y={y(scene.moon.altitude) - 12} fontSize="11" textAnchor="middle" fill="var(--color-silver)">
-              {real ? 'the real moon' : 'his moon'}
-            </text>
-          </g>
-        )}
+        {/* the moon — his — drawn at its true phase and tilt: the lit
+            limb faces the sun's drawn position, the crescent's width
+            follows the elongation. Size stays ~4× real so it is
+            visible; shape and orientation are genuine. */}
+        {inView(scene.moon) && (() => {
+          const mxp = x(scene.moon.azimuth);
+          const myp = y(scene.moon.altitude);
+          const sunAngle =
+            (Math.atan2(y(scene.sun.altitude) - myp, x(scene.sun.azimuth) - mxp) * 180) / Math.PI;
+          const elong = ((scene.shown.moonLon - scene.shown.sunLon) % 360 + 360) % 360;
+          const { d } = moonPhasePath(elong, 7);
+          const dim = scene.moon.altitude < 0 ? 0.4 : 1;
+          return (
+            <g>
+              <g transform={`translate(${mxp.toFixed(1)} ${myp.toFixed(1)}) rotate(${sunAngle.toFixed(1)})`}>
+                <circle r="7" fill="var(--color-card)" fillOpacity={0.9 * dim} stroke="var(--color-silver)" strokeOpacity={0.35 * dim} strokeWidth="0.75" />
+                <path d={d} fill="var(--color-silver)" fillOpacity={dim} />
+              </g>
+              <text x={mxp} y={myp - 12} fontSize="11" textAnchor="middle" fill="var(--color-silver)">
+                {real ? 'the real moon' : 'his moon'}
+              </text>
+            </g>
+          );
+        })()}
       </svg>
       <figcaption className="mt-1 text-center text-[11px] text-[var(--color-text-secondary)]">
         Facing west from Jerusalem's latitude. Positions his; sky frame modern.
