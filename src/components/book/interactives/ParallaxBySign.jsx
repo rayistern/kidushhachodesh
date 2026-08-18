@@ -134,7 +134,9 @@ export default function ParallaxBySign() {
         </strong>{' '}
         sign, where sighting nights fall in {SIGHTING_MONTHS[index]} — and sits{' '}
         <strong className="font-mono">{formatDms(Math.abs(night.latitude))}</strong>{' '}
-        <strong>{north ? 'north' : 'south'}</strong> of the road. Both computed, neither chosen: the sign comes from chapter 15's calculation of where the moon stands, and north-or-south from chapter 16's calculation of its height off the road.
+        <strong>{north ? 'north' : 'south'}</strong> of the road. You don't pick these two facts,
+        and you couldn't — the calculation produces them: chapter 15 says where the moon stands
+        (so, its sign), and chapter 16 says whether it sits north or south of the road.
       </p>
 
       <Curves index={index} />
