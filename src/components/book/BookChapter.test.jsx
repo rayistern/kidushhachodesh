@@ -82,7 +82,7 @@ describe('chapters that are not written yet', () => {
   it('redirects a chapter number that does not exist', async () => {
     renderAt('/book/99');
     await waitFor(() =>
-      expect(screen.getByText(/Kiddush HaChodesh, in plain words/)).toBeTruthy(),
+      expect(screen.getByText(/Kiddush HaChodesh 101/)).toBeTruthy(),
     );
   });
 });

@@ -33,7 +33,7 @@ export default function BookIndex() {
       <header className="border-b border-[var(--color-border)] bg-[var(--color-surface)]">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 py-5 flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <h1 className="text-xl sm:text-2xl font-bold">Kiddush HaChodesh, in plain words</h1>
+            <h1 className="text-xl sm:text-2xl font-bold">Kiddush HaChodesh 101</h1>
             <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
               A companion to the Rambam's chapters, written for someone with no background in
               astronomy or mathematics.
