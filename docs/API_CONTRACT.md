@@ -34,6 +34,18 @@ hosting changes.
    Authenticated/metered access is singlemcp's job, layered on top —
    never built into these paths.
 
+### Change log against this contract
+
+- **2026-08-18 (PR #47 integration).** Additive per clause 4: `/api/calculate`
+  responses gain six new keys inside each `constellation` object (`index`,
+  `translit`, `symbol`, `degreesInto`, `ordinalDegree`, `normalized`) from the
+  new shared zodiac helper. Also a **value** change, not a shape change: the
+  KH 14:5 season correction for sun 60°–120° follows the Yemenite-manuscript
+  reading (+30′, was +15′ per the printed editions), which shifts moon
+  positions on those dates and flips 2 sighting verdicts in 50 years — the
+  full audit trail is `docs/OPEN_QUESTIONS.md` Q8. Consumers pinning exact
+  output values for affected dates must re-pin.
+
 ## Known external consumers
 
 - singlemcp `kh-astronomy` skill (merkos-302/singlemcp) — pins

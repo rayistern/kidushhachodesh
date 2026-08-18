@@ -110,19 +110,34 @@ export default function TonightHere() {
   const { calc, base, local } = data;
   const moon = calc.moon;
   const visible = moon.visibilityVerdict === 'visible';
+  // Near conjunction the chain's arcs wrap (elongation ~360°, arc wildly out
+  // of range) and the verdict is meaningless — the engine's KH 17:3-4 early
+  // exit compares the wrapped gap against its threshold and declares a moon
+  // BEHIND the sun "certainly visible" (engine issue #45). Same guard as
+  // SkyPage: only sighting-shaped nights get a verdict. This card defaults
+  // to today, so without the guard it hands out wrong advice unprompted on
+  // every conjunction night.
+  const isCandidate =
+    moon.elongation > 2.5 &&
+    moon.elongation < 40 &&
+    moon.keshetHaReiyah > 0 &&
+    moon.keshetHaReiyah < 40;
+  const gapFromSun =
+    moon.elongation > 180 ? 360 - moon.elongation : moon.elongation;
   const half = halfFor(moon.trueLongitude);
   const thresholds = CONSTANTS.EARLY_EXIT_THRESHOLDS[half.key];
   const band = CONSTANTS.KITZEI_HAREIYAH_TABLE.find(
     (r) => moon.keshetHaReiyah > r.kashtFromExclusive && moon.keshetHaReiyah <= r.kashtUpTo,
   );
   // How much slack the deciding quantity has. Below about a fifth of a
-  // degree, every verdict we have tested was fragile.
+  // degree, every verdict we have tested was fragile. Only meaningful on a
+  // sighting-shaped night — on a wrapped night the slack is garbage too.
   const slack = band
     ? moon.elongation - band.orechMin
     : visible
       ? moon.elongation - thresholds.visibleMin
       : thresholds.invisibleMax - moon.keshetHaReiyah;
-  const marginal = Math.abs(slack) < 0.5;
+  const marginal = isCandidate && Math.abs(slack) < 0.5;
   const pos = zodiacPosition(moon.trueLongitude);
 
   return (
@@ -144,15 +159,25 @@ export default function TonightHere() {
       {/* ── LAYER 1: his verdict, no observer anywhere in it ── */}
       <div
         className={`mt-3 rounded-lg border-2 p-3 ${
-          visible ? 'border-[var(--color-gold)]' : 'border-[var(--color-border)]'
+          isCandidate && visible ? 'border-[var(--color-gold)]' : 'border-[var(--color-border)]'
         } bg-[var(--color-bg)]`}
       >
         <div className="text-xs font-bold text-[var(--color-text-secondary)]">
           The Rambam's answer (KH 17)
         </div>
         <div className="mt-1 text-xl font-bold text-[var(--color-gold)]">
-          {visible ? 'The moon should be visible' : 'The moon should not be visible'}
+          {!isCandidate
+            ? 'Not a sighting night'
+            : visible
+              ? 'The moon should be visible'
+              : 'The moon should not be visible'}
         </div>
+        {!isCandidate && (
+          <div className="mt-1 text-xs leading-relaxed text-[var(--color-text-secondary)]">
+            The moon is {gapFromSun.toFixed(1)}° from the sun — nowhere near a first crescent, so
+            the KH 17 chain has no verdict to give for this evening.
+          </div>
+        )}
         <div className="mt-2 grid gap-1 font-mono text-xs sm:grid-cols-2">
           <div>
             arc of sighting <strong>{moon.keshetHaReiyah.toFixed(2)}°</strong>

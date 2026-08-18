@@ -348,7 +348,7 @@ See `Inline Audit Summary` section at the bottom of this document.
 >
 > The fit is a *consequence*, not a reason — the case rests on the manuscripts. Recorded because it is the kind of corroboration that would have been suspicious by its absence.
 >
-> **Cost:** 2 verdict flips in 315 sampled sighting nights across 50 years (0.63%), all inside the marginal band where KH 18:4 already tells a court not to lean on the calculation.
+> **Cost:** 2 verdict flips in 315 sampled sighting nights across 50 years (0.63%). *Correction (2026-08-18 integration review):* only 1 of the 2 is inside the marginal band where KH 18:4 already tells a court not to lean on the calculation. The other (2037-06-14) is a conjunction night where the open wrapped-elongation bug (#45) fires — the elongation wraps to 359.9° and the KH 17:3 early exit reads it against its threshold; both readings produce a garbage verdict there, and the +30ʹ reading happens to land on the correct "not visible." A re-measure over the full 618 sighting nights in the same window confirms the flip count of 2 (0.32% of the full population; the 315 was an undocumented sample).
 >
 > **Surfaces updated:** `SEASON_CORRECTIONS` and its header; `visibilityChain.test.js` (the pin that asserted uniform +15ʹ now asserts +30ʹ and the mirror); `SeasonBands` — the comparison **reversed direction**, so the card now shows the shipped Yemenite value against the printed editions' 15ʹ; `SunsetDrift`, whose "the table is lopsided" caption no longer applied; `BookChapter.test.jsx`, which pins both directions of the disclosure so they cannot be swapped.
 >

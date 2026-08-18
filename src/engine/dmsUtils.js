@@ -14,15 +14,21 @@ export function dmsToDecimal(dms) {
 /** Convert decimal degrees to a {degrees, minutes, seconds} object */
 export function decimalToDms(decimal) {
   const sign = decimal < 0 ? -1 : 1;
-  const abs = Math.abs(decimal);
-  const degrees = Math.floor(abs);
-  const minRaw = (abs - degrees) * 60;
-  const minutes = Math.floor(minRaw);
-  const seconds = (minRaw - minutes) * 60;
+  // Round to the returned precision FIRST — thousandths of an arcsecond —
+  // and only then split into degrees/minutes/seconds, exactly as formatDms
+  // does. Rounding the seconds after the split could return
+  // {degrees: 38, minutes: 17, seconds: 60} for a value a hair under
+  // 38°18′ — the same carry bug formatDms had, and this function is a
+  // served engine export external consumers format from.
+  let thousandths = Math.round(Math.abs(decimal) * 3600 * 1000);
+  const degrees = Math.floor(thousandths / 3600000);
+  thousandths -= degrees * 3600000;
+  const minutes = Math.floor(thousandths / 60000);
+  thousandths -= minutes * 60000;
   return {
     degrees: degrees * sign,
     minutes,
-    seconds: Math.round(seconds * 1000) / 1000,
+    seconds: thousandths / 1000,
   };
 }
 

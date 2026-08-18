@@ -155,6 +155,14 @@ export default function VisibilityChain() {
 
   const isExample = days === EXAMPLE_DAYS;
   const earlyExit = Boolean(verdict?.path?.startsWith('Early exit'));
+  // Near conjunction the chain's arcs wrap (gap ~360°, arc out of range) and
+  // the verdict is meaningless — the engine's early exit reads the wrapped
+  // gap against its threshold and answers "Yes" for a moon behind the sun
+  // (engine issue #45). Same guard as SkyPage/TonightHere: only
+  // sighting-shaped nights get the Yes/No card.
+  const gap = steps.elongation?.result ?? 0;
+  const arc = steps.keshetHaReiyah?.result ?? 0;
+  const isCandidate = gap > 2.5 && gap < 40 && arc > 0 && arc < 40;
 
   return (
     <InteractiveCard
@@ -223,7 +231,15 @@ export default function VisibilityChain() {
                   <span
                     className={`font-mono text-sm ${row.key ? 'font-bold text-[var(--color-gold)]' : ''}`}
                   >
-                    {formatDms(Math.abs(step.result))}
+                    {/* Latitudes carry their sign as a direction word, so
+                        they display as |value| + north/south. Everything
+                        else shows its raw signed value — a negative arc is
+                        a wrapped, non-sighting configuration (#45), and
+                        hiding the sign behind Math.abs turned that loud
+                        wrongness into a plausible-looking number. */}
+                    {['moonLatitude', 'rochavSheni'].includes(row.id)
+                      ? formatDms(Math.abs(step.result))
+                      : formatDms(step.result)}
                     {row.id === 'moonLatitude' && (
                       <span className="ml-1 font-sans text-[11px]">
                         {step.result >= 0 ? 'north' : 'south'}
@@ -266,7 +282,7 @@ export default function VisibilityChain() {
       {verdict && (
         <div
           className={`mt-4 rounded-lg border p-3 ${
-            verdict.result
+            isCandidate && verdict.result
               ? 'border-[var(--color-accent)]/50 bg-[var(--color-accent)]/10'
               : 'border-[var(--color-border)] bg-[var(--color-bg)]'
           }`}
@@ -275,10 +291,20 @@ export default function VisibilityChain() {
             Could the new moon have been seen from Jerusalem?
           </div>
           <div
-            className={`mt-0.5 text-2xl font-bold ${verdict.result ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-secondary)]'}`}
+            className={`mt-0.5 text-2xl font-bold ${isCandidate && verdict.result ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-secondary)]'}`}
           >
-            {verdict.result ? 'Yes' : 'No'}
+            {!isCandidate
+              ? 'Not a sighting night'
+              : verdict.result
+                ? 'Yes'
+                : 'No'}
           </div>
+          {!isCandidate && (
+            <div className="mt-1 text-xs leading-relaxed text-[var(--color-text-secondary)]">
+              The moon is {(gap > 180 ? 360 - gap : gap).toFixed(1)}° from the sun — nowhere near
+              a first crescent, so the chain has no verdict to give for this night.
+            </div>
+          )}
           <div className="mt-1 font-mono text-[10px] leading-relaxed text-[var(--color-text-secondary)]">
             {verdict.path}
           </div>

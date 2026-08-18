@@ -651,10 +651,15 @@ export const CONSTANTS = {
   //      +15/+30/+15 makes the table a clean mirror, where Sefaria's
   //      +15/+15/+15 leaves it lopsided for no stated reason;
   //    - fit: against Jerusalem's sunset drift the mean gap falls from
-  //      8.4' to 6.0' (see SunsetDrift, and sunDates.test.js).
+  //      8.4' to 6.0' (stated in the SunsetDrift card's prose; not
+  //      asserted by any test — sunDates.test.js pins the band flip
+  //      itself, not this figure).
   //
-  //  Cost of the change: 2 verdict flips in 315 sampled sighting
-  //  nights over 50 years (0.63%), all in the marginal band.
+  //  Cost of the change: 2 verdict flips in 50 years of sighting
+  //  nights. One is in the KH 18:4 marginal band; the other
+  //  (2037-06-14) is a conjunction night where the wrapped-elongation
+  //  bug (#45) fires and both readings produce a garbage verdict —
+  //  details in docs/OPEN_QUESTIONS.md Q8.
   // ═══════════════════════════════════════════════════════════════
   SEASON_CORRECTIONS: [
     // { sunFrom°, sunTo°, adjustment in degrees, sourcePhrase }
