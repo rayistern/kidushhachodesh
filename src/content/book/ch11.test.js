@@ -194,3 +194,16 @@ describe('the signs no longer contain their stars', () => {
     expect(drift).toBeLessThan(32);
   });
 });
+
+describe('the check-against-the-sky reason is scoped to the courtroom era', () => {
+  it('says the reason has expired, and that the drift was small when courts sat', () => {
+    const body = bookChapter(11).sections.flatMap((s) => s.body).join('\n');
+    expect(body).toMatch(/In the era of the witnesses/);
+    expect(body).toMatch(/reason has since expired/);
+    // The claim "only a few degrees": naming era (~150 BCE) to the end of
+    // sighting courts (~4th century CE) at ~1°/72yr is well under 10°.
+    const driftThen = (350 + 150) / (3600 / 50.3);
+    expect(driftThen).toBeGreaterThan(5);
+    expect(driftThen).toBeLessThan(10);
+  });
+});
