@@ -347,9 +347,39 @@ export function determineVisibility({
     ? CONSTANTS.EARLY_EXIT_THRESHOLDS.capricornGemini
     : CONSTANTS.EARLY_EXIT_THRESHOLDS.cancerSagittarius;
 
-  // Early-exit (KH 17:3-4) — purely on אורך ראשון.
   let path, verdict;
-  if (orechRishon <= half.invisibleMax) {
+  // Trailing-moon regime (issue #45, found 2026-08-12 by a blind QA
+  // agent and verified live). אורך ראשון is computed wrapped into
+  // [0, 360), but every threshold below — the KH 17:3-4 early exits and
+  // the קשת procedure — assumes the moon AHEAD of the sun by a small
+  // arc, the configuration of a first crescent. A wrapped value near
+  // 360° (the moon numerically BEHIND the sun: the evening falls before
+  // conjunction) satisfies "אורך ראשון > 24°" numerically while meaning
+  // the exact opposite physically, so the engine declared a moon 13°
+  // behind the sun "ודאי יראה". A crescent that has not yet been born
+  // cannot be sighted — decide this regime before any threshold sees
+  // the wrapped number. (Elongations in (90°, 180°] are mid-month
+  // configurations the sighting question is never asked about; they
+  // keep flowing through the thresholds unchanged, as before — while
+  // everything ABOVE 180°, equally not a first-crescent configuration,
+  // is decided here with a not-visible verdict.)
+  //
+  // The explanation must not over-claim: "the crescent has not yet
+  // formed" is true only near 360° (the nights just before conjunction).
+  // At 200° the moon is simply past full and waning — nothing wrapped,
+  // it genuinely is 200° ahead — so that range gets waning wording
+  // instead (2026-08-18 review of this fix; the verdict is the same).
+  if (orechRishon > 180) {
+    verdict = 'not-visible';
+    path =
+      orechRishon > 340
+        ? `Pre-conjunction night: אורך ראשון = ${orechRishon.toFixed(3)}° is the wrap — ` +
+          `the moon trails the sun by ${(360 - orechRishon).toFixed(3)}°, the first crescent ` +
+          `has not yet formed → אינו נראה. (KH 17:3-4's thresholds apply to a moon ahead of the sun.)`
+        : `Waning night: אורך ראשון = ${orechRishon.toFixed(3)}° — the moon is past full and ` +
+          `waning; this is not a first-crescent evening → אינו נראה. (KH 17:3-4's thresholds ` +
+          `apply to the first crescent, a moon slightly ahead of the sun.)`;
+  } else if (orechRishon <= half.invisibleMax) {
     verdict = 'not-visible';
     path = `Early exit (${half.source}): אורך ראשון = ${orechRishon.toFixed(3)}° ≤ ${half.invisibleMax}° → אינו נראה.`;
   } else if (orechRishon > half.visibleMin) {
