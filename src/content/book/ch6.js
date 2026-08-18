@@ -123,6 +123,7 @@ export default {
         'Lunar months and solar years do not divide evenly — but nineteen solar years come remarkably close to **235 lunar months**. So the calendar runs in nineteen-year cycles with seven leap years each, at positions **3, 6, 8, 11, 14, 17 and 19**.',
         'How close is close? He does the sum himself: nineteen of his solar years overshoot 235 of his months by just **one hour and 485 parts** (KH 6:10) — about 87 minutes per nineteen years.',
         'A whole cycle, weeks thrown away, leaves the remainder **2–16–595** — one addition per nineteen years, for anyone computing far ahead.',
+        'And this list is how anyone knows whether a year is leap: divide the year number by nineteen and keep what is left over — that is its position in the current cycle (nothing left over counts as position 19). On the list, leap; off it, common. Chapters 7 and 8 both lean on that one division.',
       ],
     },
 

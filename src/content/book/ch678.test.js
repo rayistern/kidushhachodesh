@@ -201,3 +201,21 @@ describe('the reality checks chapter 6 states', () => {
     expect(prose(6)).toMatch(/about 87 minutes/);
   });
 });
+
+describe('the leap-year derivation the cards show (KH 6:11)', () => {
+  it('position-in-cycle by division matches the engine for 400 years', () => {
+    // The cards derive leapness as ((year−1) mod 19)+1 ∈ the seven
+    // positions; the engine has its own isHebrewLeapYear. They must be
+    // the same fact.
+    const LEAP_POSITIONS = new Set([3, 6, 8, 11, 14, 17, 19]);
+    for (let y = 5600; y < 6000; y++) {
+      const pos = ((y - 1) % 19) + 1;
+      expect(LEAP_POSITIONS.has(pos), `year ${y}, position ${pos}`).toBe(isHebrewLeapYear(y));
+    }
+  });
+
+  it('the prose teaches the division', () => {
+    expect(prose(6)).toMatch(/divide the year number by nineteen and keep what is left over/);
+    expect(prose(6)).toMatch(/nothing left over counts as position 19/);
+  });
+});

@@ -85,6 +85,19 @@ export default function YearShapeCard() {
         </div>
       </div>
 
+      {/* HOW we know it is (or is not) a leap year — a reader pointed
+          out the card asserted it without the derivation, and the whole
+          diagram hinges on it. KH 6:11: position in the 19-year cycle. */}
+      <div className="mt-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] p-2.5 text-[11px] text-[var(--color-text-secondary)]">
+        Leap or common? Divide by nineteen: {year} = {Math.floor((year - 1) / 19)} full cycles +
+        year <strong className="font-mono">{((year - 1) % 19) + 1}</strong> of the next. The leap
+        positions are 3, 6, 8, 11, 14, 17, 19 —{' '}
+        <strong>
+          {((year - 1) % 19) + 1} is {shape.leap ? 'one of them: a leap year' : 'not one of them: a common year'}
+        </strong>{' '}
+        (KH 6:11).
+      </div>
+
       <div className="mt-2 rounded-lg border-2 border-[var(--color-accent)]/50 bg-[var(--color-bg)] p-3">
         <div className="text-[11px] text-[var(--color-text-secondary)]">
           So {year} is {shape.leap ? 'a leap year' : 'a common year'} of {shape.length} days —

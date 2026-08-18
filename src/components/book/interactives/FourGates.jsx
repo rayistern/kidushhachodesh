@@ -96,6 +96,10 @@ export default function FourGates() {
         <div className="mt-0.5 font-mono text-lg font-bold">
           {DAY_NAMES[molad.day]}, {molad.hours}h {molad.parts}p
         </div>
+        <div className="mt-1 text-[10px] text-[var(--color-text-secondary)]">
+          cycle position {((year - 1) % 19) + 1} of 19 → {isHebrewLeapYear(year) ? 'leap' : 'common'};
+          last year was position {((year - 2) % 19) + 1} → {isHebrewLeapYear(year - 1) ? 'leap (so the after-leap rule is armed)' : 'common'} (KH 6:11)
+        </div>
       </div>
 
       <ol className="mt-3 space-y-1.5">
