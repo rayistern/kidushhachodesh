@@ -53,7 +53,7 @@ export default function CrescentDirection() {
         </PresetButton>
       </div>
 
-      <Sky fromEquator={fromEquator} />
+      <Sky fromEquator={fromEquator} horns={c.horns} />
 
       <div className="mt-3 grid gap-2 sm:grid-cols-2">
         <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] p-3">
@@ -81,7 +81,7 @@ export default function CrescentDirection() {
 }
 
 /** The western horizon at sunset, with the moon where the rule puts it. */
-function Sky({ fromEquator }) {
+function Sky({ fromEquator, horns }) {
   const w = 380;
   const h = 190;
   const groundY = 150;
@@ -124,9 +124,48 @@ function Sky({ fromEquator }) {
         </g>
 
         <line x1={cx} y1={groundY} x2={mx} y2={my} stroke="var(--color-accent)" strokeWidth="1" strokeDasharray="3 3" opacity="0.6" />
+
+        {/* The pointing, drawn as an arrow out of the crescent's mouth.
+            Two readers' questions earned it: the tips carry no arrows of
+            their own, and the corner labels were being read as the
+            horns' direction. Away-from-the-sun is the same unit vector
+            the crescent is rotated by, so arrow and bow cannot drift
+            apart. */}
+        {(() => {
+          const dx = mx - cx;
+          const dy = my - groundY;
+          const len = Math.hypot(dx, dy) || 1;
+          const ux = dx / len;
+          const uy = dy / len;
+          const x1 = mx + ux * 24;
+          const y1 = my + uy * 24;
+          const x2 = mx + ux * 56;
+          const y2 = my + uy * 56;
+          return (
+            <g>
+              <defs>
+                <marker id="kh-horn-arrow" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="5" markerHeight="5" orient="auto">
+                  <path d="M 0 0 L 8 4 L 0 8 z" fill="var(--color-gold)" />
+                </marker>
+              </defs>
+              <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="var(--color-gold)" strokeWidth="1.5" markerEnd="url(#kh-horn-arrow)" />
+              <text
+                x={x2 + ux * 10}
+                y={y2 + uy * 10}
+                fontSize="9"
+                fill="var(--color-gold)"
+                textAnchor="middle"
+              >
+                horns → {horns}
+              </text>
+            </g>
+          );
+        })()}
       </svg>
       <figcaption className="text-center text-[11px] text-[var(--color-text-secondary)]">
-        Schematic — the lean is exaggerated so the direction is readable.
+        The corner labels name the horizon's compass ends; the gold arrow names the horns. Bulge
+        toward the sun, mouth away — the mouth is the pointing. Schematic, with the lean
+        exaggerated so the direction is readable.
       </figcaption>
     </figure>
   );
