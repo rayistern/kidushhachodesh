@@ -89,7 +89,9 @@ export default {
         'Here is the chapter\'s clean trick. Find the weekday of this year\'s Rosh HaShanah and the next one\'s, and count the days strictly **between** the two weekdays.',
         'In a common year: two days between means a lacking year, three means in order, four means complete. In a leap year: four, five, six. No other gaps can occur — the postponements of chapter 7 exist partly to guarantee that.',
         'His example (8:9): this Rosh HaShanah on Thursday, next on Monday — Friday, Shabbat, Sunday between, three days: the year runs **in order**. Two weekday names, and every month of the year is forced.',
+        'The counting is the one place to be careful: **between means strictly between**, both ends left out. The calculator below does it day by day, and also shows which pairs the calendar can never produce.',
       ],
+      interactive: 'between-days',
     },
 
     {

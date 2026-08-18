@@ -51,6 +51,7 @@ const MoladLadder = React.lazy(() => import('./MoladLadder'));
 const FourGates = React.lazy(() => import('./FourGates'));
 const YearShapeCard = React.lazy(() => import('./YearShapeCard'));
 const SeasonLadder = React.lazy(() => import('./SeasonLadder'));
+const BetweenDays = React.lazy(() => import('./BetweenDays'));
 const StretchShape = React.lazy(() => import('./StretchShape'));
 const DegreeScale = React.lazy(() => import('./DegreeScale'));
 const Declination = React.lazy(() => import('./Declination'));
@@ -141,6 +142,7 @@ export const FIGURES = {
   'four-gates': FourGates,
   'year-shape': YearShapeCard,
   'season-ladder': SeasonLadder,
+  'between-days': BetweenDays,
   'stretch-shape': StretchShape,
 
   // chapter 11 — a sense of scale for every angle that follows

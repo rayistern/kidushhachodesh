@@ -17,6 +17,7 @@ import {
 import { isHebrewLeapYear } from '../../engine/fixedCalendar/months';
 import { moladTishrei, roshHashanah, actualRoshHashanahDay, yearShape } from '../../lib/fixedYear';
 import { monthGrid } from '../../components/book/interactives/YearShapeCard';
+import { daysBetween, shapeForGap } from '../../components/book/interactives/BetweenDays';
 
 const prose = (n) =>
   bookChapter(n)
@@ -217,5 +218,36 @@ describe('the leap-year derivation the cards show (KH 6:11)', () => {
   it('the prose teaches the division', () => {
     expect(prose(6)).toMatch(/divide the year number by nineteen and keep what is left over/);
     expect(prose(6)).toMatch(/nothing left over counts as position 19/);
+  });
+});
+
+describe('the between-days card (KH 8:7-9)', () => {
+  it("counts exclusively: his Thursday-to-Monday is three", () => {
+    expect(daysBetween(5, 2)).toBe(3);
+    expect(daysBetween(5, 5)).toBe(6); // same weekday a year on: six between
+    expect(daysBetween(2, 3)).toBe(0); // adjacent days: none between
+  });
+
+  it('its shape table matches KH 8:7-8', () => {
+    expect(shapeForGap(2, false)).toBe('lacking');
+    expect(shapeForGap(3, false)).toBe('in order');
+    expect(shapeForGap(4, false)).toBe('complete');
+    expect(shapeForGap(4, true)).toBe('lacking');
+    expect(shapeForGap(5, true)).toBe('in order');
+    expect(shapeForGap(6, true)).toBe('complete');
+  });
+
+  it('"cannot occur" is honest: 400 real years use only the tabled gaps', () => {
+    // Every consecutive pair of actual Rosh HaShanahs must land on a gap
+    // the card labels with a shape; and every gap the card calls
+    // impossible must never appear.
+    for (let y = 5600; y < 6000; y++) {
+      const gap = daysBetween(actualRoshHashanahDay(y), actualRoshHashanahDay(y + 1));
+      const leap = yearShape(y).leap;
+      expect(shapeForGap(gap, leap), `year ${y}: gap ${gap}, leap ${leap}`).not.toBeNull();
+      expect(shapeForGap(gap, leap)).toBe(
+        { lacking: 'lacking', 'in-order': 'in order', complete: 'complete' }[yearShape(y).kind],
+      );
+    }
   });
 });
