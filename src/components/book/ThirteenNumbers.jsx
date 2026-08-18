@@ -190,9 +190,12 @@ export default function ThirteenNumbers() {
         <section>
           <h2 className="text-base font-bold">The two odd ones, and why they earn their place</h2>
           <p className="mt-2">
-            Three of the five are self-explanatory — you need to know where the sun and moon are,
-            and the maslul is the moon's version of the story below. The other two look like
-            bookkeeping and are anything but.
+            Where the sun and the moon are needs no argument. The <strong>maslul</strong> is the
+            same story as the sun's slow point, told of the moon: the moon also drags and hurries
+            around its circle, and the maslul is where it currently stands in that
+            drag-and-hurry cycle — chapter 15's correction is looked up by it, just as chapter
+            13's is looked up by the sun's distance from the slow point. The remaining two look
+            like bookkeeping and are anything but.
           </p>
           <p className="mt-2">
             <strong>The slow point (apogee)</strong> is where the sun's unevenness is anchored.
