@@ -276,6 +276,11 @@ function ParallaxSplit({ index, north }) {
         size in every sign — 56′ to 61′, the moon's own parallax showing through — and the sign
         only decides how it splits against the belt's slant. Steep belt: nearly all of it lands
         along the belt, off the gap. Shallow belt: most of it lands across, onto the height.
+        <br />
+        <em>Whose picture is this?</em> He gives only the two tables. The triangle is our
+        reconstruction of the why — he says himself that the reasons behind these numbers belong
+        to "the wisdom of astronomy and geometry, concerning which the Greeks wrote many books"
+        (KH 17:24), and leaves them there.
       </figcaption>
     </figure>
   );

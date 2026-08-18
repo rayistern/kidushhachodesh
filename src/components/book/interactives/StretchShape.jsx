@@ -29,56 +29,6 @@ import React, { useState } from 'react';
 import InteractiveCard from '../../text/interactives/InteractiveCard';
 import { CONSTANTS } from '../../../engine/constants';
 import { ordinalSuffix } from '../../../engine/zodiac';
-import { eclipticToEquatorial, equatorialToHorizontal, gmstDeg } from '../../../lib/skyView';
-import {
-  makeSphereProjector,
-  flatCircle,
-  circleHalvesProps,
-  GeometryAside,
-} from './sphereProjection';
-
-const DEG = Math.PI / 180;
-/** KH 11:17's "about 32° north" — the latitude the whole table is for. */
-const LATITUDE = 32;
-
-/**
- * The sky over the horizon at the instant the belt's degree `lonDeg`
- * sets, as alt/az of any other belt degree. No clock involved: the
- * sidereal time is CHOSEN so the given degree sits on the western
- * horizon, by handing skyView a synthetic observer longitude.
- */
-function settingFrame(lonDeg) {
-  const jd0 = 2451545.0;
-  const { ra, dec } = eclipticToEquatorial(lonDeg, 0);
-  // Hour angle at setting: cos H = −tan φ · tan δ.
-  const cosH = -Math.tan(LATITUDE * DEG) * Math.tan(dec * DEG);
-  const H = Math.acos(Math.min(1, Math.max(-1, cosH))) / DEG;
-  const observer = { latitude: LATITUDE, longitude: ra + H - gmstDeg(jd0) };
-  return (beltDeg) => {
-    const eq = eclipticToEquatorial(beltDeg, 0);
-    return equatorialToHorizontal(eq.ra, eq.dec, jd0, observer);
-  };
-}
-
-/**
- * The angle at which the belt meets the horizon as `lonDeg` sets —
- * the geometry under KH 17:12. STEEP means the belt's degrees file
- * across the horizon one at a time, so each takes long to set and is
- * worth more (stretch). SHALLOW lays a long run of belt along the
- * horizon and drops it across together — each degree is worth less
- * (shrink). Easy to invert; verified against the classical result
- * (Aries sets slowly at northern latitudes, Virgo–Libra plunge) in
- * ch17figures.test.jsx, and his own table: the −1/3 signs come out
- * shallow, the stretch signs steep.
- */
-export function settingDiveAngle(lonDeg) {
-  const at = settingFrame(lonDeg);
-  const a = at(lonDeg - 2);
-  const b = at(lonDeg + 2);
-  const dAlt = b.altitude - a.altitude;
-  const dAz = ((b.azimuth - a.azimuth + 540) % 360) - 180;
-  return (Math.atan2(Math.abs(dAlt), Math.abs(dAz)) / DEG);
-}
 
 const ROWS = CONSTANTS.SETTING_TIME_BY_MAZAL;
 
@@ -94,130 +44,6 @@ function factorWords(row) {
   const name =
     row.fraction === 1 / 3 ? 'a third' : row.fraction === 1 / 5 ? 'a fifth' : 'a sixth';
   return row.operation === 'add' ? `stretched — add ${name} of it` : `shrunk — take ${name} off it`;
-}
-
-/**
- * The dome itself: Jerusalem's horizon as the sphere's flat circle,
- * the belt frozen at the instant the chosen degree touches it in the
- * west. NOT chapter 19's sphere — no equator here, deliberately: the
- * card's whole point is that setting speed is a fact about the horizon
- * at 32° north, and this figure is that fact drawn. Viewer faces west,
- * north to the right.
- */
-function StretchDome({ lon }) {
-  const w = 520;
-  const h = 220;
-  const cx = w / 2;
-  const cy = h / 2 + 4;
-  const R = 92;
-  const { project } = makeSphereProjector({ cx, cy, R, viewDeg: 40 });
-
-  const at = settingFrame(lon);
-  // alt/az → scene: viewer faces west (−E toward the camera), north right.
-  const scene = ({ altitude, azimuth }) => ({
-    x: Math.cos(altitude * DEG) * Math.cos(azimuth * DEG),
-    y: -Math.cos(altitude * DEG) * Math.sin(azimuth * DEG),
-    z: Math.sin(altitude * DEG),
-  });
-
-  // The belt, split into runs by ONE combined visibility: solid only
-  // where it is both on the camera's side of the ball AND above the
-  // horizon; everything else reads as "behind something".
-  const runs = [];
-  let run = null;
-  let style = null;
-  for (let d = 0; d <= 360; d += 3) {
-    const hor = at(lon + d - 180);
-    const p = project(scene(hor));
-    const s = p.front && hor.altitude > 0 ? 'solid' : 'hidden';
-    if (s !== style) {
-      if (run) runs.push({ style, pts: run });
-      run = [];
-      style = s;
-    }
-    run.push(p);
-  }
-  if (run) runs.push({ style, pts: run });
-
-  const horizonSegs = { front: [], back: [] };
-  const horizonPoly = [];
-  for (let d = 0; d <= 360; d += 3) {
-    const p = project(flatCircle(d * DEG));
-    horizonPoly.push(p);
-    (p.front ? horizonSegs.front : horizonSegs.back).push(p);
-  }
-
-  const setting = project(scene(at(lon)));
-  const under = project(scene(at(lon + (at(lon + 4).altitude < 0 ? 4 : -4))));
-  const dive = settingDiveAngle(lon);
-
-  const compass = [
-    [225, 'SW'],
-    [270, 'W'],
-    [315, 'NW'],
-  ].map(([az, label]) => ({ label, p: project(scene({ altitude: 0, azimuth: az })) }));
-
-  return (
-    <figure className="mt-3">
-      <svg
-        viewBox={`0 0 ${w} ${h}`}
-        className="w-full"
-        role="img"
-        aria-label="A dome over Jerusalem's horizon at the instant the chosen degree of the belt sets in the west; the belt meets the horizon at an angle that is steep for the plunging signs and shallow for the slow-setting ones"
-      >
-        <circle cx={cx} cy={cy} r={R} fill="var(--color-card)" fillOpacity="0.35" stroke="var(--color-border)" strokeWidth="1" />
-        {/* the ground, made faintly solid */}
-        <polygon
-          points={horizonPoly.map((p) => `${p.X.toFixed(1)},${p.Y.toFixed(1)}`).join(' ')}
-          fill="var(--color-card)"
-          fillOpacity="0.5"
-        />
-        {circleHalvesProps(
-          { front: [horizonSegs.front], back: [horizonSegs.back] },
-          'var(--color-silver)',
-          1.5,
-        ).map((p) => (
-          <polyline {...p} />
-        ))}
-
-        {runs.map((r, i) => (
-          <polyline
-            key={i}
-            points={r.pts.map((p) => `${p.X.toFixed(1)},${p.Y.toFixed(1)}`).join(' ')}
-            fill="none"
-            stroke="var(--color-gold)"
-            strokeWidth="1.5"
-            strokeOpacity={r.style === 'solid' ? 0.9 : 0.25}
-            strokeDasharray={r.style === 'solid' ? undefined : '3 3'}
-          />
-        ))}
-
-        {compass.map(({ label, p }) => (
-          <text key={label} x={p.X} y={p.Y + 12} fontSize="8" textAnchor="middle" fill="var(--color-text-secondary)">
-            {label}
-          </text>
-        ))}
-        <text x={cx - R + 4} y={cy + 26} fontSize="8" fill="var(--color-text-secondary)">
-          the horizon — below it, the earth
-        </text>
-
-        {/* the setting degree, and the dive it makes */}
-        <line x1={setting.X} y1={setting.Y} x2={under.X} y2={under.Y} stroke="var(--color-accent)" strokeWidth="1.5" />
-        <circle cx={setting.X} cy={setting.Y} r="4.5" fill="var(--color-accent)" stroke="var(--color-bg)" strokeWidth="1.25" />
-        <text x={setting.X} y={setting.Y - 10} fontSize="9" textAnchor="middle" fill="var(--color-text)">
-          meets the horizon at {dive.toFixed(0)}°
-        </text>
-      </svg>
-      <figcaption className="mt-1 text-center text-[11px] text-[var(--color-text-secondary)]">
-        The moment the moon's degree touches the western horizon, at 32° north. The gold arc is
-        the belt; the angle it makes with the horizon is the whole story. <strong>Steep</strong>,
-        and its degrees file across one at a time — each takes long to set, so each degree of gap
-        is worth more (stretch). <strong>Shallow</strong>, and a long run of belt lies along the
-        horizon and drops across together — each degree worth less (shrink). Not chapter 19's
-        sphere: there is no equator in this picture, because this table never asks for one.
-      </figcaption>
-    </figure>
-  );
 }
 
 export default function StretchShape() {
@@ -315,10 +141,6 @@ export default function StretchShape() {
           <circle cx={x(n)} cy={y(f)} r="4" fill="var(--color-silver)" />
         </svg>
       </figure>
-
-      <GeometryAside summary="For the curious: the belt meeting the horizon — the picture on the dome">
-        <StretchDome lon={n} />
-      </GeometryAside>
 
       <label className="mt-2 block">
         <span className="text-xs font-bold text-[var(--color-text-secondary)]">
