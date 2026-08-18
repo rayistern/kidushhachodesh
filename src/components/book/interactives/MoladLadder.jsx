@@ -21,8 +21,8 @@ const DAY_NAMES = ['—', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'
 /** The remainders he publishes, mod the week. */
 const REMAINDERS = [
   { label: 'one month', triple: '1 – 12 – 793', ref: 'KH 6:5', note: '29d 12h 793p, with the four whole weeks thrown away' },
-  { label: 'a common year (12 months)', triple: '4 – 8 – 876', ref: 'KH 6:5', note: 'twelve months, mod the week' },
-  { label: 'a leap year (13 months)', triple: '5 – 21 – 589', ref: 'KH 6:5', note: 'thirteen months, mod the week' },
+  { label: 'a common year (12 months)', triple: '4 – 8 – 876', ref: 'KH 6:5', note: 'twelve months, whole weeks thrown away' },
+  { label: 'a leap year (13 months)', triple: '5 – 21 – 589', ref: 'KH 6:5', note: 'thirteen months, whole weeks thrown away' },
   { label: 'a 19-year cycle', triple: '2 – 16 – 595', ref: 'KH 6:12', note: 'twelve common + seven leap years' },
 ];
 
