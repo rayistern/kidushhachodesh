@@ -23,7 +23,7 @@ import { CONSTANTS } from '../../../engine/constants';
 import { formatDms } from '../../../engine/dmsUtils';
 import { zodiacPosition } from '../../../engine/zodiac';
 import { getFullCalculation } from '../../../engine/pipeline';
-import { dateFromEpochDays, daysFromEpoch } from '../../../engine/epochDays';
+import { dateFromEpochDays } from '../../../engine/epochDays';
 import { nextSightingNight } from '../../../lib/sightingNight';
 
 const { capricornGemini, cancerSagittarius } = CONSTANTS.EARLY_EXIT_THRESHOLDS;
@@ -36,12 +36,6 @@ function halfFor(moonLongitude) {
   return capricornToGemini
     ? { ...capricornGemini, name: "G'di through Teomim", id: 'cg' }
     : { ...cancerSagittarius, name: 'Sartan through Keshet', id: 'cs' };
-}
-
-/** Tonight = the evening beginning the NEXT Hebrew day (see SkyPage). */
-function tonightDays() {
-  const now = new Date();
-  return daysFromEpoch(new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12)) + 1;
 }
 
 export default function QuickVerdict() {
@@ -105,7 +99,6 @@ export default function QuickVerdict() {
         >
           Next Rosh Chodesh
         </PresetButton>
-        <PresetButton onClick={() => applyNight(tonightDays())}>Tonight</PresetButton>
       </div>
       <p className="mt-1 text-[11px] text-[var(--color-text-secondary)]">
         {nightDays != null ? (
