@@ -138,6 +138,7 @@ export default function ParallaxBySign() {
       </p>
 
       <Curves index={index} />
+      <ParallaxSplit index={index} north={north} />
 
       <div className="mt-3 grid gap-2 sm:grid-cols-2">
         <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] p-3">
@@ -179,6 +180,104 @@ export default function ParallaxBySign() {
         the gap, the largest of the twelve, and ten minutes onto the height.
       </p>
     </InteractiveCard>
+  );
+}
+
+/** √(lon² + lat²) for a sign — the whole shift the two tables split. */
+export function wholeShiftArcmin(index) {
+  return Math.hypot(LON[index].chalakim, LAT[index].chalakim);
+}
+
+/**
+ * The mechanism the two curves only hint at, drawn as the triangle it
+ * is. The whole change in appearance is one shift of nearly constant
+ * size — √(lon² + lat²) stays within 56′–61′ across all twelve signs,
+ * which is the moon's own parallax showing through his tables — and
+ * what varies by sign is only how it SPLITS against the belt's slant:
+ * along the belt (off the gap) and across it (onto the height). The
+ * belt's drawn slant is derived from the two table values themselves,
+ * so the figure asserts nothing the tables don't say.
+ */
+function ParallaxSplit({ index, north }) {
+  const w = 520;
+  const h = 200;
+  const lon = LON[index].chalakim;
+  const lat = LAT[index].chalakim;
+  const whole = wholeShiftArcmin(index);
+  const scale = 1.7; // px per arcminute
+  const mx = 330;
+  const my = 28;
+  // The whole shift points straight down (toward the horizon). The
+  // along-belt component leaves it at α, where cos α = lon / whole —
+  // small α means a steep belt taking nearly the whole shift sideways
+  // along itself.
+  const alpha = Math.acos(lon / whole);
+  const beltDir = { x: -Math.sin(alpha), y: Math.cos(alpha) };
+  const A = { x: mx + beltDir.x * lon * scale, y: my + beltDir.y * lon * scale };
+  const D = { x: mx, y: my + whole * scale };
+  const beltFrom = { x: mx - beltDir.x * 34, y: my - beltDir.y * 34 };
+  const beltTo = { x: mx + beltDir.x * (lon * scale + 40), y: my + beltDir.y * (lon * scale + 40) };
+  const horizonY = h - 22;
+
+  return (
+    <figure className="mt-3">
+      <svg
+        viewBox={`0 0 ${w} ${h}`}
+        className="w-full"
+        role="img"
+        aria-label="One shift of nearly constant size, pointing toward the horizon, split into a component along the belt and a component across it; the split follows the belt's slant for the chosen sign"
+      >
+        <line x1="0" y1={horizonY} x2={w} y2={horizonY} stroke="var(--color-border)" strokeWidth="1.5" />
+        <text x="6" y={horizonY + 13} fontSize="8" fill="var(--color-text-secondary)">
+          toward the horizon
+        </text>
+
+        {/* the belt through the moon, at the slant the two values imply */}
+        <line x1={beltFrom.x} y1={beltFrom.y} x2={beltTo.x} y2={beltTo.y} stroke="var(--color-gold)" strokeWidth="1" strokeOpacity="0.45" />
+        <text
+          x={beltTo.x + 4}
+          y={beltTo.y + 4}
+          fontSize="8"
+          fill="var(--color-gold)"
+          fillOpacity="0.8"
+        >
+          the belt
+        </text>
+
+        {/* the whole shift, and its two parts */}
+        <line x1={mx} y1={my} x2={D.x} y2={D.y} stroke="var(--color-silver)" strokeWidth="1.5" strokeDasharray="4 3" />
+        <line x1={mx} y1={my} x2={A.x} y2={A.y} stroke="var(--color-accent)" strokeWidth="2.5" />
+        <line x1={A.x} y1={A.y} x2={D.x} y2={D.y} stroke="var(--color-gold)" strokeWidth="2.5" />
+
+        <circle cx={mx} cy={my} r="5" fill="var(--color-silver)" stroke="var(--color-bg)" strokeWidth="1.5" />
+        <text x={mx + 10} y={my + 3} fontSize="9" fill="var(--color-text)">
+          the moon, where it truly is
+        </text>
+        <circle cx={D.x} cy={D.y} r="3.5" fill="var(--color-silver)" fillOpacity="0.7" />
+        <text x={D.x + 8} y={D.y + 3} fontSize="9" fill="var(--color-text-secondary)">
+          where it is seen — {whole.toFixed(0)}′ away
+        </text>
+
+        <text
+          x={(mx + A.x) / 2 - 8}
+          y={(my + A.y) / 2}
+          fontSize="9"
+          textAnchor="end"
+          fill="var(--color-accent)"
+        >
+          along the belt: {lon === 60 ? "1° 0" : lon}′ off the gap
+        </text>
+        <text x={(A.x + D.x) / 2 + 8} y={(A.y + D.y) / 2 + 3} fontSize="9" fill="var(--color-gold)">
+          across it: {lat}′ onto the height ({north ? 'north tonight, so off' : 'south tonight, so on'})
+        </text>
+      </svg>
+      <figcaption className="mt-1 text-center text-[11px] text-[var(--color-text-secondary)]">
+        The two tables are one triangle. The dashed shift toward the horizon is nearly the same
+        size in every sign — 56′ to 61′, the moon's own parallax showing through — and the sign
+        only decides how it splits against the belt's slant. Steep belt: nearly all of it lands
+        along the belt, off the gap. Shallow belt: most of it lands across, onto the height.
+      </figcaption>
+    </figure>
   );
 }
 

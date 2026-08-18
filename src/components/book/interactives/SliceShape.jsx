@@ -26,6 +26,13 @@ import React, { useState } from 'react';
 import InteractiveCard from '../../text/interactives/InteractiveCard';
 import { CONSTANTS } from '../../../engine/constants';
 import { ordinalSuffix } from '../../../engine/zodiac';
+import { MAX_TILT } from '../../../lib/khDeclination';
+import {
+  makeSphereProjector,
+  flatCircle,
+  tiltedCircle,
+  circleHalvesProps,
+} from './sphereProjection';
 
 const BANDS = CONSTANTS.MOON_CIRCLE_FRACTIONS;
 const PEAK = 2 / 5;
@@ -52,6 +59,109 @@ function fractionWords(f) {
   if (f === 1 / 6) return 'a sixth';
   if (f === 1 / 12) return 'a twelfth';
   return 'a twenty-fourth';
+}
+
+const DEG = Math.PI / 180;
+
+/**
+ * Why the staircase has the anchors it has, shown on the sphere the
+ * fractions come from. The two great circles are chapter 19's pair —
+ * the equator and the sun's road — and the annotation is the road's
+ * LOCAL DIRECTION: a gold arrow along the road at the moon's spot, a
+ * silver arrow along the parallel of the equator through the same spot
+ * (the "level" direction). At the crossings the two arrows split by
+ * the full 23½°, and the staircase above peaks; at the turning points
+ * they merge, the road runs level, and the staircase dies to nothing.
+ * The angle between the arrows is computed, not drawn for effect.
+ */
+export function roadLevelAngle(lonDeg) {
+  const t = lonDeg * DEG;
+  const eps = MAX_TILT * DEG;
+  // Tangent to the road at t, and to the equator-parallel through the
+  // same point. Both unit up to a common factor; the angle between
+  // them is what "steepest against level" means.
+  const road = [-Math.sin(t), Math.cos(t) * Math.cos(eps), Math.cos(t) * Math.sin(eps)];
+  const level = [-Math.sin(t) * Math.cos(eps), Math.cos(t), 0];
+  const dot = road[0] * level[0] + road[1] * level[1] + road[2] * level[2];
+  const norm = (v) => Math.hypot(v[0], v[1], v[2]);
+  return Math.acos(Math.min(1, Math.max(-1, dot / (norm(road) * norm(level))))) / DEG;
+}
+
+function SliceSphere({ lon }) {
+  const w = 520;
+  const h = 220;
+  const cx = w / 2;
+  const cy = h / 2 + 4;
+  const R = 92;
+  const eps = MAX_TILT * DEG;
+  const { project, halves } = makeSphereProjector({ cx, cy, R, viewDeg: 40 });
+  const road = tiltedCircle(eps);
+
+  const t = lon * DEG;
+  const pt3 = road(t);
+  const moving = project(pt3);
+  // The parallel of the equator through the moon's spot: constant
+  // height above the equator's plane.
+  const z0 = pt3.z;
+  const r0 = Math.sqrt(Math.max(0, 1 - z0 * z0));
+  const parallel = (tp) => ({ x: r0 * Math.cos(tp), y: r0 * Math.sin(tp), z: z0 });
+
+  // The two direction arrows out of the moving point, equal drawn length.
+  const arrow = (v) => {
+    const s = 0.42 / Math.hypot(v[0], v[1], v[2]);
+    return project({ x: pt3.x + v[0] * s, y: pt3.y + v[1] * s, z: pt3.z + v[2] * s });
+  };
+  const roadTip = arrow([-Math.sin(t), Math.cos(t) * Math.cos(eps), Math.cos(t) * Math.sin(eps)]);
+  const levelTip = arrow([-Math.sin(t) * Math.cos(eps), Math.cos(t), 0]);
+  const angle = roadLevelAngle(lon);
+  const dim = moving.front ? 1 : 0.45;
+
+  const draw = (segs, color, width) =>
+    circleHalvesProps(segs, color, width).map((p) => <polyline {...p} />);
+  const taleh = project(flatCircle(0));
+  const moznayim = project(flatCircle(Math.PI));
+
+  return (
+    <figure className="mt-3">
+      <svg
+        viewBox={`0 0 ${w} ${h}`}
+        className="w-full"
+        role="img"
+        aria-label="The equator and the sun's road on a sphere, with two arrows at the moon's spot: one along the road, one along the level parallel; the angle between them is largest at the crossings and vanishes at the turning points, matching the staircase"
+      >
+        <circle cx={cx} cy={cy} r={R} fill="var(--color-card)" fillOpacity="0.5" stroke="var(--color-border)" strokeWidth="1" />
+        {draw(halves(flatCircle), 'var(--color-silver)', 1.25)}
+        {draw(halves(parallel), 'var(--color-silver)', 0.75)}
+        {draw(halves(road), 'var(--color-gold)', 1.5)}
+
+        {[
+          { p: taleh, label: '1st starts', dx: 8, anchor: 'start' },
+          { p: moznayim, label: '7th starts', dx: -8, anchor: 'end' },
+        ].map(({ p, label, dx, anchor }) => (
+          <g key={label}>
+            <circle cx={p.X} cy={p.Y} r="3" fill="var(--color-accent)" />
+            <text x={p.X + dx} y={p.Y + 3} fontSize="8" textAnchor={anchor} fill="var(--color-accent)">
+              {label}
+            </text>
+          </g>
+        ))}
+
+        {/* the two directions out of the moon's spot */}
+        <line x1={moving.X} y1={moving.Y} x2={levelTip.X} y2={levelTip.Y} stroke="var(--color-silver)" strokeWidth="1.5" strokeOpacity={dim} />
+        <line x1={moving.X} y1={moving.Y} x2={roadTip.X} y2={roadTip.Y} stroke="var(--color-gold)" strokeWidth="1.5" strokeOpacity={dim} />
+        <circle cx={moving.X} cy={moving.Y} r="4.5" fill="var(--color-silver)" fillOpacity={dim} stroke="var(--color-bg)" strokeWidth="1.25" />
+        <text x={moving.X} y={moving.Y - 10} fontSize="9" textAnchor="middle" fill="var(--color-text)" fillOpacity={dim}>
+          {angle.toFixed(0)}° apart
+        </text>
+      </svg>
+      <figcaption className="mt-1 text-center text-[11px] text-[var(--color-text-secondary)]">
+        The staircase's anchors, on the sphere it lives on. Gold arrow: the road's direction at the
+        moon's spot. Silver arrow: the level direction — the parallel of the equator through the
+        same spot. They split by the full 23½° at the crossings, where the staircase peaks, and
+        merge at the turning points, where it dies to nothing.
+      </figcaption>
+    </figure>
+  );
 }
 
 export default function SliceShape() {
@@ -179,6 +289,8 @@ export default function SliceShape() {
           />
         </svg>
       </figure>
+
+      <SliceSphere lon={n} />
 
       <label className="mt-2 block">
         <span className="text-xs font-bold text-[var(--color-text-secondary)]">

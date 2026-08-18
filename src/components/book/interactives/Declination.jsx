@@ -40,6 +40,12 @@ import {
 } from '../../../lib/khDeclination';
 import { CONSTANTS } from '../../../engine/constants';
 import { eclipticToEquatorial } from '../../../lib/skyView';
+import {
+  makeSphereProjector,
+  flatCircle,
+  tiltedCircle,
+  circleHalvesProps,
+} from './sphereProjection';
 
 const DEG = Math.PI / 180;
 /** The true tilt, for the comparison: arcsin(sin ε · sin λ). */
@@ -154,52 +160,13 @@ function Sphere({ longitude, tilt }) {
   // Camera height above the equator's plane. Not near 0° (the equator
   // would collapse to a line) and not near 23½° (the road would): 40°
   // keeps both circles open as ellipses.
-  const VIEW = 40 * DEG;
   const EPS = MAX_TILT * DEG;
-
-  // Scene coords: x to the right (both circles cross there), z up,
-  // y toward the viewer. Tilt the scene toward the camera, project flat.
-  const project = ({ x, y, z }) => ({
-    X: cx + R * x,
-    Y: cy - R * (-y * Math.sin(VIEW) + z * Math.cos(VIEW)),
-    front: y * Math.cos(VIEW) + z * Math.sin(VIEW) > 0,
-  });
-  const equatorPt = (t) => project({ x: Math.cos(t), y: Math.sin(t), z: 0 });
-  const eclipticPt = (t) =>
-    project({ x: Math.cos(t), y: Math.sin(t) * Math.cos(EPS), z: Math.sin(t) * Math.sin(EPS) });
-
-  // A circle as front/back polylines, split where it dips behind the sphere.
-  const halves = (ptAt) => {
-    const segs = { front: [], back: [] };
-    let run = [];
-    let side = null;
-    for (let d = 0; d <= 360; d += 3) {
-      const p = ptAt(d * DEG);
-      const s = p.front ? 'front' : 'back';
-      if (side !== null && s !== side) {
-        segs[side].push(run);
-        run = [];
-      }
-      run.push(p);
-      side = s;
-    }
-    if (run.length) segs[side].push(run);
-    return segs;
-  };
+  const { project, halves } = makeSphereProjector({ cx, cy, R, viewDeg: 40 });
+  const road = tiltedCircle(EPS);
+  const equatorPt = (t) => project(flatCircle(t));
+  const eclipticPt = (t) => project(road(t));
   const draw = (segs, color, width) =>
-    ['back', 'front'].map((side) =>
-      segs[side].map((seg, i) => (
-        <polyline
-          key={`${side}${i}`}
-          points={seg.map((p) => `${p.X.toFixed(1)},${p.Y.toFixed(1)}`).join(' ')}
-          fill="none"
-          stroke={color}
-          strokeWidth={width}
-          strokeOpacity={side === 'front' ? 0.9 : 0.28}
-          strokeDasharray={side === 'front' ? undefined : '3 3'}
-        />
-      )),
-    );
+    circleHalvesProps(segs, color, width).map((p) => <polyline {...p} />);
 
   // The moving point, and its meridian arc down to the equator — the
   // declination made visible as an arc on the sphere itself.
@@ -236,8 +203,8 @@ function Sphere({ longitude, tilt }) {
       >
         <circle cx={cx} cy={cy} r={R} fill="var(--color-card)" fillOpacity="0.5" stroke="var(--color-border)" strokeWidth="1" />
 
-        {draw(halves(equatorPt), 'var(--color-silver)', 1.5)}
-        {draw(halves(eclipticPt), 'var(--color-gold)', 1.5)}
+        {draw(halves(flatCircle), 'var(--color-silver)', 1.5)}
+        {draw(halves(road), 'var(--color-gold)', 1.5)}
 
         {/* the two crossings */}
         {[
