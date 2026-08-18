@@ -30,10 +30,11 @@ const page = () =>
   );
 
 describe('the page', () => {
-  it('renders both bodies, labelled as his', async () => {
+  it('renders both bodies, labelled as the Rambam\'s', async () => {
     page();
-    expect(await screen.findByText('his sun')).toBeTruthy();
-    expect(screen.getByText('his moon')).toBeTruthy();
+    // The label appears on the drawn body and as a readout title.
+    expect((await screen.findAllByText('Sun (Rambam)')).length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Moon (Rambam)').length).toBeGreaterThan(0);
   });
 
   it('carries the regime note — positions his, frame modern', () => {
@@ -76,31 +77,54 @@ describe("his worked evening's scene, numerically", () => {
   });
 });
 
-describe('the real-sky toggle', () => {
+describe('the actual-sky toggle', () => {
   it('swaps the drawn bodies to modern positions, relabelled', async () => {
     page();
-    expect(await screen.findByText('his sun')).toBeTruthy();
-    const toggle = screen.getByText(/Show the real sky/).closest('label').querySelector('input');
+    expect((await screen.findAllByText('Sun (Rambam)')).length).toBeGreaterThan(0);
+    const toggle = screen.getByText(/Show the actual sky/).closest('label').querySelector('input');
     fireEvent.click(toggle);
-    expect(await screen.findByText('the real sun')).toBeTruthy();
-    expect(screen.getByText('the real moon')).toBeTruthy();
+    expect((await screen.findAllByText('Sun (actual)')).length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Moon (actual)').length).toBeGreaterThan(0);
     // The deltas are on the readouts, so the gap between his sky and the
     // real one is a number, not an impression.
     expect(screen.getAllByText(/his sits [+−-]?\d+\.\d+° from this/).length).toBe(2);
   });
 
-  it("keeps the verdict his — the real moon never enters it", () => {
+  it("keeps the verdict his — the actual moon never enters it", () => {
     page();
     expect(screen.getByText(/verdict readout stays his either way/)).toBeTruthy();
   });
 
   it('labels the belt with names as well as numbers', async () => {
     page();
-    await screen.findByText('his sun');
+    await screen.findAllByText('Sun (Rambam)');
     // At least one transliterated name on the gold line, beneath its number.
     const names = ['Taleh', 'Shor', 'Teomim', 'Sartan', 'Aryeh', 'Betulah', 'Moznayim', 'Akrav', 'Keshet', "G'di", "D'li", 'Dagim'];
     const found = names.filter((n) => screen.queryAllByText(n).length > 0);
     expect(found.length).toBeGreaterThan(0);
+  });
+});
+
+describe('the modern check panel', () => {
+  it('is on the page, with its facts and its comparison-only stance', async () => {
+    page();
+    expect(await screen.findByText(/Would it actually be seen/)).toBeTruthy();
+    expect(screen.getByText('Conjunction (true molad)')).toBeTruthy();
+    expect(screen.getByText(/Opens 7° \(Danjon limit\)/)).toBeTruthy();
+    expect(screen.getByText('Elongation at sunset')).toBeTruthy();
+    // The stance: information only, never feeding the verdict.
+    expect(screen.getByText(/none of this feeds it/)).toBeTruthy();
+    // And the honesty note about the criterion's generosity.
+    expect(screen.getByText(/Yallop, Odeh/)).toBeTruthy();
+  });
+
+  it("agrees with KH 17 on his worked evening, and says so", async () => {
+    // Day 29 (the default): his verdict is "visible", and the modern
+    // check finds a real crescent with a window (pinned numerically in
+    // moonVisibility.test.js) — so the comparison line reports agreement.
+    page();
+    expect(await screen.findByText(/Modern reading:/)).toBeTruthy();
+    expect(screen.getByText(/the two agree this evening/)).toBeTruthy();
   });
 });
 
@@ -195,7 +219,7 @@ describe("the moon's drawn phase", () => {
 
   it('renders as a path inside a rotated group, not a plain disc', async () => {
     const { container } = page();
-    await screen.findByText('his moon');
+    await screen.findAllByText('Moon (Rambam)');
     const rotated = [...container.querySelectorAll('g[transform*="rotate"] path')];
     expect(rotated.length).toBeGreaterThan(0);
   });
