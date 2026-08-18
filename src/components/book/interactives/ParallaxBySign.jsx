@@ -138,7 +138,6 @@ export default function ParallaxBySign() {
       </p>
 
       <Curves index={index} />
-      <ParallaxSplit index={index} north={north} />
 
       <div className="mt-3 grid gap-2 sm:grid-cols-2">
         <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] p-3">
@@ -173,7 +172,11 @@ export default function ParallaxBySign() {
         circle, and they run in opposite phase — where one is largest the other is smallest. That
         is what you would expect if they are the sideways and the vertical parts of one change in
         appearance, divided differently as the belt tilts against the horizon. They are not twelve
-        unrelated numbers apiece.
+        unrelated numbers apiece. In fact, combine any sign's pair the way the sides of a
+        right-angled triangle combine and the total comes out almost the same in every sign —
+        between 56′ and 61′, which is the moon's own parallax showing through his two tables.
+        (That observation is this book's, not his: he gives the tables and says the reasons
+        belong to the geometry books, KH 17:24.)
       </p>
       <p className="mt-2 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
         On the evening the Rambam works, the moon is in <strong>Shor</strong> — a full degree off
@@ -186,88 +189,6 @@ export default function ParallaxBySign() {
 /** √(lon² + lat²) for a sign — the whole shift the two tables split. */
 export function wholeShiftArcmin(index) {
   return Math.hypot(LON[index].chalakim, LAT[index].chalakim);
-}
-
-/**
- * The mechanism, told as plainly as it can be told: you see the moon a
- * little away from where it really is, and the two tables are the
- * sideways part and the downward part of that one push. Two moons, one
- * dashed push, one right angle — no belt, no slant, no legend. Earlier
- * drafts drew the true triangle against the belt's direction and a
- * reader could not tell what they were looking at; the split here is
- * schematic (screen-sideways and screen-down), which the caption says.
- *
- * The one discovered fact stays: the whole push is nearly the same
- * size in every sign — 56'-61', the moon's own parallax showing
- * through his two tables — and the sign only re-divides it.
- */
-function ParallaxSplit({ index, north }) {
-  const w = 520;
-  const h = 195;
-  const lon = LON[index].chalakim;
-  const lat = LAT[index].chalakim;
-  const whole = wholeShiftArcmin(index);
-  const s = 1.3; // px per arcminute
-  const trueX = 340;
-  const trueY = 48;
-  const cornerX = trueX - lon * s;
-  const seenY = trueY + lat * s;
-  const horizonY = h - 22;
-
-  return (
-    <figure className="mt-3">
-      <svg
-        viewBox={`0 0 ${w} ${h}`}
-        className="w-full"
-        role="img"
-        aria-label="The moon drawn twice: where it really is, and slightly lower toward the horizon where the eye sees it. The push between them is split into a sideways arrow, the first table, and a downward arrow, the second table."
-      >
-        <line x1="0" y1={horizonY} x2={w} y2={horizonY} stroke="var(--color-border)" strokeWidth="1.5" />
-        <text x="6" y={horizonY + 13} fontSize="8" fill="var(--color-text-secondary)">
-          the horizon
-        </text>
-
-        {/* the whole push, really here → seen here */}
-        <line x1={trueX} y1={trueY} x2={cornerX} y2={seenY} stroke="var(--color-silver)" strokeWidth="1.5" strokeDasharray="4 3" />
-
-        {/* its two parts, at a right angle */}
-        <line x1={trueX} y1={trueY} x2={cornerX} y2={trueY} stroke="var(--color-accent)" strokeWidth="2.5" />
-        <text x={(trueX + cornerX) / 2} y={trueY - 8} fontSize="9" textAnchor="middle" fill="var(--color-accent)">
-          the sideways part: {lon === 60 ? "1° 0" : lon}′ — the first table
-        </text>
-        <line x1={cornerX} y1={trueY} x2={cornerX} y2={seenY} stroke="var(--color-gold)" strokeWidth="2.5" />
-        <text x={cornerX - 8} y={(trueY + seenY) / 2 + 3} fontSize="9" textAnchor="end" fill="var(--color-gold)">
-          the downward part: {lat}′ — the second table
-        </text>
-
-        {/* the two moons */}
-        <circle cx={trueX} cy={trueY} r="9" fill="none" stroke="var(--color-silver)" strokeWidth="1.5" strokeDasharray="2 2" />
-        <text x={trueX + 14} y={trueY + 3} fontSize="9" fill="var(--color-text)">
-          the moon is really here
-        </text>
-        <circle cx={cornerX} cy={seenY} r="9" fill="var(--color-silver)" fillOpacity="0.9" />
-        <text x={cornerX + 14} y={seenY + 3} fontSize="9" fill="var(--color-text)">
-          your eye sees it here
-        </text>
-        <text x={cornerX + 14} y={seenY + 16} fontSize="9" fill="var(--color-text-secondary)">
-          the whole push: {whole.toFixed(0)}′
-        </text>
-      </svg>
-      <figcaption className="mt-1 text-center text-[11px] text-[var(--color-text-secondary)]">
-        You never see the moon quite where it is: you stand on the earth's surface, not at its
-        centre, and that pushes the moon you see about two moon-widths toward the horizon. The two
-        tables are just the two parts of that one push — the first its sideways part, the second
-        its downward part — and the sign decides the split, never the size: the whole push stays
-        56′–61′ in every sign. (The directions here are schematic — "sideways" runs along the
-        sun's road.)
-        <br />
-        <em>Whose picture is this?</em> He gives only the two tables. The push-and-parts is our
-        reconstruction of the why — he says himself that the reasons behind these numbers belong
-        to "the wisdom of astronomy and geometry, concerning which the Greeks wrote many books"
-        (KH 17:24), and leaves them there.
-      </figcaption>
-    </figure>
-  );
 }
 
 function Curves({ index }) {

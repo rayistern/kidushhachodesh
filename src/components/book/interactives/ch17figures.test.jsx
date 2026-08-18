@@ -29,18 +29,13 @@ describe("the parallax triangle's claim: one shift, split by sign", () => {
     }
   });
 
-  it('renders as the two-moons story: really here, seen here, one push in two parts', () => {
+  it('states the constant-total fact in prose, with its provenance', () => {
+    // The figure that carried this fact was removed — it leaned on
+    // "first table / second table" language and cryptic numbers. The
+    // fact survives as one sentence beside the curves, still owned as
+    // this book's observation, not his.
     render(<ParallaxBySign />);
-    expect(screen.getByText('the moon is really here')).toBeTruthy();
-    expect(screen.getByText('your eye sees it here')).toBeTruthy();
-    expect(screen.getByText(/the whole push: \d+′/)).toBeTruthy();
-    expect(screen.getByText(/the sideways part: .*′ — the first table/)).toBeTruthy();
-    expect(screen.getByText(/the downward part: \d+′ — the second table/)).toBeTruthy();
-  });
-
-  it('says whose the mechanism is: his tables, our triangle', () => {
-    render(<ParallaxBySign />);
-    expect(screen.getByText(/He gives only the two tables/)).toBeTruthy();
+    expect(screen.getByText(/between 56′ and 61′/)).toBeTruthy();
     expect(screen.getByText(/KH 17:24/)).toBeTruthy();
   });
 });
