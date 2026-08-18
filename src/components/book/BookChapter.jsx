@@ -24,6 +24,7 @@
  * nothing that can go stale.
  */
 import React, { useState, useEffect } from 'react';
+import SiteCredit from '../layout/SiteCredit';
 import { Link, useParams, Navigate } from 'react-router-dom';
 import { bookChapter, hasBookChapter } from '../../content/book';
 import { CHAPTER_TITLES, isValidChapter } from '../../content/khChapters';
@@ -121,6 +122,7 @@ export default function BookChapter() {
           ))}
 
           {content.closing && <Closing closing={content.closing} chapter={chapter} />}
+          <SiteCredit />
         </main>
       </div>
     </div>

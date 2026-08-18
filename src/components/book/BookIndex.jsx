@@ -16,6 +16,7 @@
  * about which is which.
  */
 import React from 'react';
+import SiteCredit from '../layout/SiteCredit';
 import { Link } from 'react-router-dom';
 import ChainMap from './ChainMap';
 import { writtenChapters } from '../../content/book';
@@ -109,6 +110,7 @@ export default function BookIndex() {
             </p>
           </section>
         )}
+        <SiteCredit />
       </main>
     </div>
   );

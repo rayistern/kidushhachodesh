@@ -143,3 +143,14 @@ describe('the chain map', () => {
   });
 });
 
+
+describe('the credit to the upstream project', () => {
+  it('renders on a book chapter and links to rayistern/kidushhachodesh', () => {
+    renderAt('/book/14');
+    const link = screen.getByRole('link', { name: /rayistern\/kidushhachodesh/ });
+    expect(link.getAttribute('href')).toBe('https://github.com/rayistern/kidushhachodesh');
+    // Scoped credit: the logic is theirs, the book is not.
+    expect(document.body.textContent).toMatch(/engine and much of the underlying logic/);
+    expect(document.body.textContent).toMatch(/book and its figures were written here/);
+  });
+});

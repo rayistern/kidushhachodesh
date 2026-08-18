@@ -163,7 +163,16 @@ export default function TextChapter() {
               {text.heVersionTitle && <div>Hebrew: {text.heVersionTitle}</div>}
               {text.enVersionTitle && <div>English: {text.enVersionTitle}</div>}
               <div className="mt-1">
-                Text courtesy of{' '}
+                Engine and site logic built on{' '}
+                <a
+                  href="https://github.com/rayistern/kidushhachodesh"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-[var(--color-accent)] hover:underline"
+                >
+                  rayistern/kidushhachodesh
+                </a>
+                . Text courtesy of{' '}
                 <a
                   href={`https://www.sefaria.org/Mishneh_Torah,_Sanctification_of_the_New_Month.${chapter}`}
                   target="_blank"

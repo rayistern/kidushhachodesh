@@ -18,6 +18,7 @@
  * method. See docs/OPEN_QUESTIONS.md Q3.
  */
 import React from 'react';
+import SiteCredit from '../layout/SiteCredit';
 import { Link } from 'react-router-dom';
 import { SECTIONS, CHAPTER_TITLES, HALACHA_COUNTS } from '../../content/khChapters';
 
@@ -99,6 +100,7 @@ export default function TextIndex() {
           title the chapters of the Mishneh Torah. The trailing number is the count of
           halachot in each chapter.
         </p>
+        <SiteCredit />
       </main>
     </div>
   );

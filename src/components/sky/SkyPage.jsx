@@ -25,6 +25,7 @@
  * Nothing here feeds back into any calculation.
  */
 import React, { useMemo, useState } from 'react';
+import SiteCredit from '../layout/SiteCredit';
 import { Link } from 'react-router-dom';
 import { getFullCalculation } from '../../engine/pipeline';
 import { dateFromEpochDays, daysFromEpoch } from '../../engine/epochDays';
@@ -276,6 +277,7 @@ export default function SkyPage() {
           clock held and the three speeds of the book appear: the grid drifts a degree a night,
           the sun barely moves against your window, the moon runs.
         </p>
+        <SiteCredit />
       </main>
     </div>
   );
