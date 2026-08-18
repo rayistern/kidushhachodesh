@@ -29,12 +29,13 @@ describe("the parallax triangle's claim: one shift, split by sign", () => {
     }
   });
 
-  it('renders the triangle with both components named in the legend', () => {
+  it('renders as the two-moons story: really here, seen here, one push in two parts', () => {
     render(<ParallaxBySign />);
-    expect(screen.getByText(/along the belt — off the gap: .*′/)).toBeTruthy();
-    expect(screen.getByText(/across it — onto the height: \d+′/)).toBeTruthy();
-    expect(screen.getByText(/the whole shift: \d+′/)).toBeTruthy();
-    expect(screen.getByText(/where it is seen — \d+′ away/)).toBeTruthy();
+    expect(screen.getByText('the moon is really here')).toBeTruthy();
+    expect(screen.getByText('your eye sees it here')).toBeTruthy();
+    expect(screen.getByText(/the whole push: \d+′/)).toBeTruthy();
+    expect(screen.getByText(/the sideways part: .*′ — the first table/)).toBeTruthy();
+    expect(screen.getByText(/the downward part: \d+′ — the second table/)).toBeTruthy();
   });
 
   it('says whose the mechanism is: his tables, our triangle', () => {

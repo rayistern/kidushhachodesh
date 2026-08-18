@@ -551,8 +551,11 @@ describe('the adjustments name their outputs where they are made', () => {
     // tally the prose never showed; the ordinal now opens each bullet —
     // the third at the end of the slice section, the fourth beside the
     // stretch's own figure.
-    expect(body).toMatch(/\*\*The third longitude\*\* is the gap after the slice/);
-    expect(body).toMatch(/\*\*The fourth longitude\*\* is that number stretched or shrunk/);
+    // The ordinal still opens each bullet; the Hebrew name rides along so
+    // a reader can find the step in the Rambam's own text (a reader
+    // asked for exactly that link).
+    expect(body).toMatch(/\*\*The third longitude\*\* — \*\*אורך שלישי\*\* — is the gap after the slice/);
+    expect(body).toMatch(/\*\*The fourth longitude\*\* — \*\*אורך רביעי\*\* — is that number stretched or shrunk/);
     // A reader asked whether the fourth was "the same slice". It is not:
     // the slice is a fraction of the HEIGHT, the stretch a fraction of
     // the gap ITSELF — checked against the engine below.

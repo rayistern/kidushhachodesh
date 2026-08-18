@@ -189,34 +189,29 @@ export function wholeShiftArcmin(index) {
 }
 
 /**
- * The mechanism the two curves only hint at, drawn as the triangle it
- * is. The whole change in appearance is one shift of nearly constant
- * size — √(lon² + lat²) stays within 56′–61′ across all twelve signs,
- * which is the moon's own parallax showing through his tables — and
- * what varies by sign is only how it SPLITS against the belt's slant:
- * along the belt (off the gap) and across it (onto the height). The
- * belt's drawn slant is derived from the two table values themselves,
- * so the figure asserts nothing the tables don't say.
+ * The mechanism, told as plainly as it can be told: you see the moon a
+ * little away from where it really is, and the two tables are the
+ * sideways part and the downward part of that one push. Two moons, one
+ * dashed push, one right angle — no belt, no slant, no legend. Earlier
+ * drafts drew the true triangle against the belt's direction and a
+ * reader could not tell what they were looking at; the split here is
+ * schematic (screen-sideways and screen-down), which the caption says.
+ *
+ * The one discovered fact stays: the whole push is nearly the same
+ * size in every sign — 56'-61', the moon's own parallax showing
+ * through his two tables — and the sign only re-divides it.
  */
 function ParallaxSplit({ index, north }) {
   const w = 520;
-  const h = 200;
+  const h = 195;
   const lon = LON[index].chalakim;
   const lat = LAT[index].chalakim;
   const whole = wholeShiftArcmin(index);
-  const scale = 1.7; // px per arcminute
-  const mx = 330;
-  const my = 28;
-  // The whole shift points straight down (toward the horizon). The
-  // along-belt component leaves it at α, where cos α = lon / whole —
-  // small α means a steep belt taking nearly the whole shift sideways
-  // along itself.
-  const alpha = Math.acos(lon / whole);
-  const beltDir = { x: -Math.sin(alpha), y: Math.cos(alpha) };
-  const A = { x: mx + beltDir.x * lon * scale, y: my + beltDir.y * lon * scale };
-  const D = { x: mx, y: my + whole * scale };
-  const beltFrom = { x: mx - beltDir.x * 34, y: my - beltDir.y * 34 };
-  const beltTo = { x: mx + beltDir.x * (lon * scale + 40), y: my + beltDir.y * (lon * scale + 40) };
+  const s = 1.3; // px per arcminute
+  const trueX = 340;
+  const trueY = 48;
+  const cornerX = trueX - lon * s;
+  const seenY = trueY + lat * s;
   const horizonY = h - 22;
 
   return (
@@ -225,80 +220,48 @@ function ParallaxSplit({ index, north }) {
         viewBox={`0 0 ${w} ${h}`}
         className="w-full"
         role="img"
-        aria-label="One shift of nearly constant size, pointing toward the horizon, split into a component along the belt and a component across it; the split follows the belt's slant for the chosen sign"
+        aria-label="The moon drawn twice: where it really is, and slightly lower toward the horizon where the eye sees it. The push between them is split into a sideways arrow, the first table, and a downward arrow, the second table."
       >
         <line x1="0" y1={horizonY} x2={w} y2={horizonY} stroke="var(--color-border)" strokeWidth="1.5" />
         <text x="6" y={horizonY + 13} fontSize="8" fill="var(--color-text-secondary)">
-          toward the horizon
+          the horizon
         </text>
 
-        {/* the belt through the moon, at the slant the two values imply */}
-        <line x1={beltFrom.x} y1={beltFrom.y} x2={beltTo.x} y2={beltTo.y} stroke="var(--color-gold)" strokeWidth="1" strokeOpacity="0.45" />
-        <text
-          x={beltTo.x + 4}
-          y={beltTo.y + 4}
-          fontSize="8"
-          fill="var(--color-gold)"
-          fillOpacity="0.8"
-        >
-          the belt
+        {/* the whole push, really here → seen here */}
+        <line x1={trueX} y1={trueY} x2={cornerX} y2={seenY} stroke="var(--color-silver)" strokeWidth="1.5" strokeDasharray="4 3" />
+
+        {/* its two parts, at a right angle */}
+        <line x1={trueX} y1={trueY} x2={cornerX} y2={trueY} stroke="var(--color-accent)" strokeWidth="2.5" />
+        <text x={(trueX + cornerX) / 2} y={trueY - 8} fontSize="9" textAnchor="middle" fill="var(--color-accent)">
+          the sideways part: {lon === 60 ? "1° 0" : lon}′ — the first table
+        </text>
+        <line x1={cornerX} y1={trueY} x2={cornerX} y2={seenY} stroke="var(--color-gold)" strokeWidth="2.5" />
+        <text x={cornerX - 8} y={(trueY + seenY) / 2 + 3} fontSize="9" textAnchor="end" fill="var(--color-gold)">
+          the downward part: {lat}′ — the second table
         </text>
 
-        {/* the whole shift, and its two parts */}
-        <line x1={mx} y1={my} x2={D.x} y2={D.y} stroke="var(--color-silver)" strokeWidth="1.5" strokeDasharray="4 3" />
-        <line x1={mx} y1={my} x2={A.x} y2={A.y} stroke="var(--color-accent)" strokeWidth="2.5" />
-        <line x1={A.x} y1={A.y} x2={D.x} y2={D.y} stroke="var(--color-gold)" strokeWidth="2.5" />
-
-        <circle cx={mx} cy={my} r="5" fill="var(--color-silver)" stroke="var(--color-bg)" strokeWidth="1.5" />
-        <text x={mx + 10} y={my + 3} fontSize="9" fill="var(--color-text)">
-          the moon, where it truly is
+        {/* the two moons */}
+        <circle cx={trueX} cy={trueY} r="9" fill="none" stroke="var(--color-silver)" strokeWidth="1.5" strokeDasharray="2 2" />
+        <text x={trueX + 14} y={trueY + 3} fontSize="9" fill="var(--color-text)">
+          the moon is really here
         </text>
-        <circle cx={D.x} cy={D.y} r="3.5" fill="var(--color-silver)" fillOpacity="0.7" />
-        <text x={D.x + 8} y={D.y + 3} fontSize="9" fill="var(--color-text-secondary)">
-          where it is seen — {whole.toFixed(0)}′ away
+        <circle cx={cornerX} cy={seenY} r="9" fill="var(--color-silver)" fillOpacity="0.9" />
+        <text x={cornerX + 14} y={seenY + 3} fontSize="9" fill="var(--color-text)">
+          your eye sees it here
         </text>
-
-        {/* The three measurements live in a fixed legend, not floated on
-            the geometry: at steep or shallow slants the components get
-            short and floated labels landed on top of each other. */}
-        {[
-          {
-            stroke: 'var(--color-silver)', dash: '4 3', width: 1.5,
-            text: `the whole shift: ${whole.toFixed(0)}′`, color: 'var(--color-text-secondary)',
-          },
-          {
-            stroke: 'var(--color-accent)', dash: undefined, width: 2.5,
-            text: `along the belt — off the gap: ${lon === 60 ? '1° 0' : lon}′`, color: 'var(--color-accent)',
-          },
-          {
-            stroke: 'var(--color-gold)', dash: undefined, width: 2.5,
-            text: `across it — onto the height: ${lat}′ (${north ? 'north tonight, so off' : 'south tonight, so on'})`,
-            color: 'var(--color-gold)',
-          },
-        ].map((row, i) => (
-          <g key={row.text}>
-            <line
-              x1="10"
-              y1={18 + i * 15}
-              x2="30"
-              y2={18 + i * 15}
-              stroke={row.stroke}
-              strokeWidth={row.width}
-              strokeDasharray={row.dash}
-            />
-            <text x="35" y={21 + i * 15} fontSize="9" fill={row.color}>
-              {row.text}
-            </text>
-          </g>
-        ))}
+        <text x={cornerX + 14} y={seenY + 16} fontSize="9" fill="var(--color-text-secondary)">
+          the whole push: {whole.toFixed(0)}′
+        </text>
       </svg>
       <figcaption className="mt-1 text-center text-[11px] text-[var(--color-text-secondary)]">
-        The two tables are one triangle. The dashed shift toward the horizon is nearly the same
-        size in every sign — 56′ to 61′, the moon's own parallax showing through — and the sign
-        only decides how it splits against the belt's slant. Steep belt: nearly all of it lands
-        along the belt, off the gap. Shallow belt: most of it lands across, onto the height.
+        You never see the moon quite where it is: you stand on the earth's surface, not at its
+        centre, and that pushes the moon you see about two moon-widths toward the horizon. The two
+        tables are just the two parts of that one push — the first its sideways part, the second
+        its downward part — and the sign decides the split, never the size: the whole push stays
+        56′–61′ in every sign. (The directions here are schematic — "sideways" runs along the
+        sun's road.)
         <br />
-        <em>Whose picture is this?</em> He gives only the two tables. The triangle is our
+        <em>Whose picture is this?</em> He gives only the two tables. The push-and-parts is our
         reconstruction of the why — he says himself that the reasons behind these numbers belong
         to "the wisdom of astronomy and geometry, concerning which the Greeks wrote many books"
         (KH 17:24), and leaves them there.
