@@ -1,211 +1,22 @@
+# Netlify deployment for the Kiddush HaChodesh dashboard, book and sky.
+#
+# The app is built with base='/kh/' and outDir='dist/kh' (see
+# vite.config.js — that layout is deliberate and shared with upstream),
+# so the site publishes the whole dist/ and serves under /kh/. The root
+# redirect makes the bare domain land on the app, and the SPA fallback
+# lets react-router own every /kh/* path (/kh/book/14, /kh/sky, …) on
+# hard reloads.
+
 [build]
-  # Vite outputs to dist/kh because base='/kh/'. We rename that directory
-  # to dist/_app after the build so there is NO directory literally named
-  # "kh" in the publish dir. That kills Netlify's auto trailing-slash
-  # 301 on /kh, which was bouncing off Vercel's slash-stripping and
-  # producing the redirect loop. Our force=true rewrites below map
-  # /kh/* requests onto the renamed _app/* files.
-  #
-  # `set -e` makes the script fail loudly if any step fails. The
-  # buildmarker.txt write at the end is so we can curl /buildmarker.txt
-  # in production and verify Netlify actually ran THIS commit's build
-  # command (and didn't serve a cached prior deploy).
-  command = "set -e; echo '=== KH BUILD COMMAND RAN ==='; npm run build; rm -rf dist/_app; mv dist/kh dist/_app; printf 'commit=%s\\nbuilt_at=%s\\n' \"${COMMIT_REF:-unknown}\" \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\" > dist/_app/buildmarker.txt; echo '=== buildmarker:'; cat dist/_app/buildmarker.txt; echo '=== dist/_app contents:'; ls -la dist/_app; echo '=== dist/_app/assets:'; ls -la dist/_app/assets"
+  command = "npm run build"
   publish = "dist"
 
-# Disable Netlify's HTML post-processing. The "pretty_urls" feature normalizes
-# trailing slashes (e.g. /kh ↔ /kh/) and that interacts badly with the Vercel
-# proxy at shluchimexchange.ai/kh — one side adds the slash, the other strips
-# it, and the result is an infinite redirect loop. Forcing every redirect
-# rule (with force = true) and turning pretty_urls off makes our rules the
-# single source of truth.
-[build.processing.html]
-  pretty_urls = false
-
-[dev]
-  command = "npm start"
-  port    = 8888
-
-# Bundle the docs and calculation engine into the serverless functions so
-# they can read markdown files and run the Rambam pipeline at request time.
-[functions]
-  directory = "netlify/functions"
-  node_bundler = "esbuild"
-  included_files = ["docs/**", "src/engine/**", "templates/**"]
-
-# Edge function on "/" that serves /llms.txt to known AI bots and browsers
-# that ask for non-HTML content. Real browsers pass through to the SPA.
-[[edge_functions]]
-  function = "agent-router"
-  path = "/"
-
-# ── How the SPA is served ──
-# Vite builds with base='/kh/' AND outDir='dist/kh', then the build command
-# renames dist/kh → dist/_app so the publish dir contains NO directory
-# literally named "kh". Asset URLs in the built index.html still reference
-# /kh/assets/... (because of base='/kh/'), so we rewrite /kh/assets/* to
-# /_app/assets/:splat below. The SPA shell is served at /_app/index.html
-# via the same rewrite trick.
-#
-# Function paths (/mcp, /api/*, /docs/*, /engine/*, /templates/*) and the
-# edge function on "/" are matched BEFORE redirects, so they still take
-# precedence over these rules.
-#
-# `force = true` on every rule means Netlify applies our redirect even
-# when a real file would otherwise be served — required so its trailing
-# -slash auto-handling doesn't fight the rules and create a loop with
-# the upstream Vercel proxy. Order matters: more specific rules first.
-
-# Build marker — lets us curl /buildmarker.txt and see the commit hash
-# the deploy was built from. MUST come before the catch-all rules below.
 [[redirects]]
-  from = "/buildmarker.txt"
-  to = "/_app/buildmarker.txt"
-  status = 200
-  force = true
-
-# Vite-emitted static assets. MUST come before the SPA fallback so that
-# JS/CSS requests aren't rewritten to index.html (which would serve HTML
-# for a script tag and trigger a MIME-type error).
-[[redirects]]
-  from = "/kh/assets/*"
-  to = "/_app/assets/:splat"
-  status = 200
-  force = true
-
-# Agent-discoverable files reachable under the /kh prefix.
-[[redirects]]
-  from = "/kh/llms.txt"
-  to = "/_app/llms.txt"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/kh/ai.html"
-  to = "/_app/ai.html"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/kh/agents.md"
-  to = "/_app/agents.md"
-  status = 200
-  force = true
-
-# Function paths reachable under the /kh prefix. The Vercel proxy at
-# shluchimexchange.ai only forwards /kh* requests, so each function
-# endpoint (which self-registers at /mcp, /api/*, /docs/*, /engine/*,
-# /templates/*) needs a /kh-prefixed alias that strips the prefix before
-# the request hits the function. status=200 = internal rewrite, the
-# browser URL stays /kh/... and the function still receives the request.
-[[redirects]]
-  from = "/kh/mcp"
-  to = "/mcp"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/kh/.well-known/mcp"
-  to = "/.well-known/mcp"
-  status = 200
-  force = true
-
-# OAuth protected-resource metadata (RFC 9728). claude.ai's hosted MCP
-# connector probes these BEFORE attempting the MCP handshake. Must be
-# reachable both at the apex (some clients use the resource origin) and
-# under the /kh prefix (for the Vercel-proxied path).
-[[redirects]]
-  from = "/kh/.well-known/oauth-protected-resource"
-  to = "/.well-known/oauth-protected-resource"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/kh/.well-known/oauth-protected-resource/mcp"
-  to = "/.well-known/oauth-protected-resource/mcp"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/kh/.well-known/oauth-authorization-server"
-  to = "/.well-known/oauth-authorization-server"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/kh/api/*"
-  to = "/api/:splat"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/kh/docs/*"
-  to = "/docs/:splat"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/kh/engine"
-  to = "/engine"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/kh/engine/*"
-  to = "/engine/:splat"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/kh/templates"
-  to = "/templates"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/kh/templates/*"
-  to = "/templates/:splat"
-  status = 200
-  force = true
-
-# SPA fallback for client-side paths under /kh. The bare /kh case has its
-# own rule because /kh/* doesn't match /kh (no trailing slash, no splat).
-[[redirects]]
-  from = "/kh"
-  to = "/_app/index.html"
-  status = 200
-  force = true
+  from = "/"
+  to = "/kh/"
+  status = 302
 
 [[redirects]]
   from = "/kh/*"
-  to = "/_app/index.html"
+  to = "/kh/index.html"
   status = 200
-  force = true
-
-# Same agent files reachable from the bare root (no /kh prefix). Used by
-# the agent-router edge function and AI bots that scan the apex domain.
-[[redirects]]
-  from = "/llms.txt"
-  to = "/_app/llms.txt"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/ai.html"
-  to = "/_app/ai.html"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/agents.md"
-  to = "/_app/agents.md"
-  status = 200
-  force = true
-
-# Bare URL and any unknown path: drop into the SPA shell. (The agent-router
-# edge function intercepts "/" first, so AI agents get llms.txt instead.)
-[[redirects]]
-  from = "/*"
-  to = "/_app/index.html"
-  status = 200
-  force = true
