@@ -1,0 +1,111 @@
+// @vitest-environment jsdom
+/**
+ * The crescent card's pointing arrow.
+ *
+ * Three reader questions in a row showed the drawing was carrying two
+ * kinds of direction with no way to tell them apart: the horizon's
+ * compass ends and the horns' aim. The arrow out of the crescent's
+ * mouth now names the aim, and it is built from the same away-from-sun
+ * vector the bow is rotated by, so the two cannot disagree.
+ */
+import { describe, it, expect, afterEach } from 'vitest';
+import React from 'react';
+import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import CrescentDirection, { mouthScreenRotation, crescentScene } from './CrescentDirection';
+import { crescentDirection } from '../../../lib/khDeclination';
+import { skyPosition, jdAt } from '../../../lib/skyView';
+import { getFullCalculation } from '../../../engine/pipeline';
+import { dateFromEpochDays } from '../../../engine/epochDays';
+import { sunsetUtcHours, RAMBAM_REFERENCE } from '../../../lib/localObserver';
+
+afterEach(cleanup);
+
+describe('the pointing arrow', () => {
+  it("labels the arrow with his evening's answer on load", () => {
+    render(<CrescentDirection />);
+    // 14° north → horns south-east (KH 19:13).
+    expect(crescentDirection(14).horns).toBe('south-east');
+    expect(screen.getByText('horns → south-east')).toBeTruthy();
+  });
+
+  it('follows the slider through all three cases', () => {
+    render(<CrescentDirection />);
+    const slider = screen.getByLabelText("The moon's distance from the equator, in degrees");
+    fireEvent.change(slider, { target: { value: '-14' } });
+    expect(screen.getByText('horns → north-east')).toBeTruthy();
+    fireEvent.change(slider, { target: { value: '0' } });
+    expect(screen.getByText('horns → due east')).toBeTruthy();
+  });
+
+  it('says which labels are which, since they were being confused', () => {
+    render(<CrescentDirection />);
+    expect(
+      screen.getByText(/corner labels name the horizon's compass ends; the gold arrow names the horns/),
+    ).toBeTruthy();
+    expect(screen.getByText(/the mouth is the pointing/)).toBeTruthy();
+  });
+});
+
+describe('the drawing shows the reversal instead of contradicting it', () => {
+  it('maps each answer to the right screen direction, facing west', () => {
+    // Up = east, left = south, right = north. A first version aimed the
+    // crescent radially away from a sun-glow at due west, which pointed
+    // the northerly case up-NORTH on screen under a label saying
+    // SOUTH-east — the reader caught the contradiction.
+    expect(mouthScreenRotation('south-east')).toBe(-45); // up-left
+    expect(mouthScreenRotation('north-east')).toBe(45); // up-right
+    expect(mouthScreenRotation('due east')).toBe(0); // straight up
+  });
+
+  it("real geometry backs the halacha on his evening: north moon, south side", () => {
+    // The fact the corrected prose leans on, computed rather than told:
+    // at sunset+20 on his worked evening the moon (14° north of the
+    // equator) stands at a smaller azimuth-from-north-offset than the
+    // sun's set-point — i.e. on its SOUTH side, facing west.
+    const obs = { latitude: 31.78, longitude: 35.2137 };
+    // The evening beginning 2 Iyar — one civil day before the daytime
+    // date (the /sky page's one-day pairing bug, fixed everywhere).
+    const daytime = dateFromEpochDays(29);
+    const eve = new Date(daytime);
+    eve.setDate(eve.getDate() - 1);
+    const calc = getFullCalculation(daytime);
+    const utc = sunsetUtcHours(eve, { ...RAMBAM_REFERENCE }) + 20 / 60;
+    const jd = jdAt(eve, utc);
+    const sun = skyPosition(calc.sun.trueLongitude, 0, jd, obs);
+    const moon = skyPosition(calc.moon.trueLongitude, calc.moon.latitude, jd, obs);
+    expect(moon.azimuth).toBeLessThan(sun.azimuth); // south of it, facing west
+    expect(moon.altitude).toBeGreaterThan(sun.altitude); // and above: mouth up-south = SE
+  });
+
+  it('states the not-exact caveat in his own terms', () => {
+    render(<CrescentDirection />);
+    expect(screen.getByText(/will not be exact/)).toBeTruthy();
+  });
+});
+
+describe('the scene obeys its own caption: bulge toward the sun', () => {
+  it.each([[14, 'south-east'], [0, 'due east'], [-14, 'north-east']])(
+    'at %i° from the equator the drawn sun sits opposite the mouth',
+    (fromEquator, horns) => {
+      const { mx, my, mouth, glow, groundY } = crescentScene(fromEquator, horns);
+      const toGlow = { x: glow.x - mx, y: glow.y - my };
+      const len = Math.hypot(toGlow.x, toGlow.y);
+      // Opposite side of the mouth (bulge side), nearly collinear —
+      // "nearly" because the glow is clamped just below the horizon.
+      const dot = (mouth.x * toGlow.x + mouth.y * toGlow.y) / len;
+      const cross = Math.abs(mouth.x * toGlow.y - mouth.y * toGlow.x) / len;
+      expect(dot).toBeLessThan(-0.99);
+      expect(cross).toBeLessThan(0.12);
+      // And below the horizon, where a set sun belongs.
+      expect(glow.y).toBeGreaterThan(groundY);
+    },
+  );
+
+  it('labels the glow as the set sun, not as due west', () => {
+    // Parking the glow at due west was the root of both reader
+    // complaints; it is now positioned per case and named for what it is.
+    render(<CrescentDirection />);
+    expect(screen.getByText('the set sun')).toBeTruthy();
+    expect(screen.queryByText(/west — where the sun has just set/)).toBeNull();
+  });
+});

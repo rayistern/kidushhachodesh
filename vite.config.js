@@ -2,6 +2,33 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 
+// The Netlify book deploy gets its own identity: the shared index.html
+// belongs to upstream's dashboard, so when the build carries
+// VITE_UPSTREAM_BASE (netlify.toml [build.environment] — the marker of
+// the book-only deploy), the title and description are rewritten at
+// build time. Static tags, because link previews never run JS. Local
+// dev and upstream builds see none of this.
+const BOOK_SITE = Boolean(process.env.VITE_UPSTREAM_BASE);
+const BOOK_TITLE = 'Kiddush Hachodesh 101';
+const BOOK_DESCRIPTION =
+  'Challenged with astronomy or math? You can still master the basics of Hilchos Kiddush Hachodesh';
+const bookSiteMeta = () => ({
+  name: 'book-site-meta',
+  transformIndexHtml(html) {
+    if (!BOOK_SITE) return html;
+    return html
+      .replace(/<title>[^<]*<\/title>/, `<title>${BOOK_TITLE}</title>`)
+      .replace(
+        /(<meta name="description" content=")[^"]*(")/,
+        `$1${BOOK_DESCRIPTION}$2`
+      )
+      .replace(
+        '</title>',
+        `</title>\n    <meta property="og:title" content="${BOOK_TITLE}" />\n    <meta property="og:description" content="${BOOK_DESCRIPTION}" />\n    <meta property="og:type" content="website" />`
+      );
+  },
+});
+
 export default defineConfig({
   // The site is served behind a path-prefix proxy at
   // https://shluchimexchange.ai/kh. The proxy only forwards /kh*, so the
@@ -9,7 +36,7 @@ export default defineConfig({
   // index.html reference assets as /kh/assets/..., and netlify.toml
   // rewrites those back to the real /assets/* files in dist/.
   base: '/kh/',
-  plugins: [react(), tailwindcss()],
+  plugins: [react(), tailwindcss(), bookSiteMeta()],
   server: {
     port: 3000,
     open: true,

@@ -28,9 +28,18 @@ export function decimalToDms(decimal) {
 
 /** Format decimal degrees as a DMS string like "123° 45′ 6.7″" */
 export function formatDms(decimal) {
-  const dms = decimalToDms(decimal);
-  const sign = dms.degrees < 0 ? '-' : '';
-  return `${sign}${Math.abs(dms.degrees)}° ${dms.minutes}′ ${dms.seconds.toFixed(1)}″`;
+  const sign = decimal < 0 ? '-' : '';
+  // Round to the displayed precision FIRST — tenths of an arcsecond —
+  // and only then split into degrees/minutes/seconds. Rounding the
+  // seconds after the split let 38.3° print as "38° 17′ 60.0″": the
+  // float sat a hair under 38°18′, its seconds rounded up to 60 at one
+  // decimal, and nothing carried.
+  let tenths = Math.round(Math.abs(decimal) * 36000);
+  const degrees = Math.floor(tenths / 36000);
+  tenths -= degrees * 36000;
+  const minutes = Math.floor(tenths / 600);
+  tenths -= minutes * 600;
+  return `${sign}${degrees}° ${minutes}′ ${(tenths / 10).toFixed(1)}″`;
 }
 
 /** Normalize an angle to [0, 360) */

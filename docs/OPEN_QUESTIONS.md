@@ -331,7 +331,28 @@ See `Inline Audit Summary` section at the bottom of this document.
 
 ## Q8. KH 14:5 season-correction boundary readings (issue #19)
 
-**Status: resolved 2026-05-03 — switched to Sefaria's verbatim reading. See update below; original investigation preserved.**
+**Status: re-resolved 2026-08-17 — adopted the Yemenite reading (+30ʹ at 60°–120°). Earlier resolutions preserved below.**
+
+> **Update 2026-08-17 (the input the 2026-05-03 resolution was waiting for):**
+>
+> The user reports that the **Chitrik edition, which follows the Yemenite manuscripts**, reads **30ʹ** for תחילת תאומים → תחילת אריה (60°–120°). The 2026-05-03 note had guessed "possibly Frankel, possibly Yemenite" about his worksheet and stated the condition explicitly: *"If the user prefers his tradition, we can either flip back or expose a per-tradition selector."* That condition is met, and `SEASON_CORRECTIONS` now ships `+30/60` for that band.
+>
+> Four independent lines support it, which is why this is recorded as a textual correction rather than a preference:
+>
+> | line | evidence |
+> |---|---|
+> | manuscript | Chitrik / Yemenite, generally the best witness for the Mishneh Torah |
+> | translation | Touger renders the band as 30 minutes, footnoting that standard prints read 15 |
+> | internal structure | the subtractive side is −15/−30/−15; +15/+30/+15 mirrors it exactly, where Sefaria's +15/+15/+15 is lopsided for no stated reason |
+> | fit | mean gap against Jerusalem's sunset drift falls from **8.4ʹ to 6.0ʹ** |
+>
+> The fit is a *consequence*, not a reason — the case rests on the manuscripts. Recorded because it is the kind of corroboration that would have been suspicious by its absence.
+>
+> **Cost:** 2 verdict flips in 315 sampled sighting nights across 50 years (0.63%), all inside the marginal band where KH 18:4 already tells a court not to lean on the calculation.
+>
+> **Surfaces updated:** `SEASON_CORRECTIONS` and its header; `visibilityChain.test.js` (the pin that asserted uniform +15ʹ now asserts +30ʹ and the mirror); `SeasonBands` — the comparison **reversed direction**, so the card now shows the shipped Yemenite value against the printed editions' 15ʹ; `SunsetDrift`, whose "the table is lopsided" caption no longer applied; `BookChapter.test.jsx`, which pins both directions of the disclosure so they cannot be swapped.
+>
+> A per-tradition selector remains the obvious next step if a second tradition ever needs to be computed side by side. Not built: one reading at a time is what the rest of the engine assumes.
 
 > **Update 2026-05-03 (autonomous resolution per user's "true to source text" directive):**
 >
