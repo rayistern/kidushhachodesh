@@ -172,3 +172,25 @@ describe('the chapter still holds together', () => {
     }
   });
 });
+
+describe('the signs no longer contain their stars', () => {
+  it('states the drift, its size, and why the method does not care', () => {
+    const body = bookChapter(11).sections.flatMap((s) => s.body).join('\n');
+    expect(body).toMatch(/a full sign\*\*/);
+    expect(body).toMatch(/1 degree every 72 years/);
+    expect(body).toMatch(/fish of Dagim/);
+    expect(body).toMatch(/names are useless now/);
+    expect(body).toMatch(/anchors the 1st sign to the spring season-point/);
+  });
+
+  it('the stated rate really is the precession rate, and really sums to about a sign', () => {
+    // Modern general precession: ~50.3 arcseconds/year → 1° per ~71.6 years.
+    const yearsPerDegree = 3600 / 50.3;
+    expect(yearsPerDegree).toBeGreaterThan(70);
+    expect(yearsPerDegree).toBeLessThan(73);
+    // Since the naming era (~2nd century BCE) to now: ~30°, one sign.
+    const drift = (2026 + 150) / yearsPerDegree;
+    expect(drift).toBeGreaterThan(28);
+    expect(drift).toBeLessThan(32);
+  });
+});
