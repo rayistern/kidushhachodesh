@@ -258,18 +258,39 @@ function ParallaxSplit({ index, north }) {
           where it is seen — {whole.toFixed(0)}′ away
         </text>
 
-        <text
-          x={(mx + A.x) / 2 - 8}
-          y={(my + A.y) / 2}
-          fontSize="9"
-          textAnchor="end"
-          fill="var(--color-accent)"
-        >
-          along the belt: {lon === 60 ? "1° 0" : lon}′ off the gap
-        </text>
-        <text x={(A.x + D.x) / 2 + 8} y={(A.y + D.y) / 2 + 3} fontSize="9" fill="var(--color-gold)">
-          across it: {lat}′ onto the height ({north ? 'north tonight, so off' : 'south tonight, so on'})
-        </text>
+        {/* The three measurements live in a fixed legend, not floated on
+            the geometry: at steep or shallow slants the components get
+            short and floated labels landed on top of each other. */}
+        {[
+          {
+            stroke: 'var(--color-silver)', dash: '4 3', width: 1.5,
+            text: `the whole shift: ${whole.toFixed(0)}′`, color: 'var(--color-text-secondary)',
+          },
+          {
+            stroke: 'var(--color-accent)', dash: undefined, width: 2.5,
+            text: `along the belt — off the gap: ${lon === 60 ? '1° 0' : lon}′`, color: 'var(--color-accent)',
+          },
+          {
+            stroke: 'var(--color-gold)', dash: undefined, width: 2.5,
+            text: `across it — onto the height: ${lat}′ (${north ? 'north tonight, so off' : 'south tonight, so on'})`,
+            color: 'var(--color-gold)',
+          },
+        ].map((row, i) => (
+          <g key={row.text}>
+            <line
+              x1="10"
+              y1={18 + i * 15}
+              x2="30"
+              y2={18 + i * 15}
+              stroke={row.stroke}
+              strokeWidth={row.width}
+              strokeDasharray={row.dash}
+            />
+            <text x="35" y={21 + i * 15} fontSize="9" fill={row.color}>
+              {row.text}
+            </text>
+          </g>
+        ))}
       </svg>
       <figcaption className="mt-1 text-center text-[11px] text-[var(--color-text-secondary)]">
         The two tables are one triangle. The dashed shift toward the horizon is nearly the same

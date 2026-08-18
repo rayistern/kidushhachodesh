@@ -29,10 +29,11 @@ describe("the parallax triangle's claim: one shift, split by sign", () => {
     }
   });
 
-  it('renders the triangle with both components named', () => {
+  it('renders the triangle with both components named in the legend', () => {
     render(<ParallaxBySign />);
-    expect(screen.getByText(/along the belt: .*off the gap/)).toBeTruthy();
-    expect(screen.getByText(/across it: \d+′ onto the height/)).toBeTruthy();
+    expect(screen.getByText(/along the belt — off the gap: .*′/)).toBeTruthy();
+    expect(screen.getByText(/across it — onto the height: \d+′/)).toBeTruthy();
+    expect(screen.getByText(/the whole shift: \d+′/)).toBeTruthy();
     expect(screen.getByText(/where it is seen — \d+′ away/)).toBeTruthy();
   });
 
