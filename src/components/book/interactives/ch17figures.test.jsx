@@ -29,10 +29,13 @@ describe("the slice sphere's claim: road-against-level angle", () => {
     expect(roadLevelAngle(10)).toBeGreaterThan(roadLevelAngle(75));
   });
 
-  it('renders with both arrows explained', () => {
+  it('renders with both arrows labelled on the drawing, inside an aside', () => {
     render(<SliceShape />);
     expect(screen.getByText(/° apart/)).toBeTruthy();
-    expect(screen.getByText(/Silver arrow: the level direction/)).toBeTruthy();
+    expect(screen.getAllByText('where the road goes next').length).toBeGreaterThan(0);
+    expect(screen.getByText(/level — along its ring/)).toBeTruthy();
+    // Collapsed by default: regular readers get the staircase alone.
+    expect(screen.getByText(/For the curious: why those anchors/)).toBeTruthy();
   });
 });
 

@@ -30,7 +30,12 @@ import InteractiveCard from '../../text/interactives/InteractiveCard';
 import { CONSTANTS } from '../../../engine/constants';
 import { ordinalSuffix } from '../../../engine/zodiac';
 import { eclipticToEquatorial, equatorialToHorizontal, gmstDeg } from '../../../lib/skyView';
-import { makeSphereProjector, flatCircle, circleHalvesProps } from './sphereProjection';
+import {
+  makeSphereProjector,
+  flatCircle,
+  circleHalvesProps,
+  GeometryAside,
+} from './sphereProjection';
 
 const DEG = Math.PI / 180;
 /** KH 11:17's "about 32° north" — the latitude the whole table is for. */
@@ -311,7 +316,9 @@ export default function StretchShape() {
         </svg>
       </figure>
 
-      <StretchDome lon={n} />
+      <GeometryAside summary="For the curious: the belt meeting the horizon — the picture on the dome">
+        <StretchDome lon={n} />
+      </GeometryAside>
 
       <label className="mt-2 block">
         <span className="text-xs font-bold text-[var(--color-text-secondary)]">

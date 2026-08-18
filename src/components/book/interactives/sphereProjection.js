@@ -14,6 +14,7 @@
  * runs so the back can be dashed — that split is what makes a flat
  * projection read as a ball.
  */
+import React from 'react';
 
 const DEG = Math.PI / 180;
 
@@ -60,6 +61,29 @@ export const tiltedCircle = (epsRad) => (t) => ({
   y: Math.sin(t) * Math.cos(epsRad),
   z: Math.sin(t) * Math.sin(epsRad),
 });
+
+/**
+ * Where the 3D figures live: collapsed by default. The spheres earn
+ * their keep for readers who think geometrically, but the cards must
+ * read complete without them — a reader told us the sphere was more
+ * puzzling than the staircase it explained. React's <details> handles
+ * the state; no JS.
+ */
+export function GeometryAside({ summary, children }) {
+  return React.createElement(
+    'details',
+    { className: 'mt-3 rounded-lg border border-[var(--color-border)]/60 px-3 py-2' },
+    React.createElement(
+      'summary',
+      {
+        className:
+          'cursor-pointer select-none text-[11px] font-bold text-[var(--color-text-secondary)]',
+      },
+      summary,
+    ),
+    children,
+  );
+}
 
 /** Front/back runs of a curve as SVG polyline props, back dashed. */
 export function circleHalvesProps(segs, color, width) {
