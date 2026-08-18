@@ -120,3 +120,27 @@ describe('the shared card', () => {
     expect(step).toBe(1 * PARTS_PER_DAY + 6 * PARTS_PER_HOUR);
   });
 });
+
+describe("KH 10:7's two days IS chapter 13's correction at its peak", () => {
+  it('his mean sun crosses the spring point two days after his true sun', async () => {
+    const { getFullCalculation } = await import('../../engine/pipeline');
+    const { dateFromEpochDays } = await import('../../engine/epochDays');
+    let meanDay = null;
+    let trueDay = null;
+    let prevM = null;
+    let prevT = null;
+    for (let n = 300; n < 460; n++) {
+      const c = getFullCalculation(dateFromEpochDays(n));
+      if (prevM !== null && prevM > 300 && c.sun.meanLongitude < 60 && meanDay === null) meanDay = n;
+      if (prevT !== null && prevT > 300 && c.sun.trueLongitude < 60 && trueDay === null) trueDay = n;
+      prevM = c.sun.meanLongitude;
+      prevT = c.sun.trueLongitude;
+    }
+    expect(meanDay - trueDay).toBe(2);
+    // Because the correction is at its maximum there: the spring point
+    // stands ~90° from the far point.
+    const c = getFullCalculation(dateFromEpochDays(trueDay));
+    expect(c.sun.maslulCorrection).toBeGreaterThan(1.9);
+    expect(prose(10)).toMatch(/two days of the sun's travel/);
+  });
+});

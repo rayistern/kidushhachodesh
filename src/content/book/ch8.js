@@ -105,6 +105,19 @@ export default {
       ],
       interactive: 'year-shape',
     },
+
+    {
+      id: 'bonus-parshiyot',
+      heading: 'Bonus: what the shape decides at shul',
+      source: 'KH 8:7',
+      nodeId: 'year-shape',
+      body: [
+        'One more thing the year\'s shape quietly fixes, beyond this chapter but too good to leave out: **which Torah portions get doubled up** on Shabbat that year.',
+        'The reading cycle must land its last portion exactly on Simchat Torah, every year. But the shape decides how many Shabbatot the year holds, and the weekday of Rosh HaShanah decides which holidays fall ON Shabbat and swallow a reading slot. Whatever is left over, seven fixed candidate pairs absorb: split when the year has room, read together when it does not.',
+        'So a leap year — four extra Shabbatot — splits most of the pairs; a common year combines most of them. The card below does the budget for any year, and shows the one wrinkle the diaspora adds: its extra festival days can swallow one more Shabbat, putting it a portion behind the Land of Israel until a pair that never combines in Israel — Chukat–Balak — lets it catch up.',
+      ],
+      interactive: 'parsha-pairs',
+    },
   ],
 
   closing: {

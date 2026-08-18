@@ -18,6 +18,7 @@ import { isHebrewLeapYear } from '../../engine/fixedCalendar/months';
 import { moladTishrei, roshHashanah, actualRoshHashanahDay, yearShape } from '../../lib/fixedYear';
 import { monthGrid } from '../../components/book/interactives/YearShapeCard';
 import { daysBetween, shapeForGap } from '../../components/book/interactives/BetweenDays';
+import { yearReadings, CANDIDATE_PAIRS } from '../../components/book/interactives/ParshaPairs';
 
 const prose = (n) =>
   bookChapter(n)
@@ -248,6 +249,78 @@ describe('the between-days card (KH 8:7-9)', () => {
       expect(shapeForGap(gap, leap)).toBe(
         { lacking: 'lacking', 'in-order': 'in order', complete: 'complete' }[yearShape(y).kind],
       );
+    }
+  });
+});
+
+describe('the parsha bonus card (ch8)', () => {
+  it('reproduces 5786 in Israel: six pairs, no Chukat-Balak', () => {
+    const { doubles } = yearReadings(5786, true);
+    expect(doubles).toEqual([
+      'Vayakhel–Pekudei',
+      'Tazria–Metzora',
+      'Achrei Mot–Kedoshim',
+      'Behar–Bechukotai',
+      'Matot–Masei',
+      'Nitzavim–Vayeilech',
+    ]);
+  });
+
+  it('the diaspora adds Chukat-Balak in 5786, and never Israel anywhere', () => {
+    expect(yearReadings(5786, false).doubles).toContain('Chukat–Balak');
+    for (let y = 5780; y < 5810; y++) {
+      expect(yearReadings(y, true).doubles, `year ${y}`).not.toContain('Chukat–Balak');
+    }
+  });
+
+  it('every double ever produced is one of the seven candidates', () => {
+    for (let y = 5780; y < 5810; y++) {
+      for (const il of [true, false]) {
+        for (const d of yearReadings(y, il).doubles) {
+          expect(CANDIDATE_PAIRS, `${y} il=${il}: ${d}`).toContain(d);
+        }
+      }
+    }
+  });
+
+  it('leap years split: every leap year has fewer doubles than every common year', () => {
+    // Measured, not assumed: leap years keep at most two doubles (5784
+    // kept two), common years at least four — the sets never overlap.
+    let leapMax = 0;
+    let commonMin = 99;
+    for (let y = 5780; y < 5810; y++) {
+      const n = yearReadings(y, true).doubles.length;
+      if (yearShape(y).leap) leapMax = Math.max(leapMax, n);
+      else commonMin = Math.min(commonMin, n);
+    }
+    expect(leapMax).toBeLessThanOrEqual(2);
+    expect(commonMin).toBeGreaterThanOrEqual(4);
+    expect(leapMax).toBeLessThan(commonMin);
+  });
+
+  it("the card's budget equation is the real identity, year by year", () => {
+    // slots − swallowed = regular, and regular + doubles = the number of
+    // distinct portions actually read on Shabbatot that year — computed
+    // independently by collecting them.
+    const hebcal = require('hebcal');
+    for (let y = 5784; y < 5792; y++) {
+      const { doubles, shabbatot, regular, swallowed } = yearReadings(y, true);
+      expect(shabbatot - swallowed).toBe(regular);
+      const start = new hebcal.HDate(1, 'Tishrei', y).abs();
+      const end = new hebcal.HDate(1, 'Tishrei', y + 1).abs();
+      // With multiplicity, not a set: a Hebrew year runs Tishrei to
+      // Tishrei, so Vayeilech can appear twice — alone on Shabbat Shuvah
+      // at the year's start and inside Nitzavim-Vayeilech at its end.
+      // (The set version of this test failed on exactly that.)
+      let placed = 0;
+      for (let a = start; a < end; a++) {
+        if (((a % 7) + 7) % 7 !== 6) continue;
+        const hd = new hebcal.HDate(new Date((a - 719163) * 86400000));
+        hd.il = true;
+        if (!hd.isSedra()) continue;
+        placed += hd.getSedra('en').length;
+      }
+      expect(regular + doubles.length, `year ${y}`).toBe(placed);
     }
   });
 });
