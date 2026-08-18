@@ -47,6 +47,81 @@ export function moladTishrei(year) {
 }
 
 /**
+ * The same molad, reached the way KH 6:12-14 teaches a reader to reach
+ * it — so a surface can show the work, not just the answer.
+ *
+ * From the anchor, count the elapsed years since year 1; take whole
+ * 19-year cycles, then classify the leftover years of the current cycle
+ * as common or leap (KH 6:11's positions 3, 6, 8, 11, 14, 17, 19); add
+ * each class's published remainder that many times, throwing away whole
+ * weeks as you go. Every step is returned as the day–hour–part triple
+ * the chapter does all its arithmetic in: `each × count = add`,
+ * accumulating through `running`. The last running total must equal
+ * moladTishrei's answer — the two routes differ only in bookkeeping —
+ * and fixedYear.test.js holds them to that.
+ */
+export function moladTishreiLadder(year) {
+  if (year < 1) throw new Error(`Hebrew year must be >= 1, got ${year}`);
+  const MONTH = SYNODIC_MONTH_PARTS;
+  const week = (parts) => ((parts % PARTS_PER_WEEK) + PARTS_PER_WEEK) % PARTS_PER_WEEK;
+  // An amount of parts as a d–h–p triple (days 0-6, an interval).
+  const amount = (parts) => {
+    const w = week(parts);
+    const day = Math.floor(w / PARTS_PER_DAY);
+    const rest = w - day * PARTS_PER_DAY;
+    return { day, hours: Math.floor(rest / PARTS_PER_HOUR), parts: rest % PARTS_PER_HOUR };
+  };
+  // A position in the week as a weekday triple (1 = Sunday … 7 = Shabbat).
+  const position = (parts) => {
+    const a = amount(parts);
+    return { ...a, day: a.day + 1 };
+  };
+
+  const elapsed = year - 1;
+  const cycles = Math.floor(elapsed / 19);
+  const remainderYears = elapsed % 19;
+  const leapPositions = [];
+  for (let i = 1; i <= remainderYears; i++) {
+    if (isHebrewLeapYear(cycles * 19 + i)) leapPositions.push(i);
+  }
+  const leapYears = leapPositions.length;
+  const commonYears = remainderYears - leapYears;
+
+  const CYCLE_REM = week(235 * MONTH);
+  const COMMON_REM = week(12 * MONTH);
+  const LEAP_REM = week(13 * MONTH);
+
+  let running = week(BAHARAD_PARTS_OFFSET);
+  const steps = [];
+  const push = (label, count, eachParts, ref) => {
+    const add = week(count * eachParts);
+    running = week(running + add);
+    steps.push({
+      label,
+      count,
+      each: amount(eachParts),
+      add: amount(add),
+      running: position(running),
+      ref,
+    });
+  };
+  push('19-year cycles', cycles, CYCLE_REM, 'KH 6:12');
+  push('common years', commonYears, COMMON_REM, 'KH 6:5');
+  push('leap years', leapYears, LEAP_REM, 'KH 6:5');
+
+  return {
+    anchor: position(week(BAHARAD_PARTS_OFFSET)),
+    cycles,
+    remainderYears,
+    commonYears,
+    leapYears,
+    leapPositions,
+    steps,
+    final: position(running),
+  };
+}
+
+/**
  * KH 7's four postponements, applied in order. Returns the weekday of
  * Rosh HaShanah (1 = Sunday … 7 = Shabbat) and which rules fired.
  *
