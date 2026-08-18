@@ -660,6 +660,11 @@ export const CONSTANTS = {
   //  (2037-06-14) is a conjunction night where the wrapped-elongation
   //  bug (#45) fires and both readings produce a garbage verdict —
   //  details in docs/OPEN_QUESTIONS.md Q8.
+  //    Annotation 2026-08-18: the #45 fix (trailing-moon guard in
+  //    determineVisibility) makes 2037-06-14 not-visible under BOTH
+  //    readings — that flip no longer exists. The measured cost of
+  //    this table is now 1 verdict flip in 50 years, inside the
+  //    KH 18:4 marginal band.
   // ═══════════════════════════════════════════════════════════════
   SEASON_CORRECTIONS: [
     // { sunFrom°, sunTo°, adjustment in degrees, sourcePhrase }

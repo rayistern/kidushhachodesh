@@ -335,3 +335,54 @@ describe('KH 17:7-9 — רוחב שני signed arithmetic (crossover fix, 2026-0
     expect(step.direction).toBe('דרומי');
   });
 });
+
+describe('trailing-moon regime — issue #45 (wrapped elongation must never reach the thresholds)', () => {
+  // Found 2026-08-12 by a blind QA agent and verified live: the engine
+  // declared the evening of 2026-08-12 — moon ~13° BEHIND the sun, the
+  // night before conjunction — "ודאי יראה" via the KH 17:3-4 early exit,
+  // because the wrapped אורך ראשון (347°) is numerically > the visible
+  // threshold. Three date classes pin the fix and its blast radius.
+
+  it('pre-conjunction night: wrapped elongation → not-visible, with the honest path', () => {
+    const calc = getFullCalculation(new Date(2026, 7, 12)); // civil 2026-08-12
+    expect(calc.moon.elongation).toBeGreaterThan(180); // the trailing configuration
+    expect(calc.moon.isVisible).toBe(false);
+    expect(calc.moon.visibilityVerdict).toBe('not-visible');
+    expect(calc.moon.visibilityPath).toContain('Pre-conjunction');
+    // The wrapped number itself stays reported — the guard is in the
+    // verdict, not a rewrite of אורך ראשון.
+    expect(calc.moon.visibilityPath).toContain('347.053');
+  });
+
+  it('sighting-shaped night just after conjunction: thresholds unchanged', () => {
+    const calc = getFullCalculation(new Date(2026, 7, 15)); // civil 2026-08-15
+    expect(calc.moon.elongation).toBeLessThan(180);
+    expect(calc.moon.visibilityPath).not.toContain('Pre-conjunction');
+    // Whatever the verdict, it must come from the real KH 17 machinery.
+    expect(
+      /Early exit|KH 17:15|קיצי הראיה/.test(calc.moon.visibilityPath),
+    ).toBe(true);
+  });
+
+  it('mid-month gibbous night: > 24° exit still fires as before', () => {
+    const calc = getFullCalculation(new Date(2026, 7, 24)); // civil 2026-08-24
+    expect(calc.moon.elongation).toBeGreaterThan(24);
+    expect(calc.moon.elongation).toBeLessThan(180);
+    expect(calc.moon.isVisible).toBe(true);
+    expect(calc.moon.visibilityPath).toContain('Early exit');
+  });
+
+  it('the guard boundary sits at 180° exactly, with waning wording below the wrap zone', () => {
+    const base = { keshetHaReiyah: 12, moonTrueLon: 100 };
+    expect(determineVisibility({ orechRishon: 180.001, ...base }).verdict).toBe('not-visible');
+    // 180-340° is the waning regime: right verdict, honest wording — the
+    // moon there is past full, not "pre-conjunction" (nothing wrapped).
+    expect(determineVisibility({ orechRishon: 180.001, ...base }).path).toContain('Waning');
+    expect(determineVisibility({ orechRishon: 198, ...base }).path).toContain('Waning');
+    expect(determineVisibility({ orechRishon: 198, ...base }).path).not.toContain('wrap');
+    // Above 340° the pre-conjunction wording applies.
+    expect(determineVisibility({ orechRishon: 350, ...base }).path).toContain('Pre-conjunction');
+    // 180 and below flow to the normal machinery (here the >visibleMin exit).
+    expect(determineVisibility({ orechRishon: 180, ...base }).path).toContain('Early exit');
+  });
+});

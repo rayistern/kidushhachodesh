@@ -39,3 +39,4 @@ pnpm-debug.log*
 # Local Netlify folder
 .netlify
 deno.lock
+.worktrees/
