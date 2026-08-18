@@ -11,10 +11,29 @@
   command = "npm run build"
   publish = "dist"
 
+# The bare app root lands on the book — the reading entry point.
+# Netlify-only by nature: the local dev server never reads this file,
+# so localhost:3000/kh/ still shows the dashboard.
+# force = true because /kh/index.html exists as a real file, and Netlify
+# only lets a redirect win over existing content when forced. Exact
+# paths only — the /kh/* SPA fallback below must stay unforced.
 [[redirects]]
   from = "/"
-  to = "/kh/"
+  to = "/kh/book"
   status = 302
+  force = true
+
+[[redirects]]
+  from = "/kh"
+  to = "/kh/book"
+  status = 302
+  force = true
+
+[[redirects]]
+  from = "/kh/"
+  to = "/kh/book"
+  status = 302
+  force = true
 
 [[redirects]]
   from = "/kh/*"
