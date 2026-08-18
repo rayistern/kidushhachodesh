@@ -16,6 +16,13 @@
  * moon was the wave. Seeing the same drawing with the roles swapped is
  * the clearest way to say "different line".
  *
+ * Above the wave sits the sphere the wave unrolls: the dashboard's
+ * globe reduced to the two great circles this chapter needs (a reader's
+ * request). Same slider drives both, so "a wave on the flat drawing" and
+ * "a tilted circle on the sphere" visibly name one fact. Drawn as SVG
+ * orthographic projection — the 3D scene's three.js stays out of the
+ * book bundle.
+ *
  * The reality check is the closing note of the book: his table is right
  * to about a fifth of a degree, in the chapter he opens by apologising
  * for. It is NOT the most accurate table in the book — KH 13:4's sun
@@ -32,6 +39,7 @@ import {
   foldForDeclination,
 } from '../../../lib/khDeclination';
 import { CONSTANTS } from '../../../engine/constants';
+import { eclipticToEquatorial } from '../../../lib/skyView';
 
 const DEG = Math.PI / 180;
 /** The true tilt, for the comparison: arcsin(sin ε · sin λ). */
@@ -53,6 +61,7 @@ export default function Declination() {
       blurb="the sun's road is itself tilted, by up to 23½°"
       defaultOpen
     >
+      <Sphere longitude={longitude} tilt={tilt} />
       <Wave longitude={longitude} tilt={tilt} />
 
       <label className="mt-3 block">
@@ -125,6 +134,174 @@ export default function Declination() {
         tightest table in the book, but easily good enough that the apology was unnecessary.
       </p>
     </InteractiveCard>
+  );
+}
+
+/**
+ * The sphere itself: the equator and the sun's road as two great
+ * circles, crossing at Taleh and Moznayim — the dashboard's globe with
+ * everything else stripped away. Orthographic projection, the viewer
+ * standing a little above the equator's plane so both circles read.
+ * The dashed arc from the moving point down to the equator IS the
+ * chapter's quantity: how far that degree of the road is inclined.
+ */
+function Sphere({ longitude, tilt }) {
+  const w = 520;
+  const h = 240;
+  const cx = w / 2;
+  const cy = h / 2 + 6;
+  const R = 100;
+  // Camera height above the equator's plane. Not near 0° (the equator
+  // would collapse to a line) and not near 23½° (the road would): 40°
+  // keeps both circles open as ellipses.
+  const VIEW = 40 * DEG;
+  const EPS = MAX_TILT * DEG;
+
+  // Scene coords: x to the right (both circles cross there), z up,
+  // y toward the viewer. Tilt the scene toward the camera, project flat.
+  const project = ({ x, y, z }) => ({
+    X: cx + R * x,
+    Y: cy - R * (-y * Math.sin(VIEW) + z * Math.cos(VIEW)),
+    front: y * Math.cos(VIEW) + z * Math.sin(VIEW) > 0,
+  });
+  const equatorPt = (t) => project({ x: Math.cos(t), y: Math.sin(t), z: 0 });
+  const eclipticPt = (t) =>
+    project({ x: Math.cos(t), y: Math.sin(t) * Math.cos(EPS), z: Math.sin(t) * Math.sin(EPS) });
+
+  // A circle as front/back polylines, split where it dips behind the sphere.
+  const halves = (ptAt) => {
+    const segs = { front: [], back: [] };
+    let run = [];
+    let side = null;
+    for (let d = 0; d <= 360; d += 3) {
+      const p = ptAt(d * DEG);
+      const s = p.front ? 'front' : 'back';
+      if (side !== null && s !== side) {
+        segs[side].push(run);
+        run = [];
+      }
+      run.push(p);
+      side = s;
+    }
+    if (run.length) segs[side].push(run);
+    return segs;
+  };
+  const draw = (segs, color, width) =>
+    ['back', 'front'].map((side) =>
+      segs[side].map((seg, i) => (
+        <polyline
+          key={`${side}${i}`}
+          points={seg.map((p) => `${p.X.toFixed(1)},${p.Y.toFixed(1)}`).join(' ')}
+          fill="none"
+          stroke={color}
+          strokeWidth={width}
+          strokeOpacity={side === 'front' ? 0.9 : 0.28}
+          strokeDasharray={side === 'front' ? undefined : '3 3'}
+        />
+      )),
+    );
+
+  // The moving point, and its meridian arc down to the equator — the
+  // declination made visible as an arc on the sphere itself.
+  const lam = longitude * DEG;
+  const moving = eclipticPt(lam);
+  const { ra, dec } = eclipticToEquatorial(longitude, 0);
+  const meridian = [];
+  const steps = 24;
+  for (let i = 0; i <= steps; i++) {
+    const d = (dec * i) / steps;
+    meridian.push(
+      project({
+        x: Math.cos(d * DEG) * Math.cos(ra * DEG),
+        y: Math.cos(d * DEG) * Math.sin(ra * DEG),
+        z: Math.sin(d * DEG),
+      }),
+    );
+  }
+  const foot = meridian[0];
+
+  const taleh = equatorPt(0);
+  const moznayim = equatorPt(Math.PI);
+  const pole = project({ x: 0, y: 0, z: 1 });
+  const roadTop = eclipticPt(90 * DEG);
+  const equatorFrontMid = equatorPt(90 * DEG);
+
+  return (
+    <figure className="mb-3">
+      <svg
+        viewBox={`0 0 ${w} ${h}`}
+        className="w-full"
+        role="img"
+        aria-label="A sphere carrying two great circles: the equator, and the sun's road tilted 23 and a half degrees against it, crossing at the start of Taleh and the start of Moznayim; a dashed arc drops from a point on the road to the equator, showing its inclination"
+      >
+        <circle cx={cx} cy={cy} r={R} fill="var(--color-card)" fillOpacity="0.5" stroke="var(--color-border)" strokeWidth="1" />
+
+        {draw(halves(equatorPt), 'var(--color-silver)', 1.5)}
+        {draw(halves(eclipticPt), 'var(--color-gold)', 1.5)}
+
+        {/* the two crossings */}
+        {[
+          { p: taleh, label: 'Taleh 0°', dx: 8, anchor: 'start' },
+          { p: moznayim, label: 'Moznayim 180°', dx: -8, anchor: 'end' },
+        ].map(({ p, label, dx, anchor }) => (
+          <g key={label}>
+            <circle cx={p.X} cy={p.Y} r="3.5" fill="var(--color-accent)" />
+            <text x={p.X + dx} y={p.Y + 3} fontSize="9" textAnchor={anchor} fill="var(--color-accent)">
+              {label}
+            </text>
+          </g>
+        ))}
+
+        {/* the pole of the equator, which every meridian runs through */}
+        <circle cx={pole.X} cy={pole.Y} r="2" fill="var(--color-silver)" fillOpacity="0.8" />
+        <text x={pole.X} y={pole.Y - 6} fontSize="8" textAnchor="middle" fill="var(--color-text-secondary)">
+          the pole of the equator
+        </text>
+
+        {/* labels on the circles themselves */}
+        <text x={equatorFrontMid.X + 4} y={equatorFrontMid.Y + 12} fontSize="9" fill="var(--color-silver)">
+          the equator
+        </text>
+        <text x={roadTop.X + 4} y={roadTop.Y - 6} fontSize="9" fill="var(--color-gold)">
+          the sun's road
+        </text>
+
+        {/* declination arc: the chapter's own quantity, on the sphere */}
+        <polyline
+          points={meridian.map((p) => `${p.X.toFixed(1)},${p.Y.toFixed(1)}`).join(' ')}
+          fill="none"
+          stroke="var(--color-accent)"
+          strokeWidth="1.25"
+          strokeDasharray="2 2"
+          strokeOpacity={moving.front ? 0.9 : 0.4}
+        />
+        <circle cx={foot.X} cy={foot.Y} r="2.5" fill="var(--color-accent)" fillOpacity="0.7" />
+        <circle
+          cx={moving.X}
+          cy={moving.Y}
+          r="5.5"
+          fill="var(--color-accent)"
+          fillOpacity={moving.front ? 1 : 0.45}
+          stroke="var(--color-bg)"
+          strokeWidth="1.5"
+        />
+        <text
+          x={moving.X}
+          y={moving.Y - 10}
+          fontSize="9"
+          textAnchor="middle"
+          fill="var(--color-accent)"
+          fillOpacity={moving.front ? 1 : 0.55}
+        >
+          {Math.abs(tilt) < 0.05 ? 'on the equator' : `${Math.abs(tilt).toFixed(1)}° ${tilt > 0 ? 'north' : 'south'}`}
+        </text>
+      </svg>
+      <figcaption className="mt-1 text-center text-[11px] text-[var(--color-text-secondary)]">
+        The dashboard's globe, cut down to the two lines this chapter needs. The gold circle is
+        tilted 23½° against the silver one; the dashed arc dropping to the equator is exactly the
+        quantity KH 19:7 tabulates. The wave below is this same picture unrolled flat.
+      </figcaption>
+    </figure>
   );
 }
 
