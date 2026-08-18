@@ -112,7 +112,7 @@ export default {
       'With chapters 6 and 7: the complete fixed calendar, from BaHaRaD to any date, all of it whole-number arithmetic.',
     ],
     missing: [
-      'The calendar chapters not yet in this book: 1 to 5 (the court, the witnesses, the leap-year deliberations) and 9 to 10 (the two traditions for the solar seasons). They are in the source text. From here the book\'s astronomical arc begins at chapter 11 — whose day count is exactly what chapters 6 to 8 just built.',
+      'The sun\'s side of the calendar: leap years exist to hold Pesach beside the spring season-point, and tracking the seasons is chapters 9 and 10 — two traditions, one round and one exact. (Chapters 1 to 5, the court and its witnesses, remain in the source text.)',
     ],
   },
 };

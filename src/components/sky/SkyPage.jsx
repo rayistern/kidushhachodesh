@@ -131,9 +131,14 @@ export default function SkyPage() {
               sunset.
             </p>
           </div>
-          <Link to="/" className="shrink-0 text-sm text-[var(--color-accent)] hover:underline">
-            ← Dashboard
-          </Link>
+          <div className="flex shrink-0 gap-3">
+            <Link to="/book" className="text-sm text-[var(--color-accent)] hover:underline">
+              ← The book
+            </Link>
+            <Link to="/" className="text-sm text-[var(--color-accent)] hover:underline">
+              Dashboard
+            </Link>
+          </div>
         </div>
       </header>
 

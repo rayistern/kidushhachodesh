@@ -52,6 +52,14 @@ export const CHAIN_NODES = [
     blurb: 'Two Rosh HaShanahs force all the months between them.',
   },
   {
+    id: 'seasons',
+    label: 'Track the solar seasons',
+    hebrew: 'תקופות',
+    chapter: 9,
+    stepId: null,
+    blurb: "Two traditions for the sun's year — the side branch that guards the leap years.",
+  },
+  {
     id: 'days',
     label: 'Count the days since the starting point',
     hebrew: null,

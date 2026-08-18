@@ -49,6 +49,10 @@ export default function BookIndex() {
           <Link to="/text" className="text-[var(--color-accent)] hover:underline">
             the source reader
           </Link>
+          . And everything the book computes can be watched on the evening sky itself, at{' '}
+          <Link to="/sky" className="text-[var(--color-accent)] hover:underline">
+            the Sky page
+          </Link>
           .
         </p>
 

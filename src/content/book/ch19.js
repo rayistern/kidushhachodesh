@@ -181,7 +181,7 @@ export default {
       'The whole of the Rambam\'s sighting method, from counting days to examining witnesses.',
     ],
     missing: [
-      'Nothing more of the astronomy — this was the last of it. What lies outside these nine chapters is the other half of the laws: the court, the witnesses, the leap years, and the fixed reckoning that replaced sighting when the court ceased. Those are chapters 1 to 10 — and this book now covers 6 to 8, the arithmetic of the fixed calendar. The rest are in the source text.',
+      'Nothing more of the astronomy — this was the last of it. What lies outside these nine chapters is the other half of the laws: the court, the witnesses, the leap years, and the fixed reckoning that replaced sighting when the court ceased. Those are chapters 1 to 10 — and this book now covers 6 to 10, the whole fixed calendar. Chapters 1 to 5 are in the source text.',
     ],
   },
 };
