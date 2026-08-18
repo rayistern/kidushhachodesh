@@ -218,7 +218,10 @@ export default function SkyPage() {
 
         <p className="mt-4 max-w-3xl text-xs leading-relaxed text-[var(--color-text-secondary)]">
           The gold band is <strong>the belt of the signs</strong> — the sun's road — crossing the
-          evening sky at that night's slant, numbered every 30°. The faint region below the
+          evening sky at that night's slant, numbered every 30°. It curves because it is a full
+          circle round the whole sky, seen from inside: an arch climbing from the horizon toward
+          its high point in the south, off the left edge of this window. (Flattening the dome onto
+          a rectangle bends it a little further, the way flight paths curve on a map.) The faint region below the
           horizon is the earth, made see-through so the set sun stays visible. Step days with the
           clock held and the three speeds of the book appear: the grid drifts a degree a night,
           the sun barely moves against your window, the moon runs.

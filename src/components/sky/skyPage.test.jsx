@@ -100,3 +100,28 @@ describe('the real-sky toggle', () => {
     expect(found.length).toBeGreaterThan(0);
   });
 });
+
+describe('the curve of the belt is explained', () => {
+  it('says why the gold line arches', () => {
+    page();
+    expect(screen.getByText(/full\s+circle round the whole sky, seen from inside/)).toBeTruthy();
+  });
+
+  it('really does arch: altitude rises then falls along the visible run', () => {
+    // The physical claim behind the caption, checked in the same frame
+    // the page draws: sampling the belt across the window on his evening,
+    // the altitude is not monotonic — it climbs toward the southern high
+    // point and descends to the western horizon.
+    const obs = { latitude: 31.78, longitude: 35.2137 };
+    const date = dateFromEpochDays(29);
+    const utc = sunsetUtcHours(date, { ...RAMBAM_REFERENCE }) + 20 / 60;
+    const jd = jdAt(date, utc);
+    const alts = [];
+    for (let lambda = 0; lambda < 360; lambda += 2) {
+      const p = skyPosition(lambda, 0, jd, obs);
+      if (p.azimuth > 195 && p.azimuth < 345 && p.altitude > -5) alts.push(p.altitude);
+    }
+    expect(Math.max(...alts)).toBeGreaterThan(20); // well up the sky
+    expect(Math.min(...alts)).toBeLessThan(2); // down to the horizon
+  });
+});
