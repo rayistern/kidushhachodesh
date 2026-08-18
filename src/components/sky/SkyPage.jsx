@@ -29,8 +29,9 @@ import { Link } from 'react-router-dom';
 import { getFullCalculation } from '../../engine/pipeline';
 import { dateFromEpochDays, daysFromEpoch } from '../../engine/epochDays';
 import { formatDms } from '../../engine/dmsUtils';
-import { ordinalSuffix } from '../../engine/zodiac';
+import { ordinalSuffix, zodiacPosition } from '../../engine/zodiac';
 import { skyPosition, jdAt } from '../../lib/skyView';
+import { modernSunLongitude, modernMoonPosition, angularDifference } from '../../lib/modernAstronomy';
 import { sunsetUtcHours, israelUtcOffsetHours, formatClock, RAMBAM_REFERENCE } from '../../lib/localObserver';
 import { nextSightingNight } from '../../lib/sightingNight';
 
@@ -43,19 +44,39 @@ function todayDays() {
 }
 
 /** Everything the view needs for one day count and one UTC hour. */
-function sceneFor(days, utcHours) {
+function sceneFor(days, utcHours, real) {
   const date = dateFromEpochDays(days);
   const calc = getFullCalculation(date);
   const jd = jdAt(date, utcHours);
-  const sun = skyPosition(calc.sun.trueLongitude, 0, jd, OBSERVER);
-  const moon = skyPosition(calc.moon.trueLongitude, calc.moon.latitude, jd, OBSERVER);
+  // The instant, as a Date, for the modern theories.
+  const instant = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0) + utcHours * 3600000);
+  const rambam = {
+    sunLon: calc.sun.trueLongitude,
+    moonLon: calc.moon.trueLongitude,
+    moonLat: calc.moon.latitude,
+  };
+  const modernMoon = modernMoonPosition(instant);
+  const modern = {
+    sunLon: modernSunLongitude(instant),
+    moonLon: modernMoon.longitude,
+    moonLat: modernMoon.latitude,
+  };
+  const pos = real ? modern : rambam;
+  const sun = skyPosition(pos.sunLon, 0, jd, OBSERVER);
+  const moon = skyPosition(pos.moonLon, pos.moonLat, jd, OBSERVER);
+  // How far his positions sit from the real ones, for the readout.
+  const delta = {
+    sun: angularDifference(rambam.sunLon, modern.sunLon),
+    moon: angularDifference(rambam.moonLon, modern.moonLon),
+  };
+  const shown = { sunLon: pos.sunLon, moonLon: pos.moonLon };
   // The belt, sampled — and each sample keeps its longitude so the sign
   // grid can be drawn on it.
   const belt = [];
   for (let lambda = 0; lambda < 360; lambda += 2) {
     belt.push({ lambda, ...skyPosition(lambda, 0, jd, OBSERVER) });
   }
-  return { date, calc, jd, sun, moon, belt };
+  return { date, calc, jd, sun, moon, belt, delta, shown };
 }
 
 export default function SkyPage() {
@@ -64,15 +85,17 @@ export default function SkyPage() {
   // (c): when held, the UTC clock is frozen and date-stepping shows the
   // sidereal slide. null = follow sunset (b-mode).
   const [heldUtc, setHeldUtc] = useState(null);
+  // Swap the drawn positions for the real ones — the reader's request.
+  const [real, setReal] = useState(false);
 
   const date = dateFromEpochDays(days);
   const sunsetUtc = sunsetUtcHours(date, { ...RAMBAM_REFERENCE }) ?? 15.5;
   const utcHours = heldUtc ?? sunsetUtc + minutes / 60;
   const offset = israelUtcOffsetHours(date);
 
-  const scene = useMemo(() => sceneFor(days, utcHours), [days, utcHours]);
+  const scene = useMemo(() => sceneFor(days, utcHours, real), [days, utcHours, real]);
 
-  const moonSign = Math.floor(((scene.calc.moon.trueLongitude % 360) + 360) % 360 / 30) + 1;
+  const moonSign = Math.floor(((scene.shown.moonLon % 360) + 360) % 360 / 30) + 1;
 
   return (
     <div className="min-h-[100dvh] bg-[var(--color-bg)] text-[var(--color-text)]">
@@ -148,6 +171,18 @@ export default function SkyPage() {
           <label className="flex items-center gap-2 text-xs text-[var(--color-text-secondary)]">
             <input
               type="checkbox"
+              checked={real}
+              onChange={(e) => setReal(e.target.checked)}
+              className="accent-[var(--color-accent)]"
+            />
+            <span>
+              <strong>Show the real sky</strong> — swap his positions for modern ones (Meeus).
+              The verdict readout stays his either way; the real moon never enters it.
+            </span>
+          </label>
+          <label className="flex items-center gap-2 text-xs text-[var(--color-text-secondary)]">
+            <input
+              type="checkbox"
               checked={heldUtc !== null}
               onChange={(e) => setHeldUtc(e.target.checked ? utcHours : null)}
               className="accent-[var(--color-gold)]"
@@ -160,19 +195,19 @@ export default function SkyPage() {
           </label>
         </div>
 
-        <SkyFigure scene={scene} />
+        <SkyFigure scene={scene} real={real} />
 
         {/* ── readouts ── */}
         <div className="mt-4 grid gap-2 sm:grid-cols-3">
           <Readout
-            title="His sun"
-            value={`${formatDms(scene.calc.sun.trueLongitude)} on the circle`}
-            note={`altitude ${scene.sun.altitude.toFixed(1)}°, azimuth ${scene.sun.azimuth.toFixed(0)}° — ${scene.sun.altitude < -0.8 ? 'below the horizon' : 'setting'}`}
+            title={real ? 'The real sun' : 'His sun'}
+            value={`${formatDms(scene.shown.sunLon)} on the circle`}
+            note={`altitude ${scene.sun.altitude.toFixed(1)}°, azimuth ${scene.sun.azimuth.toFixed(0)}° — ${scene.sun.altitude < -0.8 ? 'below the horizon' : 'setting'}${real ? ` · his sits ${scene.delta.sun >= 0 ? '+' : ''}${scene.delta.sun.toFixed(2)}° from this` : ''}`}
           />
           <Readout
-            title="His moon"
-            value={`${formatDms(scene.calc.moon.trueLongitude)} — the ${moonSign}${ordinalSuffix(moonSign)} sign`}
-            note={`altitude ${scene.moon.altitude.toFixed(1)}°, azimuth ${scene.moon.azimuth.toFixed(0)}°${scene.moon.altitude < 0 ? ' — below the horizon tonight' : ''}`}
+            title={real ? 'The real moon' : 'His moon'}
+            value={`${formatDms(scene.shown.moonLon)} — the ${moonSign}${ordinalSuffix(moonSign)} sign`}
+            note={`altitude ${scene.moon.altitude.toFixed(1)}°, azimuth ${scene.moon.azimuth.toFixed(0)}°${scene.moon.altitude < 0 ? ' — below the horizon tonight' : ''}${real ? ` · his sits ${scene.delta.moon >= 0 ? '+' : ''}${scene.delta.moon.toFixed(2)}° from this` : ''}`}
           />
           <Readout
             title="Verdict that evening"
@@ -215,7 +250,7 @@ function Readout({ title, value, note }) {
 }
 
 /** The window itself: azimuth 195°–345°, altitude −28°–+65°. */
-function SkyFigure({ scene }) {
+function SkyFigure({ scene, real }) {
   const w = 900;
   const h = 420;
   const AZ_MIN = 195;
@@ -291,17 +326,30 @@ function SkyFigure({ scene }) {
         {signTicks.map((p) => (
           <circle key={p.lambda} cx={x(p.azimuth)} cy={y(p.altitude)} r="3" fill="var(--color-gold)" fillOpacity="0.8" />
         ))}
+        {/* Number first, name second — the book's convention, on the sky:
+            the reader asked for the mazal names alongside the numbers. */}
         {signMids.map((p) => (
-          <text
-            key={p.lambda}
-            x={x(p.azimuth)}
-            y={y(p.altitude) - 8}
-            fontSize="11"
-            textAnchor="middle"
-            fill="var(--color-gold)"
-          >
-            {Math.floor(p.lambda / 30) + 1}
-          </text>
+          <g key={p.lambda}>
+            <text
+              x={x(p.azimuth)}
+              y={y(p.altitude) - 18}
+              fontSize="11"
+              textAnchor="middle"
+              fill="var(--color-gold)"
+            >
+              {Math.floor(p.lambda / 30) + 1}
+            </text>
+            <text
+              x={x(p.azimuth)}
+              y={y(p.altitude) - 7}
+              fontSize="8"
+              textAnchor="middle"
+              fill="var(--color-gold)"
+              fillOpacity="0.75"
+            >
+              {zodiacPosition(p.lambda).translit}
+            </text>
+          </g>
         ))}
 
         {/* the sun — his */}
@@ -309,7 +357,7 @@ function SkyFigure({ scene }) {
           <g>
             <circle cx={x(scene.sun.azimuth)} cy={y(scene.sun.altitude)} r="11" fill="var(--color-gold)" fillOpacity={scene.sun.altitude < 0 ? 0.45 : 0.9} />
             <text x={x(scene.sun.azimuth)} y={y(scene.sun.altitude) + 24} fontSize="11" textAnchor="middle" fill="var(--color-gold)">
-              his sun
+              {real ? 'the real sun' : 'his sun'}
             </text>
           </g>
         )}
@@ -319,7 +367,7 @@ function SkyFigure({ scene }) {
           <g>
             <circle cx={x(scene.moon.azimuth)} cy={y(scene.moon.altitude)} r="7" fill="var(--color-silver)" fillOpacity={scene.moon.altitude < 0 ? 0.4 : 1} />
             <text x={x(scene.moon.azimuth)} y={y(scene.moon.altitude) - 12} fontSize="11" textAnchor="middle" fill="var(--color-silver)">
-              his moon
+              {real ? 'the real moon' : 'his moon'}
             </text>
           </g>
         )}

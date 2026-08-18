@@ -22,11 +22,13 @@
  * place, and leaves the verdict entirely to the engine.
  *
  * ── The honest limit ──
- * There is no lunar ephemeris in this project, by design. So nothing
- * here is an independent prediction of visibility: it cannot tell you
- * when the moon sets, which is the constraint that actually decides a
- * marginal sighting. What it gives is *when and where to look*, next to
- * the Rambam's own answer about *whether* to expect anything.
+ * The VERDICT path contains no lunar ephemeris, by design — it is the
+ * Rambam's chapters 11-17 and nothing else. (A comparison-only modern
+ * moon lives in modernAstronomy.js for the /sky page's real-sky toggle;
+ * it never feeds a verdict.) So nothing here is an independent
+ * prediction of visibility, and this module does not compute when the
+ * moon sets. What it gives is *when and where to look*, next to the
+ * Rambam's own answer about *whether* to expect anything.
  *
  * Sunset uses NOAA's low-accuracy algorithm — good to about a minute,
  * which is far finer than the elevation and refraction uncertainties

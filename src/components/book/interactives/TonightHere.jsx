@@ -313,9 +313,11 @@ export default function TonightHere() {
           nights. Nothing has been altered to compensate: this is a note, not a correction.
         </p>
         <p>
-          <strong>What this card cannot do.</strong> There is no lunar ephemeris in this project by
-          design, so nothing here independently predicts visibility, and it cannot tell you when
-          the moon sets — which is the constraint that really decides a thin crescent. Cloud, dust
+          <strong>What this card cannot do.</strong> The verdict never touches a modern moon — it
+          is the Rambam's chapters 11 to 17 and nothing else — so nothing here independently
+          predicts visibility, and this card does not tell you when the moon sets, which is the
+          constraint that really decides a thin crescent. (The Sky page carries a comparison-only
+          real moon; it stays out of every verdict.) Cloud, dust
           and haze are outside the arithmetic too, as KH 18:1 concedes. This tells you when and
           where to look, beside his answer on whether to expect anything.
         </p>

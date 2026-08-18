@@ -150,3 +150,58 @@ export function meanJerusalemSunsetHours() {
 function normalize(deg) {
   return ((deg % 360) + 360) % 360;
 }
+
+/**
+ * The real moon's ecliptic position — COMPARISON ONLY, like everything
+ * in this file. Never feeds a verdict.
+ *
+ * Truncated from Meeus, Astronomical Algorithms ch. 47: every periodic
+ * term of 0.01° or larger (19 in longitude, 14 in latitude). The full
+ * series is good to arcseconds; this truncation is good to about 0.05°,
+ * pinned in modernAstronomy.test.js against Meeus's own worked example
+ * (47.a) and against a known new-moon instant.
+ *
+ * Added 2026-08-18 for the /sky page's "show the real sky" toggle. The
+ * project's long-standing "no lunar ephemeris" stance was about the
+ * VERDICT path, which remains pure KH 11-17; the claims on the surfaces
+ * that said it were narrowed the same day.
+ */
+export function modernMoonPosition(date) {
+  const T = (toJulianDay(date) - 2451545.0) / 36525;
+  const norm = (d) => ((d % 360) + 360) % 360;
+  // Mean elements (degrees), Meeus 47.1-47.5.
+  const Lp = norm(218.3164477 + 481267.88123421 * T - 0.0015786 * T * T);
+  const D = norm(297.8501921 + 445267.1114034 * T - 0.0018819 * T * T);
+  const M = norm(357.5291092 + 35999.0502909 * T - 0.0001536 * T * T);
+  const Mp = norm(134.9633964 + 477198.8675055 * T + 0.0087414 * T * T);
+  const F = norm(93.272095 + 483202.0175233 * T - 0.0036539 * T * T);
+  const DEG = Math.PI / 180;
+  const E = 1 - 0.002516 * T; // eccentricity damping for terms with M
+  const s = (k) => Math.sin(k * DEG);
+
+  // [coeff°, d, m, mp, f] — longitude terms ≥ 0.01°.
+  const LON = [
+    [6.288774, 0, 0, 1, 0], [1.274027, 2, 0, -1, 0], [0.658314, 2, 0, 0, 0],
+    [0.213618, 0, 0, 2, 0], [-0.185116, 0, 1, 0, 0], [-0.114332, 0, 0, 0, 2],
+    [0.058793, 2, 0, -2, 0], [0.057066, 2, -1, -1, 0], [0.053322, 2, 0, 1, 0],
+    [0.045758, 2, -1, 0, 0], [-0.040923, 0, 1, -1, 0], [-0.034720, 1, 0, 0, 0],
+    [-0.030383, 0, 1, 1, 0], [0.015327, 2, 0, 0, -2], [-0.012528, 0, 0, 1, 2],
+    [0.010980, 0, 0, 1, -2], [0.010675, 4, 0, -1, 0], [0.010034, 0, 0, 3, 0],
+    [0.008548, 4, 0, -2, 0],
+  ];
+  // Latitude terms ≥ 0.01°.
+  const LAT = [
+    [5.128122, 0, 0, 0, 1], [0.280602, 0, 0, 1, 1], [0.277693, 0, 0, 1, -1],
+    [0.173237, 2, 0, 0, -1], [0.055413, 2, 0, -1, 1], [0.046271, 2, 0, -1, -1],
+    [0.032573, 2, 0, 0, 1], [0.017198, 0, 0, 2, 1], [0.009266, 2, 0, 1, -1],
+    [0.008822, 0, 0, 2, -1], [0.008216, 2, -1, 0, -1], [0.004324, 0, 0, 2, -3],
+    [0.004200, 2, 0, 1, 1], [-0.003359, 2, 1, 0, -1],
+  ];
+  const sum = (terms) =>
+    terms.reduce((acc, [c, d, m, mp, f]) => {
+      const e = m === 0 ? 1 : m === 1 || m === -1 ? E : E * E;
+      return acc + c * e * s(d * D + m * M + mp * Mp + f * F);
+    }, 0);
+
+  return { longitude: norm(Lp + sum(LON)), latitude: sum(LAT) };
+}

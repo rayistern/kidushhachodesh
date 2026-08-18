@@ -12,7 +12,7 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { render, screen, cleanup } from '@testing-library/react';
+import { render, screen, cleanup, fireEvent } from '@testing-library/react';
 import SkyPage from './SkyPage';
 import { getFullCalculation } from '../../engine/pipeline';
 import { dateFromEpochDays } from '../../engine/epochDays';
@@ -70,5 +70,33 @@ describe("his worked evening's scene, numerically", () => {
     }
     // And the verdict for that night is his: visible.
     expect(calc.moon.visibilityVerdict).toBe('visible');
+  });
+});
+
+describe('the real-sky toggle', () => {
+  it('swaps the drawn bodies to modern positions, relabelled', async () => {
+    page();
+    expect(await screen.findByText('his sun')).toBeTruthy();
+    const toggle = screen.getByText(/Show the real sky/).closest('label').querySelector('input');
+    fireEvent.click(toggle);
+    expect(await screen.findByText('the real sun')).toBeTruthy();
+    expect(screen.getByText('the real moon')).toBeTruthy();
+    // The deltas are on the readouts, so the gap between his sky and the
+    // real one is a number, not an impression.
+    expect(screen.getAllByText(/his sits [+−-]?\d+\.\d+° from this/).length).toBe(2);
+  });
+
+  it("keeps the verdict his — the real moon never enters it", () => {
+    page();
+    expect(screen.getByText(/verdict readout stays his either way/)).toBeTruthy();
+  });
+
+  it('labels the belt with names as well as numbers', async () => {
+    page();
+    await screen.findByText('his sun');
+    // At least one transliterated name on the gold line, beneath its number.
+    const names = ['Taleh', 'Shor', 'Teomim', 'Sartan', 'Aryeh', 'Betulah', 'Moznayim', 'Akrav', 'Keshet', "G'di", "D'li", 'Dagim'];
+    const found = names.filter((n) => screen.queryAllByText(n).length > 0);
+    expect(found.length).toBeGreaterThan(0);
   });
 });

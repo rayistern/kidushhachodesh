@@ -10,6 +10,7 @@ import {
   angularDifference,
   jerusalemSunsetHours,
   meanJerusalemSunsetHours,
+  modernMoonPosition,
 } from './modernAstronomy';
 import { CONSTANTS } from '../engine/constants';
 import { calculateSunMeanLongitude, calculateSunApogee } from '../engine/sunCalculations';
@@ -150,5 +151,39 @@ describe("how far the Rambam's sun sits from the modern one", () => {
     for (const ms of SAMPLES) {
       expect(gapDegrees(new Date(ms))).toBeLessThan(0);
     }
+  });
+});
+
+describe('modernMoonPosition — the comparison moon', () => {
+  it("reproduces Meeus's own worked example 47.a", () => {
+    // 1992 April 12.0 TD; full series gives λ 133.162655°, β −3.229126°.
+    // The ≥0.01° truncation must land within 0.05° of each.
+    const { longitude, latitude } = modernMoonPosition(new Date(Date.UTC(1992, 3, 12, 0, 0, 0)));
+    expect(Math.abs(longitude - 133.1627)).toBeLessThan(0.05);
+    expect(Math.abs(latitude - -3.2291)).toBeLessThan(0.05);
+  });
+
+  it('is at conjunction at the J2000-era new moon', () => {
+    // New moon of 2000-01-06 18:14 UTC. Sun and moon longitudes agree
+    // within a fraction of a degree there, by definition of new moon.
+    const d = new Date(Date.UTC(2000, 0, 6, 18, 14, 0));
+    const gap = Math.abs(angularDifference(modernMoonPosition(d).longitude, modernSunLongitude(d)));
+    expect(gap).toBeLessThan(0.6);
+  });
+
+  it('keeps its latitude inside the real ±5.3° band', () => {
+    for (let i = 0; i < 60; i++) {
+      const d = new Date(Date.UTC(2026, 0, 1 + i * 11, 18, 0, 0));
+      const { latitude } = modernMoonPosition(d);
+      expect(Math.abs(latitude), d.toISOString()).toBeLessThan(5.35);
+    }
+  });
+
+  it("moves ~13.2°/day, the real moon's pace", () => {
+    const a = modernMoonPosition(new Date(Date.UTC(2026, 7, 17, 18, 0, 0))).longitude;
+    const b = modernMoonPosition(new Date(Date.UTC(2026, 7, 18, 18, 0, 0))).longitude;
+    const step = ((b - a) % 360 + 360) % 360;
+    expect(step).toBeGreaterThan(11.5);
+    expect(step).toBeLessThan(15.5);
   });
 });
