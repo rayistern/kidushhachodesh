@@ -11,9 +11,20 @@
  *
  * Worth drawing rather than tabulating because the rule contains a
  * reversal that reads as a mistake in prose — a moon in the NORTH-west
- * has horns pointing SOUTH-east. Seen as a picture it is obvious: the
- * horns point away from the sun, so the further the moon leans one way,
- * the further its horns swing the other.
+ * has horns pointing SOUTH-east.
+ *
+ * ── A correction this drawing has been through ──
+ * A first version put a sun-glow at due west and aimed the crescent
+ * radially away from it. A reader noticed that for the northerly moon
+ * that arrow points up-NORTH on screen while the label says SOUTH-east
+ * — the drawing contradicted its own answer. The radial model is wrong:
+ * checked against real sky geometry (skyView) for his worked evening,
+ * the moon 14° north of the equator stands on the SOUTH side of where
+ * the sun went down, because "north of the equator" is not "north of
+ * the sun" — sun and moon ride the same slanted belt. The drawing now
+ * renders the halacha's own three answers directly (screen: facing
+ * west, so south-east = up-and-left), with the seasonal wobble of the
+ * exact tilt left to KH 19:1's own disclaimer of exactness.
  */
 import React, { useState } from 'react';
 import InteractiveCard, { PresetButton } from '../../text/interactives/InteractiveCard';
@@ -69,8 +80,16 @@ export default function CrescentDirection() {
 
       <p className="mt-3 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
         The reversal in there reads like an error and is not: a moon in the <em>north</em>-west has
-        horns pointing <em>south</em>-east. Watch the drawing and it is obvious — the horns point
-        away from the sun, so the further the moon leans one way, the further they swing the other.
+        horns pointing <em>south</em>-east. The trap is assuming the horns aim straight out from
+        the sunset point. They aim away from the sun <strong>along the slanted belt</strong> both
+        bodies ride — and "north of the equator" is not "north of the sun". On his own evening the
+        moon, 14° north of the equator, actually stood on the <em>south</em> side of where the sun
+        went down. The mouth of the bow aims up and south: south-east.
+      </p>
+      <p className="mt-2 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
+        The exact tilt wobbles with the season — this is the chapter the Rambam opens by saying
+        will not be exact, because none of it affects the verdict. His three cases are the coarse
+        version a court could put to a witness.
       </p>
       <p className="mt-2 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
         And this is why the court asked. Someone who had really looked could say which way it
@@ -80,6 +99,16 @@ export default function CrescentDirection() {
   );
 }
 
+/**
+ * Screen rotation for a mouth direction, facing west: up = east,
+ * left = south, right = north. SVG rotate() is clockwise-positive.
+ */
+export function mouthScreenRotation(horns) {
+  if (horns === 'south-east') return -45; // up and to the left
+  if (horns === 'north-east') return 45; // up and to the right
+  return 0; // due east — straight up
+}
+
 /** The western horizon at sunset, with the moon where the rule puts it. */
 function Sky({ fromEquator, horns }) {
   const w = 380;
@@ -87,12 +116,13 @@ function Sky({ fromEquator, horns }) {
   const groundY = 150;
   const cx = w / 2;
 
-  // Lean the moon's position and its horns in opposite directions.
+  // Lean the moon's position with its equator distance (right = north,
+  // since we face west), and rotate the crescent to the halacha's own
+  // answer for that case — not to a radial guess.
   const lean = Math.max(-1, Math.min(1, fromEquator / 24));
   const mx = cx + lean * 110;
   const my = groundY - 58 - Math.abs(lean) * 6;
-  // Horns face away from the sun, which is below the horizon at centre.
-  const hornAngle = Math.atan2(my - groundY, mx - cx) * (180 / Math.PI) + 90;
+  const hornAngle = mouthScreenRotation(horns);
 
   return (
     <figure className="mt-3">
@@ -123,20 +153,13 @@ function Sky({ fromEquator, horns }) {
           <circle cx="0" cy="0" r="17" fill="var(--color-silver)" mask="url(#kh-horns)" />
         </g>
 
-        <line x1={cx} y1={groundY} x2={mx} y2={my} stroke="var(--color-accent)" strokeWidth="1" strokeDasharray="3 3" opacity="0.6" />
-
-        {/* The pointing, drawn as an arrow out of the crescent's mouth.
-            Two readers' questions earned it: the tips carry no arrows of
-            their own, and the corner labels were being read as the
-            horns' direction. Away-from-the-sun is the same unit vector
-            the crescent is rotated by, so arrow and bow cannot drift
-            apart. */}
+        {/* The pointing, drawn as an arrow out of the crescent's mouth,
+            using the same screen rotation as the bow — so arrow, bow and
+            label agree by construction. Up is east; left is south. */}
         {(() => {
-          const dx = mx - cx;
-          const dy = my - groundY;
-          const len = Math.hypot(dx, dy) || 1;
-          const ux = dx / len;
-          const uy = dy / len;
+          const rad = ((hornAngle - 90) * Math.PI) / 180; // mouth vector
+          const ux = Math.cos(rad);
+          const uy = Math.sin(rad);
           const x1 = mx + ux * 24;
           const y1 = my + uy * 24;
           const x2 = mx + ux * 56;
@@ -150,8 +173,8 @@ function Sky({ fromEquator, horns }) {
               </defs>
               <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="var(--color-gold)" strokeWidth="1.5" markerEnd="url(#kh-horn-arrow)" />
               <text
-                x={x2 + ux * 10}
-                y={y2 + uy * 10}
+                x={x2 + ux * 12}
+                y={y2 + uy * 12 - 2}
                 fontSize="9"
                 fill="var(--color-gold)"
                 textAnchor="middle"

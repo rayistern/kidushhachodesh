@@ -11,8 +11,12 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import React from 'react';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
-import CrescentDirection from './CrescentDirection';
+import CrescentDirection, { mouthScreenRotation } from './CrescentDirection';
 import { crescentDirection } from '../../../lib/khDeclination';
+import { skyPosition, jdAt } from '../../../lib/skyView';
+import { getFullCalculation } from '../../../engine/pipeline';
+import { dateFromEpochDays } from '../../../engine/epochDays';
+import { sunsetUtcHours, RAMBAM_REFERENCE } from '../../../lib/localObserver';
 
 afterEach(cleanup);
 
@@ -39,5 +43,38 @@ describe('the pointing arrow', () => {
       screen.getByText(/corner labels name the horizon's compass ends; the gold arrow names the horns/),
     ).toBeTruthy();
     expect(screen.getByText(/the mouth is the pointing/)).toBeTruthy();
+  });
+});
+
+describe('the drawing shows the reversal instead of contradicting it', () => {
+  it('maps each answer to the right screen direction, facing west', () => {
+    // Up = east, left = south, right = north. A first version aimed the
+    // crescent radially away from a sun-glow at due west, which pointed
+    // the northerly case up-NORTH on screen under a label saying
+    // SOUTH-east — the reader caught the contradiction.
+    expect(mouthScreenRotation('south-east')).toBe(-45); // up-left
+    expect(mouthScreenRotation('north-east')).toBe(45); // up-right
+    expect(mouthScreenRotation('due east')).toBe(0); // straight up
+  });
+
+  it("real geometry backs the halacha on his evening: north moon, south side", () => {
+    // The fact the corrected prose leans on, computed rather than told:
+    // at sunset+20 on his worked evening the moon (14° north of the
+    // equator) stands at a smaller azimuth-from-north-offset than the
+    // sun's set-point — i.e. on its SOUTH side, facing west.
+    const obs = { latitude: 31.78, longitude: 35.2137 };
+    const date = dateFromEpochDays(29);
+    const calc = getFullCalculation(date);
+    const utc = sunsetUtcHours(date, { ...RAMBAM_REFERENCE }) + 20 / 60;
+    const jd = jdAt(date, utc);
+    const sun = skyPosition(calc.sun.trueLongitude, 0, jd, obs);
+    const moon = skyPosition(calc.moon.trueLongitude, calc.moon.latitude, jd, obs);
+    expect(moon.azimuth).toBeLessThan(sun.azimuth); // south of it, facing west
+    expect(moon.altitude).toBeGreaterThan(sun.altitude); // and above: mouth up-south = SE
+  });
+
+  it('states the not-exact caveat in his own terms', () => {
+    render(<CrescentDirection />);
+    expect(screen.getByText(/will not be exact/)).toBeTruthy();
   });
 });
