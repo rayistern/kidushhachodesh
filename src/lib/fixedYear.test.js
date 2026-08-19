@@ -9,7 +9,7 @@
  * times.
  */
 import { describe, it, expect } from 'vitest';
-import { moladTishrei, roshHashanah, actualRoshHashanahDay, yearShape } from './fixedYear';
+import { moladTishrei, moladTishreiLadder, roshHashanah, actualRoshHashanahDay, yearShape } from './fixedYear';
 import { isHebrewLeapYear } from '../engine/fixedCalendar/months';
 
 describe('the four postponements reproduce the real calendar', () => {
@@ -104,5 +104,43 @@ describe('the shape of the year (KH 8)', () => {
         : { 2: 'lacking', 3: 'in-order', 4: 'complete' }[between];
       expect(shape.kind, `year ${year}, between ${between}`).toBe(expected);
     }
+  });
+});
+
+describe('the ladder shows the work and reaches the same rung (KH 6:12-14)', () => {
+  it('starts at BaHaRaD and adds the published remainders', () => {
+    const l = moladTishreiLadder(5786);
+    expect(l.anchor).toEqual({ day: 2, hours: 5, parts: 204 });
+    // The three "each" triples ARE his published remainders — derived
+    // here from the constants, matching the numbers of KH 6:5 and 6:12.
+    expect(l.steps[0].each).toEqual({ day: 2, hours: 16, parts: 595 });
+    expect(l.steps[1].each).toEqual({ day: 4, hours: 8, parts: 876 });
+    expect(l.steps[2].each).toEqual({ day: 5, hours: 21, parts: 589 });
+  });
+
+  it('classifies 5786 in its cycle correctly', () => {
+    const l = moladTishreiLadder(5786);
+    // 5785 elapsed years = 304 cycles + 9; leap among the first nine
+    // positions of a cycle are 3, 6 and 8.
+    expect(l.cycles).toBe(304);
+    expect(l.remainderYears).toBe(9);
+    expect(l.leapPositions).toEqual([3, 6, 8]);
+    expect(l.commonYears).toBe(6);
+  });
+
+  it('its last rung equals moladTishrei, across eras', () => {
+    for (const year of [1, 2, 19, 20, 4938, 5786, 5787, 6000, 7000]) {
+      expect(moladTishreiLadder(year).final, `year ${year}`).toEqual(moladTishrei(year));
+    }
+    for (let year = 5770; year <= 5810; year++) {
+      expect(moladTishreiLadder(year).final, `year ${year}`).toEqual(moladTishrei(year));
+    }
+  });
+
+  it('year 1 is the bare anchor: zero of everything added', () => {
+    const l = moladTishreiLadder(1);
+    expect(l.cycles).toBe(0);
+    expect(l.remainderYears).toBe(0);
+    expect(l.final).toEqual({ day: 2, hours: 5, parts: 204 });
   });
 });

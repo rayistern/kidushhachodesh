@@ -134,7 +134,9 @@ export default function ParallaxBySign() {
         </strong>{' '}
         sign, where sighting nights fall in {SIGHTING_MONTHS[index]} — and sits{' '}
         <strong className="font-mono">{formatDms(Math.abs(night.latitude))}</strong>{' '}
-        <strong>{north ? 'north' : 'south'}</strong> of the road. Both computed, neither chosen: the sign comes from chapter 15's calculation of where the moon stands, and north-or-south from chapter 16's calculation of its height off the road.
+        <strong>{north ? 'north' : 'south'}</strong> of the road. You don't pick these two facts,
+        and you couldn't — the calculation produces them: chapter 15 says where the moon stands
+        (so, its sign), and chapter 16 says whether it sits north or south of the road.
       </p>
 
       <Curves index={index} />
@@ -172,7 +174,11 @@ export default function ParallaxBySign() {
         circle, and they run in opposite phase — where one is largest the other is smallest. That
         is what you would expect if they are the sideways and the vertical parts of one change in
         appearance, divided differently as the belt tilts against the horizon. They are not twelve
-        unrelated numbers apiece.
+        unrelated numbers apiece. In fact, combine any sign's pair the way the sides of a
+        right-angled triangle combine and the total comes out almost the same in every sign —
+        between 56′ and 61′, which is the moon's own parallax showing through his two tables.
+        (That observation is this book's, not his: he gives the tables and says the reasons
+        belong to the geometry books, KH 17:24.)
       </p>
       <p className="mt-2 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
         On the evening the Rambam works, the moon is in <strong>Shor</strong> — a full degree off
@@ -180,6 +186,11 @@ export default function ParallaxBySign() {
       </p>
     </InteractiveCard>
   );
+}
+
+/** √(lon² + lat²) for a sign — the whole shift the two tables split. */
+export function wholeShiftArcmin(index) {
+  return Math.hypot(LON[index].chalakim, LAT[index].chalakim);
 }
 
 function Curves({ index }) {

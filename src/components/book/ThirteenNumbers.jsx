@@ -1,0 +1,321 @@
+/**
+ * ThirteenNumbers — the whole method's foundations, on one page.
+ *
+ * ═══════════════════════════════════════════════════════════════════
+ *  REGIME TAG: **editorial** — NOT the Rambam, NOT a translation.
+ *  SURFACE CATEGORY: teaching commentary (standalone article)
+ * ═══════════════════════════════════════════════════════════════════
+ *
+ * Grew out of a reader's question — "what are the most fundamental
+ * numbers to calculate?" — whose answer turned out to be short enough
+ * to be an article and load-bearing enough to deserve one: three
+ * numbers run the calendar, five positions with five speeds run the
+ * astronomy, and every evening they funnel into one number.
+ *
+ * Every figure on this page is rendered FROM the engine's constants,
+ * not typed in, so the article cannot drift from the code — pinned in
+ * thirteenNumbers.test.jsx. The counting-to-thirteen framing is this
+ * book's; the numbers themselves are his, each with its chapter.
+ */
+import React from 'react';
+import { Link } from 'react-router-dom';
+import SiteCredit from '../layout/SiteCredit';
+import { CONSTANTS } from '../../engine/constants';
+import {
+  BAHARAD,
+  SYNODIC_MONTH_PARTS,
+  PARTS_PER_DAY,
+  PARTS_PER_HOUR,
+} from '../../engine/fixedCalendar/constants';
+
+// The month, decomposed from the engine's single parts figure.
+const MONTH_DAYS = Math.floor(SYNODIC_MONTH_PARTS / PARTS_PER_DAY);
+const MONTH_HOURS = Math.floor((SYNODIC_MONTH_PARTS % PARTS_PER_DAY) / PARTS_PER_HOUR);
+const MONTH_PARTS = SYNODIC_MONTH_PARTS % PARTS_PER_HOUR;
+
+/** d-m-s object → the book's inline style: 13° 10′ 35″. */
+function dms({ degrees, minutes, seconds }) {
+  const s = Math.round(seconds * 100) / 100;
+  return `${degrees}° ${minutes}′ ${s ? `${s}″` : ''}`.trim();
+}
+
+const SUN = CONSTANTS.SUN;
+const MOON = CONSTANTS.MOON;
+const NODE = CONSTANTS.NODE;
+
+/** The five running quantities: anchor at the epoch, speed, and where he states them. */
+const PAIRS = [
+  {
+    name: "The sun's mean place",
+    hebrew: 'אמצע השמש',
+    epoch: `${dms(SUN.START_POSITION)} of the 1st sign`,
+    rate: `${dms(SUN.MEAN_MOTION_PER_DAY)} a day`,
+    ref: 'KH 12:1-2',
+    note: 'He prints the rate as 59′ 8″; his own worked example and his 10-day table both need the extra third of a second, so that is the operative figure.',
+  },
+  {
+    name: "The sun's slow point (apogee)",
+    hebrew: 'גובה השמש',
+    epoch: `${dms(SUN.APOGEE_START)} of the 3rd sign`,
+    rate: '1.5″ every 10 days',
+    ref: 'KH 12:2',
+    note: 'The crawl of the whole solar circle — about a degree in seventy years.',
+  },
+  {
+    name: "The moon's mean place",
+    hebrew: 'אמצע הירח',
+    epoch: `${dms(MOON.START_POSITION)} of the 2nd sign`,
+    rate: `${dms(MOON.MEAN_MOTION_PER_DAY)} a day`,
+    ref: 'KH 14:1, 14:4',
+    note: 'The fastest thing in the sky — a whole circle in under a month.',
+  },
+  {
+    name: "The moon's place on its own wobble (maslul)",
+    hebrew: 'אמצע המסלול',
+    epoch: dms(MOON.MASLUL_START),
+    rate: `${dms(MOON.MASLUL_MEAN_MOTION)} a day`,
+    ref: 'KH 14:3-4',
+    note: 'Slightly slower than the moon itself, which is why the wobble slides.',
+  },
+  {
+    name: 'The crossing point (node)',
+    hebrew: 'הראש',
+    epoch: dms(NODE.START_POSITION),
+    rate: `${dms(NODE.DAILY_MOTION)} a day — backwards`,
+    ref: 'KH 16:2-3',
+    note: "Where the moon's tilted path cuts the sun's road; the only one that runs against the traffic.",
+  },
+];
+
+export default function ThirteenNumbers() {
+  return (
+    <div className="min-h-[100dvh] bg-[var(--color-bg)] text-[var(--color-text)]">
+      <header className="border-b border-[var(--color-border)] bg-[var(--color-surface)]">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 py-5 flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl font-bold">Thirteen numbers</h1>
+            <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
+              Everything the nineteen chapters do stands on thirteen numbers the Rambam states
+              outright — and funnels into one.
+            </p>
+          </div>
+          <Link to="/book" className="shrink-0 text-sm text-[var(--color-accent)] hover:underline">
+            ← The book
+          </Link>
+        </div>
+      </header>
+
+      <main className="mx-auto max-w-3xl px-4 sm:px-6 py-6 space-y-6 text-sm leading-relaxed">
+        <section>
+          <h2 className="text-base font-bold">Start at the window</h2>
+          <p className="mt-2">
+            Picture someone standing at a window that faces west, on the evening after the 29th
+            day of the month. Tonight might be the night the new moon shows. The question is
+            simple: <strong>will they see the thin crescent tonight, or not?</strong> Every
+            number on this page exists to answer that one question. (
+            <Link to="/sky" className="text-[var(--color-accent)] hover:underline">
+              The Sky page
+            </Link>{' '}
+            draws this exact view, evening by evening.)
+          </p>
+          <p className="mt-2">
+            Start with what makes the question hard. The new crescent is very thin and very
+            faint. You can only see it once the sky has grown dark enough — and the moon has to
+            still be up when that happens. There is the problem: a new crescent always hangs
+            close to the sun, so it sets shortly after the sun does. That leaves only a short
+            stretch of time between "the sky is finally dark enough" and "the moon has already
+            gone down." To predict whether tonight offers that stretch at all, you have to know
+            exactly where the sun is and when it sets.
+          </p>
+          <p className="mt-2">
+            You might think that part is easy — the sun seems like the most regular thing in the
+            world. It is not, in two ways. First, <strong>the sun does not travel at one steady
+            speed</strong> through the year. In some seasons it covers a little more of its path
+            each day, in others a little less. So if you predict the sun's position by assuming
+            a steady pace, your prediction slowly drifts away from where the sun actually is.
+            Second, <strong>the sun does not set at the same spot</strong>. Watch the sunset
+            from the same window for a year: the setting point slides along the horizon, well to
+            the north of due west in summer, well to the south in winter. And as the spot
+            moves, the <strong>angle</strong> at which the sun drops below the horizon changes
+            too. That angle matters twice over: it controls how quickly the sky gets dark after
+            sunset, and it controls what a given distance between the moon and the sun is worth
+            — whether that distance stands the moon well above the sunset glow, or leaves it
+            sitting low inside the glow where no eye will find it.
+          </p>
+          <p className="mt-2">
+            And the moon is harder than the sun. It has its own uneven speed — with bigger
+            swings, changing faster. And it does not even travel along the same line in the sky
+            that the sun does: the moon's path is tilted against the sun's, so in some months
+            the moon rides above the sun's path and in others below it, by up to five degrees —
+            about ten times the width of the sun itself.
+          </p>
+          <p className="mt-2">
+            So the simple window question — <em>will I see it tonight?</em> — turns out to need
+            three things that nobody can just see in advance: where the sun really is, where the
+            moon really is, and how the two of them will be arranged against the horizon when
+            the sky darkens. The rest of this page lists the numbers the Rambam gives for
+            working those three things out — and there are exactly thirteen of them.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="text-base font-bold">One pattern, everywhere</h2>
+          <p className="mt-2">
+            Strip away the tables and the vocabulary and every calculation in the whole method is
+            the same move: <strong>take an anchor, add a speed times the days elapsed, throw away
+            whole circles</strong>. It is how you read a clock — you don't ask where the hand has
+            been, only where it started and how fast it turns. So the method's real foundations
+            are exactly its anchors and its speeds, and there are thirteen of them.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="text-base font-bold">The calendar's three (chapter 6)</h2>
+          <ol className="mt-2 list-decimal space-y-2 pl-5">
+            <li>
+              <strong>
+                The month: {MONTH_DAYS} days, {MONTH_HOURS} hours, {MONTH_PARTS} parts
+              </strong>{' '}
+              — the
+              mean time from one conjunction to the next (KH 6:3). The single most important
+              number in the system; chapters 6 through 10 are nothing but multiples of it with
+              the weeks thrown away.
+            </li>
+            <li>
+              <strong>
+                The anchor: molad of Tishrei, year one — day {BAHARAD.dayOfWeek} (Monday),{' '}
+                {BAHARAD.hours} hours, {BAHARAD.parts} parts
+              </strong>{' '}
+              — <span className="hebrew-text">בהר"ד</span> (KH 6:8). Every molad ever calculated
+              is this number plus whole months.
+            </li>
+            <li>
+              <strong>Seven leap years in every nineteen</strong> (KH 6:10-11) — the one number
+              that ties the moon's months to the sun's seasons, so Pesach stays in spring.
+            </li>
+          </ol>
+          <p className="mt-2 text-[13px] text-[var(--color-text-secondary)]">
+            Everything else in the fixed calendar — the year remainders, the cycle remainder, the
+            four postponements — is derived from these three or is a rule about them, not a new
+            measurement. The{' '}
+            <Link to="/book/6" className="text-[var(--color-accent)] hover:underline">
+              molad ladder in chapter 6
+            </Link>{' '}
+            is the three of them at work.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="text-base font-bold">The astronomy's five pairs (chapters 12-16)</h2>
+          <p className="mt-2">
+            The sighting calculation adds one moment — <strong>the epoch</strong>, the eve of
+            Thursday, 3 Nisan 4938 (KH 11:16) — and for five quantities, where each stood that
+            evening and how fast it moves. Five anchors, five speeds: ten numbers.
+          </p>
+          <div className="mt-3 overflow-x-auto">
+            <table className="w-full min-w-[560px] text-[13px]">
+              <thead>
+                <tr className="border-b border-[var(--color-border)] text-left text-[var(--color-text-secondary)]">
+                  <th className="py-1 pr-3 font-bold">quantity</th>
+                  <th className="py-1 pr-3 font-bold">at the epoch</th>
+                  <th className="py-1 pr-3 font-bold">speed</th>
+                  <th className="py-1 font-bold">stated at</th>
+                </tr>
+              </thead>
+              <tbody>
+                {PAIRS.map((p) => (
+                  <tr key={p.name} className="border-b border-[var(--color-border)]/40 align-top">
+                    <td className="py-1.5 pr-3">
+                      {p.name} <span className="hebrew-text text-[var(--color-text-secondary)]">{p.hebrew}</span>
+                      <div className="text-[11px] text-[var(--color-text-secondary)]">{p.note}</div>
+                    </td>
+                    <td className="py-1.5 pr-3 font-mono whitespace-nowrap">{p.epoch}</td>
+                    <td className="py-1.5 pr-3 font-mono whitespace-nowrap">{p.rate}</td>
+                    <td className="py-1.5 font-mono text-[var(--color-text-secondary)] whitespace-nowrap">{p.ref}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section>
+          <h2 className="text-base font-bold">The two odd ones, and why they earn their place</h2>
+          <p className="mt-2">
+            Where the sun and the moon are needs no argument. The <strong>maslul</strong> is the
+            same story as the sun's slow point, told of the moon: the moon also drags and hurries
+            around its circle, and the maslul is where it currently stands in that
+            drag-and-hurry cycle — chapter 15's correction is looked up by it, just as chapter
+            13's is looked up by the sun's distance from the slow point. The remaining two look
+            like bookkeeping and are anything but.
+          </p>
+          <p className="mt-2">
+            <strong>The slow point (apogee)</strong> is where the sun's unevenness is anchored.
+            The sun drags near that point and hurries opposite it, and{' '}
+            <Link to="/book/13" className="text-[var(--color-accent)] hover:underline">
+              chapter 13's correction
+            </Link>{' '}
+            is looked up entirely by the sun's distance from it — reaching{' '}
+            <strong>1° 59′</strong> at ninety degrees away. Skip it and you are stuck with the
+            pretend sun, wrong by up to two degrees — and that error lands one-for-one in{' '}
+            <strong>the gap</strong> (moon minus sun), on which the verdict lives, with its
+            thresholds only single degrees apart. It is also why the seasons run unequal lengths;
+            and its crawl of a degree per seventy years is stated so the method would not quietly
+            expire — by now it has drifted a whole sign's worth of thirteen degrees.
+          </p>
+          <p className="mt-2">
+            <strong>The crossing point (node)</strong> is where the moon's tilt is anchored. The
+            moon does not ride the sun's road; its path is tilted against it, and{' '}
+            <Link to="/book/16" className="text-[var(--color-accent)] hover:underline">
+              chapter 16
+            </Link>{' '}
+            turns the moon's distance from the crossing into its <strong>height off the road —
+            up to 5°, north or south</strong>. That one number is the heaviest lever in the
+            verdict: it decides whether the crescent hangs above the road or below it at dusk,
+            and in the chain's last step two thirds of it swing the arc by more than three
+            degrees between a northern moon and a southern one. It also explains why there is no
+            eclipse of the sun every month — the monthly pass almost always sails above or below,
+            and only a meeting near a crossing truly lines up. And because the crossing walks{' '}
+            <em>backwards</em> (his 3′ 11″ a day works out to a full lap in about 18.6 years),
+            the pattern of high-riding and low-riding crescents slides slowly through the years.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="text-base font-bold">What the famous tables are not</h2>
+          <p className="mt-2">
+            The correction tables — the sun's (KH 13), the moon's (KH 15), the latitude rule with
+            its 5° ceiling (KH 16), chapter 17's by-sign tables — are <em>not</em> further
+            fundamentals. They are fixed recipes applied to the running numbers above: look up,
+            share out, add or subtract. Nothing in them is measured anew; once the thirteen are
+            set, the tables never change.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="text-base font-bold">Thirteen in, one out</h2>
+          <p className="mt-2">
+            Each evening the machinery exists to produce just three working numbers —{' '}
+            <strong>the sun's true place, the moon's true place, and the moon's height off the
+            sun's road</strong>. From those come the gap (
+            <span className="hebrew-text">אורך ראשון</span>) and the height (
+            <span className="hebrew-text">רוחב ראשון</span>), and after{' '}
+            <Link to="/book/17" className="text-[var(--color-accent)] hover:underline">
+              chapter 17's chain
+            </Link>{' '}
+            of corrections, the single number the verdict reads:{' '}
+            <span className="hebrew-text">קשת הראייה</span>, the arc of sighting. Thirteen numbers
+            in; a yes or a no out.
+          </p>
+        </section>
+
+        <p className="border-t border-[var(--color-border)] pt-3 text-[12px] leading-relaxed text-[var(--color-text-secondary)]">
+          Every number on this page is the Rambam's, from the chapter cited beside it — and this
+          page renders them from the same constants the calculators run on, so the two cannot
+          disagree. The framing — counting the foundations to thirteen — is this book's, not his.
+        </p>
+        <SiteCredit />
+      </main>
+    </div>
+  );
+}

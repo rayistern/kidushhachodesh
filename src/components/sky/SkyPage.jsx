@@ -37,6 +37,7 @@ import { skyPosition, jdAt } from '../../lib/skyView';
 import { modernSunLongitude, modernMoonPosition, angularDifference } from '../../lib/modernAstronomy';
 import { sunsetUtcHours, israelUtcOffsetHours, formatClock, RAMBAM_REFERENCE } from '../../lib/localObserver';
 import { nextSightingNight } from '../../lib/sightingNight';
+import { assessEvening, DANJON_LIMIT_DEG } from '../../lib/moonVisibility';
 
 const OBSERVER = { latitude: 31.78, longitude: 35.2137 };
 const EXAMPLE_DAYS = 29;
@@ -103,6 +104,27 @@ function sceneFor(days, utcHours, real) {
     belt.push({ lambda, ...skyPosition(lambda, 0, jd, OBSERVER) });
   }
   return { date, calc, jd, sun, moon, belt, delta, shown };
+}
+
+/**
+ * KH 17's verdict, gated to sighting-shaped nights. Near conjunction
+ * the chain's arcs wrap and the verdict is meaningless — a reader
+ * caught it saying "could be seen" with the moon drawn ON the sun.
+ * Only sighting-shaped nights get a verdict.
+ */
+function hisVerdictFor(calc) {
+  const gap = calc.moon.elongation;
+  const arc = calc.moon.keshetHaReiyah;
+  const isCandidate = gap > 2.5 && gap < 40 && arc > 0 && arc < 40;
+  return {
+    gap,
+    isCandidate,
+    verdict: isCandidate
+      ? calc.moon.visibilityVerdict === 'visible'
+        ? 'could be seen'
+        : 'not seen'
+      : null,
+  };
 }
 
 export default function SkyPage() {
@@ -208,8 +230,8 @@ export default function SkyPage() {
               className="accent-[var(--color-accent)]"
             />
             <span>
-              <strong>Show the real sky</strong> — swap his positions for modern ones (Meeus).
-              The verdict readout stays his either way; the real moon never enters it.
+              <strong>Show the actual sky</strong> — swap his positions for modern ones (Meeus).
+              The verdict readout stays his either way; the actual moon never enters it.
             </span>
           </label>
           <label className="flex items-center gap-2 text-xs text-[var(--color-text-secondary)]">
@@ -232,37 +254,25 @@ export default function SkyPage() {
         {/* ── readouts ── */}
         <div className="mt-4 grid gap-2 sm:grid-cols-3">
           <Readout
-            title={real ? 'The real sun' : 'His sun'}
+            title={real ? 'Sun (actual)' : 'Sun (Rambam)'}
             value={`${formatDms(scene.shown.sunLon)} on the circle`}
             note={`altitude ${scene.sun.altitude.toFixed(1)}°, azimuth ${scene.sun.azimuth.toFixed(0)}° — ${scene.sun.altitude < -0.8 ? 'below the horizon' : 'setting'}${real ? ` · his sits ${scene.delta.sun >= 0 ? '+' : ''}${scene.delta.sun.toFixed(2)}° from this` : ''}`}
           />
           <Readout
-            title={real ? 'The real moon' : 'His moon'}
+            title={real ? 'Moon (actual)' : 'Moon (Rambam)'}
             value={`${formatDms(scene.shown.moonLon)} — the ${moonSign}${ordinalSuffix(moonSign)} sign`}
             note={`altitude ${scene.moon.altitude.toFixed(1)}°, azimuth ${scene.moon.azimuth.toFixed(0)}°${scene.moon.altitude < 0 ? ' — below the horizon tonight' : ''}${real ? ` · his sits ${scene.delta.moon >= 0 ? '+' : ''}${scene.delta.moon.toFixed(2)}° from this` : ''}`}
           />
           {(() => {
-            // Near conjunction the chain's arcs wrap and the verdict is
-            // meaningless — a reader caught it saying "could be seen"
-            // with the moon drawn ON the sun. Only sighting-shaped
-            // nights get a verdict.
-            const gap = scene.calc.moon.elongation;
-            const arc = scene.calc.moon.keshetHaReiyah;
-            const isCandidate = gap > 2.5 && gap < 40 && arc > 0 && arc < 40;
+            const his = hisVerdictFor(scene.calc);
             return (
               <Readout
                 title="Verdict that evening"
-                value={
-                  isCandidate
-                    ? scene.calc.moon.visibilityVerdict === 'visible'
-                      ? 'could be seen'
-                      : 'not seen'
-                    : 'not a sighting night'
-                }
+                value={his.isCandidate ? his.verdict : 'not a sighting night'}
                 note={
-                  isCandidate
+                  his.isCandidate
                     ? "KH 17's rule, from the chain the book builds"
-                    : `the moon is ${gap > 180 ? (360 - gap).toFixed(1) : gap.toFixed(1)}° from the sun — nowhere near a first crescent`
+                    : `the moon is ${his.gap > 180 ? (360 - his.gap).toFixed(1) : his.gap.toFixed(1)}° from the sun — nowhere near a first crescent`
                 }
               />
             );
@@ -279,9 +289,139 @@ export default function SkyPage() {
           clock held and the three speeds of the book appear: the grid drifts a degree a night,
           the sun barely moves against your window, the moon runs.
         </p>
+
+        <ModernCheck eve={scene.date} his={hisVerdictFor(scene.calc)} />
+
         <SiteCredit />
       </main>
     </div>
+  );
+}
+
+const MODERN_VERDICT_PROSE = {
+  likely:
+    'a crescent is there to look for — past 7° before sunset and still up after it.',
+  challenging:
+    'barely past the gate — 7° arrives only between sunset and moonset, the thinnest of crescents.',
+  impossible: 'no sighting possible — the moon sets before opening 7° from the sun.',
+  'no-crescent-yet': 'no crescent exists yet — conjunction falls after sunset this evening.',
+  'daylight-only':
+    'a daytime window only — the moon is past 7° but sets before the sun. Testimony of a sighting made while it is still day is admissible — the court itself sanctifies on one (KH 2:9) — but a crescent this thin defeats the naked eye against a daylit sky.',
+  'not-crescent-night': 'not a first-crescent evening.',
+  indeterminate: 'no moonset found near this sunset to test against.',
+};
+
+/** Yallop's bands, in words (NAO TN 69). */
+const YALLOP_PROSE = {
+  A: 'easily visible to the naked eye',
+  B: 'visible to the naked eye in perfect conditions',
+  C: 'optical aid may be needed to find it, then the eye can hold it',
+  D: 'optical aid needed throughout — the eye alone will not catch it',
+  E: 'not visible even with a telescope',
+  F: 'not visible — below the Danjon limit',
+};
+const yallopSighted = (code) => code === 'A' || code === 'B' || code === 'C';
+
+/**
+ * The modern check, for information: does the crescent actually exist
+ * by sunset, has it actually opened 7° (the Danjon limit), and does the
+ * moon actually set late enough to leave a window — real Jerusalem
+ * sunset, real moonset, Meeus positions throughout. COMPARISON ONLY:
+ * the verdict above stays KH 17's, and nothing here feeds it.
+ */
+function ModernCheck({ eve, his }) {
+  // Keyed on the timestamp: eveningOf builds a fresh Date each render.
+  const check = useMemo(() => assessEvening(eve, OBSERVER), [eve.getTime()]); // eslint-disable-line react-hooks/exhaustive-deps
+  if (!check) return null;
+  const offset = israelUtcOffsetHours(eve);
+  const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  // Same clock convention as the sunset slider above: UTC plus Israel's
+  // legal offset, applied even to historical dates.
+  const fmtInstant = (d) => {
+    if (!d) return '—';
+    const t = new Date(d.getTime() + offset * 3600000);
+    return `${t.getUTCDate()} ${MONTHS[t.getUTCMonth()]}, ${formatClock(t.getUTCHours() + t.getUTCMinutes() / 60)}`;
+  };
+  // The full check trumps the gate for "would an eye catch it": bands
+  // A-C count as sightable, D-F as not. Without a q value (moon down by
+  // dusk, or no crescent), the coarse gate stands in.
+  const modernSighted = check.yallop
+    ? yallopSighted(check.yallop.code)
+    : check.verdict === 'likely' || check.verdict === 'challenging';
+  const comparable =
+    his.isCandidate && check.verdict !== 'not-crescent-night' && check.verdict !== 'indeterminate';
+  return (
+    <section className="mt-8 rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] p-4">
+      <h2 className="text-sm font-bold">Would it actually be seen? — the modern check, Jerusalem</h2>
+      <p className="mt-1 text-xs leading-relaxed text-[var(--color-text-secondary)]">
+        Everything above draws positions. This box asks the modern question directly for this
+        evening: has conjunction actually happened, has the moon opened{' '}
+        {DANJON_LIMIT_DEG}° from the sun — the <strong>Danjon limit</strong>, the least
+        separation at which a naked eye has ever caught a crescent — and does the moon set late
+        enough after the sun to leave a window. Real sunset, real moonset, Meeus positions.
+        For information only: the verdict above stays KH 17's, and none of this feeds it.
+      </p>
+      <div className="mt-3 grid gap-2 sm:grid-cols-3">
+        <Readout title="Conjunction (true molad)" value={fmtInstant(check.conjunction)} note="the actual sun-moon lineup, not the mean molad" />
+        <Readout title={`Opens ${DANJON_LIMIT_DEG}° (Danjon limit)`} value={fmtInstant(check.sevenDeg)} note="~11-16 hours after conjunction, by the moon's speed" />
+        <Readout
+          title="Elongation at sunset"
+          value={`${check.elongationAtSunset.toFixed(1)}°`}
+          note={`sunset ${formatClock(check.sunsetUtc + offset)}, moonset ${
+            check.moonsetUtc != null ? formatClock(check.moonsetUtc + offset) : '—'
+          }${check.windowMinutes != null ? ` — a ${check.windowMinutes} min window` : ''}`}
+        />
+      </div>
+      {check.yallop && (
+        <div className="mt-2 grid gap-2 sm:grid-cols-3">
+          <Readout
+            title="Best moment (Yallop)"
+            value={formatClock(check.yallop.bestUtc + offset)}
+            note={`sunset + 4/9 of the ${check.yallop.lagMinutes}-minute lag to moonset`}
+          />
+          <Readout
+            title="Arc of vision vs crescent width"
+            value={`${check.yallop.arcv.toFixed(1)}° over ${check.yallop.wPrime.toFixed(2)}′`}
+            note="the moon's height above the sun then, against the lune's thickness"
+          />
+          <Readout
+            title="q-test"
+            value={`q = ${check.yallop.q.toFixed(3)} — band ${check.yallop.code}`}
+            note={YALLOP_PROSE[check.yallop.code]}
+          />
+        </div>
+      )}
+      <p className="mt-3 text-xs leading-relaxed">
+        <strong>Modern reading:</strong> {MODERN_VERDICT_PROSE[check.verdict]}
+        {check.yallop && (
+          <>
+            {' '}
+            The full q-test says the crescent is <strong>{YALLOP_PROSE[check.yallop.code]}</strong>{' '}
+            (band {check.yallop.code}).
+          </>
+        )}
+        {comparable && (
+          <>
+            {' '}
+            KH 17 above says <strong>{his.verdict}</strong> —{' '}
+            {modernSighted === (his.verdict === 'could be seen')
+              ? 'the two agree this evening.'
+              : 'the two split this evening. His moon carries about a degree of error and the criteria differ — his arc of sighting against a bare elongation limit — so borderline evenings can land on opposite sides.'}
+          </>
+        )}
+      </p>
+      <p className="mt-2 text-[10px] leading-relaxed text-[var(--color-text-secondary)]">
+        Two criteria: the 7° gate asks whether a crescent <em>exists</em> to look for; Yallop's
+        q-test — the criterion fitted to 295 recorded first sightings (NAO TN 69, 1997), weighing
+        the moon's height above the sun against the crescent's width at the best moment of dusk —
+        asks whether an eye would <em>catch</em> it, in bands A (easy) through F (below the Danjon
+        limit). Cloud, dust and haze remain outside every criterion. Jerusalem stands here for
+        the whole Land, the way the Rambam's own single reference does (KH 11:17) — checked
+        across the classical span, from Dan to Beersheba, the q-test moves by at most one band,
+        and only on knife-edge evenings, with the south slightly favoured; on any clear verdict
+        every city agrees.
+      </p>
+    </section>
   );
 }
 
@@ -447,7 +587,7 @@ function SkyFigure({ scene, real }) {
           <g>
             <circle cx={x(scene.sun.azimuth)} cy={y(scene.sun.altitude)} r="11" fill="var(--color-gold)" fillOpacity={scene.sun.altitude < 0 ? 0.45 : 0.9} />
             <text x={x(scene.sun.azimuth)} y={y(scene.sun.altitude) + 24} fontSize="11" textAnchor="middle" fill="var(--color-gold)">
-              {real ? 'the real sun' : 'his sun'}
+              {real ? 'Sun (actual)' : 'Sun (Rambam)'}
             </text>
           </g>
         )}
@@ -471,7 +611,7 @@ function SkyFigure({ scene, real }) {
                 <path d={d} fill="var(--color-silver)" fillOpacity={dim} />
               </g>
               <text x={mxp} y={myp - 12} fontSize="11" textAnchor="middle" fill="var(--color-silver)">
-                {real ? 'the real moon' : 'his moon'}
+                {real ? 'Moon (actual)' : 'Moon (Rambam)'}
               </text>
             </g>
           );

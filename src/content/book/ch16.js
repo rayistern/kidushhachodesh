@@ -130,6 +130,7 @@ export default {
         'The Rambam names them for what the moon does there. At one, the moon is crossing from below the sun\'s track to above it — he calls that the **head** (ראש); think of it as **the up-crossing**. Half a circle away it crosses back down: the **tail** (זנב), or **the down-crossing**.',
         'At either crossing the moon sits exactly on the sun\'s track and has no height at all. Between them it climbs to five degrees and comes back down. So if you know where the up-crossing is, and where the moon is, you know how high it must be — which is the calculation the rest of the chapter performs.',
         'And because the two are always half a circle apart, knowing one gives you the other for free. Seven signs along, at the same degree.',
+        'The crossings also answer a question you may never have thought to ask: **why is there no eclipse of the sun every month?** The moon passes the sun every month — but almost always sails above or below it; five degrees of height is ten of the sun\'s own widths. Only when the meeting happens to fall near a crossing do the two truly line up. (He does not raise eclipses here; the observation is this book\'s.)',
       ],
     },
 

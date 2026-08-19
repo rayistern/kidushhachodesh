@@ -31,6 +31,7 @@ const TextIndex = React.lazy(() => import('./components/text/TextIndex'));
 const TextChapter = React.lazy(() => import('./components/text/TextChapter'));
 const BookIndex = React.lazy(() => import('./components/book/BookIndex'));
 const BookChapter = React.lazy(() => import('./components/book/BookChapter'));
+const ThirteenNumbers = React.lazy(() => import('./components/book/ThirteenNumbers'));
 const SkyPage = React.lazy(() => import('./components/sky/SkyPage'));
 
 const Fallback = () => (
@@ -70,6 +71,9 @@ export default function App() {
           <Route path="/text/:chapter" element={<TextChapter />} />
           {/* Plain-language companion — one chapter at a time, KH 14 first. */}
           <Route path="/book" element={<BookIndex />} />
+          {/* Standalone article: the thirteen numbers everything stands on.
+              Must precede :chapter, which would otherwise swallow it. */}
+          <Route path="/book/numbers" element={<ThirteenNumbers />} />
           <Route path="/book/:chapter" element={<BookChapter />} />
           {/* The book's numbers drawn on the real evening sky. */}
           <Route path="/sky" element={<SkyPage />} />
