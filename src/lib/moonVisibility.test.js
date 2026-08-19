@@ -154,14 +154,16 @@ describe("Yallop's q-test", () => {
 });
 
 describe('one city stands for the Land (the claim on the /sky panel)', () => {
-  // The panel says Jerusalem represents Israel the way KH 11:17's single
-  // reference does, moving the q-test by at most about one band across
-  // the country's full span. Held here across the extremes.
+  // The panel says Jerusalem represents the Land the way KH 11:17's
+  // single reference does, moving the q-test by at most one band across
+  // the classical span — from Dan to Beersheba, since the modern map's
+  // southern point (Eilat) sits outside the halachic Land by most
+  // reckonings. Held here across that span.
   const SPAN = [
-    { latitude: 33.28, longitude: 35.57 }, // Metula, the north tip
+    { latitude: 33.249, longitude: 35.652 }, // Dan, the northern byword
     { latitude: 31.78, longitude: 35.2137 }, // Jerusalem
     { latitude: 32.08, longitude: 34.78 }, // the coast
-    { latitude: 29.55, longitude: 34.95 }, // Eilat, the south tip
+    { latitude: 31.25, longitude: 34.79 }, // Beersheba, the southern byword
   ];
   const BANDS = 'ABCDEF';
 
@@ -176,9 +178,9 @@ describe('one city stands for the Land (the claim on the /sky panel)', () => {
       const qs = SPAN.map((o) => yallopFor(new Date(y, m, d), o));
       const idx = qs.map((r) => BANDS.indexOf(r.code));
       expect(Math.max(...idx) - Math.min(...idx), `${y}-${m + 1}-${d}`).toBeLessThanOrEqual(1);
-      // Eilat (last) never worse than Metula (first): the south's crescent
-      // stands a little higher — the geometry behind KH 18:4's "weigh
-      // where the witnesses stood".
+      // Beersheba (last) never worse than Dan (first): the south's
+      // crescent stands a little higher — the geometry behind KH 18:4's
+      // "weigh where the witnesses stood".
       expect(qs[3].q, `${y}-${m + 1}-${d}`).toBeGreaterThan(qs[0].q);
     }
   });
