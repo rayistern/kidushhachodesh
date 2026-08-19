@@ -56,6 +56,10 @@ export default function BookIndex() {
           <Link to="/sky" className="text-[var(--color-accent)] hover:underline">
             the Sky page
           </Link>
+          . Short on time? The whole method's foundations fit on one page:{' '}
+          <Link to="/book/numbers" className="text-[var(--color-accent)] hover:underline">
+            Thirteen numbers
+          </Link>
           .
         </p>
 

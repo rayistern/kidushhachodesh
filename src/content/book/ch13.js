@@ -120,7 +120,7 @@ export default {
       body: [
         'Now the answers themselves — **the fix** to apply. The Rambam lists it for every ten degrees of course, from nothing up to a maximum and back down to nothing.',
         'In the text it is nineteen lines of prose and hard to see any shape in. Plotted, it is obviously a smooth arch: zero at the start, rising to **1° 59\'** when the course is 90 degrees, falling back to zero at 180.',
-        'Two degrees, at most. That is the entire size of the difference between the pretend sun and the real one — small, but far too big to ignore when the whole question turns on a few degrees of angle.',
+        'Two degrees, at most. That is the entire size of the difference between the pretend sun and the real one — small, but far too big to ignore when the whole question turns on a few degrees of angle. And it lands where it hurts: chapter 17\'s gap is the moon\'s position minus the sun\'s, so every arcminute the sun is off moves the gap by that same arcminute — and the gap\'s verdict thresholds sit only single degrees apart.',
       ],
       interactive: 'correction-table',
     },

@@ -14,7 +14,7 @@
  */
 import React, { useState } from 'react';
 import InteractiveCard, { PresetButton } from '../../text/interactives/InteractiveCard';
-import { moladTishrei } from '../../../lib/fixedYear';
+import { moladTishrei, moladTishreiLadder } from '../../../lib/fixedYear';
 
 const DAY_NAMES = ['—', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Shabbat'];
 
@@ -26,9 +26,12 @@ const REMAINDERS = [
   { label: 'a 19-year cycle', triple: '2 – 16 – 595', ref: 'KH 6:12', note: 'twelve common + seven leap years' },
 ];
 
+const t = (x) => `${x.day} – ${x.hours} – ${x.parts}`;
+
 export default function MoladLadder() {
   const [year, setYear] = useState(5786);
   const molad = moladTishrei(year);
+  const ladder = moladTishreiLadder(year);
 
   return (
     <InteractiveCard
@@ -110,12 +113,53 @@ export default function MoladLadder() {
         </PresetButton>
       </div>
       <div className="mt-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] p-3">
-        <div className="font-mono text-lg font-bold text-[var(--color-gold)]">
+        <div className="text-xs font-bold text-[var(--color-text-secondary)]">
+          The whole ladder, climbed for Tishrei {year} (KH 6:12-14)
+        </div>
+        <div className="mt-2 overflow-x-auto">
+          <table className="w-full min-w-[420px] font-mono text-xs">
+            <thead>
+              <tr className="border-b border-[var(--color-border)] text-left text-[var(--color-text-secondary)]">
+                <th className="py-1 pr-3 font-bold">step</th>
+                <th className="py-1 pr-3 font-bold">adds</th>
+                <th className="py-1 font-bold">running total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr className="border-b border-[var(--color-border)]/40">
+                <td className="py-1 pr-3">
+                  start at the anchor <span className="hebrew-text">בהר"ד</span>
+                </td>
+                <td className="py-1 pr-3 text-[var(--color-text-secondary)]">—</td>
+                <td className="py-1">{t(ladder.anchor)}</td>
+              </tr>
+              {ladder.steps.map((s) => (
+                <tr key={s.label} className="border-b border-[var(--color-border)]/40">
+                  <td className="py-1 pr-3">
+                    + {s.count} {s.label} × {t(s.each)}
+                  </td>
+                  <td className="py-1 pr-3 text-[var(--color-text-secondary)]">{t(s.add)}</td>
+                  <td className="py-1">{t(s.running)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="mt-2 border-t border-[var(--color-border)] pt-2 font-mono text-lg font-bold text-[var(--color-gold)]">
           {DAY_NAMES[molad.day]}, {molad.hours}h {molad.parts}p
         </div>
-        <div className="text-[11px] text-[var(--color-text-secondary)]">
-          = BaHaRaD + (months from year 1 to Tishrei {year}) × 1 – 12 – 793, whole weeks thrown
-          away. Chapter 7 turns this into the day Rosh HaShanah actually falls.
+        <div className="mt-1 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
+          Year {year} sits {ladder.remainderYears === 0 ? 'exactly at the start of' : `${ladder.remainderYears} year${ladder.remainderYears === 1 ? '' : 's'} into`}{' '}
+          cycle {ladder.cycles + 1}
+          {ladder.remainderYears > 0 && (
+            <>
+              ; of those, {ladder.leapYears === 0 ? 'none are' : ladder.leapYears === 1 ? `position ${ladder.leapPositions[0]} is` : `positions ${ladder.leapPositions.join(', ')} are`}{' '}
+              leap (KH 6:11's seven: 3, 6, 8, 11, 14, 17, 19)
+            </>
+          )}
+          . Each "adds" column is count × remainder with whole weeks already thrown away — every
+          multiplication is just repeated addition mod the week, checkable by hand. Chapter 7 turns
+          the final triple into the day Rosh HaShanah actually falls.
         </div>
       </div>
     </InteractiveCard>

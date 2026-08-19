@@ -41,13 +41,54 @@ import {
   THIRD_OF_AN_HOUR_MINUTES,
 } from '../../../lib/localObserver';
 import { zodiacPosition, ordinalSuffix } from '../../../engine/zodiac';
+import { nextSightingNight } from '../../../lib/sightingNight';
+import { dateFromEpochDays, HDate } from '../../../engine/epochDays';
+
+const isoOf = (d) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
 function todayIso() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  return isoOf(new Date());
+}
+
+/**
+ * The civil evening of the next sighting night at or after `from` — the
+ * same derivation as /sky's eveningOf: engine day N is the evening
+ * beginning Hebrew day N, whose civil date is dateFromEpochDays(N) − 1.
+ * This is the card's default. An earlier version opened on today, which
+ * is usually mid-month — a verdict on an evening nobody would watch.
+ */
+function sightingIso(from = new Date()) {
+  const eve = new Date(dateFromEpochDays(nextSightingNight(from).days));
+  eve.setDate(eve.getDate() - 1);
+  return isoOf(eve);
+}
+
+/** The sighting night of the month after the one `iso` sits in. */
+function followingSightingIso(iso) {
+  const parts = iso.split('-').map(Number);
+  const base =
+    parts.length === 3 && !parts.some(Number.isNaN)
+      ? new Date(parts[0], parts[1] - 1, parts[2], 12)
+      : new Date();
+  // +5 days clears this month's window (the preset can land up to two
+  // evenings past the 29th) while staying well short of the next 29th.
+  base.setDate(base.getDate() + 5);
+  return sightingIso(base);
 }
 
 const signed = (n, digits = 1) => `${n >= 0 ? '+' : '−'}${Math.abs(n).toFixed(digits)}`;
+
+function PresetButton({ onClick, children }) {
+  return (
+    <button
+      onClick={onClick}
+      className="rounded border border-[var(--color-border)] bg-[var(--color-bg)] px-2 py-1 text-xs text-[var(--color-text-secondary)] hover:bg-[var(--color-border)]"
+    >
+      {children}
+    </button>
+  );
+}
 
 /** Which KH 17:3-4 half the moon is in, and hence which thresholds. */
 function halfFor(longitude) {
@@ -58,7 +99,7 @@ function halfFor(longitude) {
 }
 
 export default function TonightHere() {
-  const [iso, setIso] = useState(todayIso);
+  const [iso, setIso] = useState(sightingIso);
   const [lat, setLat] = useState(String(KARMIEL.latitude));
   const [lon, setLon] = useState(String(KARMIEL.longitude));
   const [elev, setElev] = useState(String(KARMIEL.elevationM));
@@ -89,6 +130,10 @@ export default function TonightHere() {
         calc: getFullCalculation(nextNoon),
         base: rambamWindow(date),
         local: localOffsets(date, observer),
+        // The Hebrew day this civil evening begins — so the reader can
+        // see whether they are looking at ליל שלושים or a mid-month night.
+        hebrew: new HDate(nextNoon).toString(),
+        hebrewDay: new HDate(nextNoon).getDate(),
       };
     } catch {
       return null;
@@ -146,15 +191,30 @@ export default function TonightHere() {
       source="KH 17 verdict · KH 14:6 moment"
       blurb="his answer first, then the offsets that turn it into a clock time"
     >
-      <label className="block">
-        <span className="text-xs font-bold text-[var(--color-text-secondary)]">Evening of</span>
-        <input
-          type="date"
-          value={iso}
-          onChange={(e) => setIso(e.target.value)}
-          className="mt-1 ml-2 rounded border border-[var(--color-border)] bg-[var(--color-bg)] px-2 py-1 font-mono text-sm"
-        />
-      </label>
+      <div className="flex flex-wrap items-end gap-2">
+        <label className="block">
+          <span className="text-xs font-bold text-[var(--color-text-secondary)]">Evening of</span>
+          <input
+            type="date"
+            value={iso}
+            onChange={(e) => setIso(e.target.value)}
+            className="mt-1 ml-2 rounded border border-[var(--color-border)] bg-[var(--color-bg)] px-2 py-1 font-mono text-sm"
+          />
+        </label>
+        <PresetButton onClick={() => setIso(sightingIso())}>Next sighting night</PresetButton>
+        <PresetButton onClick={() => setIso(followingSightingIso(iso))}>
+          The month after
+        </PresetButton>
+        <PresetButton onClick={() => setIso(todayIso())}>Tonight</PresetButton>
+      </div>
+      <p className="mt-1 text-[11px] text-[var(--color-text-secondary)]">
+        This evening begins <strong>{data.hebrew}</strong>
+        {data.hebrewDay === 30 || data.hebrewDay <= 2
+          ? ' — a night the court would actually be watching.'
+          : data.hebrewDay >= 27
+            ? ' — close to the watching nights at the month\'s end.'
+            : ' — mid-month, so the verdict below answers a question no court would ask; jump to the next sighting night for the real one.'}
+      </p>
 
       {/* ── LAYER 1: his verdict, no observer anywhere in it ── */}
       <div
