@@ -86,6 +86,16 @@ describe('the five pairs, from the constants', () => {
   });
 });
 
+describe('the window opening', () => {
+  it('starts where the reader stands and derives the need', () => {
+    page();
+    expect(screen.getByText(/Start at the window/)).toBeTruthy();
+    expect(screen.getByText(/how dark it will be,\s*and when/)).toBeTruthy();
+    expect(screen.getByText(/does not set in one place/)).toBeTruthy();
+    expect(screen.getByText(/exactly thirteen numbers/)).toBeTruthy();
+  });
+});
+
 describe('the two odd ones', () => {
   it('states the stakes of each: the gap transfer, and the heaviest lever', () => {
     page();

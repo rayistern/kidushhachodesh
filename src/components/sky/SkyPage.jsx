@@ -415,7 +415,11 @@ function ModernCheck({ eve, his }) {
         q-test — the criterion fitted to 295 recorded first sightings (NAO TN 69, 1997), weighing
         the moon's height above the sun against the crescent's width at the best moment of dusk —
         asks whether an eye would <em>catch</em> it, in bands A (easy) through F (below the Danjon
-        limit). Cloud, dust and haze remain outside every criterion.
+        limit). Cloud, dust and haze remain outside every criterion. Jerusalem stands here for
+        the whole Land, the way the Rambam's own single reference does (KH 11:17) — checked
+        across Israel's full span, Metula to Eilat, the q-test moves by at most about one band,
+        and only on knife-edge evenings, with the south slightly favoured; on any clear verdict
+        every city agrees.
       </p>
     </section>
   );

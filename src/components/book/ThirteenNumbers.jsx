@@ -107,6 +107,41 @@ export default function ThirteenNumbers() {
 
       <main className="mx-auto max-w-3xl px-4 sm:px-6 py-6 space-y-6 text-sm leading-relaxed">
         <section>
+          <h2 className="text-base font-bold">Start at the window</h2>
+          <p className="mt-2">
+            Stand at a west-facing window — or on the mountaintop, with KH 18:1's watchers — on
+            the evening after the 29th of the month. One question: <strong>will a thin crescent
+            show tonight?</strong> Everything below exists to answer it, and it is worth feeling
+            how much the innocent question actually demands (
+            <Link to="/sky" className="text-[var(--color-accent)] hover:underline">
+              the Sky page
+            </Link>{' '}
+            draws all of it on the window itself).
+          </p>
+          <p className="mt-2">
+            Knowing where the moon is isn't enough. A crescent that thin shows only against a
+            sky dark enough to lose to it — so first you must know <strong>how dark it will be,
+            and when</strong>: that is, exactly where the sun is and when it goes down. And the
+            sun refuses to be simple about it. It does not run at one speed — some stretches of
+            the year it hurries, others it drags — so its true place is never quite where an
+            even-paced sun would be. And it does not set in one place: watch from the same
+            window through a year and the setting point swings along the horizon, and with it the{' '}
+            <strong>angle</strong> the sun's path cuts down through the horizon — which sets how
+            fast the sky darkens, and how a given separation between moon and sun translates
+            into the moon standing clear of the glow or drowning in it.
+          </p>
+          <p className="mt-2">
+            The moon is worse. Everything the sun does wrong it does too — its own drag and
+            hurry, faster and bigger — and then one more: it does not even ride the sun's road,
+            but a path tilted against it, so it stands now above the road, now below, by up to
+            ten of the sun's widths. So the window question needs three things the eye cannot
+            supply in advance: where the sun truly is, where the moon truly is, and how the two
+            will sit against the horizon at dusk. The whole method is the shortest honest path
+            to those three — and the path runs through exactly thirteen numbers.
+          </p>
+        </section>
+
+        <section>
           <h2 className="text-base font-bold">One pattern, everywhere</h2>
           <p className="mt-2">
             Strip away the tables and the vocabulary and every calculation in the whole method is
