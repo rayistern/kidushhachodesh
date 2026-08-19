@@ -109,35 +109,52 @@ export default function ThirteenNumbers() {
         <section>
           <h2 className="text-base font-bold">Start at the window</h2>
           <p className="mt-2">
-            Stand at a west-facing window — or on the mountaintop, with KH 18:1's watchers — on
-            the evening after the 29th of the month. One question: <strong>will a thin crescent
-            show tonight?</strong> Everything below exists to answer it, and it is worth feeling
-            how much the innocent question actually demands (
+            Picture someone standing at a window that faces west, on the evening after the 29th
+            day of the month. Tonight might be the night the new moon shows. The question is
+            simple: <strong>will they see the thin crescent tonight, or not?</strong> Every
+            number on this page exists to answer that one question. (
             <Link to="/sky" className="text-[var(--color-accent)] hover:underline">
-              the Sky page
+              The Sky page
             </Link>{' '}
-            draws all of it on the window itself).
+            draws this exact view, evening by evening.)
           </p>
           <p className="mt-2">
-            Knowing where the moon is isn't enough. A crescent that thin shows only against a
-            sky dark enough to lose to it — so first you must know <strong>how dark it will be,
-            and when</strong>: that is, exactly where the sun is and when it goes down. And the
-            sun refuses to be simple about it. It does not run at one speed — some stretches of
-            the year it hurries, others it drags — so its true place is never quite where an
-            even-paced sun would be. And it does not set in one place: watch from the same
-            window through a year and the setting point swings along the horizon, and with it the{' '}
-            <strong>angle</strong> the sun's path cuts down through the horizon — which sets how
-            fast the sky darkens, and how a given separation between moon and sun translates
-            into the moon standing clear of the glow or drowning in it.
+            Start with what makes the question hard. The new crescent is very thin and very
+            faint. You can only see it once the sky has grown dark enough — and the moon has to
+            still be up when that happens. There is the problem: a new crescent always hangs
+            close to the sun, so it sets shortly after the sun does. That leaves only a short
+            stretch of time between "the sky is finally dark enough" and "the moon has already
+            gone down." To predict whether tonight offers that stretch at all, you have to know
+            exactly where the sun is and when it sets.
           </p>
           <p className="mt-2">
-            The moon is worse. Everything the sun does wrong it does too — its own drag and
-            hurry, faster and bigger — and then one more: it does not even ride the sun's road,
-            but a path tilted against it, so it stands now above the road, now below, by up to
-            ten of the sun's widths. So the window question needs three things the eye cannot
-            supply in advance: where the sun truly is, where the moon truly is, and how the two
-            will sit against the horizon at dusk. The whole method is the shortest honest path
-            to those three — and the path runs through exactly thirteen numbers.
+            You might think that part is easy — the sun seems like the most regular thing in the
+            world. It is not, in two ways. First, <strong>the sun does not travel at one steady
+            speed</strong> through the year. In some seasons it covers a little more of its path
+            each day, in others a little less. So if you predict the sun's position by assuming
+            a steady pace, your prediction slowly drifts away from where the sun actually is.
+            Second, <strong>the sun does not set at the same spot</strong>. Watch the sunset
+            from the same window for a year: the setting point slides along the horizon, well to
+            the north of due west in summer, well to the south in winter. And as the spot
+            moves, the <strong>angle</strong> at which the sun drops below the horizon changes
+            too. That angle matters twice over: it controls how quickly the sky gets dark after
+            sunset, and it controls what a given distance between the moon and the sun is worth
+            — whether that distance stands the moon well above the sunset glow, or leaves it
+            sitting low inside the glow where no eye will find it.
+          </p>
+          <p className="mt-2">
+            And the moon is harder than the sun. It has its own uneven speed — with bigger
+            swings, changing faster. And it does not even travel along the same line in the sky
+            that the sun does: the moon's path is tilted against the sun's, so in some months
+            the moon rides above the sun's path and in others below it, by up to five degrees —
+            about ten times the width of the sun itself.
+          </p>
+          <p className="mt-2">
+            So the simple window question — <em>will I see it tonight?</em> — turns out to need
+            three things that nobody can just see in advance: where the sun really is, where the
+            moon really is, and how the two of them will be arranged against the horizon when
+            the sky darkens. The rest of this page lists the numbers the Rambam gives for
+            working those three things out — and there are exactly thirteen of them.
           </p>
         </section>
 

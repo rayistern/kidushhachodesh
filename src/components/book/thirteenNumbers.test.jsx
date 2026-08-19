@@ -87,12 +87,15 @@ describe('the five pairs, from the constants', () => {
 });
 
 describe('the window opening', () => {
-  it('starts where the reader stands and derives the need', () => {
+  it('starts where the reader stands and derives the need, in plain words', () => {
     page();
     expect(screen.getByText(/Start at the window/)).toBeTruthy();
-    expect(screen.getByText(/how dark it will be,\s*and when/)).toBeTruthy();
-    expect(screen.getByText(/does not set in one place/)).toBeTruthy();
-    expect(screen.getByText(/exactly thirteen numbers/)).toBeTruthy();
+    // The two sun difficulties, stated without shorthand — a reader
+    // called the first draft cryptic.
+    expect(screen.getByText(/the sun does not travel at one steady\s*speed/)).toBeTruthy();
+    expect(screen.getByText(/the sun does not set at the same spot/)).toBeTruthy();
+    expect(screen.getByText(/how quickly the sky gets dark after\s*sunset/)).toBeTruthy();
+    expect(screen.getByText(/exactly thirteen of them/)).toBeTruthy();
   });
 });
 
